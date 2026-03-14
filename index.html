@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Project Lab — Quest Board</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 20px;
+  position: relative; overflow-x: hidden;
+}
+.stars { position: fixed; inset: 0; opacity: 0.3; pointer-events: none; z-index: 0; }
+.star { position: absolute; background: white; border-radius: 50%; }
+@keyframes twinkle { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.header { position: relative; text-align: center; margin-bottom: 30px; z-index: 1; }
+.header h1 {
+  font-size: 36px; font-weight: 800; letter-spacing: 2px;
+  background: linear-gradient(135deg, #ffd700, #ff6b6b, #6c5ce7, #00b894);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.header p { color: #888; font-size: 14px; margin: 5px 0 15px; }
+.tabs { display: flex; gap: 10px; justify-content: center; }
+.tab {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: #888; padding: 8px 20px; border-radius: 20px; cursor: pointer;
+  font-size: 13px; font-weight: 600; transition: all 0.2s;
+}
+.tab.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #fff; }
+
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1;
+}
+.grid.students { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-width: 900px; }
+.grid.network { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; max-width: 1000px; }
+
+.card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.card:hover { border-color: rgba(255,255,255,0.15); }
+.card.selected { background: var(--quest-bg); border-color: var(--quest-color); }
+
+.badge {
+  position: absolute; top: 12px; right: 12px;
+  padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 600;
+}
+.quest-emoji { font-size: 22px; margin-bottom: 4px; }
+.quest-name { margin: 4px 0 6px; font-size: 17px; font-weight: 700; color: #fff; padding-right: 80px; }
+.quest-desc { font-size: 12px; color: #999; margin: 0 0 14px; line-height: 1.4; }
+
+.members { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.member {
+  padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;
+}
+.sq-count {
+  font-size: 11px; color: #666;
+  border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; margin-top: 4px;
+}
+.helpers-panel {
+  margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px;
+}
+.helpers-panel .label { font-size: 11px; color: #aaa; margin-bottom: 6px; font-weight: 600; }
+.helpers-panel .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.helper-tag {
+  background: rgba(255,255,255,0.06); color: #ccc; padding: 3px 8px;
+  border-radius: 8px; font-size: 11px; border: 1px dashed rgba(255,255,255,0.15);
+}
+
+.student-card { border-radius: 12px; padding: 14px; }
+.student-name { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 6px; }
+.mq-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.mq-badge { padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600; }
+.sq-mini { font-size: 10px; color: #666; }
+.sq-expanded { margin-top: 6px; }
+.sq-expanded .label { font-size: 10px; color: #888; margin-bottom: 4px; font-weight: 600; }
+.sq-tag { padding: 2px 6px; border-radius: 6px; font-size: 10px; }
+
+.network-card { border-radius: 14px; padding: 16px; }
+.network-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.network-header span:first-child { font-size: 20px; }
+.network-header span:last-child { font-weight: 700; font-size: 14px; color: #fff; }
+.network-stats { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.connection { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 12px; }
+.connection-bar { height: 4px; border-radius: 2px; }
+.connection-name { color: #ccc; }
+.connection-count { color: #666; font-size: 10px; }
+
+.stats-bar {
+  position: relative; margin: 30px auto 0; padding: 16px 20px;
+  background: rgba(255,255,255,0.03); border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;
+  max-width: 800px; z-index: 1;
+}
+.stat { text-align: center; }
+.stat-num { font-size: 28px; font-weight: 800; }
+.stat-label { font-size: 11px; color: #888; }
+
+.subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; position: relative; z-index: 1; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="header">
+  <h1>QUEST BOARD</h1>
+  <p>AI Project Lab — Main Quests & Side Quests</p>
+  <div class="tabs">
+    <button class="tab active" onclick="switchView('board')">Quest Board</button>
+    <button class="tab" onclick="switchView('network')">Side Quest Network</button>
+    <button class="tab" onclick="switchView('students')">Party Members</button>
+  </div>
+</div>
+
+<div id="view-board"></div>
+<div id="view-network" class="hidden"></div>
+<div id="view-students" class="hidden"></div>
+
+<div class="stats-bar" id="stats-bar"></div>
+
+<script>
+const QUESTS = [
+  { id:"adhd", name:"ADHD / Neuroróżnorodność", type:"Deep Dive", emoji:"🧠", color:"#6C5CE7",
+    members:["Adelina","Ania","Justyna","Mishi","Sylwia K.","Zofia P."],
+    desc:"Badania, testy narzędzi AI, poradnik, aplikacja self-aware" },
+  { id:"edu", name:"AI w edukacji", type:"Deep Dive / QI", emoji:"🎓", color:"#00B894",
+    members:["Alicja K.","Doris","Maciej","Sylwia K.","whomean"],
+    desc:"AI w podstawówce, poradnik dla młodzieży, gra edukacyjna" },
+  { id:"gra", name:"Gra psycho-kognitywistyczna", type:"Deep Dive", emoji:"🎮", color:"#E17055",
+    members:["Kamil","Karola","Kornelia","Mateusz","whomean"],
+    desc:"Planszówka, apka lub gra miejska. Nauka przez zabawę" },
+  { id:"targi", name:"Targi Praktyków", type:"Deep Dive", emoji:"🎤", color:"#0984E3",
+    members:["Alicja (Alice)","lidzia","Tymon"],
+    desc:"Nagrania warsztatów → transkrypcja AI → podsumowania → podcast" },
+  { id:"budzace", name:"Budzące się AI", type:"QI / Deep Dive", emoji:"👁️", color:"#A29BFE",
+    members:["Karola","Kornelia"],
+    desc:"Instalacja artystyczna. Co modele mówią o świadomości?" },
+  { id:"urzad", name:"AI w instytucjach", type:"Deep Dive", emoji:"🏛️", color:"#FDCB6E",
+    members:["Alicja K.","Nikita","pestka z dyni"],
+    desc:"Urząd + asystent UMK — AI w sferze publicznej" },
+  { id:"szanse", name:"Wyrównywanie szans", type:"Do ustalenia", emoji:"⚖️", color:"#E84393",
+    members:["Hania","Mishi"],
+    desc:"Nierówności w dostępie do AI + zdrowie psychiczne" },
+  { id:"seniorzy", name:"Wspomnienia seniorów", type:"Quick Impact", emoji:"📸", color:"#00CEC9",
+    members:["Doris"],
+    desc:"AI ożywia stare zdjęcia — ruch, dźwięk, głos bliskich" }
+];
+
+const SIDE_QUESTS = {
+  "Adelina":["seniorzy","gra","urzad","szanse"],
+  "Alicja K.":["targi","seniorzy","szanse"],
+  "Alicja (Alice)":[],
+  "Ania":["edu","seniorzy","szanse"],
+  "Doris":["gra","urzad"],
+  "Hania":["budzace","adhd","urzad"],
+  "Justyna":["budzace","gra"],
+  "Kamil":["targi","urzad"],
+  "Karola":["edu"],
+  "Kornelia":["seniorzy"],
+  "lidzia":["edu"],
+  "Maciej":["targi","seniorzy","szanse"],
+  "Mateusz":["urzad"],
+  "Mishi":["gra","urzad"],
+  "Nikita":["budzace","targi"],
+  "pestka z dyni":["budzace","edu","seniorzy","szanse"],
+  "Sylwia K.":["budzace","targi","szanse"],
+  "whomean":["budzace","targi","urzad","szanse"],
+  "Zofia P.":["budzace","targi","gra"],
+  "Tymon":[]
+};
+
+const ALL_STUDENTS = [...new Set(QUESTS.flatMap(q=>q.members))].sort();
+let selectedQuest = null, selectedStudent = null;
+
+// Stars
+(function(){
+  const s=document.getElementById('stars');
+  for(let i=0;i<50;i++){
+    const d=document.createElement('div');d.className='star';
+    const sz=Math.random()*3+1;
+    Object.assign(d.style,{width:sz+'px',height:sz+'px',left:Math.random()*100+'%',top:Math.random()*100+'%',
+      animation:`twinkle ${2+Math.random()*3}s ease-in-out infinite`,animationDelay:Math.random()*2+'s'});
+    s.appendChild(d);
+  }
+})();
+
+function getSQCount(qid){ return Object.values(SIDE_QUESTS).filter(ids=>ids.includes(qid)).length; }
+function getSQHelpers(qid){ return Object.entries(SIDE_QUESTS).filter(([,ids])=>ids.includes(qid)).map(([n])=>n); }
+
+function switchView(v){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['board','network','students'][i]===v));
+  ['board','network','students'].forEach(id=>{
+    document.getElementById('view-'+id).classList.toggle('hidden',id!==v);
+  });
+  selectedQuest=null; selectedStudent=null;
+  renderAll();
+}
+
+function renderBoard(){
+  const el=document.getElementById('view-board');
+  el.innerHTML='<div class="grid">'+QUESTS.map((q,i)=>{
+    const sqc=getSQCount(q.id); const sel=selectedQuest===q.id;
+    const helpers=getSQHelpers(q.id);
+    return `<div class="card${sel?' selected':''}" style="--quest-color:${q.color};--quest-bg:linear-gradient(135deg,${q.color}33,${q.color}11);animation:slideIn 0.4s ease ${i*0.05}s both" onclick="toggleQuest('${q.id}')">
+      <div class="badge" style="background:${q.color}33;color:${q.color}">${q.type}</div>
+      <div class="quest-emoji">${q.emoji}</div>
+      <div class="quest-name">${q.name}</div>
+      <div class="quest-desc">${q.desc}</div>
+      <div class="members">${q.members.map(m=>`<span class="member" style="background:${q.color}22;color:${q.color};border:1px solid ${q.color}44">${m}</span>`).join('')}</div>
+      <div class="sq-count">${sqc>0?`+${sqc} osób chce pomóc jako Side Quest`:'Brak Side Questów'}</div>
+      ${sel&&sqc>0?`<div class="helpers-panel"><div class="label">SIDE QUEST HELPERS:</div><div class="tags">${helpers.map(h=>`<span class="helper-tag">${h}</span>`).join('')}</div></div>`:''}
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function renderNetwork(){
+  const el=document.getElementById('view-network');
+  el.innerHTML='<p class="subtitle">Kliknij quest żeby zobaczyć połączenia — im grubsza linia, tym więcej osób łączy projekty</p><div class="grid network">'+QUESTS.map(q=>{
+    const helpers=getSQHelpers(q.id);
+    const connections={};
+    helpers.forEach(name=>{
+      QUESTS.filter(oq=>oq.members.includes(name)&&oq.id!==q.id).forEach(oq=>{
+        connections[oq.id]=(connections[oq.id]||0)+1;
+      });
+    });
+    const sel=selectedQuest===q.id;
+    return `<div class="card network-card${sel?' selected':''}" style="--quest-color:${q.color};--quest-bg:linear-gradient(135deg,${q.color}22,transparent)" onclick="toggleQuest('${q.id}')">
+      <div class="network-header"><span>${q.emoji}</span><span>${q.name}</span></div>
+      <div class="network-stats" style="color:${q.color}">Party: ${q.members.length} | Helpers: ${helpers.length}</div>
+      ${sel?Object.entries(connections).sort(([,a],[,b])=>b-a).map(([id,count])=>{
+        const o=QUESTS.find(x=>x.id===id);
+        return o?`<div class="connection"><div class="connection-bar" style="width:${8+count*8}px;background:linear-gradient(90deg,${q.color},${o.color})"></div><span class="connection-name">${o.emoji} ${o.name}</span><span class="connection-count">(${count} ${count===1?'osoba':count<5?'osoby':'osób'})</span></div>`:'';
+      }).join('')+(helpers.length?`<div style="margin-top:8px;font-size:11px;color:#777;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">Helpers: ${helpers.join(', ')}</div>`:''):''}
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function renderStudents(){
+  const el=document.getElementById('view-students');
+  el.innerHTML='<p class="subtitle">Kliknij studenta żeby zobaczyć Main Questy i Side Questy</p><div class="grid students">'+ALL_STUDENTS.map((name,i)=>{
+    const mqs=QUESTS.filter(q=>q.members.includes(name));
+    const sqs=(SIDE_QUESTS[name]||[]).map(id=>QUESTS.find(q=>q.id===id)).filter(Boolean);
+    const sel=selectedStudent===name;
+    return `<div class="card student-card${sel?' selected':''}" style="animation:slideIn 0.3s ease ${i*0.03}s both;--quest-color:rgba(255,255,255,0.2);--quest-bg:rgba(255,255,255,0.08)" onclick="toggleStudent('${name}')">
+      <div class="student-name">${name}</div>
+      <div class="mq-badges">${mqs.map(q=>`<span class="mq-badge" style="background:${q.color}33;color:${q.color}">MQ: ${q.emoji} ${q.name.length>15?q.name.slice(0,15)+'…':q.name}</span>`).join('')}</div>
+      ${!sel&&sqs.length>0?`<div class="sq-mini">+${sqs.length} Side Quests</div>`:''}
+      ${sel&&sqs.length>0?`<div class="sq-expanded"><div class="label">SIDE QUESTS:</div><div style="display:flex;flex-wrap:wrap;gap:3px">${sqs.map(q=>`<span class="sq-tag" style="background:rgba(255,255,255,0.04);color:${q.color};border:1px dashed ${q.color}44">${q.emoji} ${q.name.length>12?q.name.slice(0,12)+'…':q.name}</span>`).join('')}</div></div>`:''}
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function renderStats(){
+  const totalSQ=Object.values(SIDE_QUESTS).reduce((s,ids)=>s+ids.length,0);
+  const avg=Math.round(totalSQ/ALL_STUDENTS.length*10)/10;
+  document.getElementById('stats-bar').innerHTML=
+    `<div class="stat"><div class="stat-num" style="color:#ffd700">${ALL_STUDENTS.length}</div><div class="stat-label">Party Members</div></div>`+
+    `<div class="stat"><div class="stat-num" style="color:#6c5ce7">${QUESTS.length}</div><div class="stat-label">Active Quests</div></div>`+
+    `<div class="stat"><div class="stat-num" style="color:#00b894">${totalSQ}</div><div class="stat-label">Side Quest Links</div></div>`+
+    `<div class="stat"><div class="stat-num" style="color:#e17055">${avg}</div><div class="stat-label">Avg SQ / osoba</div></div>`;
+}
+
+function toggleQuest(id){ selectedQuest=selectedQuest===id?null:id; renderAll(); }
+function toggleStudent(name){ selectedStudent=selectedStudent===name?null:name; renderAll(); }
+
+function renderAll(){ renderBoard(); renderNetwork(); renderStudents(); renderStats(); }
+renderAll();
+</script>
+</body>
+</html>

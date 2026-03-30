@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfigurator Projektu - Budżet Obywatelski</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --accent-blue: #0f3460;
+            --text-light: #e6e6e6;
+            --text-muted: #94a3b8;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #e94560;
+            
+            /* Kategorie kolorów */
+            --cat-green: #4ade80;      /* Zieleń */
+            --cat-blue: #60a5fa;       /* Architektura */
+            --cat-yellow: #facc15;     /* Oświetlenie */
+            --cat-orange: #fb923c;     /* Rekreacja */
+            --cat-gray: #94a3b8;       /* Infrastruktura */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Siatka elementów */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .item-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-round {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .btn-round:hover:not(:disabled) {
+            background: #1a4b8c;
+        }
+
+        .btn-round:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .count {
+            font-size: 1.4rem;
+            font-weight: bold;
+            min-width: 30px;
+        }
+
+        /* Pasek Budżetu */
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .budget-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .progress-container {
+            height: 25px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12.5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease, background-color 0.3s;
+        }
+
+        .budget-warning {
+            color: var(--danger);
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .budget-bar-pulse {
+            animation: danger-pulse 1s infinite alternate;
+        }
+
+        @keyframes danger-pulse {
+            from { box-shadow: 0 0 5px var(--danger); }
+            to { box-shadow: 0 0 20px var(--danger); }
+        }
+
+        /* Wykres */
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+        }
+
+        #pie-chart {
+            width: 220px;
+            height: 220px;
+            transform: rotate(-90deg);
+            border-radius: 50%;
+        }
+
+        .legend {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Podsumowanie */
+        .summary-section {
+            margin-top: 40px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .summary-section h2 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--text-muted);
+            font-weight: normal;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 10px;
+        }
+
+        td {
+            padding: 15px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .total-row {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .btn-copy {
+            background: var(--success);
+            color: var(--bg-color);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: filter 0.2s, transform 0.1s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .btn-copy:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-copy:active {
+            transform: scale(0.98);
+        }
+
+        /* Custom Modal for Clipboard */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2dd4bf;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Konfigurator Projektu — Budżet Obywatelski</h1>
+            <p>Wybierz elementy i sprawdź, czy Twój projekt mieści się w limitach inwestycyjnych (300 000 zł)</p>
+        </header>
+
+        <div class="main-layout">
+            <!-- Lewa kolumna: Wybór -->
+            <div class="items-grid" id="itemsGrid">
+                <!-- Generowane przez JS -->
+            </div>
+
+            <!-- Prawa kolumna: Budżet i Wykres -->
+            <div class="sidebar">
+                <div class="budget-card">
+                    <div class="budget-header">
+                        <span>Wykorzystany Budżet</span>
+                        <span id="budgetLabel">0 / 300 000 zł</span>
+                    </div>
+                    <div class="progress-container" id="progCont">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p class="budget-warning" id="budgetWarning">⚠️ Przekroczono limit budżetu obywatelskiego!</p>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Struktura kosztów</h3>
+                    <svg id="pie-chart" viewBox="0 0 32 32">
+                        <!-- Ścieżki generowane przez JS -->
+                    </svg>
+                    <div class="legend">
+                        <div class="legend-item"><div class="dot" style="background:var(--cat-green)"></div>Zieleń</div>
+                        <div class="legend-item"><div class="dot" style="background:var(--cat-blue)"></div>Architektura</div>
+                        <div class="legend-item"><div class="dot" style="background:var(--cat-yellow)"></div>Oświetlenie</div>
+                        <div class="legend-item"><div class="dot" style="background:var(--cat-orange)"></div>Rekreacja</div>
+                        <div class="legend-item"><div class="dot" style="background:var(--cat-gray)"></div>Infrastruktura</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Podsumowanie -->
+        <div class="summary-section">
+            <h2>Podsumowanie projektu</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th>Ilość</th>
+                        <th>Koszt jedn.</th>
+                        <th>Koszt łączny</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryTableBody">
+                    <!-- Generowane przez JS -->
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">Suma końcowa:</td>
+                        <td id="totalSum">0 zł</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <button class="btn-copy" onclick="copyToClipboard()">📋 Kopiuj listę do schowka</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Skopiowano do schowka!</div>
+
+    <script>
+        const BUDGET_LIMIT = 300000;
+
+        const CATEGORIES = {
+            nature: { name: 'Zieleń', color: '#4ade80' },
+            arch: { name: 'Mała architektura', color: '#60a5fa' },
+            light: { name: 'Oświetlenie', color: '#facc15' },
+            recreation: { name: 'Rekreacja', color: '#fb923c' },
+            infra: { name: 'Infrastruktura', color: '#94a3b8' }
+        };
+
+        const ITEMS = [
+            { id: 'bench', name: 'Ławka parkowa', price: 3500, max: 10, emoji: '🪑', cat: 'arch' },
+            { id: 'tree', name: 'Drzewo (nasadzenie)', price: 2000, max: 15, emoji: '🌳', cat: 'nature' },
+            { id: 'flower', name: 'Klomb kwiatowy (10m²)', price: 4000, max: 5, emoji: '🌺', cat: 'nature' },
+            { id: 'pergola', name: 'Drewniana pergola', price: 25000, max: 2, emoji: '🏗️', cat: 'arch' },
+            { id: 'lamp', name: 'Lampa solarna', price: 5500, max: 8, emoji: '💡', cat: 'light' },
+            { id: 'playground', name: 'Plac zabaw (mały)', price: 80000, max: 1, emoji: '🛝', cat: 'recreation' },
+            { id: 'path', name: 'Ścieżka żwirowa (20m)', price: 12000, max: 3, emoji: '🪨', cat: 'infra' },
+            { id: 'fountain', name: 'Fontanna', price: 150000, max: 1, emoji: '⛲', cat: 'infra' },
+            { id: 'gym', name: 'Siłownia plenerowa', price: 45000, max: 1, emoji: '🏋️', cat: 'recreation' },
+            { id: 'trash', name: 'Kosz na śmieci', price: 1500, max: 6, emoji: '🗑️', cat: 'arch' }
+        ];
+
+        let selection = {};
+        ITEMS.forEach(item => selection[item.id] = 0);
+
+        function updateUI() {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+
+            ITEMS.forEach(item => {
+                const count = selection[item.id];
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <div>
+                        <span class="item-emoji">${item.emoji}</span>
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">${item.price.toLocaleString()} zł / szt.</div>
+                    </div>
+                    <div class="controls">
+                        <button class="btn-round" onclick="changeCount('${item.id}', -1)" ${count === 0 ? 'disabled' : ''}>-</button>
+                        <span class="count">${count}</span>
+                        <button class="btn-round" onclick="changeCount('${item.id}', 1)" ${count === item.max ? 'disabled' : ''}>+</button>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px;">Max: ${item.max}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            const total = calculateTotal();
+            const budgetLabel = document.getElementById('budgetLabel');
+            const progressBar = document.getElementById('progressBar');
+            const progCont = document.getElementById('progCont');
+            const budgetWarning = document.getElementById('budgetWarning');
+
+            budgetLabel.innerText = `${total.toLocaleString()} / ${BUDGET_LIMIT.toLocaleString()} zł`;
+            
+            const perc = Math.min((total / BUDGET_LIMIT) * 100, 100);
+            progressBar.style.width = perc + '%';
+
+            // Colors for bar
+            if (total > BUDGET_LIMIT) {
+                progressBar.style.backgroundColor = 'var(--danger)';
+                progCont.classList.add('budget-bar-pulse');
+                budgetWarning.style.display = 'block';
+            } else if (perc > 90) {
+                progressBar.style.backgroundColor = 'var(--danger)';
+                progCont.classList.remove('budget-bar-pulse');
+                budgetWarning.style.display = 'none';
+            } else if (perc > 70) {
+                progressBar.style.backgroundColor = 'var(--warning)';
+                progCont.classList.remove('budget-bar-pulse');
+                budgetWarning.style.display = 'none';
+            } else {
+                progressBar.style.backgroundColor = 'var(--success)';
+                progCont.classList.remove('budget-bar-pulse');
+                budgetWarning.style.display = 'none';
+            }
+
+            updateTable();
+            updateChart();
+        }
+
+        function changeCount(id, delta) {
+            const item = ITEMS.find(i => i.id === id);
+            const newVal = selection[id] + delta;
+            if (newVal >= 0 && newVal <= item.max) {
+                selection[id] = newVal;
+                updateUI();
+            }
+        }
+
+        function calculateTotal() {
+            return ITEMS.reduce((sum, item) => sum + (selection[item.id] * item.price), 0);
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('summaryTableBody');
+            tbody.innerHTML = '';
+            let totalSum = 0;
+
+            ITEMS.forEach(item => {
+                const count = selection[item.id];
+                if (count > 0) {
+                    const rowSum = count * item.price;
+                    totalSum += rowSum;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.emoji} ${item.name}</td>
+                        <td>${count}</td>
+                        <td>${item.price.toLocaleString()} zł</td>
+                        <td>${rowSum.toLocaleString()} zł</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            if (tbody.innerHTML === '') {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Brak wybranych elementów</td></tr>';
+            }
+
+            document.getElementById('totalSum').innerText = totalSum.toLocaleString() + ' zł';
+        }
+
+        function updateChart() {
+            const chart = document.getElementById('pie-chart');
+            chart.innerHTML = '';
+            
+            const catTotals = { nature: 0, arch: 0, light: 0, recreation: 0, infra: 0 };
+            ITEMS.forEach(item => {
+                catTotals[item.cat] += selection[item.id] * item.price;
+            });
+
+            const total = Object.values(catTotals).reduce((a, b) => a + b, 0);
+            
+            if (total === 0) {
+                chart.innerHTML = '<circle cx="16" cy="16" r="16" fill="#333" />';
+                return;
+            }
+
+            let cumulativePercent = 0;
+
+            Object.keys(catTotals).forEach(cat => {
+                const value = catTotals[cat];
+                if (value === 0) return;
+
+                const percent = value / total;
+                const [startX, startY] = getCoordinatesForPercent(cumulativePercent);
+                cumulativePercent += percent;
+                const [endX, endY] = getCoordinatesForPercent(cumulativePercent);
+
+                const largeArcFlag = percent > 0.5 ? 1 : 0;
+                const pathData = [
+                    `M 16 16`,
+                    `L ${startX} ${startY}`,
+                    `A 16 16 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+                    `Z`
+                ].join(' ');
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', CATEGORIES[cat].color);
+                chart.appendChild(path);
+            });
+        }
+
+        function getCoordinatesForPercent(percent) {
+            const x = 16 + (Math.cos(2 * Math.PI * percent) * 16);
+            const y = 16 + (Math.sin(2 * Math.PI * percent) * 16);
+            return [x, y];
+        }
+
+        function copyToClipboard() {
+            let text = "MÓJ PROJEKT DO BUDŻETU OBYWATELSKIEGO\n";
+            text += "====================================\n\n";
+            
+            let total = 0;
+            ITEMS.forEach(item => {
+                const count = selection[item.id];
+                if (count > 0) {
+                    const cost = count * item.price;
+                    total += cost;
+                    text += `${item.emoji} ${item.name}: ${count} szt. x ${item.price} zł = ${cost.toLocaleString()} zł\n`;
+                }
+            });
+
+            text += `\n------------------------------------\n`;
+            text += `SUMA CAŁKOWITA: ${total.toLocaleString()} zł\n`;
+            text += `Limit: 300 000 zł\n`;
+            
+            if (total > BUDGET_LIMIT) {
+                text += `⚠️ UWAGA: Przekroczono dostępny budżet!\n`;
+            }
+
+            // Using standard method for widest compatibility
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('Błąd kopiowania', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        // Init
+        updateUI();
+    </script>
+</body>
+</html>

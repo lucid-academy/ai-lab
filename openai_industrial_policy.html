@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenAI: Industrial Policy for the Intelligence Age — Analiza</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: #2a2a3a;
+  --text: #e8e6e1;
+  --text-dim: #8a8a9a;
+  --accent: #ff6b35;
+  --accent2: #3b82f6;
+  --accent3: #10b981;
+  --danger: #ef4444;
+  --warn: #f59e0b;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.7;
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--accent); color: #000; }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,107,53,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 60%, rgba(59,130,246,0.06) 0%, transparent 50%);
+  animation: drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-3%, 2%) rotate(1deg); }
+}
+
+.hero-content {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards 0.2s;
+}
+
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 1.1;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards 0.4s;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--text-dim);
+  max-width: 600px;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards 0.6s;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards 0.8s;
+}
+
+.hero-meta span { display: flex; align-items: center; gap: 0.4rem; }
+.hero-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* NAV */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+  overflow-x: auto;
+}
+
+.nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+}
+
+.nav-btn {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* SECTIONS */
+.section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.section h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.section p {
+  color: var(--text-dim);
+  margin-bottom: 1.2rem;
+  max-width: 700px;
+}
+
+/* CARDS */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: var(--card-accent, var(--accent));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover { border-color: var(--card-accent, var(--accent)); transform: translateY(-2px); }
+.card:hover::before { opacity: 1; }
+
+.card-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.card h3 {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.card-expand {
+  display: none;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.card.expanded .card-expand { display: block; }
+
+.card-toggle {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* VERDICT */
+.verdict-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 640px) {
+  .verdict-grid { grid-template-columns: 1fr; }
+}
+
+.verdict-col h3 {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.verdict-col h3 .icon-plus { color: var(--accent3); }
+.verdict-col h3 .icon-minus { color: var(--danger); }
+
+.verdict-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.verdict-item:hover { border-color: var(--text-dim); }
+.verdict-item strong { color: var(--text); font-weight: 600; }
+
+.verdict-detail {
+  display: none;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+
+.verdict-item.open .verdict-detail { display: block; }
+
+/* COMPARISON TABLE */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+  font-size: 0.85rem;
+}
+
+.compare-table th {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.compare-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+}
+
+.compare-table tr:hover td { background: var(--surface); }
+.compare-table td:first-child { color: var(--text); font-weight: 500; }
+
+/* QUIZ */
+.quiz-container { margin-top: 2rem; }
+
+.quiz-q {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.quiz-q h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.quiz-opts { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.quiz-opt {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quiz-opt:hover { border-color: var(--accent); color: var(--text); }
+.quiz-opt.correct { border-color: var(--accent3); background: rgba(16,185,129,0.1); color: var(--accent3); }
+.quiz-opt.wrong { border-color: var(--danger); background: rgba(239,68,68,0.08); color: var(--danger); }
+.quiz-opt.disabled { pointer-events: none; opacity: 0.6; }
+.quiz-opt.disabled.correct { opacity: 1; }
+
+.quiz-feedback {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  display: none;
+}
+
+/* TIMELINE */
+.timeline { margin-top: 2rem; position: relative; padding-left: 2rem; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.tl-item {
+  position: relative;
+  margin-bottom: 2rem;
+  padding-left: 1.5rem;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 0.5rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--bg);
+}
+
+.tl-item h4 {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+}
+
+.tl-item p { font-size: 0.88rem; color: var(--text-dim); }
+
+/* FOOTER */
+.footer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.footer a { color: var(--accent); text-decoration: none; }
+
+/* SEPARATOR */
+.sep {
+  max-width: 900px;
+  margin: 0 auto;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">Analiza dokumentu · Kwiecień 2026</div>
+    <h1>Industrial Policy<br>for the <em>Intelligence Age</em></h1>
+    <p class="hero-sub">OpenAI opublikowało manifest polityczno-gospodarczy na erę superinteligencji. 13 stron propozycji, które mogą zmienić reguły gry — albo je utrwalić. Przeanalizujmy to razem.</p>
+    <div class="hero-meta">
+      <span><span class="dot"></span>OpenAI, kwiecień 2026</span>
+      <span>13 stron</span>
+      <span>USA-centric</span>
+      <span>Policy paper</span>
+    </div>
+  </div>
+  <div class="scroll-hint">↓ Przewiń, żeby eksplorować</div>
+</section>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-target="thesis">Teza</button>
+    <button class="nav-btn" data-target="economy">Otwarta gospodarka</button>
+    <button class="nav-btn" data-target="resilience">Odporne społeczeństwo</button>
+    <button class="nav-btn" data-target="verdict">Ocena krytyczna</button>
+    <button class="nav-btn" data-target="compare">Porównanie</button>
+    <button class="nav-btn" data-target="quiz">Quiz</button>
+    <button class="nav-btn" data-target="discuss">Do dyskusji</button>
+  </div>
+</nav>
+
+<!-- THESIS -->
+<section class="section" id="thesis">
+  <div class="section-label">01 — Główna teza</div>
+  <h2>Nowy New Deal na erę AI</h2>
+  <p>OpenAI twierdzi, że superinteligencja — AI przewyższająca najzdolniejszych ludzi — jest blisko. I że wymaga ona polityki przemysłowej na miarę Progressive Era i New Deal: nowych instytucji, siatek bezpieczeństwa i mechanizmów dzielenia się dobrobytem.</p>
+  <p>Dokument buduje się na trzech filarach:</p>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent: #10b981">
+      <div class="card-icon">💰</div>
+      <h3>1. Dzielenie dobrobytu</h3>
+      <p>AI ma podnieść poziom życia wszystkich — nie tylko tych, którzy ją tworzą.</p>
+      <span class="card-toggle">▸ więcej</span>
+      <div class="card-expand">Obejmuje Public Wealth Fund, modernizację podatków, dywidendy efektywnościowe (np. 4-dniowy tydzień pracy). Kluczowy cytat z dokumentu: OpenAI przyznaje wprost, że istnieje ryzyko koncentracji zysków "w kilku firmach, takich jak OpenAI".</div>
+    </div>
+    <div class="card" style="--card-accent: #ef4444">
+      <div class="card-icon">🛡️</div>
+      <h3>2. Mitygacja ryzyk</h3>
+      <p>Zagrożenia: cyber, bio, utrata kontroli nad systemami, podważanie demokracji.</p>
+      <span class="card-toggle">▸ więcej</span>
+      <div class="card-expand">Propozycje obejmują playbooki konteneryzacji niebezpiecznych modeli, reżimy audytowe, raportowanie incydentów i near-missów, oraz międzynarodową sieć AI Institutes do koordynacji oceny ryzyka.</div>
+    </div>
+    <div class="card" style="--card-accent: #3b82f6">
+      <div class="card-icon">🌐</div>
+      <h3>3. Demokratyzacja dostępu</h3>
+      <p>Udział w gospodarce AI nie powinien zależeć od dostępu do najsilniejszych modeli.</p>
+      <span class="card-toggle">▸ więcej</span>
+      <div class="card-expand">"Right to AI" — dostęp do AI traktowany jak dostęp do elektryczności lub internetu. Darmowe lub niskokosztowe punkty dostępu. Edukacja, infrastruktura, szkolenia. Przenośne świadczenia oderwane od pracodawcy.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- OPEN ECONOMY -->
+<section class="section" id="economy">
+  <div class="section-label">02 — Część 1 dokumentu</div>
+  <h2>Budowanie otwartej gospodarki</h2>
+  <p>10 konkretnych propozycji politycznych. Kliknij, żeby rozwinąć szczegóły:</p>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent: #f59e0b">
+      <div class="card-icon">🗣️</div>
+      <h3>Głos pracowników</h3>
+      <p>Formalne mechanizmy współpracy workers–management przy wdrażaniu AI.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Pracownicy mają wiedzę, jak naprawdę wygląda praca. Powinni móc priorytetyzować wdrożenia AI eliminujące niebezpieczne, powtarzalne zadania — i blokować te, które pogarszają warunki pracy.</div>
+    </div>
+    <div class="card" style="--card-accent: #8b5cf6">
+      <div class="card-icon">🚀</div>
+      <h3>AI-first przedsiębiorcy</h3>
+      <p>Mikrogranty + "startup-in-a-box" — AI zajmuje się księgowością, marketingiem, zaopatrzeniem.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Pracownicy zamieniają wiedzę branżową w firmy. Organizacje pracownicze jako enablers: szkolenia, wspólna infrastruktura back-office, negocjowanie warunków handlowych.</div>
+    </div>
+    <div class="card" style="--card-accent: #3b82f6">
+      <div class="card-icon">📡</div>
+      <h3>Prawo do AI</h3>
+      <p>Dostęp do AI jako fundament — jak elektryczność czy internet.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Darmowe/niskokosztowe punkty dostępu do modeli fundamentalnych. Edukacja, infrastruktura, łączność. Szkoły, biblioteki, małe firmy, społeczności wykluczone — nikt nie powinien być odcięty.</div>
+    </div>
+    <div class="card" style="--card-accent: #10b981">
+      <div class="card-icon">🏦</div>
+      <h3>Modernizacja podatków</h3>
+      <p>Przesunięcie ciężaru z podatków od pracy na podatki od kapitału i zysków z AI.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Jeśli AI zredukuje zatrudnienie, base podatkowa oparta na payroll taxes (Social Security, Medicaid) się skurczy. Propozycja: wyższe podatki od capital gains, corporate income, oraz nowe podatki od zautomatyzowanej pracy.</div>
+    </div>
+    <div class="card" style="--card-accent: #ec4899">
+      <div class="card-icon">🏛️</div>
+      <h3>Public Wealth Fund</h3>
+      <p>Fundusz majątkowy dający każdemu obywatelowi udział w zyskach z AI.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Model inspirowany Alaska Permanent Fund. Inwestycje w zdywersyfikowane aktywa — zarówno firmy AI, jak i firmy wdrażające AI. Dywidendy wypłacane bezpośrednio obywatelom, niezależnie od ich majątku.</div>
+    </div>
+    <div class="card" style="--card-accent: #f97316">
+      <div class="card-icon">⚡</div>
+      <h3>Rozbudowa sieci energetycznej</h3>
+      <p>Partnerstwa publiczno-prywatne na infrastrukturę energetyczną dla AI.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Ulgi inwestycyjne, usuwanie barier dla nowych technologii (HVDC, zaawansowane przewodniki), wąskie uprawnienia federalne do przyspieszenia budowy transmisji międzyregionalnej.</div>
+    </div>
+    <div class="card" style="--card-accent: #06b6d4">
+      <div class="card-icon">⏰</div>
+      <h3>Dywidendy efektywnościowe</h3>
+      <p>4-dniowy tydzień pracy, lepsze benefity — gdy AI zwiększy produktywność.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Pilotażowe programy 32h/tydzień bez obniżki płacy. Wyższe składki emerytalne, subsydia na opiekę nad dziećmi i starszymi. "Benefits bonuses" powiązane z mierzalnymi wzrostami produktywności.</div>
+    </div>
+    <div class="card" style="--card-accent: #14b8a6">
+      <div class="card-icon">🔄</div>
+      <h3>Adaptacyjne siatki bezpieczeństwa</h3>
+      <p>Automatyczna aktywacja wsparcia, gdy wskaźniki dyslokacji przekroczą progi.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Monitoring w czasie rzeczywistym: bezrobocie, płace, jakość pracy, dynamika sektorowa. Gdy wskaźniki przekroczą próg → automatycznie uruchamiają się: rozszerzone zasiłki, wage insurance, vouchery szkoleniowe. Gdy sytuacja się stabilizuje → wsparcie się wycofuje.</div>
+    </div>
+    <div class="card" style="--card-accent: #a855f7">
+      <div class="card-icon">💼</div>
+      <h3>Przenośne świadczenia</h3>
+      <p>Zdrowie, emerytura, szkolenia — podążają za osobą, nie za pracodawcą.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Pooled contributions z wielu źródeł → standardowe konta przypisane do jednostki. Ciągłość niezależnie od formy zatrudnienia, sektora, a nawet własnej działalności.</div>
+    </div>
+    <div class="card" style="--card-accent: #e11d48">
+      <div class="card-icon">🤝</div>
+      <h3>Praca oparta na relacjach</h3>
+      <p>Opieka, edukacja, zdrowie — ścieżki dla ludzi wypieranych przez AI z innych sektorów.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">AI odciąża od administracji, ale ludzka obecność pozostaje kluczowa. Inwestycje w szkolenia, płace, jakość pracy w sektorach opiekuńczych. Plus: świadczenie rodzinne uznające opiekę za pracę o wartości ekonomicznej.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- RESILIENCE -->
+<section class="section" id="resilience">
+  <div class="section-label">03 — Część 2 dokumentu</div>
+  <h2>Budowanie odpornego społeczeństwa</h2>
+  <p>7 propozycji dotyczących bezpieczeństwa, governance i koordynacji międzynarodowej:</p>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent: #ef4444">
+      <div class="card-icon">🔬</div>
+      <h3>Systemy bezpieczeństwa</h3>
+      <p>Narzędzia ochrony przed zagrożeniami cyber, bio, CBRN — z rynkiem konkurencyjnych dostawców.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Red teaming i threat modeling z użyciem samego AI. Szybka identyfikacja i produkcja kontrmiar medycznych. Tworzenie popytu na bezpieczeństwo przez zamówienia publiczne, standardy i zobowiązania zakupowe.</div>
+    </div>
+    <div class="card" style="--card-accent: #3b82f6">
+      <div class="card-icon">🔐</div>
+      <h3>AI Trust Stack</h3>
+      <p>Proweniencja treści, weryfikowalne sygnatury, audyt z ochroną prywatności.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Bezpieczne podpisy dla akcji AI (generowanie treści, wydawanie instrukcji). Logi zachowujące prywatność, ale umożliwiające dochodzenie. Frameworki odpowiedzialności wewnątrz organizacji — kto jest accountable za działania AI.</div>
+    </div>
+    <div class="card" style="--card-accent: #f59e0b">
+      <div class="card-icon">📋</div>
+      <h3>Reżimy audytowe</h3>
+      <p>Wzmocnienie CAISI + rynek audytorów AI, standardy projektowane pod adopcję międzynarodową.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Audyty pre- i post-deployment — ale tylko dla "wąskiego zestawu" najsilniejszych modeli. Reszta ekosystemu ma pozostać swobodna. Standardy zaprojektowane, by nie tworzyć zbędnych barier dla małych firm.</div>
+    </div>
+    <div class="card" style="--card-accent: #dc2626">
+      <div class="card-icon">🧊</div>
+      <h3>Playbooki konteneryzacji</h3>
+      <p>Co robić, gdy niebezpieczny model jest już „na wolności" — i nie da się go cofnąć.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Scenariusze: wagi modelu upublicznione, developer nie chce ograniczyć dostępu, system autonomiczny zdolny do autoreplikacji. Analogia: cyberbezpieczeństwo + zdrowie publiczne — pełna konteneryzacja bywa niemożliwa, ale skoordynowana reakcja nadal zmniejsza szkody.</div>
+    </div>
+    <div class="card" style="--card-accent: #8b5cf6">
+      <div class="card-icon">🏢</div>
+      <h3>Governance zorientowany na misję</h3>
+      <p>Public Benefit Corporations, filantropia, ochrona przed „insider capture".</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Frontier AI companies powinny przyjąć struktury PBC z zobowiązaniem do dzielenia się zyskami. Zabezpieczenie wag modeli i infrastruktury szkoleniowej. Audyt modeli pod kątem manipulacyjnych zachowań lub ukrytych lojalności.</div>
+    </div>
+    <div class="card" style="--card-accent: #10b981">
+      <div class="card-icon">🏛️</div>
+      <h3>Guardrails dla rządu</h3>
+      <p>Jasne reguły użycia AI przez rząd + AI jako narzędzie demokratycznej kontroli.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">Standardy niezawodności i alignment dla rządowego AI — skodyfikowane w prawie. AI-assisted auditing przez inspektorów generalnych, komisje kongresowe, sądy. Modernizacja FOIA — obywatele mogą używać AI do przeglądania decyzji rządu.</div>
+    </div>
+    <div class="card" style="--card-accent: #06b6d4">
+      <div class="card-icon">🌍</div>
+      <h3>Koordynacja międzynarodowa</h3>
+      <p>Sieć AI Institutes, bezpieczna wymiana informacji, antitrust safe harbors.</p>
+      <span class="card-toggle">▸ szczegóły</span>
+      <div class="card-expand">CAISI jako fundament → globalna sieć AI Institutes → docelowo instytucja multilateralna (jak IAEA dla atomu). Bezpieczne kanały cross-lab i cross-country do wymiany wyników ewaluacji, alignment findings i emerging risks. Raportowanie incydentów i near-missów.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- VERDICT -->
+<section class="section" id="verdict">
+  <div class="section-label">04 — Analiza krytyczna</div>
+  <h2>Co mocne, co słabe?</h2>
+  <p>Kliknij na element, żeby rozwinąć szczegółowy komentarz:</p>
+
+  <div class="verdict-grid">
+    <div class="verdict-col">
+      <h3><span class="icon-plus">✦</span> Mocne strony</h3>
+      <div class="verdict-item">
+        <strong>Samokrytyczna szczerość</strong> — OpenAI wprost mówi o ryzyku koncentracji zysków w firmach takich jak… OpenAI.
+        <div class="verdict-detail">To rzadkość w branży. Większość firm tech unika nazywania siebie jako potencjalnego źródła problemu. Pytanie: czy ta szczerość przełoży się na działania?</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Public Wealth Fund</strong> — poważna propozycja strukturalna, nie PR.
+        <div class="verdict-detail">Koncepcyjnie bliska Alaska Permanent Fund, ale na skalę federalną. Istotne, że OpenAI sugeruje współfinansowanie przez firmy AI — to osobisty skin in the game.</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Adaptacyjne progi</strong> — automatyczna aktywacja wsparcia zamiast debaty politycznej w kryzysie.
+        <div class="verdict-detail">Eleganckie myślenie systemowe. Zamiast reagować post-factum, predefiniujesz wskaźniki i reakcje. Problem: kto ustala progi i jakie są consequences polityczne ich zmiany?</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Przenośne świadczenia</strong> — rewolucyjne w kontekście USA.
+        <div class="verdict-detail">W Europie mamy systemy mniej zależne od pracodawcy, ale w USA zdrowie i emerytura są związane z employment. W erze gig economy + AI to kluczowa zmiana.</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Playbooki konteneryzacji</strong> — realistyczne uznanie, że nie wszystko da się cofnąć.
+        <div class="verdict-detail">Większość dyskusji o bezpieczeństwie AI zakłada, że możesz "wyłączyć" model. OpenAI mówi: nie zawsze. I dlatego potrzebujesz planów B, C, D — jak w epidemiologii.</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Demokratyzacja alignmentu</strong> — alignment to nie tylko kwestia inżynierów.
+        <div class="verdict-detail">Postulat publicznego wkładu w to, jak AI się zachowuje, jest zbieżny z podejściem Anthropic (Collective Constitutional AI) i inicjatywami OECD.</div>
+      </div>
+    </div>
+    <div class="verdict-col">
+      <h3><span class="icon-minus">✦</span> Słabe strony</h3>
+      <div class="verdict-item">
+        <strong>Konflikt interesów</strong> — OpenAI pisze regulacje, które dotyczą… OpenAI.
+        <div class="verdict-detail">Propozycja audytów "tylko dla najsilniejszych modeli" de facto chroni pozycję incumbentów i tworzy bariery wejścia. To klasyczny regulatory capture — dokładnie to, przed czym sam dokument ostrzega.</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Ameryka-centryzm</strong> — propozycje głęboko zakorzenione w systemie USA.
+        <div class="verdict-detail">Social Security, SNAP, Medicaid, FOIA — to amerykańskie instytucje. Dla Europy, Azji, Global South ten dokument wymaga kompletnego przepisania. Brak propozycji globalnych poza ogólnikową "siecią AI Institutes".</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Superinteligencja jako pewnik</strong> — spekulatywne założenie traktowane jako fakt.
+        <div class="verdict-detail">Cała architektura polityczna opiera się na przekonaniu, że superinteligencja nadejdzie wkrótce. Brak scenariusza "plateau". Jeśli postęp zwolni, wiele propozycji traci uzasadnienie — lub tworzy zbędną biurokrację.</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Brak zębów</strong> — same "should" i "could", żadnych konkretnych projektów ustaw ani sankcji.
+        <div class="verdict-detail">Porównaj z EU AI Act, który — niezależnie od wad — jest egzekwowalny. Ten dokument to thought leadership, nie propozycja legislacyjna. Brak timeline'ów, budżetów, mechanizmów egzekucji.</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Kto wymusi "dywidendy efektywnościowe"?</strong> — historycznie zyski z produktywności szły do kapitału.
+        <div class="verdict-detail">Dokument wie, że produktywność nie przekłada się automatycznie na lepsze warunki pracy. Ale proponuje tylko "zachęty" — bez mechanizmów wymuszania. To samo co nic?</div>
+      </div>
+      <div class="verdict-item">
+        <strong>Brak głosu pracowników w dokumencie o głosie pracowników</strong>
+        <div class="verdict-detail">Ironicznie, manifest postulujący inkluzywność napisany został wyłącznie przez firmę technologiczną, bez widocznego udziału związków zawodowych, organizacji pracowniczych, czy konsultacji publicznych.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- COMPARE -->
+<section class="section" id="compare">
+  <div class="section-label">05 — Kontekst</div>
+  <h2>Jak to się ma do innych podejść?</h2>
+  <p>Porównanie z innymi frameworkami regulacji AI:</p>
+
+  <div style="overflow-x: auto;">
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th style="min-width:140px">Wymiar</th>
+        <th>OpenAI (ten dokument)</th>
+        <th>EU AI Act</th>
+        <th>Anthropic RSP</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Charakter</td>
+        <td>Policy paper / manifesto</td>
+        <td>Wiążące prawo</td>
+        <td>Samoregulacja firmy</td>
+      </tr>
+      <tr>
+        <td>Egzekwowalność</td>
+        <td>Żadna — propozycje do dyskusji</td>
+        <td>Pełna — kary do 7% obrotu</td>
+        <td>Wewnętrzna — publiczne zobowiązanie</td>
+      </tr>
+      <tr>
+        <td>Fokus geograficzny</td>
+        <td>USA</td>
+        <td>UE (z efektem globalnym)</td>
+        <td>Globalny (z bazą w USA)</td>
+      </tr>
+      <tr>
+        <td>Podejście do ryzyka</td>
+        <td>Miękkie zachęty + audyty top-tier</td>
+        <td>Rygorystyczna klasyfikacja ryzyka</td>
+        <td>AI Safety Levels (ASL) z progami</td>
+      </tr>
+      <tr>
+        <td>Kwestie socjalne</td>
+        <td>Centralne — fundusz, podatki, benefity</td>
+        <td>Minimalne</td>
+        <td>Brak (fokus na safety)</td>
+      </tr>
+      <tr>
+        <td>Kto zyskuje?</td>
+        <td>Incumbenci (high bar for top models)</td>
+        <td>Obywatele UE (prawa)</td>
+        <td>Społeczeństwo (jeśli RSP działa)</td>
+      </tr>
+      <tr>
+        <td>Słabość</td>
+        <td>Brak zębów, konflikt interesów</td>
+        <td>Zbyt sztywne, wolne tempo</td>
+        <td>Samoregulacja bez zewn. kontroli</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- QUIZ -->
+<section class="section" id="quiz">
+  <div class="section-label">06 — Sprawdź się</div>
+  <h2>Quiz: Czy rozumiesz dokument?</h2>
+  <p>Krótki test zrozumienia — kliknij odpowiedź:</p>
+
+  <div class="quiz-container">
+    <div class="quiz-q" data-correct="2">
+      <h4>1. Co OpenAI proponuje jako mechanizm dzielenia się zyskami z AI z obywatelami?</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" data-idx="0">Universal Basic Income (UBI)</div>
+        <div class="quiz-opt" data-idx="1">Bezpłatny dostęp do ChatGPT dla wszystkich</div>
+        <div class="quiz-opt" data-idx="2">Public Wealth Fund — fundusz inwestujący w aktywa AI</div>
+        <div class="quiz-opt" data-idx="3">Podatek od robotów przekazywany bezpośrednio obywatelom</div>
+      </div>
+      <div class="quiz-feedback">✓ Public Wealth Fund — inwestycje w zdywersyfikowane aktywa z dywidendami dla obywateli. To nie UBI — to udział w zyskach z wzrostu gospodarczego napędzanego AI.</div>
+    </div>
+
+    <div class="quiz-q" data-correct="1">
+      <h4>2. Jaki jest główny zarzut krytyczny wobec propozycji audytów "tylko dla najsilniejszych modeli"?</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" data-idx="0">Audyty są zbyt kosztowne</div>
+        <div class="quiz-opt" data-idx="1">Tworzą barierę wejścia i chronią pozycję incumbentów (regulatory capture)</div>
+        <div class="quiz-opt" data-idx="2">Nie obejmują open-source modeli</div>
+        <div class="quiz-opt" data-idx="3">Wymagają zbyt wielu audytorów</div>
+      </div>
+      <div class="quiz-feedback">✓ Ograniczenie audytów do "najsilniejszych modeli" de facto chroni firmy, które już je mają (OpenAI, Google, Anthropic), utrudniając nowym graczom wejście na rynek — klasyczny regulatory capture.</div>
+    </div>
+
+    <div class="quiz-q" data-correct="0">
+      <h4>3. Z czym OpenAI porównuje nadejście superinteligencji w sensie historycznym?</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" data-idx="0">Rewolucja przemysłowa → Progressive Era i New Deal</div>
+        <div class="quiz-opt" data-idx="1">Wynalezienie druku → Renesans</div>
+        <div class="quiz-opt" data-idx="2">Rewolucja cyfrowa → bańka dot-com</div>
+        <div class="quiz-opt" data-idx="3">Rewolucja naukowa XVII w. → Oświecenie</div>
+      </div>
+      <div class="quiz-feedback">✓ Dokument wprost przywołuje Industrial Age → Progressive Era → New Deal jako analogię: nowa technologia wymagała nowych instytucji, siatek bezpieczeństwa i umowy społecznej.</div>
+    </div>
+
+    <div class="quiz-q" data-correct="2">
+      <h4>4. Co to są "adaptacyjne siatki bezpieczeństwa" w propozycji OpenAI?</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" data-idx="0">Stałe programy socjalne na wypadek masowego bezrobocia</div>
+        <div class="quiz-opt" data-idx="1">Prywatne ubezpieczenia wykupywane przez firmy AI</div>
+        <div class="quiz-opt" data-idx="2">Wsparcie aktywowane automatycznie, gdy wskaźniki dyslokacji przekroczą zdefiniowane progi</div>
+        <div class="quiz-opt" data-idx="3">System scoringowy oceniający ryzyko utraty pracy przez AI</div>
+      </div>
+      <div class="quiz-feedback">✓ Kluczowe: automatyczna aktywacja i dezaktywacja. Gdy wskaźniki (bezrobocie, spadek płac sektorowych) przekroczą próg → wsparcie się uruchamia. Gdy sytuacja się normalizuje → wycofuje się. Unika permanentnej ekspansji programów.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- DISCUSSION -->
+<section class="section" id="discuss">
+  <div class="section-label">07 — Pytania do dyskusji</div>
+  <h2>O czym warto porozmawiać na zajęciach?</h2>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <h4>Konflikt interesów</h4>
+      <p>Czy firma technologiczna powinna pisać politykę przemysłową, która dotyczy jej samej? Jakie mechanizmy mogłyby zmniejszyć ten konflikt?</p>
+    </div>
+    <div class="tl-item">
+      <h4>Perspektywa europejska</h4>
+      <p>Które z tych propozycji mają sens w kontekście europejskim (polskim)? Które są nieprzekładalne? Czego brakuje z perspektywy UE?</p>
+    </div>
+    <div class="tl-item">
+      <h4>Superinteligencja — pewnik czy marketing?</h4>
+      <p>Czy budowanie polityki na założeniu, że superinteligencja nadejdzie wkrótce, jest odpowiedzialne? Co jeśli postęp AI zwolni?</p>
+    </div>
+    <div class="tl-item">
+      <h4>Kto naprawdę skorzysta?</h4>
+      <p>Public Wealth Fund, prawo do AI, przenośne świadczenia — piękne hasła. Ale kto ustala reguły? Kto zarządza funduszem? Kto definiuje „baseline capability"?</p>
+    </div>
+    <div class="tl-item">
+      <h4>Regulatory capture</h4>
+      <p>Propozycja audytów tylko dla „najsilniejszych modeli" chroni incumbentów czy społeczeństwo? Jak zaprojektować regulację, która nie tworzy barier wejścia?</p>
+    </div>
+    <div class="tl-item">
+      <h4>Praca i sens</h4>
+      <p>Jeśli AI przejmie większość zadań — czy „4-dniowy tydzień pracy" wystarczy? Jak zmienia się pojęcie pracy, gdy AI robi to, co kiedyś definiowało naszą wartość zawodową?</p>
+    </div>
+    <div class="tl-item">
+      <h4>Porównanie podejść</h4>
+      <p>EU AI Act vs. ten dokument vs. Anthropic RSP — trzy różne filozofie regulacji. Która lepiej chroni obywateli? Która lepiej wspiera innowację? Czy da się pogodzić obie?</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  Materiał dydaktyczny · Analiza dokumentu OpenAI „Industrial Policy for the Intelligence Age" (kwiecień 2026)<br>
+  Przygotowany na potrzeby zajęć z AI · <a href="https://openai.com" target="_blank">Źródło: openai.com</a>
+</footer>
+
+<script>
+// Card expand
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('click', () => {
+    card.classList.toggle('expanded');
+    const toggle = card.querySelector('.card-toggle');
+    if (toggle) toggle.textContent = card.classList.contains('expanded') ? '▾ mniej' : '▸ więcej';
+  });
+});
+
+// Verdict expand
+document.querySelectorAll('.verdict-item').forEach(item => {
+  item.addEventListener('click', () => item.classList.toggle('open'));
+});
+
+// Nav
+const navBtns = document.querySelectorAll('.nav-btn');
+navBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    navBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target)?.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// Scroll spy
+const sections = [...document.querySelectorAll('.section')];
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navBtns.forEach(b => b.classList.remove('active'));
+      const btn = document.querySelector(`.nav-btn[data-target="${e.target.id}"]`);
+      if (btn) btn.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+
+// Quiz
+document.querySelectorAll('.quiz-q').forEach(q => {
+  const correct = parseInt(q.dataset.correct);
+  q.querySelectorAll('.quiz-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (opt.classList.contains('disabled')) return;
+      const idx = parseInt(opt.dataset.idx);
+      q.querySelectorAll('.quiz-opt').forEach(o => {
+        o.classList.add('disabled');
+        if (parseInt(o.dataset.idx) === correct) o.classList.add('correct');
+      });
+      if (idx !== correct) opt.classList.add('wrong');
+      q.querySelector('.quiz-feedback').style.display = 'block';
+    });
+  });
+});
+</script>
+</body>
+</html>

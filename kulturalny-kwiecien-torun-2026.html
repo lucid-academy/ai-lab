@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kulturalny Kwiecien - Torun 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FAF7F2;
+  --bg-card: #FFFFFF;
+  --bg-hover: #F5F0E8;
+  --text: #2C2418;
+  --text-secondary: #7A6F5F;
+  --text-light: #A89F8F;
+  --accent: #B8860B;
+  --accent-light: #DAA520;
+  --border: #E8E0D4;
+  --border-light: #F0EBE3;
+  --shadow: rgba(44,36,24,0.06);
+  --radius: 10px;
+}
+
+body {
+  font-family: 'Source Sans 3', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.header {
+  padding: 40px 24px 28px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #FDF9F3 0%, var(--bg) 100%);
+}
+.header-label {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 6vw, 44px);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.15;
+}
+.header-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+.header-sub strong { font-weight: 600; color: var(--accent); }
+
+.container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+
+/* Search */
+.search-wrap {
+  padding: 20px 0 0;
+}
+.search-wrap input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg-card);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-wrap input:focus {
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px rgba(184,134,11,0.08);
+}
+.search-wrap input::placeholder { color: var(--text-light); }
+
+/* Filters */
+.filters {
+  padding: 14px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 12px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pill:hover { border-color: var(--accent-light); color: var(--accent); }
+.pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.controls {
+  padding: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.controls select {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg-card);
+  color: var(--text);
+  cursor: pointer;
+}
+.btn-filter {
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 12px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-filter:hover { border-color: var(--accent-light); }
+.btn-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-clear {
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  border: none;
+  background: rgba(184,134,11,0.1);
+  font-size: 12px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+/* Calendar strip */
+.cal-strip {
+  padding: 0 0 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.cal-strip::-webkit-scrollbar { display: none; }
+.cal-days {
+  display: flex;
+  gap: 3px;
+  min-width: max-content;
+}
+.cal-day {
+  width: 34px;
+  padding: 5px 0;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  color: var(--text-light);
+  transition: all 0.15s;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.cal-day:hover { background: var(--bg-hover); }
+.cal-day.has-events { background: rgba(184,134,11,0.06); color: var(--text-secondary); }
+.cal-day.selected { background: var(--accent); color: #fff; }
+.cal-day.weekend { color: var(--accent); }
+.cal-day.selected.weekend { color: #fff; }
+.cal-day-label { font-size: 9px; font-weight: 600; text-transform: uppercase; }
+.cal-day-num { font-size: 15px; font-weight: 600; }
+.cal-day-count { font-size: 8px; opacity: 0.7; }
+
+/* Date group */
+.date-group { margin-bottom: 28px; }
+.date-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 10px 0;
+  background: var(--bg);
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border-light);
+  text-transform: capitalize;
+}
+
+/* Event card */
+.event {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.event:hover { background: rgba(184,134,11,0.02); margin: 0 -8px; padding: 16px 8px; border-radius: 8px; }
+.event-row { display: flex; gap: 14px; align-items: flex-start; }
+.event-time {
+  min-width: 50px;
+  text-align: center;
+  padding-top: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+}
+.event-body { flex: 1; min-width: 0; }
+.event-title-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.event-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.event-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(16px, 2.5vw, 19px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-free { background: rgba(34,139,34,0.1); color: #228B22; }
+.badge-sold { background: rgba(178,34,34,0.1); color: #B22222; }
+.event-meta {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+.event-meta .venue { color: var(--text-secondary); font-weight: 500; }
+
+/* Expanded detail */
+.event-detail {
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--bg-hover);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent-light);
+  animation: slideDown 0.2s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.event-detail p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.event-detail .detail-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.event-detail .detail-info strong { color: var(--text); font-weight: 600; }
+.event-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(184,134,11,0.08);
+  color: var(--accent);
+  cursor: pointer;
+  border: 1px solid rgba(184,134,11,0.15);
+  font-weight: 500;
+  transition: all 0.1s;
+}
+.tag:hover { background: rgba(184,134,11,0.15); }
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+.empty p { font-size: 15px; }
+
+.footer {
+  padding: 24px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+.footer p {
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 300;
+}
+
+.count-badge {
+  display: inline-block;
+  min-width: 24px;
+  text-align: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(184,134,11,0.1);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Torun &middot; Kwiecien 2026</div>
+  <h1>Kulturalny Kwiecien</h1>
+  <p class="header-sub">
+    <span id="countInfo"></span>
+  </p>
+</div>
+
+<div class="container">
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Szukaj - nazwa, miejsce, tag...">
+  </div>
+  <div class="filters" id="catFilters"></div>
+  <div class="controls" id="controls"></div>
+  <div class="cal-strip" id="calStrip" style="display:none"></div>
+  <div id="eventList"></div>
+</div>
+
+<div class="footer">
+  <p>Dane z IKAR nr 218 &middot; prototyp Lucid Academy &times; Claude</p>
+</div>
+
+<script>
+const EVENTS=[
+{id:1,name:"Amelia Tokarska & Celtic Tales Quartet",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-09",time:"19:00",cat:"muzyka",price:"od 84 zl (ulgowy), od 120 zl (normalny)",desc:"Wybitna harfistka Amelia Tokarska zaprasza na koncert swojego zespolu Celtic Tales Quartet. Wydarzenie promuje album Celtic Harp Tales. To zupelnie nowe i swieze wydanie harfowej muzyki celtyckiej w unikalnym na skale europejska wydaniu.",contact:"booking@ameliatokarska.com",tags:["koncert","folk","harfa"],aud:"dorosli"},
+{id:2,name:"neoCLASSICA EMOTIONS",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-10",time:"19:00",cat:"muzyka",price:"79 zl (ulgowy), 99 zl (normalny)",desc:"neoCLASSICA to zaskakujace spotkanie tworcow i dziel, wywodzacych sie z odmiennych tradycji i epok. Ikoniczne utwory takich gwiazd jak Queen, Prince, Metallica, U2 czy Whitney Houston bez gitar, bebnow i syntezatorow, za to z pelnia brzmien orkiestry symfonicznej.",org:"Torunska Orkiestra Symfoniczna",tags:["koncert","klasyka","rock","symfoniczny"],aud:"dorosli"},
+{id:3,name:"Poniedzielski i Andrus - Piosenki wesole, smutne i ladne. Chyba...",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-11",time:"18:00",cat:"kabaret",price:"od 149 zl",desc:"Andrzej Poniedzielski to poeta, autor tekstow, satyryk i konferansjer, znany z subtelnego poczucia humoru, pelnego inteligentnej ironii i lirycznosci. Artur Andrus jest z kolei dziennikarzem, poeta, autorem tekstow, satyrykiem i piesniarzem, przez wiele lat zwiazanym z Trojka. Obaj zapraszaja publicznosc na wyjatkowy wieczor kabaretowy.",org:"Just For Music",tags:["kabaret","satyra","piosenka"],aud:"dorosli"},
+{id:4,name:"Spiety - Full H.D.",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-12",time:"20:00",cat:"muzyka",price:"od 90 zl",desc:"Koncert promujacy nowa plyte Spietego Full H.D. Najnowszy singiel Zapalanie Przedrostka zadebiutowal na 1 miejscu listy Radia 357 oraz na 2 miejscu Radia Nowy Swiat.",org:"CKK Jordanki",tags:["koncert","rock","indie"],aud:"dorosli"},
+{id:5,name:"Bridgerton - muzyka instrumentalna przy swiecach",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-13",time:"19:00",cat:"muzyka",price:"od 119 zl",desc:"Wieczor pelen romantyzmu i elegancji, podczas ktorego zabrzmia najslynniejsze melodie i piosenki z popularnej serii Bridgertonowie.",org:"AZ Event Production",tags:["koncert","filmowe","romantyczne"],aud:"dorosli"},
+{id:6,name:"Julia Wieniawa: Swiatlocienie ReLove Tour 2026",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-15",time:"19:00",cat:"muzyka",price:"od 179 zl",desc:"Polaczenie nowoczesnego popu, osobistego przekazu oraz spektakularnej oprawy wizualnej. Dopracowany show pelen swiatla, tanca, energii i autentycznych emocji.",org:"Sounds Art",tags:["koncert","pop"],aud:"dorosli"},
+{id:7,name:"Romantyczne arcydziela #1 - Grieg i Rachmaninow",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-17",time:"19:00",cat:"muzyka",price:"60 zl (normalny), 45 zl (ulgowy)",desc:"Spotkanie z dwoma przedstawicielami poznego romantyzmu - Edvardem Griegiem oraz Siergiejem Rachmaninowem. Choc dziela ich skandynawskie fiordy i rosyjskie bezdroza, laczy niezwykly dar przekuwania najglebszych ludzkich uczuc w niesmiertelne, monumentalne brzmienia.",org:"Torunska Orkiestra Symfoniczna",tags:["koncert","klasyka","romantyzm"],aud:"dorosli"},
+{id:8,name:"John Porter - Helicopters 45",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-18",time:"19:00",cat:"muzyka",price:"od 90 zl",desc:"Rock w Polsce mial wiele waznych momentow, ale Helicopters byl tym, ktory otworzyl brame na oscierz. W 1980 plyta wpadla jak swiezy przeciag w PRL-owska rzeczywistosc, a w centrum John Porter, Walijczyk, ktory w Polsce znalazl wlasny akord buntu. Dzis wraca nie jako pamiatka, lecz organizm zywy. Helicopters 45 jest dowodem, ze poczatki sie nie starzeja - jesli byly prawdziwe.",org:"CKK Jordanki",tags:["koncert","rock","legenda"],aud:"dorosli"},
+{id:9,name:"Kwiat Jabloni: Przesilenie Tour",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-19",time:"17:30",cat:"muzyka",price:"wyprzedane",desc:"Kwiat Jabloni zaprezentuje swoje piosenki w orkiestrowej formule. Zapraszaja Kasia i Jacek Sienkiewicz, zalozyciele grupy. Dwa koncerty: 17:30 i 20:30.",org:"Music Legends",tags:["koncert","folk","pop"],aud:"dorosli"},
+{id:10,name:"Grzegorz Turnau - Szosta godzina",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-20",time:"19:00",cat:"muzyka",price:"od 239 zl",desc:"Po wydaniu pierwszej od 11 lat calkowicie autorskiej plyty Szosta godzina, Grzegorz Turnau rusza w podroz promujaca ten album. Atutem plyty sa teksty znakomitych poetow m.in. Jozefa Czechowicza, Adama Zagajewskiego, Bronislawa Maja oraz oczywiscie Grzegorza Turnaua.",org:"Redakcja Artystyczna LIVE CONCERT",tags:["koncert","piosenka autorska","poezja"],aud:"dorosli"},
+{id:11,name:"Romantyczne arcydziela #2 - Rossini, Schumann, Mendelssohn",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-24",time:"19:00",cat:"muzyka",price:"60 zl (normalny), 45 zl (ulgowy)",desc:"Druga odslona cyklu Romantyczne arcydziela to propozycja dla spragnionych slonca. Tego wieczoru udamy sie w podroz do goracej Italii, a takze wysluchamy muzycznego wyznania milosci. W programie: G. Rossini, R. Schumann i F. Mendelssohn-Bartholdy.",org:"Torunska Orkiestra Symfoniczna",tags:["koncert","klasyka","romantyzm"],aud:"dorosli"},
+{id:12,name:"Skrzypek na dachu - musical",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-25",time:"19:00",cat:"teatr",price:"od 160 zl",desc:"Zespol Teatru z Czeskiego Cieszyna - Scena Polska na swoj jubileusz 70-lecia istnienia wystawia klasyczny musical. Jak dotad niewiele polskich teatrow dramatycznych zmierzylo sie z tym legendarnym musicalem. Takze 26.04 godz. 17:00.",org:"Krakowska Agencja Artystyczna Dariusz Liput",tags:["musical","teatr","jubileusz"],aud:"dorosli"},
+{id:13,name:"Grechuta Herbuta w wykonaniu Igora Herbuta",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-27",time:"20:00",cat:"muzyka",price:"wyprzedane",desc:"Igor Herbut wraz z zespolem interpretuje utwory Marka Grechuty - nadajac im swieze brzmienie, jednoczesnie zachowujac ich kolor, duchowa glebe i poetycka wrazliwosc.",org:"LADIDADI",tags:["koncert","piosenka autorska","Grechuta"],aud:"dorosli"},
+{id:14,name:"Rodziewicz x Namyslowski - Miedzynarodowy Dzien Jazzu",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-30",time:"19:00",cat:"muzyka",price:"110 zl",desc:"Koncert supergrupy jazzowej Rodziewicz z goscinnym udzialem syna mistrza, Jacka Namyslowskiego oraz Mateusza Kurka, torunskiej gwiazdy gitary jazzowej. Zespol zaprezentuje autorski program, a takze muzyke Zbigniewa Namyslowskiego. Obchodom towarzyszyc bedzie wystawa fotografii pt. Zbigniewowi Namyslowskiemu w holdzie autorstwa Jarka Wierzbickiego.",org:"CKK Jordanki",tags:["koncert","jazz","hold"],aud:"dorosli"},
+{id:15,name:"Adam Bielecki - Bez sladu. Spotkanie autorskie",venue:"CK Dwor Artusa",address:"Rynek Staromiejski 6",date:"2026-04-10",time:"19:00",cat:"spotkanie",price:"95 zl",desc:"Gory sie zmieniaja. On tez. Adam Bielecki - jeden z najwybitniejszych wspolczesnych himalaistow - powraca z nowa prelekcja promujaca jego druga ksiazke Bez sladu.",org:"Adam Bielecki Team",tags:["spotkanie autorskie","podroze","gory"],aud:"dorosli"},
+{id:16,name:"Kolektyw TERAZ - Hive mind, spektakl impro",venue:"CK Dwor Artusa",address:"Rynek Staromiejski 6",date:"2026-04-11",time:"19:00",cat:"teatr",price:"35 zl normalny, 30 zl ulgowy",desc:"Aktorzy za kazdym razem staja przed nowymi wyzwaniami tworzac niepowtarzalne show. Badz tego swiadkiem na zywo! W spektaklu zagraja aktorzy z Kolektywu TERAZ!",tags:["teatr","impro","komedia"],aud:"dorosli"},
+{id:17,name:"Czwartek z filozofia - dr Jaroslaw Jakubowski",venue:"CK Dwor Artusa",address:"Rynek Staromiejski 6",date:"2026-04-16",time:"18:30",cat:"wyklad",price:"bezplatne",desc:"Doswiadczenie siebie samego jako dzialajacego. Dr Jaroslaw Jakubowski: profesor na Uniwersytecie Kazimierza Wielkiego, absolwent studiow podyplomowych w Universite de Paris XII. Zainteresowania naukowe: wspolczesna filozofia francuska, filozofia egzystencji, hermeneutyka i fenomenologia. Wydarzenie wspolorganizowane z Instytutem Filozofii UMK.",tags:["wyklad","filozofia","UMK"],aud:"dorosli"},
+{id:18,name:"Raz Dwa Trzy - 35-lecie zespolu",venue:"CK Dwor Artusa",address:"Rynek Staromiejski 6",date:"2026-04-16",time:"19:00",cat:"muzyka",price:"110 zl",desc:"35 lat na scenie to w przypadku Raz Dwa Trzy nie tylko haslo jubileuszowe, ale przede wszystkim setki koncertow, kilkanascie albumow, radiowe przeboje i nagrody fonograficzne. Podczas Artus Festivalu zespol zaprezentuje najwazniejsze utwory, ktore na trwale weszly do historii polskiej piosenki.",tags:["koncert","piosenka autorska","jubileusz"],aud:"dorosli"},
+{id:19,name:"Dikanda - koncert",venue:"CK Dwor Artusa",address:"Rynek Staromiejski 6",date:"2026-04-23",time:"19:00",cat:"muzyka",price:"70 zl",desc:"Dikanda to szczecinski zespol, cieszacy sie ogromnym uznaniem na zagranicznym rynku muzycznym. Grupa porusza sie w gatunku world music, a jej koncerty sa okazja do poszerzenia swojej wiedzy o roznorodnosci etnicznej i kulturowej swiata.",tags:["koncert","world music","folk"],aud:"dorosli"},
+{id:20,name:"WATCH DOCS - Prawa Czlowieka w Filmie",venue:"CK Dwor Artusa",address:"Rynek Staromiejski 6",date:"2026-04-21",time:"17:30",cat:"film",price:"wg programu",desc:"24. Objazdowy Festiwal Filmowy organizowany przez Helsinska Fundacje Praw Czlowieka. 4 dni dokumentow i paneli dyskusyjnych (21-24.04). W programie m.in.: Bloodline, Divia, Czarna woda, W pokoju mojej siostry, Na wlasnych zasadach, Gaza. List z przeszlosci, Prawda czy wyzwanie. Panele: Ekobojstwo, Dorastanie w kryzysie, Architekci chaosu (spotkanie z Marcinem Ogdowskim).",org:"Helsinska Fundacja Praw Czlowieka",tags:["film","dokumenty","prawa czlowieka","festiwal"],aud:"dorosli"},
+{id:21,name:"T.Love - 40-lecie",venue:"ACKiS Od Nowa",address:"ul. Gagarina 37a",date:"2026-04-09",time:"19:00",cat:"muzyka",price:"bilety online",desc:"Zespol T.Love swietuje jubileusz 40-lecia dzialalnosci artystycznej, prezentujac program obejmujacy najwazniejsze utwory ze swojej bogatej historii oraz kompozycje z najnowszego albumu Orajt!",tags:["koncert","rock","jubileusz"],aud:"dorosli"},
+{id:22,name:"Fisz Emade Tworzywo - 25-lecie",venue:"ACKiS Od Nowa",address:"ul. Gagarina 37a",date:"2026-04-16",time:"19:00",cat:"muzyka",price:"bilety online",desc:"Muzyczne podsumowanie tworczej drogi braci Waglewskich i ich stylistycznych poszukiwan.",tags:["koncert","hip-hop","elektronika","jubileusz"],aud:"dorosli"},
+{id:23,name:"Piotr Rogucki & Normalni Ludzie",venue:"ACKiS Od Nowa",address:"ul. Gagarina 37a",date:"2026-04-25",time:"19:00",cat:"muzyka",price:"bilety online",desc:"Artysta powraca z premierowym repertuarem oraz nowym zespolem, proponujac bardziej osobista i kameralna formule koncertowa.",tags:["koncert","rock"],aud:"dorosli"},
+{id:24,name:"Slam Poetycki",venue:"ACKiS Od Nowa",address:"ul. Gagarina 37a",date:"2026-04-13",time:"18:00",cat:"literatura",price:"bilety online",desc:"Spotkanie milosnikow poezji performatywnej w formule otwartego konkursu, w ktorym uczestnicy prezentuja wlasne teksty przed publicznoscia.",tags:["literatura","poetry slam"],aud:"dorosli"},
+{id:25,name:"Polska Od Nowa - debata literacko-spoleczna",venue:"ACKiS Od Nowa",address:"ul. Gagarina 37a",date:"2026-04-14",time:"19:00",cat:"debata",price:"bilety online",desc:"Cykl stanowi druga czesc projektu Swiat Od Nowa i koncentruje sie na refleksji nad wspolczesnymi zjawiskami spolecznymi i kulturowymi. W spotkaniach uczestnicza naukowcy oraz publicysci, a punktem wyjscia do dyskusji sa najczesciej ksiazki i aktualne tematy zycia publicznego.",tags:["debata","spoleczenstwo","nauka"],aud:"dorosli"},
+{id:26,name:"Stefan Knapp. Alchemik i wizjoner",venue:"CSW Znaki Czasu",address:"Waly gen. Sikorskiego 13",date:"2026-04-01",time:"10:00",cat:"wystawa",price:"bilet do CSW",desc:"Wystawa czynna do 31.05.2026. Retrospektywa Stefana Knappa - malarstwo, ceramika i monumentalne realizacje architektoniczne.",tags:["wystawa","malarstwo","architektura"],aud:"wszyscy"},
+{id:27,name:"Wernisaz: Slodkiego, milego zycia",venue:"CSW Znaki Czasu",address:"Waly gen. Sikorskiego 13",date:"2026-04-24",time:"19:00",cat:"wystawa",price:"bezplatne",desc:"Miedzy sztuka, konsumpcja i rzeczywistoscia spoleczna. Oprowadzanie autorsko-kuratorskie 25.04 godz. 12:30. Kuratorki: Paulina Brzuskiewicz-Kuhn, Natalia Cieslak.",tags:["wernisaz","sztuka wspolczesna"],aud:"dorosli"},
+{id:28,name:"Zmysloteka - warsztaty dla rodzin",venue:"CSW Znaki Czasu",address:"Waly gen. Sikorskiego 13",date:"2026-04-09",time:"16:00",cat:"warsztaty",price:"50 zl (dziecko + rodzic)",desc:"Warsztaty sensoryczne dla rodzin z dziecmi 3-6 lat. Prowadzenie: Milena Chojnacka. Cyklicznie: 9, 16, 23.04. Limit: 12 dzieci. Zapisy: 695 788 114.",tags:["warsztaty","rodziny","sensoryczne"],aud:"dzieci"},
+{id:29,name:"Grafika na warsztat!",venue:"CSW Znaki Czasu",address:"Waly gen. Sikorskiego 13",date:"2026-04-09",time:"16:00",cat:"warsztaty",price:"40 zl",desc:"Warsztaty graficzne dla mlodziezy i osob doroslych. Prowadzenie: Dorota Sobolewska. Takze 16.04. Limit: 10 osob.",tags:["warsztaty","grafika"],aud:"mlodziez"},
+{id:30,name:"Otwarcie Muzeum Sztuki Azji w Kamienicy pod Gwiazda",venue:"Kamienica pod Gwiazda",address:"Rynek Staromiejski 35",date:"2026-04-10",time:"10:00",cat:"wystawa",price:"bilet do muzeum",desc:"W programie m.in. oprowadzania po odnowionej przestrzeni muzeum, spotkania przyblizajace prezentowane zbiory oraz wydarzenia edukacyjne dla roznych grup odbiorcow. Mozliwosc ponownego odkrycia jednej z ciekawszych kolekcji sztuki pozaeuropejskiej w Toruniu. 10-12.04.",tags:["wystawa","sztuka azjatycka","otwarcie"],aud:"wszyscy"},
+{id:31,name:"Zapomniane nabrzeze - archeologia",venue:"Ratusz Staromiejski",address:"Rynek Staromiejski 1",date:"2026-04-01",time:"10:00",cat:"wystawa",price:"bilet do muzeum",desc:"Wystawa poswiecona wynikom badan archeologicznych, prowadzonych w latach 2022-2025 na terenie dawnego zespolu sakralnego Ducha Swietego, zlokalizowanego miedzy Brama Klasztorna a Bulwarem Filadelfijskim. Miejsce o wyjatkowym znaczeniu historycznym. Do 20.09.2026.",tags:["wystawa","archeologia","historia"],aud:"wszyscy"},
+{id:32,name:"Jak zecer skladal Kopernika?",venue:"Dom Mikolaja Kopernika",address:"ul. Kopernika 15/17",date:"2026-04-24",time:"11:00",cat:"warsztaty",price:"bezplatne",desc:"Podczas zajec przedstawione zostana dawne techniki drukarskie. Wstep bezplatny, limit 12 os. Zapisy telefoniczne w Dziale Edukacji (56) 660 56 05. W ramach 24. Torunskiego Festiwalu Nauki i Sztuki.",tags:["warsztaty","historia","TFNiS","drukarstwo"],aud:"wszyscy"},
+{id:33,name:"PREMIERA: Wskazowki na niebie",venue:"Planetarium",address:"ul. Franciszkanska 15/21",date:"2026-04-25",time:"wg grafiku",cat:"pokaz",price:"od 20 zl",desc:"Od zarania dziejow zycie czlowieka wpisane bylo w naturalny cykl zmian w przyrodzie. Czlowiek obserwowal codzienne nastepstwo dnia i nocy, sezonowe zmiany por roku, fazy Ksiezyca. Czy dzis ktos z nas obserwuje niebo, by wyznaczyc i okreslic czas? Moze warto powrocic do obserwacji nieba? Poszukajmy wskazowek wsrod gwiazd i konstelacji.",tags:["planetarium","astronomia","premiera"],aud:"wszyscy"},
+{id:34,name:"Baza MARS#17",venue:"Planetarium",address:"ul. Franciszkanska 15/21",date:"2026-04-01",time:"wg grafiku",cat:"wystawa",price:"od 8 zl",desc:"Interaktywna przestrzen zaranzona w formie bazy kosmicznej, gdzie odwiedzajacy niczym czlonkowie zalogi beda mieli do wykonania okreslone czynnosci, niezbedne do tego, by przezyc poza Ziemia i wykonac powierzone im zadania: monitorowanie stanu Bazy, usuwanie drobnych awarii, badanie probek gruntu Czerwonej Planety czy wlasciwe gospodarowanie energia.",tags:["interaktywne","kosmos","dzieci"],aud:"dzieci"},
+{id:35,name:"Piknik popularnonaukowy - Ciaglosc potrzeb, zmiennosc zrodel",venue:"CN Mlyn Wiedzy",address:"ul. Wladyslawa Lokietka 5",date:"2026-04-26",time:"11:00",cat:"piknik",price:"bezplatne",desc:"Piknik na parkingu przed budynkiem CN Mlyn Wiedzy w ramach 24. Torunskiego Festiwalu Nauki i Sztuki. Godz. 11:00-17:00.",tags:["piknik","nauka","TFNiS","rodziny"],aud:"rodziny"},
+{id:36,name:"Bareja wieczorowa pora",venue:"Teatr Horzycy",address:"Plac Teatralny 1",date:"2026-04-10",time:"18:00",cat:"teatr",price:"70 zl, 60 zl ulgowy, 40 zl szkolny",desc:"Rez. Lukasz Czuj. Spektakle: 10.04 (pt) godz. 18:00, 11.04 (sob) godz. 18:00, 11.04 (ndz) godz. 17:00 - spektakl z dostepna audiodeskrypcja.",tags:["teatr","komedia","Bareja"],aud:"dorosli"},
+{id:37,name:"Kandyd - premiera",venue:"Teatr Horzycy",address:"Plac Teatralny 1",date:"2026-04-26",time:"19:00",cat:"teatr",price:"70 zl, 60 zl ulgowy, 40 zl szkolny",desc:"Rez. Slawomir Narloch. Pokaz przedpremierowy 25.04 godz. 18:00, premiera 26.04 godz. 19:00. Kolejne spektakle: 28, 29, 30.04.",tags:["teatr","premiera"],aud:"dorosli"},
+{id:38,name:"Krolowa sportu",venue:"Teatr Horzycy",address:"Plac Teatralny 1",date:"2026-04-15",time:"19:00",cat:"teatr",price:"65 zl, 55 zl ulgowy, 40 zl szkolny",desc:"Rez. Jedrzej Wielicki. Scena na Zapleczu. Seria: 15-19.04, codziennie godz. 19:00.",tags:["teatr"],aud:"dorosli"},
+{id:39,name:"Spiaca Krolewna - premiera",venue:"Teatr Baj Pomorski",address:"ul. Piernikarska 9",date:"2026-04-19",time:"16:30",cat:"teatr",price:"bilety online",desc:"Rez. Pawel Paszta. Premiera bajki dla dzieci 19.04. Kolejne spektakle: 21-26.04.",tags:["teatr","dzieci","premiera","bajka"],aud:"dzieci"},
+{id:40,name:"Kelnerskie tango - premiera",venue:"Kujawsko-Pomorski Teatr Muzyczny",address:"ul. Zeglarska 8",date:"2026-04-24",time:"19:00",cat:"teatr",price:"premiera 100 zl; 90 zl, ulgowy 80 zl",desc:"Premiera musicalu 24.04 godz. 19:00. Powtorki: 25.04 godz. 19:00, 26.04 godz. 18:00.",tags:["musical","premiera","taniec"],aud:"dorosli"},
+{id:41,name:"Ciechowski w lustrze",venue:"Kujawsko-Pomorski Teatr Muzyczny",address:"ul. Zeglarska 8",date:"2026-04-28",time:"19:00",cat:"muzyka",price:"60 zl",desc:"Muzyczny hold dla Grzegorza Ciechowskiego. 28.04 godz. 19:00, 29.04 godz. 18:00 i 20:00.",tags:["muzyka","hold","Republika"],aud:"dorosli"},
+{id:42,name:"Homo Twist - Malenczuk elektrycznie",venue:"Kombinat Kultury",address:"ul. Podmurna 1/3",date:"2026-04-24",time:"20:00",cat:"muzyka",price:"100/120 zl",desc:"Maciej Malenczuk w wydaniu elektrycznym, w formie hendrixowskiego trio. Plyta grupy otrzymala 5 nominacji do Fryderyka. Lider wskrzesza grupe i pokazuje swiatu dorobek zespolu.",tags:["koncert","rock","legenda"],aud:"dorosli"},
+{id:43,name:"Wieczor z Republika",venue:"Kombinat Kultury",address:"ul. Podmurna 1/3",date:"2026-04-25",time:"18:00",cat:"muzyka",price:"50/60 zl",desc:"Koncert z okazji rocznicy pierwszego koncertu Republiki. Line-up: 20:00 Neonique Band, 21:00 Kombinatorzy (muzycy zespolow Zagadka, Ponizej Krytyki, Nietrzask, Absurd i Czaqu), 22:00 Republikanskie Afterparty.",tags:["koncert","rock","Republika"],aud:"dorosli"},
+{id:44,name:"Vavamuffin - Fly High-Fi!",venue:"Kombinat Kultury",address:"ul. Podmurna 1/3",date:"2026-04-18",time:"20:00",cat:"muzyka",price:"89/99/109 zl",desc:"Grupa przyjezdza z materialem z najnowszej plyty Fly High-Fi! Wyrazny krok w strone roots reggae i okolic, ale jest na niej oczywiscie i troche dancehallu, i funka, i dubu.",tags:["koncert","reggae","dub"],aud:"dorosli"},
+{id:45,name:"Luxtorpeda - Szukamy Guza",venue:"Lizard King",address:"ul. Kopernika 3",date:"2026-04-23",time:"20:00",cat:"muzyka",price:"od 109 zl",desc:"Koncert promujacy najnowszy album pt. Szukamy Guza.",tags:["koncert","rock"],aud:"dorosli"},
+{id:46,name:"Kacper Rucinski - stand-up",venue:"Lizard King",address:"ul. Kopernika 3",date:"2026-04-15",time:"19:00",cat:"kabaret",price:"od 80 zl",desc:"Zdobywca niezliczonych nagrod i wyroznien, scenarzysta, aktor, improwizator, prezenter telewizyjny, ale przede wszystkim stand-uper. Jest wspolzalozycielem pierwszego w Polsce projektu stand-upowego Bez Cenzury. Wystep tylko dla widzow pelnoletnich.",tags:["stand-up","komedia"],aud:"dorosli"},
+{id:47,name:"Joanna Karpowicz - Cale to szalenstwo",venue:"Galeria Wozownia",address:"ul. Rabianska 20",date:"2026-04-01",time:"11:00",cat:"wystawa",price:"12 zl, ulgowy 6 zl",desc:"Autorka komiksow, malarka i ilustratorka. Wystawa prezentuje wczesne prace Joanny Karpowicz - powstale przed cyklem Anubis. Kuratorzy: Jacek Swiderski, Dominika Krawanska. Do 19.04.",tags:["wystawa","komiks","malarstwo","ilustracja"],aud:"wszyscy"},
+{id:48,name:"12. Miedzynarodowa Wystawa Rysunku Studenckiego",venue:"Galeria Wozownia",address:"ul. Rabianska 20",date:"2026-04-24",time:"17:00",cat:"wystawa",price:"12 zl, ulgowy 6 zl",desc:"RYSOWAC NIE RYSOWAC - wystawa organizowana od 2008 przez Katedre Rysunku Wydzialu Sztuk Pieknych UMK. Cel: pokazanie rysunku w calej jego roznorodnosci. Prace artystek i artystow bedace wynikiem eksperymentu wokol dwoch postaw tworczych: dzialania i zaniechania. Do 24.05.",org:"Katedra Rysunku WSP UMK",tags:["wernisaz","rysunek","UMK"],aud:"wszyscy"},
+{id:49,name:"Henri Matisse - wystawa litografii",venue:"Krzywa Wieza",address:"ul. Pod Krzywa Wieza 1",date:"2026-04-03",time:"10:00",cat:"wystawa",price:"bilety na miejscu i online",desc:"Wystawa obejmuje grafiki Matisse'a z dwoch cyklow: Papierowe poematy (1958) i Jazz (1983). Codziennie w godz. 10:00-18:00. Do 16.06.",tags:["wystawa","litografia","Matisse","klasyka"],aud:"wszyscy"},
+{id:50,name:"Gwiazdozbior Kryminalny - festiwal literacki",venue:"Ksiaznica Kopernikanska",address:"ul. Slowackiego 8",date:"2026-04-22",time:"wg programu",cat:"literatura",price:"bezplatne",desc:"Jeden z najszybciej rozwijajacych sie polskich festiwali poswieconych literaturze gatunkowej. Co roku odwiedzaja go mistrzowie polskiej literatury kryminalnej i sensacyjnej. Program obejmuje kilkadziesiat wydarzen: spotkania autorskie, panele dyskusyjne, wyklady z kryminologii, medycyny sadowej, psychiatrii i psychologii sledczej, warsztaty pisarskie i scenariuszowe. 22-26.04. Program od 9 kwietnia na gwiazdozbiorkryminalny.pl",tags:["festiwal","kryminal","literatura","warsztaty"],aud:"dorosli"},
+{id:51,name:"Pisanki ze swiata - oprowadzanie kuratorskie",venue:"Muzeum Etnograficzne",address:"Waly Gen. W. Sikorskiego 19",date:"2026-04-19",time:"12:00",cat:"wystawa",price:"2 zl",desc:"Podroz po wystawie Pisanki ze swiata. Kolekcja Aleksandry i Arkadiusza Belicow w towarzystwie kuratorki Hanny Lopatynskiej. Zapisy od 10 kwietnia: eskapada-z-przewodnikiem.pl",tags:["oprowadzanie","etnografia","pisanki"],aud:"wszyscy"},
+{id:52,name:"24. TFNiS w Muzeum Etnograficznym",venue:"Park Etnograficzny",address:"Waly Gen. W. Sikorskiego 19",date:"2026-04-25",time:"10:00",cat:"warsztaty",price:"bezplatne",desc:"Muzealne imprezy w ramach 24. Torunskiego Festiwalu Nauki i Sztuki. Godz. 10:00-15:30. Sala widowiskowa. Program i zapisy: festiwal.torun.pl",tags:["warsztaty","TFNiS","etnografia"],aud:"rodziny"},
+{id:53,name:"Tajemnice Torunskiego Debu - spektakl familijny",venue:"Teatr Miejsca",address:"ul. Sukiennicza 6",date:"2026-04-12",time:"15:00",cat:"teatr",price:"40 zl (dzieci do 3 r.z. bezplatnie)",desc:"Czy wiecie, ze w sercu Torunia stoi dab, od ktorego zaczela sie historia miasta? Przygotujcie sie na rodzinny spektakl pelen magii, przygod i niezwyklych postaci - od Kucharza Jordana po Plage Zab! Muzyka na zywo, ilustracje i basniowa narracja przeniosla Was w dawne czasy Torunia. Takze 17.04 godz. 18:00. Obowiazuje rezerwacja.",tags:["teatr","rodziny","historia","Torun"],aud:"dzieci"},
+{id:54,name:"Kufer pelen Basni - Andersen",venue:"Teatr Miejsca",address:"ul. Sukiennicza 6",date:"2026-04-18",time:"15:00",cat:"teatr",price:"40 zl (dzieci do 3 r.z. bezplatnie)",desc:"Do Torunia przybyl pewnego dnia wedrowiec. Nie wiadomo skad, nie wiadomo jak. Mial przy sobie tylko jeden bagaz: stary podrozny kufer. Mowia, ze ten kufer pamieta wiecej niz niejeden kronikarz. Dwie basnie Andersena - Swiniopas i Nowe Szaty Cesarza - w kameralnej przestrzeni Domu Opowiesci ozyja tak blisko, ze swiat wyobrazni stanie sie naprawde na wyciagniecie reki. Takze 26.04 godz. 15:00.",tags:["teatr","dzieci","bajki","Andersen"],aud:"dzieci"},
+{id:55,name:"Hamlet - National Theatre Live",venue:"Kino 1410",address:"ul. Przedzamcze 6c",date:"2026-04-17",time:"19:00",cat:"film",price:"wg cennika",desc:"Kolejna wersja sztuki Szekspira w ramach cyklu NT Live - retransmisja z National Theatre w Londynie. Rez. Robert Hastie.",tags:["film","teatr","retransmisja","Szekspir"],aud:"dorosli"},
+{id:56,name:"Lot nad kukulczym gniazdem",venue:"Kino 1410",address:"ul. Przedzamcze 6c",date:"2026-04-25",time:"19:00",cat:"film",price:"wg cennika",desc:"Kultowy dramat w rezyserii Milosa Formana z Jackiem Nicholsonem, opowiadajacy o charyzmatycznym przestepcy Randle McMurphym, ktory udaje chorobe psychiczna, by uniknac wiezienia.",tags:["film","klasyka","dramat"],aud:"dorosli"},
+{id:57,name:"Big Lebowski",venue:"Kino Niebieski Kocyk / Od Nowa",address:"ul. Gagarina 37a",date:"2026-04-17",time:"18:00",cat:"film",price:"wstep wolny",desc:"Kultowa komedia w rezyserii braci Coen opowiadajaca historie przypadkowo wplatanego w kryminalna intryge bohatera zwanego Kolesiem. W ramach cyklu Filmowe Piatki.",tags:["film","klasyka","komedia"],aud:"dorosli"},
+{id:58,name:"Potanc - zabawa taneczna",venue:"Torunianka Cafe / Wejsciowka",address:"ul. Franciszkanska 16 / Plac Teatralny 1",date:"2026-04-10",time:"20:00",cat:"taniec",price:"bilety na nobrotow.pl",desc:"Zabawa taneczna zbudowana na tradycyjnych melodiach i dawnych wzorach tanca. W menu tradycyjne tance polskie - kujawiaki, kujony, mazurki, oberki, polki i wiwaty, szwedzkie - tance polska, schottis, a takze z innych zakatkow Europy. Do tanca zagraja: agregandado & Skrzypkowie Dzielni. Takze 18.04 (Wejsciowka, godz. 19:00).",org:"Grupa N Obrotow",tags:["taniec","tradycja","folk"],aud:"dorosli"},
+{id:59,name:"Warsztaty furoshiki - chusta pelna mozliwosci",venue:"Biblioteka Uniwersytecka UMK",address:"ul. Gagarina 13",date:"2026-04-27",time:"09:00",cat:"warsztaty",price:"bezplatne",desc:"Warsztaty furoshiki to spotkanie z japonska tradycja, ktora od wiekow laczy piekno z praktycznoscia. Dzis przezywa renesans jako alternatywa dla plastikowych toreb i jednorazowych opakowan. 5 grup, czas trwania: 45 min. Godz. 9:00-14:00. W ramach 24. TFNiS.",tags:["warsztaty","ekologia","TFNiS","Japonia"],aud:"wszyscy"},
+{id:60,name:"Slady i odbicia - warsztaty grafiki artystycznej",venue:"Dom Muz, Podgorz",address:"ul. Poznanska 52",date:"2026-04-26",time:"11:00",cat:"warsztaty",price:"bezplatne",desc:"Warsztaty przeznaczone sa zarowno dla dzieci, jak i doroslych, ktorzy chca doswiadczyc jak sztuka moze laczyc przeszlosc z terazniejszoscia, profesjonalna technike z przypadkiem i powtarzalnosc z tworczym odkryciem! Prowadzenie: Paula Raszka. Godz. 11:00-12:00. Liczba miejsc ograniczona. Zapisy: edukacja@artus.torun.pl lub 509 696 050. W ramach 24. TFNiS.",tags:["warsztaty","grafika","TFNiS"],aud:"rodziny"},
+{id:61,name:"Ruchome obrazy - warsztaty podstaw animacji",venue:"Dom Muz, Podgorz",address:"ul. Poznanska 52",date:"2026-04-26",time:"12:30",cat:"warsztaty",price:"bezplatne",desc:"Uczestnicy dowiedza sie, jak powstal kinematograf oraz jak dziala animacja poklatkowa. Beda mogli wykonac proste zabawki wykorzystujace iluzje ruchu. Wspolnie stworza krotki film animowany. Prowadzenie: Karolina Krol-Buczko. Godz. 12:30-13:30. Zapisy: edukacja@artus.torun.pl lub 509 696 050. W ramach 24. TFNiS.",tags:["warsztaty","animacja","TFNiS","film"],aud:"rodziny"},
+{id:62,name:"Wiosenna pieciolinia - warsztaty umuzykalniajace",venue:"OPP Dom Harcerza",address:"Rynek Staromiejski 7",date:"2026-04-25",time:"10:30",cat:"warsztaty",price:"bezplatne",desc:"Zajecia dla dzieci w wieku 6-10 lat na ktorych spiewamy, gramy na instrumentach poznajac swiat muzyki w atrakcyjny i kreatywny sposob. Godz. 10:30-12:30. Zapisy: 56 622 39 50.",tags:["warsztaty","muzyka","dzieci"],aud:"dzieci"},
+{id:63,name:"Jazz w palacu: Maciej Sikala Duet",venue:"Kujawsko-Pomorski Teatr Muzyczny",address:"ul. Zeglarska 8",date:"2026-04-09",time:"19:00",cat:"muzyka",price:"70 zl",desc:"Trio tworza jazzowi mistrzowie w swoim fachu: Maciej Sikala, Wojciech Pulcyn i Sebastian Frankiewicz. Koncert promuje ich najnowszy album Better Place.",tags:["koncert","jazz"],aud:"dorosli"},
+{id:64,name:"Koncert czyżyka - ptasiego muzyka",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-19",time:"15:00",cat:"muzyka",price:"25 zl dziecko, 35 zl dorosly, 80 zl rodzinny",desc:"Bohaterem kolejnego koncertu z cyklu Czas na nas bedzie czyzyk. Zaspiawamy i zatanczymy do ptasich przebojow muzyki klasycznej oraz piesni i piosenek (m.in. Vivaldiego, Griega i Lutoslawskiego). Koncert przeznaczony dla dzieci w wieku 0-6 lat. Dwa seanse: 15:00 i 16:30.",org:"Torunska Orkiestra Symfoniczna",tags:["koncert","dzieci","klasyka"],aud:"dzieci"},
+{id:65,name:"Dariusz Przewiezlikowski - Dom przestrzenie wspolne",venue:"Galeria Dworu Artusa",address:"Rynek Staromiejski 6",date:"2026-04-10",time:"18:00",cat:"wystawa",price:"bezplatne",desc:"Wernisaz wystawy. Absolwent ASP w Gdansku z dyplomem z ceramiki architektonicznej. Uprawia rzezbke ceramiczna i malarstwo. Dla mnie dom w swych granicach to obserwacja zycia i czasu, ktory jutro bedzie wspomnieniem. Stare strychy pelne nieprzydatnych rzeczy stanowia nosnik pamieci, ktorym sie inspiruje. Do 3.05. Galeria czynna codziennie 13:00-19:00.",tags:["wystawa","rzeźba","ceramika","wernisaz"],aud:"wszyscy"},
+{id:66,name:"Piękna i bestia - Czy warto chodzic na wystawe kilka razy?",venue:"Galeria Wozownia",address:"ul. Rabianska 20",date:"2026-04-30",time:"18:00",cat:"wyklad",price:"bezplatne",desc:"Cykl wykladow Piekna i Bestia to zaproszenie do namyslu nad tym czy nauka moze przyblizyc sztuke. Jak doswiadczenie estetyczne rozwija sie w czasie. Prowadzaca: dr Joanna Dreszer.",tags:["wyklad","sztuka","neuroestetyka"],aud:"dorosli"},
+{id:67,name:"Poznaj muzyke. O operze i nie tylko",venue:"CKK Jordanki",address:"al. Solidarnosci 1-3",date:"2026-04-20",time:"18:00",cat:"wyklad",price:"10 zl",desc:"Opera, operetka, dramat muzyczny, czym sie roznia? Dowiemy sie tego podczas spotkania poswieconego opowiesciom o operze i spiewie klasycznym. Przystepnie prowadzone wydarzenie edukacyjne polaczone z minikoncertami.",org:"Torunska Orkiestra Symfoniczna",tags:["wyklad","opera","edukacja"],aud:"wszyscy"},
+];
+
+const CATS=[...new Set(EVENTS.map(e=>e.cat))].sort();
+const AUDS=["wszyscy","dorosli","dzieci","mlodziez","rodziny"];
+const AUD_L={wszyscy:"Wszyscy",dorosli:"Dorosli",dzieci:"Dzieci",mlodziez:"Mlodziez",rodziny:"Rodziny"};
+const CC={muzyka:'#C4722C',teatr:'#7B68AE',wystawa:'#3A8C5C',warsztaty:'#C9950F',film:'#4A7AB5',wyklad:'#8B6BAE',spotkanie:'#C4587A',literatura:'#2E8B6A',kabaret:'#D4960F',pokaz:'#2A9AAE',piknik:'#44A855',debata:'#9060C0',taniec:'#C75060'};
+const DAYS=[];
+for(let i=1;i<=30;i++){DAYS.push({date:"2026-04-"+String(i).padStart(2,"0"),num:i});}
+
+let state={search:"",cats:new Set(),aud:"",free:false,mode:"list",open:null,day:null};
+
+function dow(d){return["Nd","Pn","Wt","Sr","Cz","Pt","So"][new Date(d+"T12:00:00").getDay()];}
+function fmtDate(d){return new Date(d+"T12:00:00").toLocaleDateString("pl-PL",{weekday:"long",day:"numeric",month:"long"});}
+
+function filter(){
+  return EVENTS.filter(e=>{
+    const q=state.search.toLowerCase();
+    if(q&&!e.name.toLowerCase().includes(q)&&!e.desc.toLowerCase().includes(q)&&!e.venue.toLowerCase().includes(q)&&!e.tags.some(t=>t.includes(q)))return false;
+    if(state.cats.size>0&&!state.cats.has(e.cat))return false;
+    if(state.aud&&e.aud!==state.aud&&e.aud!=="wszyscy"&&state.aud!=="wszyscy")return false;
+    if(state.free&&e.price!=="bezplatne")return false;
+    if(state.day&&e.date!==state.day)return false;
+    return true;
+  }).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||"").localeCompare(b.time||""));
+}
+
+function render(){
+  const f=filter();
+  const hasF=state.search||state.cats.size>0||state.aud||state.free||state.day;
+
+  document.getElementById("countInfo").innerHTML=
+    "<strong>"+f.length+"</strong> wydarzen z "+EVENTS.length+" "+(hasF?"(filtry aktywne)":"");
+
+  // Categories
+  let ch="";
+  CATS.forEach(c=>{
+    ch+='<button class="pill'+(state.cats.has(c)?" active":"")+'" data-cat="'+c+'" style="'+(state.cats.has(c)?"background:"+CC[c]+";border-color:"+CC[c]:"")+'">'+c+'</button>';
+  });
+  document.getElementById("catFilters").innerHTML=ch;
+
+  // Controls
+  let ctrl='<select id="audSelect"><option value="">Dla kogo?</option>';
+  AUDS.forEach(a=>{ctrl+='<option value="'+a+'"'+(state.aud===a?" selected":"")+'>'+AUD_L[a]+'</option>';});
+  ctrl+='</select>';
+  ctrl+='<button class="btn-filter'+(state.free?" active":"")+'" id="freeBtn">Bezplatne</button>';
+  ctrl+='<button class="btn-filter" id="modeBtn">'+(state.mode==="list"?"Kalendarz":"Lista")+'</button>';
+  if(hasF) ctrl+='<button class="btn-clear" id="clearBtn">&times; Wyczysc</button>';
+  document.getElementById("controls").innerHTML=ctrl;
+
+  // Calendar
+  const cs=document.getElementById("calStrip");
+  if(state.mode==="cal"){
+    cs.style.display="block";
+    let cd='<div class="cal-days">';
+    DAYS.forEach(d=>{
+      const cnt=EVENTS.filter(e=>e.date===d.date).filter(e=>{
+        if(state.cats.size>0&&!state.cats.has(e.cat))return false;
+        if(state.aud&&e.aud!==state.aud&&e.aud!=="wszyscy")return false;
+        if(state.free&&e.price!=="bezplatne")return false;
+        return true;
+      }).length;
+      const sel=state.day===d.date;
+      const dw=dow(d.date);
+      const we=dw==="So"||dw==="Nd";
+      let cls="cal-day";
+      if(cnt>0)cls+=" has-events";
+      if(sel)cls+=" selected";
+      if(we&&!sel)cls+=" weekend";
+      cd+='<button class="'+cls+'" data-day="'+d.date+'">';
+      cd+='<span class="cal-day-label">'+dw+'</span>';
+      cd+='<span class="cal-day-num">'+d.num+'</span>';
+      if(cnt>0)cd+='<span class="cal-day-count">'+cnt+'</span>';
+      cd+='</button>';
+    });
+    cd+='</div>';
+    cs.innerHTML=cd;
+  } else { cs.style.display="none"; }
+
+  // Events
+  const el=document.getElementById("eventList");
+  if(f.length===0){
+    el.innerHTML='<div class="empty"><p>Brak pasujacych wydarzen</p></div>';
+    return;
+  }
+
+  const byDate={};
+  f.forEach(e=>{if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
+
+  let html="";
+  Object.entries(byDate).forEach(([date,evts])=>{
+    html+='<div class="date-group"><div class="date-header">'+fmtDate(date)+'<span class="count-badge">'+evts.length+'</span></div>';
+    evts.forEach(ev=>{
+      const isOpen=state.open===ev.id;
+      html+='<div class="event" data-id="'+ev.id+'">';
+      html+='<div class="event-row">';
+      html+='<div class="event-time">'+(ev.time!=="wg grafiku"&&ev.time!=="wg programu"?ev.time:"--")+'</div>';
+      html+='<div class="event-body">';
+      html+='<div class="event-title-row">';
+      html+='<span class="event-dot" style="background:'+(CC[ev.cat]||"#999")+'"></span>';
+      html+='<span class="event-name">'+ev.name+'</span>';
+      if(ev.price==="bezplatne")html+='<span class="badge badge-free">FREE</span>';
+      if(ev.price==="wyprzedane")html+='<span class="badge badge-sold">SOLD OUT</span>';
+      html+='</div>';
+      html+='<div class="event-meta"><span class="venue">'+ev.venue+'</span>'+(ev.price!=="bezplatne"&&ev.price!=="wyprzedane"?" &middot; "+ev.price:"")+'</div>';
+
+      if(isOpen){
+        html+='<div class="event-detail">';
+        html+='<p>'+ev.desc+'</p>';
+        if(ev.address)html+='<div class="detail-info"><strong>Adres:</strong> '+ev.address+'</div>';
+        if(ev.org)html+='<div class="detail-info"><strong>Organizator:</strong> '+ev.org+'</div>';
+        if(ev.contact)html+='<div class="detail-info"><strong>Kontakt:</strong> '+ev.contact+'</div>';
+        html+='<div class="event-tags">';
+        ev.tags.forEach(t=>{html+='<span class="tag" data-tag="'+t+'">#'+t+'</span>';});
+        html+='</div></div>';
+      }
+
+      html+='</div></div></div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+// Event delegation
+document.addEventListener("click",function(e){
+  const pill=e.target.closest("[data-cat]");
+  if(pill){const c=pill.dataset.cat;state.cats.has(c)?state.cats.delete(c):state.cats.add(c);render();return;}
+
+  const dayBtn=e.target.closest("[data-day]");
+  if(dayBtn){const d=dayBtn.dataset.day;state.day=state.day===d?null:d;render();return;}
+
+  const ev=e.target.closest("[data-id]");
+  const tag=e.target.closest("[data-tag]");
+  if(tag){e.stopPropagation();state.search=tag.dataset.tag;document.getElementById("search").value=state.search;render();return;}
+  if(ev){const id=parseInt(ev.dataset.id);state.open=state.open===id?null:id;render();return;}
+
+  if(e.target.id==="freeBtn"){state.free=!state.free;render();return;}
+  if(e.target.id==="modeBtn"){state.mode=state.mode==="list"?"cal":"list";render();return;}
+  if(e.target.id==="clearBtn"){state.search="";state.cats=new Set();state.aud="";state.free=false;state.day=null;document.getElementById("search").value="";render();return;}
+});
+
+document.addEventListener("change",function(e){
+  if(e.target.id==="audSelect"){state.aud=e.target.value;render();}
+});
+
+document.getElementById("search").addEventListener("input",function(e){
+  state.search=e.target.value;render();
+});
+
+render();
+</script>
+</body>
+</html>

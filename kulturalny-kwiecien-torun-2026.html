@@ -327,6 +327,213 @@ body {
   font-weight: 600;
   margin-left: 6px;
 }
+
+/* Wizard */
+.wiz-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 28px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.wiz-btn:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(184,134,11,0.25); }
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(44,36,24,0.5);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  overflow-y: auto;
+}
+.overlay.open { display: flex; }
+
+.wiz-panel {
+  background: var(--bg-card);
+  border-radius: 16px;
+  max-width: 560px;
+  width: 100%;
+  padding: 32px 28px;
+  box-shadow: 0 20px 60px rgba(44,36,24,0.2);
+  animation: wizIn 0.3s ease;
+}
+@keyframes wizIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+.wiz-panel h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.wiz-panel .wiz-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.wiz-close {
+  float: right;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-light);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+.wiz-close:hover { color: var(--text); }
+
+.wiz-step { display: none; }
+.wiz-step.active { display: block; }
+
+.wiz-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+.wiz-opt {
+  padding: 10px 18px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.wiz-opt:hover { border-color: var(--accent-light); background: rgba(184,134,11,0.04); }
+.wiz-opt.sel { border-color: var(--accent); background: rgba(184,134,11,0.08); color: var(--accent); }
+.wiz-opt .opt-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+.wiz-dates {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 20px;
+  align-items: center;
+}
+.wiz-dates label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.wiz-dates input[type=date] {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.wiz-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+.wiz-nav-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.wiz-nav-btn:hover { border-color: var(--accent-light); }
+.wiz-nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.wiz-nav-btn.primary:hover { background: var(--accent-light); }
+
+/* Results */
+.wiz-results { margin-top: 16px; }
+.wiz-day-block { margin-bottom: 20px; }
+.wiz-day-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 10px;
+  text-transform: capitalize;
+}
+.wiz-ev {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.wiz-ev:last-child { border-bottom: none; }
+.wiz-ev-time {
+  min-width: 42px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+.wiz-ev-body { flex: 1; }
+.wiz-ev-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+}
+.wiz-ev-venue {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.wiz-ev-why {
+  font-size: 12px;
+  color: var(--accent);
+  font-style: italic;
+  margin-top: 3px;
+}
+.wiz-ev-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.wiz-score {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(184,134,11,0.08);
+  color: var(--accent);
+  font-weight: 600;
+  margin-left: 6px;
+}
+.wiz-empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-light);
+  font-size: 15px;
+}
+.wiz-summary {
+  background: var(--bg-hover);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.wiz-summary strong { color: var(--text); }
 </style>
 </head>
 <body>
@@ -337,6 +544,7 @@ body {
   <p class="header-sub">
     <span id="countInfo"></span>
   </p>
+  <button class="wiz-btn" onclick="openWizard()">&#10024; Zaplanuj wizyte</button>
 </div>
 
 <div class="container">
@@ -347,6 +555,70 @@ body {
   <div class="controls" id="controls"></div>
   <div class="cal-strip" id="calStrip" style="display:none"></div>
   <div id="eventList"></div>
+</div>
+
+<div class="overlay" id="wizOverlay">
+<div class="wiz-panel">
+  <button class="wiz-close" onclick="closeWizard()">&times;</button>
+
+  <div class="wiz-step active" id="wizStep1">
+    <h2>Kto przyjezdza?</h2>
+    <p class="wiz-sub">Pomogę dobrać wydarzenia do Waszej grupy</p>
+    <div class="wiz-options" id="whoOpts">
+      <button class="wiz-opt" data-who="family-kid" onclick="wizSelect(this,'who')"><span class="opt-icon">&#128106;</span>Rodzina z dzieckiem</button>
+      <button class="wiz-opt" data-who="family-teen" onclick="wizSelect(this,'who')"><span class="opt-icon">&#127891;</span>Rodzina z nastolatkiem</button>
+      <button class="wiz-opt" data-who="couple" onclick="wizSelect(this,'who')"><span class="opt-icon">&#128145;</span>Para</button>
+      <button class="wiz-opt" data-who="solo" onclick="wizSelect(this,'who')"><span class="opt-icon">&#128694;</span>Sam/sama</button>
+      <button class="wiz-opt" data-who="seniors" onclick="wizSelect(this,'who')"><span class="opt-icon">&#9749;</span>Seniorzy</button>
+      <button class="wiz-opt" data-who="friends" onclick="wizSelect(this,'who')"><span class="opt-icon">&#127881;</span>Grupa przyjaciol</button>
+    </div>
+    <div class="wiz-nav"><span></span><button class="wiz-nav-btn primary" onclick="wizNext(2)">Dalej &rarr;</button></div>
+  </div>
+
+  <div class="wiz-step" id="wizStep2">
+    <h2>Kiedy bedziecie w Toruniu?</h2>
+    <p class="wiz-sub">Wybierz zakres dat</p>
+    <div class="wiz-dates">
+      <div><label>Od</label><br><input type="date" id="wizFrom" value="2026-04-10" min="2026-04-01" max="2026-04-30"></div>
+      <div style="padding-top:18px;color:var(--text-light)">&#8594;</div>
+      <div><label>Do</label><br><input type="date" id="wizTo" value="2026-04-20" min="2026-04-01" max="2026-04-30"></div>
+    </div>
+    <div class="wiz-nav">
+      <button class="wiz-nav-btn" onclick="wizNext(1)">&larr; Wstecz</button>
+      <button class="wiz-nav-btn primary" onclick="wizNext(3)">Dalej &rarr;</button>
+    </div>
+  </div>
+
+  <div class="wiz-step" id="wizStep3">
+    <h2>Co Was interesuje?</h2>
+    <p class="wiz-sub">Wybierz jedno lub wiecej (lub pomin - pokaze wszystko)</p>
+    <div class="wiz-options" id="intOpts">
+      <button class="wiz-opt" data-int="muzyka" onclick="wizToggle(this)"><span class="opt-icon">&#127925;</span>Muzyka</button>
+      <button class="wiz-opt" data-int="teatr" onclick="wizToggle(this)"><span class="opt-icon">&#127917;</span>Teatr</button>
+      <button class="wiz-opt" data-int="sztuka" onclick="wizToggle(this)"><span class="opt-icon">&#127912;</span>Sztuka / wystawy</button>
+      <button class="wiz-opt" data-int="nauka" onclick="wizToggle(this)"><span class="opt-icon">&#128300;</span>Nauka</button>
+      <button class="wiz-opt" data-int="warsztaty" onclick="wizToggle(this)"><span class="opt-icon">&#9997;</span>Warsztaty</button>
+      <button class="wiz-opt" data-int="film" onclick="wizToggle(this)"><span class="opt-icon">&#127909;</span>Film</button>
+      <button class="wiz-opt" data-int="historia" onclick="wizToggle(this)"><span class="opt-icon">&#127984;</span>Historia / muzea</button>
+      <button class="wiz-opt" data-int="bezplatne" onclick="wizToggle(this)"><span class="opt-icon">&#128176;</span>Tylko bezplatne</button>
+    </div>
+    <div class="wiz-nav">
+      <button class="wiz-nav-btn" onclick="wizNext(2)">&larr; Wstecz</button>
+      <button class="wiz-nav-btn primary" onclick="wizGenerate()">&#10024; Pokaz plan!</button>
+    </div>
+  </div>
+
+  <div class="wiz-step" id="wizStep4">
+    <h2>Twoj plan na Torun</h2>
+    <p class="wiz-sub" id="wizResultSub"></p>
+    <div id="wizResults"></div>
+    <div class="wiz-nav">
+      <button class="wiz-nav-btn" onclick="wizNext(3)">&larr; Zmien preferencje</button>
+      <button class="wiz-nav-btn primary" onclick="closeWizard()">Zamknij</button>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <div class="footer">
@@ -572,6 +844,105 @@ document.getElementById("search").addEventListener("input",function(e){
 });
 
 render();
+
+// ===== WIZARD =====
+let wiz={who:null,from:"2026-04-10",to:"2026-04-20",interests:new Set()};
+function openWizard(){document.getElementById("wizOverlay").classList.add("open");wizNext(1);document.body.style.overflow="hidden";}
+function closeWizard(){document.getElementById("wizOverlay").classList.remove("open");document.body.style.overflow="";}
+function wizNext(step){document.querySelectorAll(".wiz-step").forEach(function(s){s.classList.remove("active")});document.getElementById("wizStep"+step).classList.add("active");}
+function wizSelect(btn,type){btn.parentElement.querySelectorAll(".wiz-opt").forEach(function(b){b.classList.remove("sel")});btn.classList.add("sel");if(type==="who")wiz.who=btn.dataset.who;}
+function wizToggle(btn){btn.classList.toggle("sel");var v=btn.dataset.int;wiz.interests.has(v)?wiz.interests.delete(v):wiz.interests.add(v);}
+
+function wizGenerate(){
+  wiz.from=document.getElementById("wizFrom").value;
+  wiz.to=document.getElementById("wizTo").value;
+  var who=wiz.who||"couple";
+  var ints=wiz.interests;
+
+  var scored=EVENTS.map(function(ev){
+    var score=0,reasons=[];
+    if(ev.date<wiz.from||ev.date>wiz.to)return null;
+    if(ev.price==="wyprzedane"){score-=100;reasons.push("wyprzedane");}
+
+    if(who==="family-kid"){
+      if(ev.aud==="dzieci"||ev.aud==="rodziny"){score+=30;reasons.push("idealne dla rodzin z dziecmi");}
+      else if(ev.aud==="wszyscy"){score+=15;reasons.push("dla calej rodziny");}
+      else if(ev.aud==="dorosli")score-=5;
+      if(ev.tags.some(function(t){return["dzieci","rodziny","interaktywne","kosmos","warsztaty","bajki","bajka","historia"].indexOf(t)>=0}))score+=20;
+      if(ev.price==="bezplatne"){score+=5;reasons.push("bezplatne!");}
+    }else if(who==="family-teen"){
+      if(ev.aud==="dzieci")score-=10;
+      if(ev.aud==="wszyscy"||ev.aud==="mlodziez"){score+=15;reasons.push("odpowiednie dla mlodziezy");}
+      if(ev.aud==="dorosli"&&(ev.cat==="muzyka"||ev.cat==="film")){score+=10;reasons.push("moze zainteresowac nastolatka");}
+      if(ev.tags.some(function(t){return["rock","komedia","stand-up","impro","kosmos","animacja","film","komiks"].indexOf(t)>=0}))score+=15;
+    }else if(who==="couple"){
+      if(ev.aud==="dzieci")score-=20;
+      if(ev.cat==="muzyka"||ev.cat==="teatr"||ev.cat==="film"){score+=10;reasons.push("swietne na wieczor we dwoje");}
+      if(ev.tags.some(function(t){return["romantyczne","jazz","klasyka","piosenka autorska","world music"].indexOf(t)>=0})){score+=15;reasons.push("romantyczny klimat");}
+    }else if(who==="solo"){
+      if(ev.aud==="dzieci")score-=15;score+=5;
+      if(ev.tags.some(function(t){return["wyklad","filozofia","debata","spotkanie autorskie","literatura","poetry slam"].indexOf(t)>=0})){score+=15;reasons.push("ciekawe intelektualnie");}
+    }else if(who==="seniors"){
+      if(ev.aud==="dzieci")score-=10;
+      if(ev.cat==="muzyka"&&ev.tags.some(function(t){return["klasyka","jazz","piosenka autorska","romantyzm"].indexOf(t)>=0})){score+=20;reasons.push("klasyka i piekne brzmienia");}
+      if(ev.cat==="wystawa"||ev.cat==="wyklad"){score+=15;reasons.push("wartosc edukacyjna");}
+      if(ev.tags.some(function(t){return["oprowadzanie","historia","etnografia","archeologia"].indexOf(t)>=0}))score+=10;
+    }else if(who==="friends"){
+      if(ev.aud==="dzieci")score-=20;
+      if(ev.tags.some(function(t){return["rock","reggae","stand-up","komedia","impro","koncert","poetry slam","taniec"].indexOf(t)>=0})){score+=15;reasons.push("super na wyjscie ze znajomymi");}
+    }
+
+    if(ints.size>0){
+      if(ints.has("muzyka")&&ev.cat==="muzyka")score+=25;
+      if(ints.has("teatr")&&(ev.cat==="teatr"||ev.tags.indexOf("musical")>=0))score+=25;
+      if(ints.has("sztuka")&&(ev.cat==="wystawa"||ev.tags.some(function(t){return["malarstwo","grafika","rysunek","komiks","wernisaz","litografia","ceramika"].indexOf(t)>=0})))score+=25;
+      if(ints.has("nauka")&&ev.tags.some(function(t){return["TFNiS","nauka","astronomia","planetarium","interaktywne"].indexOf(t)>=0})){score+=25;reasons.push("nauka i odkrywanie");}
+      if(ints.has("warsztaty")&&ev.cat==="warsztaty")score+=25;
+      if(ints.has("film")&&ev.cat==="film")score+=25;
+      if(ints.has("historia")&&ev.tags.some(function(t){return["historia","archeologia","etnografia","oprowadzanie","Torun","drukarstwo"].indexOf(t)>=0}))score+=25;
+      if(ints.has("bezplatne")&&ev.price!=="bezplatne")score-=30;
+      if(ints.has("bezplatne")&&ev.price==="bezplatne")score+=20;
+    }
+    if(ev.tags.indexOf("premiera")>=0){score+=8;reasons.push("premiera!");}
+    if(ev.tags.indexOf("jubileusz")>=0||ev.tags.indexOf("legenda")>=0)score+=5;
+
+    var uniqR=[];reasons.forEach(function(r){if(uniqR.indexOf(r)<0)uniqR.push(r)});
+    return{ev:ev,score:score,reasons:uniqR.slice(0,2)};
+  }).filter(function(x){return x&&x.score>-50}).sort(function(a,b){return b.score-a.score});
+
+  var byD={};
+  scored.forEach(function(s){var d=s.ev.date;if(!byD[d])byD[d]=[];if(byD[d].length<4)byD[d].push(s);});
+
+  var wl={"family-kid":"rodziny z dzieckiem","family-teen":"rodziny z nastolatkiem","couple":"pary","solo":"wyprawy solo","seniors":"seniorow","friends":"grupy przyjaciol"};
+  var fromD=new Date(wiz.from+"T12:00:00"),toD=new Date(wiz.to+"T12:00:00");
+  var days=Math.round((toD-fromD)/86400000)+1;
+  var total=0;Object.keys(byD).forEach(function(k){total+=byD[k].length});
+
+  document.getElementById("wizResultSub").innerHTML="Plan dla <strong>"+(wl[wiz.who]||"Was")+"</strong>, "+days+" dni, <strong>"+total+"</strong> propozycji";
+
+  var html="";
+  if(total===0){html='<div class="wiz-empty">Brak wydarzen w tym terminie. Sprobuj poszerzyc zakres.</div>';}
+  else{
+    Object.keys(byD).sort().forEach(function(date){
+      var evts=byD[date];
+      html+='<div class="wiz-day-block"><div class="wiz-day-title">'+fmtDate(date)+' <span style="font-size:12px;color:var(--text-light);font-family:Source Sans 3,sans-serif;font-weight:400">('+evts.length+')</span></div>';
+      evts.forEach(function(s){
+        var e=s.ev;
+        html+='<div class="wiz-ev"><div class="wiz-ev-time">'+(e.time!=="wg grafiku"&&e.time!=="wg programu"?e.time:"--")+'</div>';
+        html+='<div class="wiz-ev-body"><div class="wiz-ev-name"><span class="wiz-ev-dot" style="background:'+(CC[e.cat]||"#999")+'"></span>'+e.name;
+        if(e.price==="bezplatne")html+=' <span class="badge badge-free" style="font-size:9px">FREE</span>';
+        if(s.score>=30)html+=' <span class="wiz-score">'+(s.score>=50?"idealne!":"polecane")+'</span>';
+        html+='</div><div class="wiz-ev-venue">'+e.venue+(e.price!=="bezplatne"&&e.price!=="wyprzedane"?" &middot; "+e.price:"")+'</div>';
+        if(s.reasons.length>0)html+='<div class="wiz-ev-why">'+s.reasons.join(" &middot; ")+'</div>';
+        html+='</div></div>';
+      });
+      html+='</div>';
+    });
+  }
+  document.getElementById("wizResults").innerHTML=html;
+  wizNext(4);
+}
+document.getElementById("wizOverlay").addEventListener("click",function(e){if(e.target===this)closeWizard();});
 </script>
 </body>
 </html>

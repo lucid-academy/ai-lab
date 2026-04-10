@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toruń dla Mieszkańców</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-900: #042C53;
+    --blue-800: #0C447C;
+    --blue-600: #185FA5;
+    --blue-400: #378ADD;
+    --blue-100: #B5D4F4;
+    --blue-50:  #E6F1FB;
+    --gray-bg:  #F5F6F8;
+    --gray-100: #E8E9EC;
+    --gray-400: #888780;
+    --gray-700: #444441;
+    --text:     #1a1a1a;
+    --text-sec: #5a5a5a;
+    --text-hint:#888;
+    --radius-md: 8px;
+    --radius-lg: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,.08);
+    --shadow-card: 0 1px 4px rgba(0,0,0,.06);
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--gray-bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .hdr {
+    background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-800) 45%, var(--blue-600) 100%);
+    padding: 0;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 16px rgba(4,44,83,.25);
+  }
+  .hdr-inner {
+    max-width: 1000px; margin: 0 auto;
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px;
+  }
+  .hdr-logo {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+  .hdr-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: #fff; line-height: 1.2; }
+  .hdr-sub { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; letter-spacing: .02em; }
+  .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .bell-btn {
+    position: relative; cursor: pointer;
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 50%; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #fff; transition: background .15s;
+  }
+  .bell-btn:hover { background: rgba(255,255,255,.25); }
+  .notif-badge {
+    position: absolute; top: 1px; right: 1px;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #E24B4A; font-size: 9px; color: #fff;
+    display: none; align-items: center; justify-content: center; font-weight: 700;
+    border: 1.5px solid var(--blue-800);
+  }
+
+  /* NAV TABS */
+  .nav-bar {
+    background: #fff; border-bottom: 1px solid var(--gray-100);
+    position: sticky; top: 70px; z-index: 99;
+  }
+  .nav-inner {
+    max-width: 1000px; margin: 0 auto;
+    display: flex; gap: 0; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 12px 16px; font-size: 13px; font-family: 'Lato', sans-serif;
+    color: var(--text-sec); cursor: pointer; white-space: nowrap;
+    background: none; border: none; border-bottom: 2px solid transparent;
+    transition: all .15s; margin-bottom: -1px;
+  }
+  .nav-btn:hover { color: var(--blue-600); }
+  .nav-btn.active { color: var(--blue-800); border-bottom-color: var(--blue-400); font-weight: 700; }
+  .nav-icon { font-size: 14px; }
+
+  /* LAYOUT */
+  .page { max-width: 1000px; margin: 0 auto; padding: 20px; }
+
+  /* PUSH STATUS BAR */
+  .push-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: var(--radius-md);
+    font-size: 12px; margin-bottom: 16px;
+    background: var(--blue-50); color: var(--blue-800);
+    border: 1px solid var(--blue-100);
+  }
+  .push-bar.granted { background: #EAF3DE; color: #27500A; border-color: #97C459; }
+  .push-bar.blocked { background: #FCEBEB; color: #791F1F; border-color: #F09595; }
+  .push-bar-btn {
+    margin-left: auto; font-size: 11px; padding: 4px 12px;
+    border-radius: 20px; border: 1px solid currentColor;
+    background: none; cursor: pointer; font-family: 'Lato', sans-serif;
+    font-weight: 700; color: inherit; white-space: nowrap;
+  }
+
+  /* NOTIF PANEL */
+  .notif-panel {
+    background: #fff; border: 1px solid var(--gray-100);
+    border-radius: var(--radius-lg); padding: 1rem;
+    margin-bottom: 16px; display: none; box-shadow: var(--shadow);
+  }
+  .notif-panel.visible { display: block; }
+  .notif-panel-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .notif-panel-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .notif-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-hint); line-height: 1; }
+  .notif-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); align-items: flex-start; }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue-400); flex-shrink: 0; margin-top: 6px; }
+  .notif-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .notif-time { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+  .notif-empty { font-size: 13px; color: var(--text-hint); }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* HOME GRID */
+  .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .home-card {
+    background: #fff; border: 1px solid var(--gray-100); border-radius: var(--radius-lg);
+    padding: 1.1rem; cursor: pointer; transition: all .18s;
+    box-shadow: var(--shadow-card);
+  }
+  .home-card:hover { border-color: var(--blue-400); box-shadow: var(--shadow); transform: translateY(-1px); }
+  .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .card-desc { font-size: 12px; color: var(--text-sec); line-height: 1.5; }
+  .card-arrow { font-size: 12px; color: var(--blue-400); margin-top: 10px; font-weight: 700; }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    background: #fff; border: 1px solid var(--gray-100);
+    border-radius: var(--radius-lg); padding: 1.25rem;
+    margin-top: 14px; display: none; box-shadow: var(--shadow);
+  }
+  .detail-panel.visible { display: block; }
+  .detail-back {
+    font-size: 13px; color: var(--blue-600); cursor: pointer;
+    background: none; border: none; padding: 0; font-family: 'Lato', sans-serif;
+    display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px; font-weight: 700;
+  }
+  .detail-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+  .badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; font-weight: 700; }
+  .badge-blue  { background: var(--blue-50); color: var(--blue-800); }
+  .badge-green { background: #EAF3DE; color: #27500A; }
+  .badge-amber { background: #FAEEDA; color: #854F0B; }
+  .step-list { list-style: none; }
+  .step-item { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--blue-50); color: var(--blue-800);
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step-text { font-size: 14px; color: var(--text); line-height: 1.6; }
+  .step-note { font-size: 12px; color: var(--text-hint); margin-top: 3px; }
+  .divider { height: 1px; background: var(--gray-100); margin: 14px 0; }
+
+  /* DOCS SECTION */
+  .docs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+
+  /* EVENTS */
+  .event-item {
+    background: #fff; border: 1px solid var(--gray-100); border-radius: var(--radius-lg);
+    padding: 1rem; display: flex; gap: 12px; box-shadow: var(--shadow-card);
+    transition: border-color .15s;
+  }
+  .event-item:hover { border-color: var(--blue-400); }
+  .event-date-col {
+    flex-shrink: 0; width: 46px; text-align: center;
+    background: var(--blue-50); border-radius: var(--radius-md);
+    padding: 8px 4px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .event-day { font-size: 20px; font-weight: 700; color: var(--blue-800); line-height: 1; }
+  .event-month { font-size: 10px; color: var(--blue-600); text-transform: uppercase; margin-top: 2px; font-weight: 700; letter-spacing: .04em; }
+  .event-body { flex: 1; min-width: 0; }
+  .event-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px; }
+  .etag { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+  .event-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .event-meta { font-size: 12px; color: var(--text-sec); }
+  .event-actions { margin-top: 8px; }
+  .btn-notify {
+    font-size: 11px; padding: 4px 12px; border-radius: 20px;
+    border: 1px solid var(--gray-100); background: none; cursor: pointer;
+    color: var(--text-sec); font-family: 'Lato', sans-serif; font-weight: 700;
+    transition: all .15s;
+  }
+  .btn-notify:hover { border-color: var(--blue-400); color: var(--blue-600); }
+  .btn-notify.active { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-800); }
+  .feed { display: flex; flex-direction: column; gap: 10px; }
+
+  /* PROFILES */
+  .profiles-section { background: #fff; border: 1px solid var(--gray-100); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 16px; box-shadow: var(--shadow-card); }
+  .profiles-title { font-size: 12px; font-weight: 700; color: var(--text-hint); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+  .profiles-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .profile-chip {
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+    border-radius: 20px; border: 1px solid var(--gray-100);
+    background: var(--gray-bg); cursor: pointer; font-size: 12px;
+    color: var(--text-sec); transition: all .15s; font-family: 'Lato', sans-serif;
+    font-weight: 400; user-select: none;
+  }
+  .profile-chip.on { border-color: var(--chip-color); background: var(--chip-bg); color: var(--chip-text); font-weight: 700; }
+
+  /* KONSULTACJE */
+  .consult-item {
+    background: #fff; border: 1px solid var(--gray-100); border-radius: var(--radius-lg);
+    padding: 1rem 1rem 1rem 1.25rem; border-left: 3px solid var(--blue-400);
+    box-shadow: var(--shadow-card);
+  }
+  .consult-date { font-size: 12px; color: var(--blue-600); font-weight: 700; margin-bottom: 4px; }
+  .consult-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .consult-place { font-size: 12px; color: var(--text-sec); }
+
+  /* TRANSPORT */
+  .transport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+
+  /* CITIZEN */
+  .citizen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+
+  /* TABS within events */
+  .sub-tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--gray-100); padding-bottom: 0; }
+  .sub-tab {
+    padding: 7px 14px; font-size: 13px; cursor: pointer; color: var(--text-hint);
+    border: none; background: none; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; font-family: 'Lato', sans-serif; font-weight: 400; transition: all .15s;
+  }
+  .sub-tab.active { color: var(--blue-800); border-bottom-color: var(--blue-400); font-weight: 700; }
+
+  /* CHATBOT */
+  .chat-wrap { background: #fff; border: 1px solid var(--gray-100); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  .chat-header { background: var(--blue-50); border-bottom: 1px solid var(--blue-100); padding: 10px 1rem; display: flex; align-items: center; gap: 8px; }
+  .chat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue-600); }
+  .chat-header-text { font-size: 13px; font-weight: 700; color: var(--blue-800); }
+  .chat-messages { padding: 1rem; min-height: 180px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 85%; font-size: 13px; line-height: 1.65; padding: 9px 13px; border-radius: var(--radius-lg); }
+  .msg-bot { background: var(--gray-bg); color: var(--text); align-self: flex-start; border-radius: 4px 14px 14px 14px; }
+  .msg-user { background: var(--blue-600); color: #fff; align-self: flex-end; border-radius: 14px 4px 14px 14px; }
+  .msg-loading { color: var(--text-hint); font-style: italic; }
+  .quick-btns { display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 1rem 10px; }
+  .quick-btn {
+    font-size: 11px; padding: 4px 10px; border: 1px solid var(--blue-100);
+    border-radius: 14px; color: var(--blue-600); cursor: pointer;
+    background: var(--blue-50); font-family: 'Lato', sans-serif; font-weight: 700; transition: background .15s;
+  }
+  .quick-btn:hover { background: var(--blue-100); }
+  .chat-input-row { display: flex; gap: 8px; padding: 10px 1rem; border-top: 1px solid var(--gray-100); }
+  .chat-input {
+    flex: 1; border: 1px solid var(--gray-100); border-radius: var(--radius-md);
+    padding: 9px 13px; font-size: 13px; font-family: 'Lato', sans-serif;
+    background: var(--gray-bg); color: var(--text); outline: none; transition: border-color .15s;
+  }
+  .chat-input:focus { border-color: var(--blue-400); background: #fff; }
+  .chat-send {
+    background: var(--blue-600); color: #fff; border: none;
+    border-radius: var(--radius-md); padding: 9px 16px; font-size: 13px;
+    cursor: pointer; font-family: 'Lato', sans-serif; font-weight: 700; transition: background .15s;
+  }
+  .chat-send:hover { background: var(--blue-800); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-hint); font-size: 13px; }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-h { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--text); }
+  .section-note { font-size: 12px; color: var(--text-hint); margin-top: 4px; }
+
+  @media (max-width: 600px) {
+    .page { padding: 12px; }
+    .home-grid, .docs-grid, .transport-grid, .citizen-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="hdr-logo">🏛️</div>
+    <div>
+      <div class="hdr-title">Toruń dla Mieszkańców</div>
+      <div class="hdr-sub">Informacje miejskie · Urzędy · Wydarzenia · AI-asystent</div>
+    </div>
+    <div class="hdr-right">
+      <div class="bell-btn" onclick="toggleNotifPanel()" title="Powiadomienia">
+        🔔
+        <span class="notif-badge" id="notifBadge"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showSection('home',this)"><span class="nav-icon">🏠</span> Start</button>
+    <button class="nav-btn" onclick="showSection('docs',this)"><span class="nav-icon">📄</span> Dokumenty i urzędy</button>
+    <button class="nav-btn" onclick="showSection('events',this)"><span class="nav-icon">🎭</span> Wydarzenia i kultura</button>
+    <button class="nav-btn" onclick="showSection('consult',this)"><span class="nav-icon">💬</span> Konsultacje społeczne</button>
+    <button class="nav-btn" onclick="showSection('transport',this)"><span class="nav-icon">🚌</span> Transport</button>
+    <button class="nav-btn" onclick="showSection('citizen',this)"><span class="nav-icon">👥</span> Dla obywatela</button>
+    <button class="nav-btn" onclick="showSection('chat',this)"><span class="nav-icon">🤖</span> Asystent AI</button>
+  </div>
+</nav>
+
+<main class="page">
+
+  <!-- PUSH BAR -->
+  <div class="push-bar" id="pushBar">
+    <span id="pushText">🔔 Powiadomienia push nieaktywne — włącz, aby otrzymywać alerty o wydarzeniach</span>
+    <button class="push-bar-btn" id="pushBtn" onclick="requestPush()">Włącz</button>
+  </div>
+
+  <!-- NOTIF PANEL -->
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-hdr">
+      <div class="notif-panel-title">🔔 Twoje powiadomienia</div>
+      <button class="notif-close" onclick="toggleNotifPanel()">✕</button>
+    </div>
+    <div id="notifList"><div class="notif-empty">Brak powiadomień — zapisz się na wydarzenie klikając „Powiadom mnie".</div></div>
+  </div>
+
+  <!-- ═══════════════ HOME ═══════════════ -->
+  <div id="sec-home" class="section active">
+    <div class="section-header"><div><div class="section-h">Co możemy dla Ciebie zrobić?</div><div class="section-note">Wybierz kategorię lub zapytaj asystenta AI</div></div></div>
+    <div class="home-grid">
+      <div class="home-card" onclick="showSection('docs',null);showDetail('dowod')">
+        <div class="card-icon">🪪</div>
+        <div class="card-title">Dowód osobisty dla 18-latka</div>
+        <div class="card-desc">Jakie dokumenty złożyć i gdzie</div>
+        <div class="card-arrow">→ Sprawdź</div>
+      </div>
+      <div class="home-card" onclick="showSection('docs',null);showDetail('800plus')">
+        <div class="card-icon">👶</div>
+        <div class="card-title">Świadczenie 800+</div>
+        <div class="card-desc">Jak złożyć wniosek krok po kroku</div>
+        <div class="card-arrow">→ Sprawdź</div>
+      </div>
+      <div class="home-card" onclick="showSection('events',null)">
+        <div class="card-icon">🎭</div>
+        <div class="card-title">Nadchodzące wydarzenia</div>
+        <div class="card-desc">Co dzieje się w Toruniu</div>
+        <div class="card-arrow">→ Sprawdź</div>
+      </div>
+      <div class="home-card" onclick="showSection('consult',null)">
+        <div class="card-icon">💬</div>
+        <div class="card-title">Konsultacje społeczne</div>
+        <div class="card-desc">Gdzie i kiedy możesz zabrać głos</div>
+        <div class="card-arrow">→ Sprawdź</div>
+      </div>
+      <div class="home-card" onclick="showSection('transport',null)">
+        <div class="card-icon">🚌</div>
+        <div class="card-title">Komunikacja miejska</div>
+        <div class="card-desc">MZK, linie, bilety, P+R</div>
+        <div class="card-arrow">→ Sprawdź</div>
+      </div>
+      <div class="home-card" onclick="showSection('citizen',null)">
+        <div class="card-icon">🗳️</div>
+        <div class="card-title">Informacje dla obywatela</div>
+        <div class="card-desc">Prawa, obowiązki, pomoc społeczna</div>
+        <div class="card-arrow">→ Sprawdź</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DOCS ═══════════════ -->
+  <div id="sec-docs" class="section">
+    <div class="section-header"><div class="section-h">📄 Dokumenty i urzędy</div></div>
+    <div class="docs-grid">
+      <div class="home-card" onclick="showDetail('dowod')">
+        <div class="card-icon">🪪</div>
+        <div class="card-title">Dowód osobisty — 18 lat</div>
+        <div class="card-desc">Pierwszy dowód dla pełnoletniego</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('800plus')">
+        <div class="card-icon">👶</div>
+        <div class="card-title">Świadczenie 800+</div>
+        <div class="card-desc">Wniosek i wymagane dokumenty</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('meldunek')">
+        <div class="card-icon">🏠</div>
+        <div class="card-title">Zameldowanie / wymeldowanie</div>
+        <div class="card-desc">Procedura meldunkowa w Toruniu</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('paszport')">
+        <div class="card-icon">🛂</div>
+        <div class="card-title">Paszport</div>
+        <div class="card-desc">Wyrobienie lub wymiana paszportu</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+    </div>
+    <div class="detail-panel" id="detail-docs">
+      <button class="detail-back" onclick="hideDetail('detail-docs')">← Wróć</button>
+      <div id="detail-docs-content"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ EVENTS ═══════════════ -->
+  <div id="sec-events" class="section">
+    <div class="section-header"><div class="section-h">🎭 Wydarzenia i kultura</div></div>
+
+    <!-- Profile chips -->
+    <div class="profiles-section">
+      <div class="profiles-title">Twoje profile — filtruj dopasowane wydarzenia</div>
+      <div class="profiles-bar" id="profilesBar"></div>
+    </div>
+
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="switchSubTab('dla-ciebie',this)">Dla Ciebie</button>
+      <button class="sub-tab" onclick="switchSubTab('wszystkie',this)">Wszystkie</button>
+      <button class="sub-tab" onclick="switchSubTab('zapisane',this)">Zapisane</button>
+    </div>
+
+    <div id="feed-dla-ciebie" class="feed"></div>
+    <div id="feed-wszystkie" class="feed" style="display:none"></div>
+    <div id="feed-zapisane" class="feed" style="display:none"></div>
+  </div>
+
+  <!-- ═══════════════ KONSULTACJE ═══════════════ -->
+  <div id="sec-consult" class="section">
+    <div class="section-header"><div class="section-h">💬 Konsultacje społeczne</div></div>
+    <p style="font-size:13px;color:var(--text-hint);margin-bottom:14px">Zaplanowane konsultacje i spotkania z mieszkańcami Torunia</p>
+    <div class="feed">
+      <div class="consult-item">
+        <div class="consult-date">2 kwietnia 2026 · godz. 17:00</div>
+        <div class="consult-title">Miejscowy Plan Zagospodarowania — Bielawy</div>
+        <div class="consult-place">📍 Dom Kultury Bielawy, ul. Bielańska 21 · Rejestracja: bip.torun.pl</div>
+      </div>
+      <div class="consult-item">
+        <div class="consult-date">16 kwietnia 2026 · godz. 16:30</div>
+        <div class="consult-title">Budżet Obywatelski 2027 — spotkanie informacyjne</div>
+        <div class="consult-place">📍 Ratusz Staromiejski, Rynek Staromiejski 1</div>
+      </div>
+      <div class="consult-item">
+        <div class="consult-date">7 maja 2026 · godz. 18:00</div>
+        <div class="consult-title">Strategia adaptacji Torunia do zmian klimatu — warsztaty</div>
+        <div class="consult-place">📍 Centrum Kulturalno-Kongresowe „Jordanki", al. Solidarności 1–3</div>
+      </div>
+      <div class="consult-item">
+        <div class="consult-date">22 maja 2026 · godz. 17:00</div>
+        <div class="consult-title">Plan mobilności miejskiej — transport i ścieżki rowerowe</div>
+        <div class="consult-place">📍 Urząd Miasta Torunia, ul. Grudziądzka 126b</div>
+      </div>
+    </div>
+    <div style="background:var(--blue-50);border-radius:var(--radius-md);padding:12px 16px;font-size:13px;color:var(--blue-800);margin-top:14px;border:1px solid var(--blue-100)">
+      Chcesz zgłosić temat do konsultacji lub dowiedzieć się o innych? Przejdź do <strong>Asystenta AI</strong> i zapytaj.
+    </div>
+  </div>
+
+  <!-- ═══════════════ TRANSPORT ═══════════════ -->
+  <div id="sec-transport" class="section">
+    <div class="section-header"><div class="section-h">🚌 Transport i komunikacja</div></div>
+    <div class="transport-grid">
+      <div class="home-card" onclick="showDetail('mzk')">
+        <div class="card-icon">🚌</div>
+        <div class="card-title">Linie MZK Toruń</div>
+        <div class="card-desc">Rozkłady jazdy i mapka linii</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('bilet')">
+        <div class="card-icon">🎫</div>
+        <div class="card-title">Bilety i ulgi</div>
+        <div class="card-desc">Cennik, ulgi, Karta Miejska</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('rower')">
+        <div class="card-icon">🚲</div>
+        <div class="card-title">Toruński Rower Miejski</div>
+        <div class="card-desc">Stacje, rejestracja, cennik</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('parkingi')">
+        <div class="card-icon">🅿️</div>
+        <div class="card-title">Parkingi i SPP</div>
+        <div class="card-desc">Strefa Płatnego Parkowania, P+R</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+    </div>
+    <div class="detail-panel" id="detail-transport">
+      <button class="detail-back" onclick="hideDetail('detail-transport')">← Wróć</button>
+      <div id="detail-transport-content"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ CITIZEN ═══════════════ -->
+  <div id="sec-citizen" class="section">
+    <div class="section-header"><div class="section-h">👥 Dla obywatela</div></div>
+    <div class="citizen-grid">
+      <div class="home-card" onclick="showDetail('pomoc')">
+        <div class="card-icon">🤝</div>
+        <div class="card-title">Pomoc społeczna</div>
+        <div class="card-desc">MOPR, zasiłki, wsparcie dla rodzin</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('wybory')">
+        <div class="card-icon">🗳️</div>
+        <div class="card-title">Udział w wyborach</div>
+        <div class="card-desc">Rejestracja, lokale wyborcze</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('bo')">
+        <div class="card-icon">💡</div>
+        <div class="card-title">Budżet Obywatelski</div>
+        <div class="card-desc">Jak złożyć projekt, jak głosować</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+      <div class="home-card" onclick="showDetail('skargi')">
+        <div class="card-icon">📮</div>
+        <div class="card-title">Skargi i wnioski do UM</div>
+        <div class="card-desc">Jak złożyć pismo do urzędu miasta</div>
+        <div class="card-arrow">→ Szczegóły</div>
+      </div>
+    </div>
+    <div class="detail-panel" id="detail-citizen">
+      <button class="detail-back" onclick="hideDetail('detail-citizen')">← Wróć</button>
+      <div id="detail-citizen-content"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ CHAT ═══════════════ -->
+  <div id="sec-chat" class="section">
+    <div class="section-header"><div class="section-h">🤖 Asystent AI</div></div>
+    <div class="chat-wrap">
+      <div class="chat-header">
+        <div class="chat-dot"></div>
+        <div class="chat-header-text">Zapytaj o cokolwiek dotyczącego Torunia i usług miejskich</div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg msg-bot">Cześć! Jestem asystentem Torunia. Mogę pomóc z dokumentami urzędowymi, wydarzeniami, komunikacją miejską i prawami obywateli. O co chcesz się dowiedzieć?</div>
+      </div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="quickAsk('Jakie dokumenty potrzebne do dowodu osobistego dla 18-latka?')">Dowód 18-latka</button>
+        <button class="quick-btn" onclick="quickAsk('Jak złożyć wniosek o 800+?')">Wniosek 800+</button>
+        <button class="quick-btn" onclick="quickAsk('Gdzie złożyć skargę do Urzędu Miasta Toruń?')">Skarga do UM</button>
+        <button class="quick-btn" onclick="quickAsk('Jak zapisać się do Budżetu Obywatelskiego Torunia?')">Budżet Obywatelski</button>
+        <button class="quick-btn" onclick="quickAsk('Jakie ulgi na bilety MZK w Toruniu?')">Ulgi MZK</button>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chatInput" type="text" placeholder="Napisz pytanie, np. jak wyrobić paszport..." onkeydown="if(event.key==='Enter') sendMsg()" />
+        <button class="chat-send" onclick="sendMsg()">Wyślij</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ──────────────── DATA ──────────────── */
+const DETAILS = {
+  dowod: { title:'Dowód osobisty dla 18-latka', badge:{text:'Urząd Miasta Toruń',cls:'badge-blue'}, steps:[
+    {n:1,text:'Wypełnij wniosek online na obywatel.gov.pl lub osobiście w Wydziale Ewidencji i Obsługi Mieszkańców',note:'ul. Grudziądzka 126b, Toruń — możliwe przez e-PUAP'},
+    {n:2,text:'Przygotuj zdjęcie do dowodu osobistego',note:'Aktualne, kolorowe, 35×45 mm, twarz bez nakrycia głowy'},
+    {n:3,text:'Dostarcz dokumenty: wniosek + zdjęcie + dotychczasowy dokument tożsamości',note:'Przy pierwszym dowodzie może być akt urodzenia'},
+    {n:4,text:'Odbierz dowód osobiście po ok. 30 dniach — SMS z powiadomieniem o gotowości',note:''},
+  ], extra:'<span class="badge badge-green">Bezpłatne</span><br><br><strong style="font-size:13px">Adres:</strong> ul. Grudziądzka 126b · pon–pt 7:30–15:30'},
+  '800plus': { title:'Świadczenie 800+ (Rodzina 800+)', badge:{text:'ZUS / mZUS',cls:'badge-blue'}, steps:[
+    {n:1,text:'Złóż wniosek elektronicznie przez empatia.mrips.gov.pl, aplikację mZUS lub bankowość elektroniczną',note:'Najwygodniejsza forma — bez wizyty w urzędzie'},
+    {n:2,text:'Możliwe też złożenie w oddziale ZUS lub na poczcie',note:'ZUS Toruń: ul. Mickiewicza 33/39'},
+    {n:3,text:'Wymagane: dane dziecka (PESEL), konto bankowe, dane rodziców/opiekunów',note:'Brak kryterium dochodowego — przysługuje na każde dziecko do 18 r.ż.'},
+    {n:4,text:'Decyzja i pierwszy przelew w ciągu ok. 3 miesięcy od złożenia wniosku',note:''},
+  ], extra:'<span class="badge badge-green">800 zł / miesiąc / dziecko</span>'},
+  meldunek: { title:'Zameldowanie w Toruniu', badge:{text:'Urząd Miasta Toruń',cls:'badge-blue'}, steps:[
+    {n:1,text:'Zgłoś się do Wydziału Ewidencji i Obsługi Mieszkańców UM Toruń',note:'ul. Grudziądzka 126b'},
+    {n:2,text:'Wypełnij formularz zgłoszenia pobytu stałego lub czasowego',note:'Dostępny w urzędzie lub online: gov.pl'},
+    {n:3,text:'Dostarcz tytuł prawny do lokalu — umowę najmu, akt notarialny lub oświadczenie właściciela',note:''},
+    {n:4,text:'Zameldowanie jest bezpłatne i realizowane od ręki',note:''},
+  ], extra:'<span class="badge badge-green">Bezpłatne · od ręki</span>'},
+  paszport: { title:'Wyrobienie paszportu', badge:{text:'Kujawsko-Pomorski UW',cls:'badge-amber'}, steps:[
+    {n:1,text:'Umów wizytę w Wydziale Paszportów — Delegatura w Toruniu: ul. Moniuszki 15/21',note:''},
+    {n:2,text:'Wypełnij wniosek paszportowy (dostępny online lub w urzędzie)',note:''},
+    {n:3,text:'Przygotuj: zdjęcie paszportowe, stary paszport lub dowód, potwierdzenie opłaty',note:'Opłata: 140 zł normalny; 70 zł ulga (dzieci, seniorzy, niepełnosprawni)'},
+    {n:4,text:'Odbiór paszportu po ok. 30 dniach roboczych',note:''},
+  ], extra:'<span class="badge badge-amber">140 zł · 70 zł (ulga)</span>'},
+  mzk: { title:'Linie MZK Toruń', badge:{text:'MZK Toruń',cls:'badge-blue'}, steps:[
+    {n:1,text:'MZK Toruń obsługuje ok. 30 linii autobusowych i tramwajowych w Toruniu i okolicach',note:''},
+    {n:2,text:'Rozkłady na mzk.torun.pl oraz w aplikacji Jakdojade lub mPay',note:''},
+    {n:3,text:'Informacja pasażerska: tel. 56 651-00-00 · pon–pt godz. 7:00–18:00',note:''},
+  ], extra:'<span class="badge badge-blue">mzk.torun.pl</span>'},
+  bilet: { title:'Bilety i ulgi MZK', badge:{text:'MZK Toruń',cls:'badge-blue'}, steps:[
+    {n:1,text:'Bilet jednorazowy normalny: 4,00 zł; ulgowy: 2,00 zł',note:'Zakup w pojazdach, kioskach, aplikacji mPay'},
+    {n:2,text:'Bilety miesięczne normalne od ok. 80 zł, ulgowe od ok. 40 zł',note:'Dostępne na Toruńskiej Karcie Miejskiej (TKM)'},
+    {n:3,text:'Posiadacze Karty Mieszkańca mogą korzystać z dodatkowych zniżek',note:'Sprawdź: torun.pl'},
+  ], extra:'<span class="badge badge-blue">Toruńska Karta Miejska</span>'},
+  rower: { title:'Toruński Rower Miejski', badge:{text:'Nextbike / UM Toruń',cls:'badge-green'}, steps:[
+    {n:1,text:'Zarejestruj konto w aplikacji Nextbike lub na nextbike.pl',note:''},
+    {n:2,text:'Doładuj konto i odblokuj rower przy dowolnej stacji',note:'Pierwsza godzina: 2 zł'},
+    {n:3,text:'Zwróć rower do dowolnej stacji Nextbike w Toruniu',note:'Mapa stacji w aplikacji'},
+  ], extra:'<span class="badge badge-green">Sezon: kwiecień–listopad</span>'},
+  parkingi: { title:'Parkowanie w Toruniu — SPP', badge:{text:'UM Toruń',cls:'badge-amber'}, steps:[
+    {n:1,text:'Strefa Płatnego Parkowania obejmuje centrum — opłata w parkometrach lub przez mPay/SkyCash',note:'Pon–pt 8:00–18:00, sob 8:00–14:00'},
+    {n:2,text:'Parkuj&Jedź (P+R): bezpłatne parkingi na obrzeżach + bilet MZK w cenie parkowania',note:'Lokalizacje: Chełmińskie, Jakubskie, Wały gen. Sikorskiego'},
+    {n:3,text:'Mieszkańcy mogą ubiegać się o kartę abonamentową SPP w UM Toruń',note:''},
+  ], extra:'<span class="badge badge-amber">Strefa A i B</span>'},
+  pomoc: { title:'Pomoc społeczna w Toruniu', badge:{text:'MOPR Toruń',cls:'badge-blue'}, steps:[
+    {n:1,text:'Miejski Ośrodek Pomocy Rodzinie (MOPR): ul. Słowackiego 118a',note:'Tel. 56 650-84-00 · mopr.torun.pl'},
+    {n:2,text:'Zakres pomocy: zasiłki stałe i okresowe, pomoc rzeczowa, usługi opiekuńcze, praca socjalna',note:''},
+    {n:3,text:'Złóż wniosek osobiście w MOPR lub Centrum Usług Społecznych',note:'Wymagany wywiad środowiskowy'},
+  ], extra:'<span class="badge badge-blue">mopr.torun.pl</span>'},
+  wybory: { title:'Udział w wyborach', badge:{text:'PKW / UM Toruń',cls:'badge-blue'}, steps:[
+    {n:1,text:'Sprawdź czy jesteś wpisany do rejestru wyborców: obywatel.gov.pl lub w UM Toruń',note:''},
+    {n:2,text:'Wniosek o dopisanie złóż do 5 dni przed wyborami',note:''},
+    {n:3,text:'Znajdź lokal wyborczy na wybory.gov.pl lub pkw.gov.pl',note:''},
+  ], extra:'<span class="badge badge-blue">wybory.gov.pl</span>'},
+  bo: { title:'Budżet Obywatelski Torunia', badge:{text:'UM Toruń',cls:'badge-green'}, steps:[
+    {n:1,text:'Zgłaszanie projektów: corocznie kwiecień–maj — formularz na budzet.torun.pl',note:'Każdy mieszkaniec Torunia może złożyć projekt'},
+    {n:2,text:'Projekty muszą być zlokalizowane na terenie Torunia i mieć charakter ogólnodostępny',note:''},
+    {n:3,text:'Głosowanie na projekty: zazwyczaj wrzesień — przez internet lub osobiście',note:'Wymagany PESEL mieszkańca Torunia'},
+  ], extra:'<span class="badge badge-green">budzet.torun.pl</span>'},
+  skargi: { title:'Skargi i wnioski do UM Toruń', badge:{text:'UM Toruń',cls:'badge-blue'}, steps:[
+    {n:1,text:'Złóż pismo w Biurze Obsługi Mieszkańca: ul. Grudziądzka 126b',note:'Pon–pt 7:30–15:30'},
+    {n:2,text:'Możliwe też przez ePUAP: /UMTorun/skrytka lub pocztą tradycyjną',note:''},
+    {n:3,text:'Urząd ma obowiązek rozpatrzenia skargi w ciągu 30 dni (KPA)',note:''},
+  ], extra:'<span class="badge badge-blue">torun.pl · tel. 56 611-87-77</span>'},
+};
+
+const PROFILES = [
+  { id:'dzieci',  label:'Rodzice małych dzieci', icon:'👶', color:'#D85A30', bg:'#FAECE7', text:'#993C1D' },
+  { id:'teens',   label:'Rodzice nastolatków',   icon:'🎒', color:'#185FA5', bg:'#E6F1FB', text:'#0C447C' },
+  { id:'kultura', label:'Miłośnicy kultury',      icon:'🎭', color:'#533AB7', bg:'#EEEDFE', text:'#3C3489' },
+  { id:'senior',  label:'Seniorzy',               icon:'🌿', color:'#0F6E56', bg:'#E1F5EE', text:'#085041' },
+  { id:'student', label:'Studenci / młodzi',      icon:'🎓', color:'#3B6D11', bg:'#EAF3DE', text:'#27500A' },
+  { id:'sport',   label:'Sportowcy',              icon:'🏃', color:'#BA7517', bg:'#FAEEDA', text:'#854F0B' },
+];
+
+const EVENTS = [
+  { id:1,  title:'Warsztaty plastyczne dla dzieci — Wiosna w sztuce', day:29, month:'mar', place:'Centrum Sztuki Współczesnej, ul. Wały gen. Sikorskiego 26', profiles:['dzieci'], tags:['Warsztaty','Dzieci'], tagColor:'#D85A30', tagBg:'#FAECE7' },
+  { id:2,  title:'Spektakl „Pinokio" — Teatr Baj Pomorski', day:30, month:'mar', place:'Teatr Baj Pomorski, ul. Piernikarska 9', profiles:['dzieci'], tags:['Teatr','Dzieci'], tagColor:'#D85A30', tagBg:'#FAECE7' },
+  { id:3,  title:'Warsztaty graffiti i street artu dla młodzieży', day:5, month:'kwi', place:'Centrum Kultury Dwór Artusa, Rynek Staromiejski 6', profiles:['teens','student'], tags:['Warsztaty','Młodzież'], tagColor:'#185FA5', tagBg:'#E6F1FB' },
+  { id:4,  title:'Hackathon miejski — aplikacje dla Torunia', day:6, month:'kwi', place:'Centrum Innowacji UMK, ul. Grudziądzka 5', profiles:['teens','student'], tags:['Tech','Młodzież'], tagColor:'#3B6D11', tagBg:'#EAF3DE' },
+  { id:5,  title:'Koncert Filharmonii Pomorskiej — Vivaldi: Cztery pory roku', day:8, month:'kwi', place:'Filharmonia Pomorska, ul. Szosa Chełmińska 1', profiles:['kultura','senior'], tags:['Muzyka klasyczna'], tagColor:'#533AB7', tagBg:'#EEEDFE' },
+  { id:6,  title:'Wernisaż — „Toruń wczoraj i dziś" (fotografia)', day:10, month:'kwi', place:'Muzeum Okręgowe, ul. Szeroka 1', profiles:['kultura'], tags:['Wystawa','Sztuka'], tagColor:'#533AB7', tagBg:'#EEEDFE' },
+  { id:7,  title:'Spacer po Starym Mieście dla seniorów z przewodnikiem', day:12, month:'kwi', place:'Start: Fontanna Neptuna, Rynek Staromiejski', profiles:['senior'], tags:['Seniorzy','Aktywność'], tagColor:'#0F6E56', tagBg:'#E1F5EE' },
+  { id:8,  title:'Kino za rogiem — seanse dla seniorów w MDK', day:14, month:'kwi', place:'MDK Toruń, ul. Batorego 13', profiles:['senior'], tags:['Kino','Seniorzy'], tagColor:'#0F6E56', tagBg:'#E1F5EE' },
+  { id:9,  title:'Bieg Uliczny „Toruń Biega" — 5 km i 10 km', day:20, month:'kwi', place:'Start/Meta: Bulwar Filadelfijski', profiles:['sport'], tags:['Bieg','Sport'], tagColor:'#BA7517', tagBg:'#FAEEDA' },
+  { id:10, title:'Turniej tenisa stołowego — otwarty dla mieszkańców', day:26, month:'kwi', place:'Hala Sportowa MOSiR, ul. Bema 23/29', profiles:['sport','student'], tags:['Sport','Turniej'], tagColor:'#BA7517', tagBg:'#FAEEDA' },
+  { id:11, title:'Spektakl „Hamlet" — Teatr im. W. Horzycy', day:2, month:'maj', place:'Teatr Horzycy, Plac Teatralny 1', profiles:['kultura','teens'], tags:['Teatr'], tagColor:'#533AB7', tagBg:'#EEEDFE' },
+  { id:12, title:'Dni Otwarte UMK — targi dla maturzystów', day:10, month:'maj', place:'Kampus UMK, ul. Gagarina 11', profiles:['teens','student'], tags:['Edukacja','Młodzież'], tagColor:'#3B6D11', tagBg:'#EAF3DE' },
+];
+
+/* ──────────────── STATE ──────────────── */
+let activeSection = 'home';
+let activeProfiles = new Set(['kultura','dzieci']);
+let savedEvents = new Set();
+let notifications = [];
+let pushGranted = false;
+let activeSubTab = 'dla-ciebie';
+
+/* ──────────────── NAV ──────────────── */
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+name+"'")) b.classList.add('active');
+    });
+  }
+  activeSection = name;
+  if (name === 'events') renderAllFeeds();
+}
+
+/* ──────────────── DETAIL PANELS ──────────────── */
+const detailMap = {
+  dowod:'detail-docs', '800plus':'detail-docs', meldunek:'detail-docs', paszport:'detail-docs',
+  mzk:'detail-transport', bilet:'detail-transport', rower:'detail-transport', parkingi:'detail-transport',
+  pomoc:'detail-citizen', wybory:'detail-citizen', bo:'detail-citizen', skargi:'detail-citizen',
+};
+
+function showDetail(key) {
+  const d = DETAILS[key]; if (!d) return;
+  const panelId = detailMap[key] || 'detail-docs';
+  const contentId = panelId + '-content';
+  document.getElementById(contentId).innerHTML = buildDetail(d);
+  document.getElementById(panelId).classList.add('visible');
+  document.getElementById(panelId).scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function hideDetail(panelId) {
+  document.getElementById(panelId).classList.remove('visible');
+}
+
+function buildDetail(d) {
+  let s = `<span class="badge ${d.badge.cls}">${d.badge.text}</span>`;
+  s += `<div class="detail-title">${d.title}</div><ul class="step-list">`;
+  d.steps.forEach(st => {
+    s += `<li class="step-item"><div class="step-num">${st.n}</div><div><div class="step-text">${st.text}</div>${st.note?`<div class="step-note">${st.note}</div>`:''}</div></li>`;
+  });
+  s += `</ul>`;
+  if (d.extra) s += `<div class="divider"></div><div style="font-size:13px">${d.extra}</div>`;
+  return s;
+}
+
+/* ──────────────── PROFILES ──────────────── */
+function renderProfiles() {
+  const bar = document.getElementById('profilesBar');
+  bar.innerHTML = '';
+  PROFILES.forEach(p => {
+    const on = activeProfiles.has(p.id);
+    const chip = document.createElement('div');
+    chip.className = 'profile-chip' + (on?' on':'');
+    chip.style.setProperty('--chip-color', p.color);
+    chip.style.setProperty('--chip-bg', p.bg);
+    chip.style.setProperty('--chip-text', p.text);
+    chip.innerHTML = `<span style="font-size:14px">${p.icon}</span><span>${p.label}</span>${on?'<span style="font-size:10px">✓</span>':''}`;
+    chip.onclick = () => {
+      activeProfiles.has(p.id) ? activeProfiles.delete(p.id) : activeProfiles.add(p.id);
+      renderAllFeeds();
+    };
+    bar.appendChild(chip);
+  });
+}
+
+/* ──────────────── EVENTS FEED ──────────────── */
+function renderFeed(events, containerId, emptyMsg) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  if (!events.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div>${emptyMsg}</div>`;
+    return;
+  }
+  events.forEach(ev => {
+    const saved = savedEvents.has(ev.id);
+    const card = document.createElement('div');
+    card.className = 'event-item';
+    card.innerHTML = `
+      <div class="event-date-col"><div class="event-day">${ev.day}</div><div class="event-month">${ev.month}</div></div>
+      <div class="event-body">
+        <div class="event-tags">${ev.tags.map(t=>`<span class="etag" style="background:${ev.tagBg};color:${ev.tagColor}">${t}</span>`).join('')}</div>
+        <div class="event-title">${ev.title}</div>
+        <div class="event-meta">📍 ${ev.place}</div>
+        <div class="event-actions">
+          <button class="btn-notify${saved?' active':''}" onclick="toggleSave(${ev.id},this)">${saved?'✓ Zapisano':'🔔 Powiadom mnie'}</button>
+        </div>
+      </div>`;
+    el.appendChild(card);
+  });
+}
+
+function renderAllFeeds() {
+  renderProfiles();
+  const forMe = activeProfiles.size===0 ? EVENTS : EVENTS.filter(e=>e.profiles.some(p=>activeProfiles.has(p)));
+  renderFeed(forMe, 'feed-dla-ciebie', 'Wybierz przynajmniej jeden profil powyżej.');
+  renderFeed(EVENTS, 'feed-wszystkie', 'Brak wydarzeń.');
+  renderFeed(EVENTS.filter(e=>savedEvents.has(e.id)), 'feed-zapisane', 'Nie masz zapisanych wydarzeń — kliknij „Powiadom mnie" przy wybranym.');
+  updateBadge();
+}
+
+function switchSubTab(name, el) {
+  ['dla-ciebie','wszystkie','zapisane'].forEach(t => {
+    document.getElementById('feed-'+t).style.display = t===name?'flex':'none';
+  });
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  activeSubTab = name;
+}
+
+function toggleSave(id, btn) {
+  const ev = EVENTS.find(e=>e.id===id); if (!ev) return;
+  if (savedEvents.has(id)) {
+    savedEvents.delete(id);
+    btn.className='btn-notify'; btn.textContent='🔔 Powiadom mnie';
+    notifications = notifications.filter(n=>n.id!==id);
+  } else {
+    savedEvents.add(id);
+    btn.className='btn-notify active'; btn.textContent='✓ Zapisano';
+    notifications.push({ id, text:ev.title, date:`${ev.day} ${ev.month}`, time:'teraz' });
+    if (pushGranted) {
+      try { new Notification('Toruń dla Mieszkańców 🏛️', { body:`Zapisano: ${ev.title} (${ev.day} ${ev.month})` }); } catch(e){}
+    }
+  }
+  updateBadge();
+  renderFeed(EVENTS.filter(e=>savedEvents.has(e.id)), 'feed-zapisane', 'Nie masz zapisanych wydarzeń.');
+}
+
+/* ──────────────── NOTIFICATIONS ──────────────── */
+function updateBadge() {
+  const b = document.getElementById('notifBadge');
+  b.textContent = notifications.length;
+  b.style.display = notifications.length>0?'flex':'none';
+}
+
+function toggleNotifPanel() {
+  const p = document.getElementById('notifPanel');
+  p.classList.toggle('visible');
+  const list = document.getElementById('notifList');
+  if (!notifications.length) {
+    list.innerHTML='<div class="notif-empty">Brak powiadomień — zapisz się na wydarzenie.</div>'; return;
+  }
+  list.innerHTML = notifications.map(n=>`
+    <div class="notif-item">
+      <div class="notif-dot"></div>
+      <div><div class="notif-text">${n.text}</div><div class="notif-time">${n.date} · ${n.time}</div></div>
+    </div>`).join('');
+}
+
+async function requestPush() {
+  const bar=document.getElementById('pushBar'), txt=document.getElementById('pushText'), btn=document.getElementById('pushBtn');
+  if (!('Notification' in window)) {
+    bar.className='push-bar blocked'; txt.textContent='⚠️ Ta przeglądarka nie obsługuje powiadomień push'; btn.style.display='none'; return;
+  }
+  if (Notification.permission==='granted') { setPushGranted(); return; }
+  if (Notification.permission==='denied') {
+    bar.className='push-bar blocked'; txt.textContent='🚫 Powiadomienia zablokowane — zmień ustawienia przeglądarki'; btn.style.display='none'; return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm==='granted') {
+    setPushGranted();
+    try { new Notification('Toruń dla Mieszkańców 🏛️', { body:'Powiadomienia włączone! Będziesz informowany o wydarzeniach.' }); } catch(e){}
+  } else {
+    bar.className='push-bar blocked'; txt.textContent='🚫 Powiadomienia zablokowane'; btn.style.display='none';
+  }
+}
+
+function setPushGranted() {
+  pushGranted=true;
+  const bar=document.getElementById('pushBar'), txt=document.getElementById('pushText'), btn=document.getElementById('pushBtn');
+  bar.className='push-bar granted'; txt.textContent='✓ Powiadomienia push aktywne — otrzymasz alert gdy wydarzenie będzie bliskie'; btn.style.display='none';
+}
+
+/* ──────────────── CHAT ──────────────── */
+const chatMsgs = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+
+function quickAsk(q) { chatInput.value=q; sendMsg(); showSection('chat',null); }
+
+async function sendMsg() {
+  const text = chatInput.value.trim(); if (!text) return;
+  chatInput.value='';
+  addMsg(text,'user');
+  const loading = addMsg('Piszę odpowiedź...','bot loading');
+  const sys = `Jesteś pomocnym asystentem miejskim dla mieszkańców Torunia. Odpowiadasz po polsku, zwięźle i konkretnie. Pomagasz z informacjami o dokumentach urzędowych (dowody osobiste, paszporty, 500+/800+, meldunki), wydarzeniach kulturalnych, komunikacji miejskiej (MZK Toruń), konsultacjach społecznych i prawach obywateli. Podajesz konkretne adresy i telefony urzędów w Toruniu gdy są potrzebne. Nie wymyślaj informacji — gdy nie jesteś pewien, powiedz to uczciwie. Odpowiadaj krótko, max 5-6 zdań.`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, system:sys, messages:[{role:'user',content:text}] })
+    });
+    const data = await res.json();
+    const reply = data.content?.find(b=>b.type==='text')?.text || 'Przepraszam, nie udało się uzyskać odpowiedzi.';
+    loading.textContent=reply; loading.classList.remove('msg-loading');
+  } catch(e) {
+    loading.textContent='Błąd połączenia z asystentem. Spróbuj ponownie.'; loading.classList.remove('msg-loading');
+  }
+}
+
+function addMsg(text, type) {
+  const d = document.createElement('div');
+  d.className = 'msg '+(type.includes('user')?'msg-user':'msg-bot')+(type.includes('loading')?' msg-loading':'');
+  d.textContent = text;
+  chatMsgs.appendChild(d);
+  chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  return d;
+}
+
+/* ──────────────── INIT ──────────────── */
+if ('Notification' in window && Notification.permission==='granted') setPushGranted();
+renderAllFeeds();
+</script>
+</body>
+</html>

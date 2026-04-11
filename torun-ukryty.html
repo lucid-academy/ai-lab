@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toruń, którego nie znasz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+:root {
+  --bg: #1a1a1a;
+  --card-bg: #242424;
+  --card-border: #333;
+  --text: #e8e4df;
+  --text-muted: #9a9590;
+  --accent: #c8a96e;
+  --accent-soft: rgba(200,169,110,0.15);
+  --spring: #8ab06b;
+  --summer: #e2a93b;
+  --autumn: #c2704f;
+  --winter: #7ba3c4;
+  --green-soft: rgba(138,176,107,0.15);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+}
+.header {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  padding: 16px 24px;
+  background: linear-gradient(to bottom, rgba(26,26,26,0.95), rgba(26,26,26,0));
+  pointer-events: none;
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.header-left { pointer-events: auto; }
+.site-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em;
+}
+.site-title em { color: var(--accent); font-style: italic; font-weight: 400; }
+.site-subtitle {
+  font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;
+  letter-spacing: 0.08em; text-transform: uppercase; font-weight: 300;
+}
+.season-filter {
+  pointer-events: auto; display: flex; gap: 6px;
+  background: rgba(36,36,36,0.9); border: 1px solid var(--card-border);
+  border-radius: 24px; padding: 4px; backdrop-filter: blur(12px);
+}
+.season-btn {
+  border: none; background: transparent; color: var(--text-muted);
+  padding: 6px 14px; border-radius: 20px;
+  font-family: 'Source Sans 3', sans-serif; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.3s; letter-spacing: 0.02em;
+}
+.season-btn:hover { color: var(--text); }
+.season-btn.active { background: var(--accent-soft); color: var(--accent); }
+.season-btn[data-season="wiosna"].active { background: var(--green-soft); color: var(--spring); }
+.season-btn[data-season="lato"].active { background: rgba(226,169,59,0.15); color: var(--summer); }
+.season-btn[data-season="jesień"].active { background: rgba(194,112,79,0.15); color: var(--autumn); }
+.season-btn[data-season="zima"].active { background: rgba(123,163,196,0.15); color: var(--winter); }
+#map { width: 100%; height: 100vh; background: #1a1a1a; }
+.leaflet-tile-pane { filter: saturate(0.3) brightness(0.65) contrast(1.1); }
+.custom-marker {
+  width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; border-radius: 50%;
+  border: 2px solid var(--accent); background: rgba(26,26,26,0.88);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 20px rgba(200,169,110,0.2);
+  cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
+  animation: markerAppear 0.6s ease-out both;
+}
+.custom-marker:hover {
+  transform: scale(1.18);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 30px rgba(200,169,110,0.35);
+}
+.custom-marker.season-spring { border-color: var(--spring); box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 20px rgba(138,176,107,0.25); }
+.custom-marker.season-summer { border-color: var(--summer); box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 20px rgba(226,169,59,0.25); }
+.custom-marker.season-autumn { border-color: var(--autumn); box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 20px rgba(194,112,79,0.25); }
+.custom-marker.season-winter { border-color: var(--winter); box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 20px rgba(123,163,196,0.25); }
+@keyframes markerAppear { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.card-panel {
+  position: fixed; bottom: -100%; left:0; right:0; z-index:1001;
+  transition: bottom 0.5s cubic-bezier(0.16,1,0.3,1); max-height: 70vh; overflow-y: auto;
+}
+.card-panel.open { bottom: 0; }
+.card-overlay {
+  position: fixed; inset:0; background: rgba(0,0,0,0.4); z-index:1000;
+  opacity:0; pointer-events: none; transition: opacity 0.4s;
+}
+.card-overlay.visible { opacity:1; pointer-events: auto; }
+.card {
+  background: var(--card-bg); border-top: 1px solid var(--card-border);
+  border-radius: 20px 20px 0 0; padding: 24px 28px 36px;
+  box-shadow: var(--shadow); position: relative;
+}
+.card-handle { width: 36px; height: 4px; background: var(--card-border); border-radius: 2px; margin: 0 auto 20px; }
+.card-close {
+  position: absolute; top: 16px; right: 20px; background: none; border: none;
+  color: var(--text-muted); font-size: 1.4rem; cursor: pointer;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: background 0.2s;
+}
+.card-close:hover { background: rgba(255,255,255,0.08); }
+.card-season {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 12px; margin-bottom: 12px;
+}
+.card-season.spring { color: var(--spring); background: var(--green-soft); }
+.card-season.summer { color: var(--summer); background: rgba(226,169,59,0.12); }
+.card-season.autumn { color: var(--autumn); background: rgba(194,112,79,0.12); }
+.card-season.winter { color: var(--winter); background: rgba(123,163,196,0.12); }
+.card-title {
+  font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700;
+  margin-bottom: 6px; line-height: 1.25;
+}
+.card-quote {
+  font-family: 'Playfair Display', serif; font-style: italic; color: var(--accent);
+  font-size: 1.05rem; margin-bottom: 16px; line-height: 1.5;
+}
+.card-description { color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; margin-bottom: 20px; }
+.card-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+.card-tag {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem;
+  color: var(--text-muted); background: rgba(255,255,255,0.05);
+  padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
+}
+.card-tag .tag-icon { font-size: 0.9rem; }
+.card-recommender {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.82rem; color: var(--text-muted);
+}
+.card-recommender strong { color: var(--text); font-weight: 500; }
+.places-list {
+  position: fixed; top: 80px; left: 16px; z-index: 999;
+  width: 300px; max-height: calc(100vh - 110px); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px;
+  scrollbar-width: thin; scrollbar-color: var(--card-border) transparent;
+}
+.place-item {
+  background: rgba(36,36,36,0.88); border: 1px solid var(--card-border);
+  border-radius: 14px; padding: 14px 16px; cursor: pointer;
+  transition: all 0.3s; backdrop-filter: blur(12px);
+  display: flex; gap: 12px; align-items: center;
+}
+.place-item:hover { border-color: var(--accent); background: rgba(36,36,36,0.95); transform: translateX(4px); }
+.place-item.active { border-color: var(--accent); background: rgba(200,169,110,0.08); }
+.place-item-icon {
+  font-size: 1.5rem; width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04); border-radius: 10px; flex-shrink: 0;
+}
+.place-item-text h3 { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+.place-item-text p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.3; }
+.places-count {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 999;
+  background: rgba(36,36,36,0.9); border: 1px solid var(--card-border);
+  border-radius: 20px; padding: 8px 18px; font-size: 0.8rem;
+  color: var(--text-muted); backdrop-filter: blur(12px);
+}
+.places-count strong { color: var(--accent); font-weight: 600; }
+.cta-badge {
+  position: fixed; bottom: 20px; right: 20px; z-index: 999;
+  background: var(--accent); color: var(--bg); border: none; border-radius: 24px;
+  padding: 10px 20px; font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(200,169,110,0.3); transition: transform 0.2s;
+}
+.cta-badge:hover { transform: translateY(-2px); }
+@media (max-width: 768px) {
+  .places-list { display: none; }
+  .header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .site-title { font-size: 1.2rem; }
+  .season-filter { gap: 2px; padding: 3px; }
+  .season-btn { padding: 5px 8px; font-size: 0.72rem; }
+  .card { padding: 20px 20px 32px; }
+  .card-title { font-size: 1.35rem; }
+}
+.leaflet-control-zoom { border: 1px solid var(--card-border) !important; border-radius: 10px !important; overflow: hidden; }
+.leaflet-control-zoom a { background: var(--card-bg) !important; color: var(--text) !important; border-color: var(--card-border) !important; width: 34px !important; height: 34px !important; line-height: 34px !important; }
+.leaflet-control-zoom a:hover { background: rgba(255,255,255,0.1) !important; }
+.leaflet-control-attribution { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="site-title">Toruń, którego <em>nie znasz</em></div>
+    <div class="site-subtitle">Miejsca szeptane przez mieszkańców</div>
+  </div>
+  <div class="season-filter">
+    <button class="season-btn active" data-season="all">Wszystko</button>
+    <button class="season-btn" data-season="wiosna">🌸 Wiosna</button>
+    <button class="season-btn" data-season="lato">☀️ Lato</button>
+    <button class="season-btn" data-season="jesień">🍂 Jesień</button>
+    <button class="season-btn" data-season="zima">❄️ Zima</button>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<div class="places-list" id="placesList"></div>
+<div class="card-overlay" id="cardOverlay"></div>
+<div class="card-panel" id="cardPanel">
+  <div class="card">
+    <div class="card-handle"></div>
+    <button class="card-close" id="cardClose">&times;</button>
+    <div id="cardContent"></div>
+  </div>
+</div>
+<div class="places-count" id="placesCount"></div>
+<button class="cta-badge">+ Znasz takie miejsce? Dodaj!</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var places = [
+  {
+    id: 'zachody-lotnisko', name: 'Zachody słońca na lotnisku', icon: '🌅',
+    lat: 53.0280, lng: 18.5780, season: 'lato',
+    seasonLabel: 'Lato', seasonClass: 'summer', months: 'czerwiec – sierpień',
+    quote: 'Otwarta przestrzeń, pas startowy w złocie, cisza. Najlepszy widok na zachód w Toruniu.',
+    description: 'Teren przy lotnisku Toruń-Bielany to jedno z najlepszych miejsc w mieście na zachód słońca. Płaski horyzont bez zabudowy daje panoramiczny widok, którego nie znajdziesz nigdzie na Starówce. Najlepiej dojechać rowerem — samo dotarcie jest już przygodą przez tereny zielone.',
+    transport: 'Rowerem (najlepiej)', time: 'Wieczór, ok. 1h przed zachodem', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'aleja-jasminow', name: 'Sekretna alejka jaśminów', icon: '🤍',
+    lat: 53.0098, lng: 18.5935, season: 'wiosna',
+    seasonLabel: 'Wiosna · maj', seasonClass: 'spring', months: 'maj (2–3 tygodnie)',
+    quote: 'Kwitnie przez dwa tygodnie w roku. Pachnie tak, że nie chce się wracać do domu.',
+    description: 'Alpinarium przy Ślimaku Getyńskim — niewiele osób w Toruniu wie o tej alejce. Przez kilkanaście dni w maju jaśminy tworzą tu biały tunel, w którym zapach jest tak intensywny, że czujesz go zanim zobaczysz kwiaty. Warto przyjść rano, kiedy jest cicho i rosa jeszcze nie wyschła.',
+    transport: 'Pieszo lub rowerem', time: 'Rano lub wieczorem', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'magnolie-spacer', name: 'Szlak kwitnących magnolii', icon: '🌸',
+    lat: 53.0130, lng: 18.6070, season: 'wiosna',
+    seasonLabel: 'Wiosna · kwiecień', seasonClass: 'spring', months: 'kwiecień (ok. 10 dni)',
+    quote: 'Kwiecień — magnolie eksplodują różem. Musisz złapać moment, bo trwa chwilę.',
+    description: 'W Toruniu rośnie zaskakująco dużo magnolii, ale trzeba wiedzieć gdzie szukać. W kwietniu kwitną jednocześnie na kilku ulicach — spacer od jednej do drugiej to najpiękniejsza trasa w mieście, o której nikt nie pisze w przewodnikach. Kwiaty trzymają się ok. 10 dni, potem znikają do przyszłego roku.',
+    transport: 'Pieszo', time: 'Dowolna pora dnia', free: true,
+    recommender: null, recommenderFrom: null
+  },
+  {
+    id: 'magnolia-bydgoska', name: 'Magnolia na tle muru pruskiego', icon: '📸',
+    lat: 53.0068, lng: 18.5982, season: 'wiosna',
+    seasonLabel: 'Wiosna · kwiecień', seasonClass: 'spring', months: 'kwiecień (kilka dni!)',
+    quote: 'Róg Bydgoskiej i Konopnickiej. Kilka dni w roku. Jedno zdjęcie. Perfekcja.',
+    description: 'Na rogu Bydgoskiej i Konopnickiej rośnie okazała magnolia, a za nią — piękna kamienica z murem pruskim. Kiedy magnolia kwitnie, zestawienie różowych kwiatów z czarno-białą fakturą muru to najlepsza fota w Toruniu. Problem: kwitnie dosłownie kilka dni. Trzeba to złapać — albo czekać rok.',
+    transport: 'Pieszo', time: 'Rano (najlepsze światło)', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'bydgoskie-bzy', name: 'Bzy na Bydgoskim Przedmieściu', icon: '💜',
+    lat: 53.0075, lng: 18.5900, season: 'wiosna',
+    seasonLabel: 'Wiosna · kwiecień–maj', seasonClass: 'spring', months: 'kwiecień – maj',
+    quote: 'Spacer przez cudze ogrody — bez wchodzenia do środka.',
+    description: 'Bydgoskie Przedmieście od kwietnia zamienia się w botaniczny ogród. Bzy, jaśminy i kwitnące drzewa w przydomowych ogródkach tworzą kolorowy korytarz wzdłuż ulic. Najlepsza trasa to spacer bocznymi uliczkami — każda kolejna brama to nowy zapach. Tempo: żadne. Cel: żaden. Po prostu idź i oddychaj.',
+    transport: 'Pieszo', time: 'Popołudnie', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'ogrodki-etnograficzne', name: 'Ogródki Muzeum Etnograficznego', icon: '🌿',
+    lat: 53.0040, lng: 18.6120, season: 'lato',
+    seasonLabel: 'Wiosna / Lato', seasonClass: 'summer', months: 'maj – wrzesień',
+    quote: 'Wszyscy znają muzeum. Prawie nikt nie wie, że za nim kryją się ogródki.',
+    description: 'Muzeum Etnograficzne w Toruniu to znana atrakcja — ale niewiele osób wie, że za budynkiem rozciągają się niezwykłe ogródki tematyczne. Zioła, kwiaty, tradycyjne uprawy — właściwie w centrum miasta, a czujesz się jak na wsi. Idealne na spokojny spacer, kiedy Starówka jest zbyt głośna.',
+    transport: 'Pieszo', time: 'Przed południem (mniej ludzi)', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'lezaczki', name: 'Darmowe leżaczki w parku', icon: '🪑',
+    lat: 53.0100, lng: 18.5940, season: 'lato',
+    seasonLabel: 'Lato', seasonClass: 'summer', months: 'maj – wrzesień',
+    quote: 'Leżaczki, książka, nic. Toruń ma takie miejsce i prawie nikt tam nie chodzi.',
+    description: 'W Toruniu są miejsca z bezpłatnymi leżaczkami — rozstawiane sezonowo w parkach. Przynosisz książkę albo herbatę w termosie, kładziesz się i zapominasz że jesteś w mieście. Idealne na popołudnie kiedy nie masz planu i nie potrzebujesz go mieć.',
+    transport: 'Pieszo / tramwaj', time: 'Popołudnie', free: true,
+    recommender: null, recommenderFrom: null
+  },
+  {
+    id: 'ogrod-wfosigw', name: 'Ogród parkowy przy WFOŚiGW', icon: '📖',
+    lat: 53.0120, lng: 18.5730, season: 'lato',
+    seasonLabel: 'Lato · cały sezon', seasonClass: 'summer', months: 'maj – październik',
+    quote: 'Zrewitalizowany, piękny i pusty. Toruń wydał miliony, a ludzie nie wiedzą że istnieje.',
+    description: 'Ogród parkowy przy alei 500-lecia to jedno z najlepiej ukrytych miejsc w Toruniu. Po rewitalizacji — ławki, zieleń, cisza. Idealne do czytania, pracy z laptopem albo po prostu siedzenia bez celu. Ruch minimalny, bo nikt nie wie że można tu wejść. A można. I warto.',
+    transport: 'Pieszo / rowerem', time: 'Dowolna pora dnia', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'barbarka-jesien', name: 'Bukowe liście na Barbarce', icon: '🍂',
+    lat: 53.0450, lng: 18.5650, season: 'jesień',
+    seasonLabel: 'Jesień · październik', seasonClass: 'autumn', months: 'październik – początek listopada',
+    quote: 'Wielokolorowy dywan pod stopami. Las Barbarki jesienią to osobny świat.',
+    description: 'Barbarka jesienią to spektakl kolorów. Stare buki przybierają odcienie złota, pomarańczu i czerwieni — a kiedy liście opadną, tworzą gruby, szeleszczący dywan na leśnych ścieżkach. Spacer tu w słoneczny październikowy dzień to jedno z najpiękniejszych doświadczeń w Toruniu. Cisza, światło przebijające przez koronę drzew, zapach wilgotnej ziemi.',
+    transport: 'Rowerem lub autobusem', time: 'Przed południem (najlepsze światło)', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'bydgoskie-zima', name: 'Upiorne drzewa na Bydgoskim', icon: '🌙',
+    lat: 53.0072, lng: 18.5880, season: 'zima',
+    seasonLabel: 'Zima · grudzień–luty', seasonClass: 'winter', months: 'grudzień – luty (szczególnie po śniegu)',
+    quote: 'Bezlistne drzewa podświetlone latarniami. Magiczny, niemal filmowy klimat.',
+    description: 'Park na Bydgoskim Przedmieściu zimą zmienia charakter kompletnie. Bezlistne, rozłożyste drzewa podświetlone ciepłym światłem starych latarni wyglądają upiornie i pięknie jednocześnie. Po opadach śniegu ten efekt się potęguje — biały puch na czarnych gałęziach, cisza, i poczucie jakbyś wszedł w kadr z filmu noir. Najlepiej wieczorem, kiedy latarnie się zapalą.',
+    transport: 'Pieszo', time: 'Wieczór (po zmroku)', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  }
+];
+
+function initApp() {
+  var seasonClassMap = {wiosna:'season-spring', lato:'season-summer', 'jesień':'season-autumn', zima:'season-winter'};
+  var map = L.map('map', {center:[53.013,18.590], zoom:13, zoomControl:true});
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 19
+  }).addTo(map);
+
+  var markers = {};
+  places.forEach(function(p, i) {
+    var sc = seasonClassMap[p.season] || '';
+    var icon = L.divIcon({
+      className: '',
+      html: '<div class="custom-marker '+sc+'" style="animation-delay:'+i*0.08+'s">'+p.icon+'</div>',
+      iconSize: [42,42], iconAnchor: [21,21]
+    });
+    var m = L.marker([p.lat, p.lng], {icon:icon}).addTo(map);
+    m.on('click', function(){openCard(p.id);});
+    markers[p.id] = m;
+  });
+
+  function buildList(filter) {
+    var list = document.getElementById('placesList');
+    list.innerHTML = '';
+    var vis = places.filter(function(p){return filter==='all'||p.season===filter;});
+    vis.forEach(function(p) {
+      var d = document.createElement('div');
+      d.className = 'place-item'; d.setAttribute('data-id', p.id);
+      d.innerHTML = '<div class="place-item-icon">'+p.icon+'</div><div class="place-item-text"><h3>'+p.name+'</h3><p>'+p.months+'</p></div>';
+      d.onclick = function(){openCard(p.id);};
+      list.appendChild(d);
+    });
+    var n = vis.length;
+    document.getElementById('placesCount').innerHTML = '<strong>'+n+'</strong> '+(n===1?'miejsce':n<5?'miejsca':'miejsc')+' do odkrycia';
+  }
+  buildList('all');
+
+  document.querySelectorAll('.season-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.season-btn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      var s = btn.dataset.season;
+      places.forEach(function(p){
+        if(s==='all'||p.season===s){markers[p.id].addTo(map);}
+        else{map.removeLayer(markers[p.id]);}
+      });
+      buildList(s); closeCard();
+    });
+  });
+
+  window.openCard = function(id) {
+    var p = places.find(function(x){return x.id===id;});
+    if(!p)return;
+    document.querySelectorAll('.place-item').forEach(function(el){el.classList.remove('active');});
+    var a = document.querySelector('.place-item[data-id="'+id+'"]');
+    if(a) a.classList.add('active');
+    map.flyTo([p.lat, p.lng], 15, {duration:0.8});
+    var rec = p.recommender ? '<div class="card-recommender">Poleca: <strong>'+p.recommender+'</strong> · '+p.recommenderFrom+'</div>' : '';
+    document.getElementById('cardContent').innerHTML =
+      '<div class="card-season '+p.seasonClass+'">'+p.seasonLabel+'</div>'+
+      '<div class="card-title">'+p.name+'</div>'+
+      '<div class="card-quote">'+p.quote+'</div>'+
+      '<div class="card-description">'+p.description+'</div>'+
+      '<div class="card-meta">'+
+        '<span class="card-tag"><span class="tag-icon">📅</span> '+p.months+'</span>'+
+        '<span class="card-tag"><span class="tag-icon">🚶</span> '+p.transport+'</span>'+
+        '<span class="card-tag"><span class="tag-icon">🕐</span> '+p.time+'</span>'+
+        (p.free?'<span class="card-tag"><span class="tag-icon">💚</span> Bezpłatne</span>':'')+
+      '</div>'+rec;
+    document.getElementById('cardPanel').classList.add('open');
+    document.getElementById('cardOverlay').classList.add('visible');
+  };
+
+  window.closeCard = function() {
+    document.getElementById('cardPanel').classList.remove('open');
+    document.getElementById('cardOverlay').classList.remove('visible');
+    document.querySelectorAll('.place-item').forEach(function(el){el.classList.remove('active');});
+  };
+
+  document.getElementById('cardClose').addEventListener('click', closeCard);
+  document.getElementById('cardOverlay').addEventListener('click', closeCard);
+}
+
+// Load Leaflet with retry
+if(typeof L!=='undefined'){initApp();}
+else{var t=setInterval(function(){if(typeof L!=='undefined'){clearInterval(t);initApp();}},200);setTimeout(function(){clearInterval(t);},8000);}
+</script>
+</body>
+</html>

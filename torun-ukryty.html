@@ -222,108 +222,117 @@ body {
 <script>
 var places = [
   {
-    id: 'zachody-lotnisko', name: 'Zachody słońca na lotnisku', icon: '🌅',
-    lat: 53.0280, lng: 18.5780, season: 'lato',
-    seasonLabel: 'Lato', seasonClass: 'summer', months: 'czerwiec – sierpień',
-    quote: 'Otwarta przestrzeń, pas startowy w złocie, cisza. Najlepszy widok na zachód w Toruniu.',
-    description: 'Teren przy lotnisku Toruń-Bielany to jedno z najlepszych miejsc w mieście na zachód słońca. Płaski horyzont bez zabudowy daje panoramiczny widok, którego nie znajdziesz nigdzie na Starówce. Najlepiej dojechać rowerem — samo dotarcie jest już przygodą przez tereny zielone.',
-    transport: 'Rowerem (najlepiej)', time: 'Wieczór, ok. 1h przed zachodem', free: true,
-    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
-  },
-  {
     id: 'aleja-jasminow', name: 'Sekretna alejka jaśminów', icon: '🤍',
-    lat: 53.0098, lng: 18.5935, season: 'wiosna',
+    lat: 53.008343, lng: 18.601507, season: 'wiosna',
     seasonLabel: 'Wiosna · maj', seasonClass: 'spring', months: 'maj (2–3 tygodnie)',
-    quote: 'Kwitnie przez dwa tygodnie w roku. Pachnie tak, że nie chce się wracać do domu.',
-    description: 'Alpinarium przy Ślimaku Getyńskim — niewiele osób w Toruniu wie o tej alejce. Przez kilkanaście dni w maju jaśminy tworzą tu biały tunel, w którym zapach jest tak intensywny, że czujesz go zanim zobaczysz kwiaty. Warto przyjść rano, kiedy jest cicho i rosa jeszcze nie wyschła.',
+    quote: 'Pachnie tak, że nie chce się wracać do domu.',
+    description: 'Alpinarium przy Ślimaku Getyńskim — przez kilkanaście dni w maju jaśminy tworzą tu biały, pachnący tunel. Większość torunian nie ma pojęcia, że to miejsce istnieje. Wejdziesz przypadkiem i staniesz w pół kroku, bo zapach zatrzyma Cię szybciej niż widok. Najlepiej rano, kiedy rosa jeszcze lśni na płatkach.',
     transport: 'Pieszo lub rowerem', time: 'Rano lub wieczorem', free: true,
     recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
   },
   {
     id: 'magnolie-spacer', name: 'Szlak kwitnących magnolii', icon: '🌸',
-    lat: 53.0130, lng: 18.6070, season: 'wiosna',
+    lat: 53.011513, lng: 18.601680, season: 'wiosna',
     seasonLabel: 'Wiosna · kwiecień', seasonClass: 'spring', months: 'kwiecień (ok. 10 dni)',
-    quote: 'Kwiecień — magnolie eksplodują różem. Musisz złapać moment, bo trwa chwilę.',
-    description: 'W Toruniu rośnie zaskakująco dużo magnolii, ale trzeba wiedzieć gdzie szukać. W kwietniu kwitną jednocześnie na kilku ulicach — spacer od jednej do drugiej to najpiękniejsza trasa w mieście, o której nikt nie pisze w przewodnikach. Kwiaty trzymają się ok. 10 dni, potem znikają do przyszłego roku.',
+    quote: 'Kwiecień — magnolie eksplodują różem. Musisz złapać moment.',
+    description: 'W Toruniu rośnie zaskakująco dużo magnolii, ale trzeba wiedzieć gdzie patrzeć. W kwietniu kwitną jednocześnie na kilku ulicach — spacer od jednej do drugiej to trasa, której nie znajdziesz w żadnym przewodniku. Różowe korony na tle starych kamienic. Dziesięć dni, potem czekasz rok.',
     transport: 'Pieszo', time: 'Dowolna pora dnia', free: true,
     recommender: null, recommenderFrom: null
   },
   {
     id: 'magnolia-bydgoska', name: 'Magnolia na tle muru pruskiego', icon: '📸',
-    lat: 53.0068, lng: 18.5982, season: 'wiosna',
+    lat: 53.010092, lng: 18.586013, season: 'wiosna',
     seasonLabel: 'Wiosna · kwiecień', seasonClass: 'spring', months: 'kwiecień (kilka dni!)',
     quote: 'Róg Bydgoskiej i Konopnickiej. Kilka dni w roku. Jedno zdjęcie. Perfekcja.',
-    description: 'Na rogu Bydgoskiej i Konopnickiej rośnie okazała magnolia, a za nią — piękna kamienica z murem pruskim. Kiedy magnolia kwitnie, zestawienie różowych kwiatów z czarno-białą fakturą muru to najlepsza fota w Toruniu. Problem: kwitnie dosłownie kilka dni. Trzeba to złapać — albo czekać rok.',
+    description: 'Okazała magnolia na tle kamienicy z murem pruskim — to zestawienie wygląda jak specjalnie wyreżyserowane. Różowe kwiaty, czarno-biała faktura ścian, kawałek nieba. Kwitnie dosłownie kilka dni. Kto wie, ten łapie. Kto nie wie — przechodzi obok i nie podnosi głowy.',
     transport: 'Pieszo', time: 'Rano (najlepsze światło)', free: true,
     recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
   },
   {
     id: 'bydgoskie-bzy', name: 'Bzy na Bydgoskim Przedmieściu', icon: '💜',
-    lat: 53.0075, lng: 18.5900, season: 'wiosna',
+    lat: 53.009625, lng: 18.583394, season: 'wiosna',
     seasonLabel: 'Wiosna · kwiecień–maj', seasonClass: 'spring', months: 'kwiecień – maj',
     quote: 'Spacer przez cudze ogrody — bez wchodzenia do środka.',
-    description: 'Bydgoskie Przedmieście od kwietnia zamienia się w botaniczny ogród. Bzy, jaśminy i kwitnące drzewa w przydomowych ogródkach tworzą kolorowy korytarz wzdłuż ulic. Najlepsza trasa to spacer bocznymi uliczkami — każda kolejna brama to nowy zapach. Tempo: żadne. Cel: żaden. Po prostu idź i oddychaj.',
+    description: 'Bydgoskie od kwietnia zamienia się w ogród, do którego nikt nie sprzedaje biletów. Bzy, jaśminy i kwitnące drzewa w przydomowych ogródkach tworzą kolorowy korytarz wzdłuż bocznych uliczek. Każda brama to inny zapach, każdy zakręt to nowa paleta. Nie musisz nigdzie iść. Po prostu idź.',
     transport: 'Pieszo', time: 'Popołudnie', free: true,
     recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
   },
   {
     id: 'ogrodki-etnograficzne', name: 'Ogródki Muzeum Etnograficznego', icon: '🌿',
-    lat: 53.0040, lng: 18.6120, season: 'lato',
+    lat: 53.014717, lng: 18.603966, season: 'lato',
     seasonLabel: 'Wiosna / Lato', seasonClass: 'summer', months: 'maj – wrzesień',
-    quote: 'Wszyscy znają muzeum. Prawie nikt nie wie, że za nim kryją się ogródki.',
-    description: 'Muzeum Etnograficzne w Toruniu to znana atrakcja — ale niewiele osób wie, że za budynkiem rozciągają się niezwykłe ogródki tematyczne. Zioła, kwiaty, tradycyjne uprawy — właściwie w centrum miasta, a czujesz się jak na wsi. Idealne na spokojny spacer, kiedy Starówka jest zbyt głośna.',
+    quote: 'Wszyscy znają muzeum. Prawie nikt nie wie o ogródkach za nim.',
+    description: 'Za budynkiem Muzeum Etnograficznego kryją się ogródki tematyczne — zioła, kwiaty, tradycyjne uprawy. Właściwie w centrum miasta, a czujesz się jak na wsi u babci. Cicho, zielono, bez tłumów. Idealne kiedy Starówka jest zbyt głośna, a Ty potrzebujesz dwudziestu minut spokoju.',
     transport: 'Pieszo', time: 'Przed południem (mniej ludzi)', free: true,
     recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
   },
   {
+    id: 'wystawy-sztuki', name: 'Wystawy plenerowe na Sztukach Pięknych', icon: '🎨',
+    lat: 53.014266, lng: 18.580589, season: 'lato',
+    seasonLabel: 'Cały rok', seasonClass: 'summer', months: 'zmieniają się co kilka tygodni',
+    quote: 'Galeria sztuki, do której nie trzeba wchodzić.',
+    description: 'Przed budynkiem Wydziału Sztuk Pięknych UMK pojawiają się czasowe wystawy plenerowe — rzeźby, instalacje, prace studentów. Zmieniają się co kilka tygodni, więc za każdym razem jest coś nowego. Mijasz to po drodze do tramwaju i nagle stoisz przed czymś, co każe Ci się zatrzymać. Sztuka wychodząca na ulicę — dosłownie.',
+    transport: 'Pieszo / tramwaj', time: 'Dowolna pora dnia', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
+    id: 'zachody-lotnisko', name: 'Zachody słońca na lotnisku', icon: '🌅',
+    lat: 53.027536, lng: 18.559491, season: 'lato',
+    seasonLabel: 'Lato', seasonClass: 'summer', months: 'czerwiec – sierpień',
+    quote: 'Płaski horyzont, pas startowy w złocie, cisza. Toruń znika — zostaje niebo.',
+    description: 'Teren przy lotnisku Toruń-Bielany to najlepszy punkt widokowy na zachód słońca w mieście. Zero zabudowy na horyzoncie, samo niebo. Dojazd rowerem to połowa przyjemności — droga wiedzie przez tereny zielone, coraz ciszej, coraz szerzej. Na miejscu siadasz w trawie i patrzysz jak miasto tonie w pomarańczowym świetle.',
+    transport: 'Rowerem (najlepiej)', time: 'Wieczór, ok. 1h przed zachodem', free: true,
+    recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
+  },
+  {
     id: 'lezaczki', name: 'Darmowe leżaczki w parku', icon: '🪑',
-    lat: 53.0100, lng: 18.5940, season: 'lato',
+    lat: 53.010, lng: 18.594, season: 'lato',
     seasonLabel: 'Lato', seasonClass: 'summer', months: 'maj – wrzesień',
-    quote: 'Leżaczki, książka, nic. Toruń ma takie miejsce i prawie nikt tam nie chodzi.',
-    description: 'W Toruniu są miejsca z bezpłatnymi leżaczkami — rozstawiane sezonowo w parkach. Przynosisz książkę albo herbatę w termosie, kładziesz się i zapominasz że jesteś w mieście. Idealne na popołudnie kiedy nie masz planu i nie potrzebujesz go mieć.',
+    quote: 'Leżaczki, książka, nic. Najlepszy plan to brak planu.',
+    description: 'W Toruniu są miejsca, gdzie ktoś postawił dla Ciebie leżaczki — za darmo, bez rezerwacji, bez kolejki. Przynosisz książkę albo herbatę w termosie, kładziesz się i zapominasz o mieście. Kiedy nie wiesz co robić z popołudniem — właśnie to.',
     transport: 'Pieszo / tramwaj', time: 'Popołudnie', free: true,
     recommender: null, recommenderFrom: null
   },
   {
     id: 'ogrod-wfosigw', name: 'Ogród parkowy przy WFOŚiGW', icon: '📖',
-    lat: 53.0120, lng: 18.5730, season: 'lato',
+    lat: 53.009755, lng: 18.597279, season: 'lato',
     seasonLabel: 'Lato · cały sezon', seasonClass: 'summer', months: 'maj – październik',
-    quote: 'Zrewitalizowany, piękny i pusty. Toruń wydał miliony, a ludzie nie wiedzą że istnieje.',
-    description: 'Ogród parkowy przy alei 500-lecia to jedno z najlepiej ukrytych miejsc w Toruniu. Po rewitalizacji — ławki, zieleń, cisza. Idealne do czytania, pracy z laptopem albo po prostu siedzenia bez celu. Ruch minimalny, bo nikt nie wie że można tu wejść. A można. I warto.',
+    quote: 'Zrewitalizowany, piękny i pusty. Miliony wydane — nikt nie przychodzi.',
+    description: 'Ogród parkowy przy alei 500-lecia to jeden z najlepiej strzeżonych sekretów Torunia — i to nie dlatego, że jest zamknięty. Jest otwarty. Po rewitalizacji wygląda przepięknie: ławki, zieleń, cisza. Problem w tym, że ludzie nie wiedzą, że mogą tu wejść. A mogą. I warto — szczególnie z książką.',
     transport: 'Pieszo / rowerem', time: 'Dowolna pora dnia', free: true,
     recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
   },
   {
     id: 'barbarka-jesien', name: 'Bukowe liście na Barbarce', icon: '🍂',
-    lat: 53.0450, lng: 18.5650, season: 'jesień',
+    lat: 53.056436, lng: 18.546755, season: 'jesień',
     seasonLabel: 'Jesień · październik', seasonClass: 'autumn', months: 'październik – początek listopada',
-    quote: 'Wielokolorowy dywan pod stopami. Las Barbarki jesienią to osobny świat.',
-    description: 'Barbarka jesienią to spektakl kolorów. Stare buki przybierają odcienie złota, pomarańczu i czerwieni — a kiedy liście opadną, tworzą gruby, szeleszczący dywan na leśnych ścieżkach. Spacer tu w słoneczny październikowy dzień to jedno z najpiękniejszych doświadczeń w Toruniu. Cisza, światło przebijające przez koronę drzew, zapach wilgotnej ziemi.',
+    quote: 'Szeleszczący dywan pod stopami. Las, który jesienią mówi kolorami.',
+    description: 'Barbarka jesienią to osobny świat. Stare buki przybierają odcienie złota, miedzi i czerwieni, a kiedy liście opadną — tworzą gruby dywan, który szeleści pod każdym krokiem. Światło przebija przez koronę drzew w smugach, zapach wilgotnej ziemi miesza się z chłodnym powietrzem. Spacer tutaj w październikowy poranek to jedno z tych doświadczeń, o których potem opowiadasz znajomym.',
     transport: 'Rowerem lub autobusem', time: 'Przed południem (najlepsze światło)', free: true,
     recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
   },
   {
-    id: 'bydgoskie-zima', name: 'Upiorne drzewa na Bydgoskim', icon: '🌙',
-    lat: 53.0072, lng: 18.5880, season: 'zima',
+    id: 'bydgoskie-zima', name: 'Tajemnicze drzewa na Bydgoskim', icon: '🌙',
+    lat: 53.008378, lng: 18.574947, season: 'zima',
     seasonLabel: 'Zima · grudzień–luty', seasonClass: 'winter', months: 'grudzień – luty (szczególnie po śniegu)',
-    quote: 'Bezlistne drzewa podświetlone latarniami. Magiczny, niemal filmowy klimat.',
-    description: 'Park na Bydgoskim Przedmieściu zimą zmienia charakter kompletnie. Bezlistne, rozłożyste drzewa podświetlone ciepłym światłem starych latarni wyglądają upiornie i pięknie jednocześnie. Po opadach śniegu ten efekt się potęguje — biały puch na czarnych gałęziach, cisza, i poczucie jakbyś wszedł w kadr z filmu noir. Najlepiej wieczorem, kiedy latarnie się zapalą.',
+    quote: 'Latarnie podświetlają pnie i konary zastygłe w dziwnych pozach. Cicho. Biało. Dziwnie pięknie.',
+    description: 'Park na Bydgoskim zimą zmienia się nie do poznania. Bezlistne drzewa odsłaniają swoje kształty — powykręcane konary, rozłożyste pnie, sylwetki jakby wyrwane z baśni. Kiedy spadnie śnieg i zapali się latarnie, ciepłe światło rysuje cienie na białym tle i robi się niesamowicie. Niewielu ludzi, cisza, lekki mróz. Wchodzisz w to jak w kadr z filmu, którego nikt jeszcze nie nakręcił.',
     transport: 'Pieszo', time: 'Wieczór (po zmroku)', free: true,
     recommender: 'Piotr', recommenderFrom: 'wykładowca UMK'
   }
 ];
 
 function initApp() {
-  var seasonClassMap = {wiosna:'season-spring', lato:'season-summer', 'jesień':'season-autumn', zima:'season-winter'};
-  var map = L.map('map', {center:[53.013,18.590], zoom:13, zoomControl:true});
+  var scMap = {wiosna:'season-spring', lato:'season-summer', 'jesień':'season-autumn', zima:'season-winter'};
+  var map = L.map('map', {center:[53.012, 18.590], zoom:13, zoomControl:true});
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap', maxZoom: 19
+    attribution: '\u00a9 OpenStreetMap', maxZoom: 19
   }).addTo(map);
 
   var markers = {};
   places.forEach(function(p, i) {
-    var sc = seasonClassMap[p.season] || '';
+    var sc = scMap[p.season] || '';
     var icon = L.divIcon({
       className: '',
       html: '<div class="custom-marker '+sc+'" style="animation-delay:'+i*0.08+'s">'+p.icon+'</div>',
@@ -365,22 +374,22 @@ function initApp() {
 
   window.openCard = function(id) {
     var p = places.find(function(x){return x.id===id;});
-    if(!p)return;
+    if(!p) return;
     document.querySelectorAll('.place-item').forEach(function(el){el.classList.remove('active');});
     var a = document.querySelector('.place-item[data-id="'+id+'"]');
     if(a) a.classList.add('active');
     map.flyTo([p.lat, p.lng], 15, {duration:0.8});
-    var rec = p.recommender ? '<div class="card-recommender">Poleca: <strong>'+p.recommender+'</strong> · '+p.recommenderFrom+'</div>' : '';
+    var rec = p.recommender ? '<div class="card-recommender">Poleca: <strong>'+p.recommender+'</strong> \u00b7 '+p.recommenderFrom+'</div>' : '';
     document.getElementById('cardContent').innerHTML =
       '<div class="card-season '+p.seasonClass+'">'+p.seasonLabel+'</div>'+
       '<div class="card-title">'+p.name+'</div>'+
       '<div class="card-quote">'+p.quote+'</div>'+
       '<div class="card-description">'+p.description+'</div>'+
       '<div class="card-meta">'+
-        '<span class="card-tag"><span class="tag-icon">📅</span> '+p.months+'</span>'+
-        '<span class="card-tag"><span class="tag-icon">🚶</span> '+p.transport+'</span>'+
-        '<span class="card-tag"><span class="tag-icon">🕐</span> '+p.time+'</span>'+
-        (p.free?'<span class="card-tag"><span class="tag-icon">💚</span> Bezpłatne</span>':'')+
+        '<span class="card-tag"><span class="tag-icon">\ud83d\udcc5</span> '+p.months+'</span>'+
+        '<span class="card-tag"><span class="tag-icon">\ud83d\udeb6</span> '+p.transport+'</span>'+
+        '<span class="card-tag"><span class="tag-icon">\ud83d\udd50</span> '+p.time+'</span>'+
+        (p.free?'<span class="card-tag"><span class="tag-icon">\ud83d\udc9a</span> Bezp\u0142atne</span>':'')+
       '</div>'+rec;
     document.getElementById('cardPanel').classList.add('open');
     document.getElementById('cardOverlay').classList.add('visible');
@@ -396,7 +405,6 @@ function initApp() {
   document.getElementById('cardOverlay').addEventListener('click', closeCard);
 }
 
-// Load Leaflet with retry
 if(typeof L!=='undefined'){initApp();}
 else{var t=setInterval(function(){if(typeof L!=='undefined'){clearInterval(t);initApp();}},200);setTimeout(function(){clearInterval(t);},8000);}
 </script>

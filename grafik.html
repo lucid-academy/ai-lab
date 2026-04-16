@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>Grafik 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-elevated: #14141c;
+    --bg-card: #1a1a24;
+    --border: #2a2a38;
+    --text: #f0ede4;
+    --text-dim: #8a8a96;
+    --text-faint: #4a4a56;
+
+    --ranka: #22c55e;
+    --ranka-bg: rgba(34, 197, 94, 0.18);
+
+    --popoludnie: #f97316;
+    --popoludnie-bg: rgba(249, 115, 22, 0.18);
+
+    --nocka: #ef4444;
+    --nocka-bg: rgba(239, 68, 68, 0.18);
+
+    --wolne: #94a3b8;
+    --wolne-bg: rgba(148, 163, 184, 0.12);
+    --wolne-strong: rgba(148, 163, 184, 0.7);
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(239, 68, 68, 0.06), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(34, 197, 94, 0.05), transparent 50%);
+    padding: 24px 20px 120px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    padding-top: calc(24px + env(safe-area-inset-top));
+  }
+
+  .container { max-width: 720px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variation-settings: 'opsz' 144;
+  }
+
+  h1 em { font-style: italic; font-weight: 600; }
+
+  .year-tag {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .today-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .today-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--today-color, var(--text-faint)), transparent 50%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.8;
+    pointer-events: none;
+  }
+
+  .today-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .today-date {
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: capitalize;
+  }
+
+  .today-shift {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 52px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variation-settings: 'opsz' 144;
+    color: var(--today-color, var(--text));
+  }
+
+  .today-shift.unset {
+    color: var(--text-faint);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 32px;
+  }
+
+  .today-hours {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-top: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .tomorrow-hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tomorrow-hint strong {
+    color: var(--tomorrow-color, var(--text));
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 0;
+    margin-left: 6px;
+  }
+
+  .week-preview {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 32px;
+  }
+
+  .week-day {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 4px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.15s ease;
+    cursor: pointer;
+  }
+
+  .week-day:active { transform: scale(0.95); }
+  .week-day.today { border-color: var(--text); }
+
+  .week-day-name {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .week-day-num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .week-day-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background: var(--text-faint);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 36px 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    font-style: italic;
+  }
+
+  .section-header .hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+  }
+
+  .month-nav button {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    transition: background 0.15s ease;
+  }
+
+  .month-nav button:active { background: var(--bg-card); }
+
+  .month-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    text-align: center;
+    flex: 1;
+    text-transform: capitalize;
+    font-style: italic;
+  }
+
+  .calendar {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .cal-weekdays div {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: 0.1em;
+    padding: 6px 0;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    background: var(--bg-elevated);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s ease, background 0.15s ease;
+    padding: 4px;
+    overflow: hidden;
+  }
+
+  .cal-day:active { transform: scale(0.92); }
+
+  .cal-day.empty {
+    background: transparent;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .cal-day.today {
+    border-color: var(--text);
+    box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px var(--text);
+  }
+
+  .cal-day-num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .cal-day.ranka { background: var(--ranka-bg); }
+  .cal-day.ranka .cal-day-num { color: var(--ranka); }
+  .cal-day.popoludnie { background: var(--popoludnie-bg); }
+  .cal-day.popoludnie .cal-day-num { color: var(--popoludnie); }
+  .cal-day.nocka { background: var(--nocka-bg); }
+  .cal-day.nocka .cal-day-num { color: var(--nocka); }
+  .cal-day.wolne { background: var(--wolne-bg); }
+  .cal-day.wolne .cal-day-num { color: var(--wolne); }
+
+  .cal-day-mark {
+    position: absolute;
+    bottom: 4px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--stat-color);
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--stat-color);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-unit {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-left: 4px;
+  }
+
+  .year-overview {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+
+  .year-months {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .year-month {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease;
+  }
+
+  .year-month:active { transform: scale(0.96); }
+  .year-month.current { border-color: var(--text); }
+
+  .year-month-name {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .year-month-bar {
+    display: flex;
+    height: 14px;
+    border-radius: 3px;
+    overflow: hidden;
+    gap: 1px;
+  }
+
+  .year-month-bar span { display: block; height: 100%; }
+  .year-month-bar .b-ranka { background: var(--ranka); }
+  .year-month-bar .b-popoludnie { background: var(--popoludnie); }
+  .year-month-bar .b-nocka { background: var(--nocka); }
+  .year-month-bar .b-wolne { background: var(--wolne-strong); opacity: 0.3; }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-backdrop.active { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .modal {
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 20px;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 500px;
+    animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 500;
+    margin-bottom: 4px;
+    text-transform: capitalize;
+  }
+
+  .modal-subtitle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 22px;
+  }
+
+  .shift-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .shift-option {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .shift-option:active { transform: scale(0.98); }
+
+  .shift-option.ranka { border-left: 4px solid var(--ranka); }
+  .shift-option.ranka:hover, .shift-option.ranka.selected { background: var(--ranka-bg); }
+  .shift-option.popoludnie { border-left: 4px solid var(--popoludnie); }
+  .shift-option.popoludnie:hover, .shift-option.popoludnie.selected { background: var(--popoludnie-bg); }
+  .shift-option.nocka { border-left: 4px solid var(--nocka); }
+  .shift-option.nocka:hover, .shift-option.nocka.selected { background: var(--nocka-bg); }
+  .shift-option.wolne { border-left: 4px solid var(--wolne); }
+  .shift-option.wolne:hover, .shift-option.wolne.selected { background: var(--wolne-bg); }
+  .shift-option.clear { border-left: 4px solid var(--text-faint); color: var(--text-dim); }
+  .shift-option.clear:hover { background: rgba(255,255,255,0.03); }
+
+  .shift-hours {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  .modal-close {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 14px;
+    border-radius: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .tools {
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tool-btn {
+    flex: 1;
+    min-width: 130px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 12px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .tool-btn:active { background: var(--bg-elevated); }
+
+  .hours-settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .hours-field { display: flex; flex-direction: column; gap: 6px; }
+
+  .hours-field label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .hours-field input {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    transition: transform 0.3s ease;
+    z-index: 200;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 380px) {
+    h1 { font-size: 36px; }
+    .today-shift { font-size: 42px; }
+    .cal-day-num { font-size: 15px; }
+    .cal-day-mark { font-size: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <h1>Grafik<br><em>zmian</em></h1>
+    <span class="year-tag">A.D. 2026</span>
+  </div>
+  <p class="subtitle">kliknij dowolny dzień, aby zmienić</p>
+</header>
+
+<div class="today-card" id="todayCard">
+  <div class="today-label">Dziś</div>
+  <div class="today-date" id="todayDate">—</div>
+  <div class="today-shift unset" id="todayShift">nie ustawiono</div>
+  <div class="today-hours" id="todayHours"></div>
+  <div class="tomorrow-hint" id="tomorrowHint">Jutro: <strong id="tomorrowShift">—</strong></div>
+</div>
+
+<div class="section-header">
+  <h2>ten tydzień</h2>
+  <span class="hint">dotknij → edytuj</span>
+</div>
+<div class="week-preview" id="weekPreview"></div>
+
+<div class="section-header">
+  <h2>statystyki</h2>
+  <span class="hint" id="statsMonthLabel"></span>
+</div>
+<div class="stats" id="stats"></div>
+
+<div class="section-header">
+  <h2>cały rok</h2>
+  <span class="hint">skacz do miesiąca</span>
+</div>
+<div class="year-overview">
+  <div class="year-months" id="yearMonths"></div>
+</div>
+
+<div class="section-header">
+  <h2>miesiąc</h2>
+  <span class="hint">przegląd</span>
+</div>
+<div class="month-nav">
+  <button id="prevMonth" aria-label="Poprzedni miesiąc">‹</button>
+  <div class="month-title" id="monthTitle"></div>
+  <button id="nextMonth" aria-label="Następny miesiąc">›</button>
+</div>
+<div class="calendar">
+  <div class="cal-weekdays">
+    <div>PN</div><div>WT</div><div>ŚR</div><div>CZ</div><div>PT</div><div>SO</div><div>ND</div>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<div class="tools">
+  <button class="tool-btn" id="exportBtn">⬇ Eksportuj</button>
+  <button class="tool-btn" id="importBtn">⬆ Importuj</button>
+  <button class="tool-btn" id="resetBtn">↻ Przywróć oryginał</button>
+</div>
+
+<input type="file" id="fileInput" accept=".json" style="display:none">
+
+</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modalDate">—</div>
+    <div class="modal-subtitle" id="modalDay"></div>
+    <div class="shift-options">
+      <div class="shift-option ranka" data-shift="ranka">
+        <span>Ranka</span>
+        <span class="shift-hours" id="hoursRanka"></span>
+      </div>
+      <div class="shift-option popoludnie" data-shift="popoludnie">
+        <span>Popołudnie</span>
+        <span class="shift-hours" id="hoursPopoludnie"></span>
+      </div>
+      <div class="shift-option nocka" data-shift="nocka">
+        <span>Nocka</span>
+        <span class="shift-hours" id="hoursNocka"></span>
+      </div>
+      <div class="shift-option wolne" data-shift="wolne">
+        <span>Wolne</span>
+        <span class="shift-hours">—</span>
+      </div>
+      <div class="shift-option clear" data-shift="">
+        <span>Wyczyść</span>
+      </div>
+    </div>
+
+    <div class="hours-settings">
+      <div class="hours-field">
+        <label>Ranka</label>
+        <input type="text" id="editRanka" placeholder="6:00–14:00">
+      </div>
+      <div class="hours-field">
+        <label>Popołudnie</label>
+        <input type="text" id="editPopoludnie" placeholder="14:00–22:00">
+      </div>
+      <div class="hours-field">
+        <label>Nocka</label>
+        <input type="text" id="editNocka" placeholder="22:00–6:00">
+      </div>
+      <div class="hours-field" style="justify-content:flex-end;">
+        <button class="tool-btn" id="saveHours" style="margin-top:auto;">Zapisz godziny</button>
+      </div>
+    </div>
+
+    <button class="modal-close" id="modalClose" style="margin-top:20px;">Zamknij</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const BUILTIN_SCHEDULE = {
+    "2026-01-01":"wolne","2026-01-02":"popoludnie","2026-01-03":"wolne","2026-01-04":"wolne",
+    "2026-01-05":"ranka","2026-01-06":"ranka","2026-01-07":"ranka","2026-01-08":"ranka","2026-01-09":"ranka",
+    "2026-01-10":"wolne","2026-01-11":"wolne",
+    "2026-01-12":"nocka","2026-01-13":"nocka","2026-01-14":"nocka","2026-01-15":"nocka","2026-01-16":"nocka",
+    "2026-01-17":"wolne","2026-01-18":"wolne",
+    "2026-01-19":"popoludnie","2026-01-20":"popoludnie","2026-01-21":"popoludnie","2026-01-22":"popoludnie","2026-01-23":"popoludnie",
+    "2026-01-24":"wolne","2026-01-25":"wolne",
+    "2026-01-26":"ranka","2026-01-27":"ranka","2026-01-28":"ranka","2026-01-29":"ranka","2026-01-30":"ranka",
+    "2026-01-31":"wolne",
+    "2026-02-01":"wolne",
+    "2026-02-02":"nocka","2026-02-03":"nocka","2026-02-04":"nocka","2026-02-05":"nocka","2026-02-06":"nocka",
+    "2026-02-07":"wolne","2026-02-08":"wolne",
+    "2026-02-09":"popoludnie","2026-02-10":"popoludnie","2026-02-11":"popoludnie","2026-02-12":"popoludnie","2026-02-13":"popoludnie",
+    "2026-02-14":"wolne","2026-02-15":"wolne",
+    "2026-02-16":"ranka","2026-02-17":"ranka","2026-02-18":"ranka","2026-02-19":"ranka","2026-02-20":"ranka",
+    "2026-02-21":"wolne","2026-02-22":"wolne",
+    "2026-02-23":"nocka","2026-02-24":"nocka","2026-02-25":"nocka","2026-02-26":"nocka","2026-02-27":"nocka",
+    "2026-02-28":"wolne",
+    "2026-03-01":"wolne",
+    "2026-03-02":"popoludnie","2026-03-03":"popoludnie","2026-03-04":"popoludnie","2026-03-05":"popoludnie","2026-03-06":"popoludnie",
+    "2026-03-07":"wolne","2026-03-08":"wolne",
+    "2026-03-09":"ranka","2026-03-10":"ranka","2026-03-11":"ranka","2026-03-12":"ranka","2026-03-13":"ranka",
+    "2026-03-14":"wolne","2026-03-15":"wolne",
+    "2026-03-16":"nocka","2026-03-17":"nocka","2026-03-18":"nocka","2026-03-19":"nocka","2026-03-20":"nocka",
+    "2026-03-21":"wolne","2026-03-22":"wolne",
+    "2026-03-23":"popoludnie","2026-03-24":"popoludnie","2026-03-25":"popoludnie","2026-03-26":"popoludnie","2026-03-27":"popoludnie",
+    "2026-03-28":"wolne","2026-03-29":"wolne",
+    "2026-03-30":"ranka","2026-03-31":"ranka",
+    "2026-04-01":"ranka","2026-04-02":"ranka","2026-04-03":"ranka",
+    "2026-04-04":"wolne","2026-04-05":"wolne","2026-04-06":"wolne",
+    "2026-04-07":"nocka","2026-04-08":"nocka","2026-04-09":"nocka","2026-04-10":"nocka",
+    "2026-04-11":"wolne","2026-04-12":"wolne",
+    "2026-04-13":"popoludnie","2026-04-14":"popoludnie","2026-04-15":"popoludnie","2026-04-16":"popoludnie","2026-04-17":"popoludnie",
+    "2026-04-18":"wolne","2026-04-19":"wolne",
+    "2026-04-20":"ranka","2026-04-21":"ranka","2026-04-22":"ranka","2026-04-23":"ranka","2026-04-24":"ranka",
+    "2026-04-25":"wolne","2026-04-26":"wolne",
+    "2026-04-27":"nocka","2026-04-28":"nocka","2026-04-29":"nocka","2026-04-30":"nocka",
+    "2026-05-01":"wolne","2026-05-02":"wolne","2026-05-03":"wolne",
+    "2026-05-04":"popoludnie","2026-05-05":"popoludnie","2026-05-06":"popoludnie","2026-05-07":"popoludnie","2026-05-08":"popoludnie",
+    "2026-05-09":"wolne","2026-05-10":"wolne",
+    "2026-05-11":"ranka","2026-05-12":"ranka","2026-05-13":"ranka","2026-05-14":"ranka","2026-05-15":"ranka",
+    "2026-05-16":"wolne","2026-05-17":"wolne",
+    "2026-05-18":"nocka","2026-05-19":"nocka","2026-05-20":"nocka","2026-05-21":"nocka","2026-05-22":"nocka",
+    "2026-05-23":"wolne","2026-05-24":"wolne",
+    "2026-05-25":"popoludnie","2026-05-26":"popoludnie","2026-05-27":"popoludnie","2026-05-28":"popoludnie","2026-05-29":"popoludnie",
+    "2026-05-30":"wolne","2026-05-31":"wolne",
+    "2026-06-01":"ranka","2026-06-02":"ranka","2026-06-03":"ranka",
+    "2026-06-04":"wolne",
+    "2026-06-05":"ranka",
+    "2026-06-06":"wolne","2026-06-07":"wolne",
+    "2026-06-08":"nocka","2026-06-09":"nocka","2026-06-10":"nocka","2026-06-11":"nocka","2026-06-12":"nocka",
+    "2026-06-13":"wolne","2026-06-14":"wolne",
+    "2026-06-15":"popoludnie","2026-06-16":"popoludnie","2026-06-17":"popoludnie","2026-06-18":"popoludnie","2026-06-19":"popoludnie",
+    "2026-06-20":"wolne","2026-06-21":"wolne",
+    "2026-06-22":"ranka","2026-06-23":"ranka","2026-06-24":"ranka","2026-06-25":"ranka","2026-06-26":"ranka",
+    "2026-06-27":"wolne","2026-06-28":"wolne",
+    "2026-06-29":"nocka","2026-06-30":"nocka",
+    "2026-07-01":"nocka","2026-07-02":"nocka","2026-07-03":"nocka",
+    "2026-07-04":"wolne","2026-07-05":"wolne",
+    "2026-07-06":"popoludnie","2026-07-07":"popoludnie","2026-07-08":"popoludnie","2026-07-09":"popoludnie","2026-07-10":"popoludnie",
+    "2026-07-11":"wolne","2026-07-12":"wolne",
+    "2026-07-13":"ranka","2026-07-14":"ranka","2026-07-15":"ranka","2026-07-16":"ranka","2026-07-17":"ranka",
+    "2026-07-18":"wolne","2026-07-19":"wolne",
+    "2026-07-20":"nocka","2026-07-21":"nocka","2026-07-22":"nocka","2026-07-23":"nocka","2026-07-24":"nocka",
+    "2026-07-25":"wolne","2026-07-26":"wolne",
+    "2026-07-27":"popoludnie","2026-07-28":"popoludnie","2026-07-29":"popoludnie","2026-07-30":"popoludnie","2026-07-31":"popoludnie",
+    "2026-08-01":"wolne","2026-08-02":"wolne",
+    "2026-08-03":"ranka","2026-08-04":"ranka","2026-08-05":"ranka","2026-08-06":"ranka","2026-08-07":"ranka",
+    "2026-08-08":"wolne","2026-08-09":"wolne",
+    "2026-08-10":"nocka","2026-08-11":"nocka","2026-08-12":"nocka","2026-08-13":"nocka","2026-08-14":"nocka",
+    "2026-08-15":"wolne","2026-08-16":"wolne",
+    "2026-08-17":"popoludnie","2026-08-18":"popoludnie","2026-08-19":"popoludnie","2026-08-20":"popoludnie","2026-08-21":"popoludnie",
+    "2026-08-22":"wolne","2026-08-23":"wolne",
+    "2026-08-24":"ranka","2026-08-25":"ranka","2026-08-26":"ranka","2026-08-27":"ranka","2026-08-28":"ranka",
+    "2026-08-29":"wolne","2026-08-30":"wolne",
+    "2026-08-31":"nocka",
+    "2026-09-01":"nocka","2026-09-02":"nocka","2026-09-03":"nocka","2026-09-04":"nocka",
+    "2026-09-05":"wolne","2026-09-06":"wolne",
+    "2026-09-07":"popoludnie","2026-09-08":"popoludnie","2026-09-09":"popoludnie","2026-09-10":"popoludnie","2026-09-11":"popoludnie",
+    "2026-09-12":"wolne","2026-09-13":"wolne",
+    "2026-09-14":"ranka","2026-09-15":"ranka","2026-09-16":"ranka","2026-09-17":"ranka","2026-09-18":"ranka",
+    "2026-09-19":"wolne","2026-09-20":"wolne",
+    "2026-09-21":"nocka","2026-09-22":"nocka","2026-09-23":"nocka","2026-09-24":"nocka","2026-09-25":"nocka",
+    "2026-09-26":"wolne","2026-09-27":"wolne",
+    "2026-09-28":"popoludnie","2026-09-29":"popoludnie","2026-09-30":"popoludnie",
+    "2026-10-01":"popoludnie","2026-10-02":"popoludnie",
+    "2026-10-03":"wolne","2026-10-04":"wolne",
+    "2026-10-05":"ranka","2026-10-06":"ranka","2026-10-07":"ranka","2026-10-08":"ranka","2026-10-09":"ranka",
+    "2026-10-10":"wolne","2026-10-11":"wolne",
+    "2026-10-12":"nocka","2026-10-13":"nocka","2026-10-14":"nocka","2026-10-15":"nocka","2026-10-16":"nocka",
+    "2026-10-17":"wolne","2026-10-18":"wolne",
+    "2026-10-19":"popoludnie","2026-10-20":"popoludnie","2026-10-21":"popoludnie","2026-10-22":"popoludnie","2026-10-23":"popoludnie",
+    "2026-10-24":"wolne","2026-10-25":"wolne",
+    "2026-10-26":"ranka","2026-10-27":"ranka","2026-10-28":"ranka","2026-10-29":"ranka","2026-10-30":"ranka",
+    "2026-10-31":"wolne",
+    "2026-11-01":"wolne",
+    "2026-11-02":"nocka","2026-11-03":"nocka","2026-11-04":"nocka","2026-11-05":"nocka","2026-11-06":"nocka",
+    "2026-11-07":"wolne","2026-11-08":"wolne",
+    "2026-11-09":"popoludnie","2026-11-10":"popoludnie",
+    "2026-11-11":"wolne",
+    "2026-11-12":"popoludnie","2026-11-13":"popoludnie",
+    "2026-11-14":"wolne","2026-11-15":"wolne",
+    "2026-11-16":"ranka","2026-11-17":"ranka","2026-11-18":"ranka","2026-11-19":"ranka","2026-11-20":"ranka",
+    "2026-11-21":"wolne","2026-11-22":"wolne",
+    "2026-11-23":"nocka","2026-11-24":"nocka","2026-11-25":"nocka","2026-11-26":"nocka","2026-11-27":"nocka",
+    "2026-11-28":"wolne","2026-11-29":"wolne",
+    "2026-11-30":"popoludnie",
+    "2026-12-01":"popoludnie","2026-12-02":"popoludnie","2026-12-03":"popoludnie","2026-12-04":"popoludnie",
+    "2026-12-05":"wolne","2026-12-06":"wolne",
+    "2026-12-07":"ranka","2026-12-08":"ranka","2026-12-09":"ranka","2026-12-10":"ranka","2026-12-11":"ranka",
+    "2026-12-12":"wolne","2026-12-13":"wolne",
+    "2026-12-14":"nocka","2026-12-15":"nocka","2026-12-16":"nocka","2026-12-17":"nocka","2026-12-18":"nocka",
+    "2026-12-19":"wolne","2026-12-20":"wolne",
+    "2026-12-21":"popoludnie","2026-12-22":"popoludnie","2026-12-23":"popoludnie",
+    "2026-12-24":"wolne","2026-12-25":"wolne","2026-12-26":"wolne","2026-12-27":"wolne",
+    "2026-12-28":"ranka","2026-12-29":"ranka","2026-12-30":"ranka","2026-12-31":"ranka"
+  };
+
+  const STORAGE_KEY = 'grafik-2026-v2';
+  const HOURS_KEY = 'grafik-hours-v2';
+
+  const MONTHS_PL = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień'];
+  const MONTHS_SHORT = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+  const WEEKDAYS_PL = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+  const WEEKDAYS_SHORT = ['PN','WT','ŚR','CZ','PT','SO','ND'];
+
+  const SHIFT_LABELS = {ranka:'Ranka',popoludnie:'Popołudnie',nocka:'Nocka',wolne:'Wolne'};
+  const SHIFT_COLORS = {ranka:'var(--ranka)',popoludnie:'var(--popoludnie)',nocka:'var(--nocka)',wolne:'var(--wolne)'};
+
+  let schedule = {};
+  let hours = {ranka:'6:00–14:00',popoludnie:'14:00–22:00',nocka:'22:00–6:00'};
+
+  const now = new Date();
+  let currentMonth = (now.getFullYear() === 2026) ? now.getMonth() : 0;
+  let activeDateKey = null;
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) schedule = JSON.parse(raw);
+      else schedule = {...BUILTIN_SCHEDULE};
+      const rawH = localStorage.getItem(HOURS_KEY);
+      if (rawH) hours = {...hours, ...JSON.parse(rawH)};
+    } catch(e) { console.error(e); schedule = {...BUILTIN_SCHEDULE}; }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+      localStorage.setItem(HOURS_KEY, JSON.stringify(hours));
+    } catch(e) { console.error(e); }
+  }
+
+  function dateKey(y, m, d) {
+    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function renderToday() {
+    const now = new Date();
+    const card = document.getElementById('todayCard');
+    const dateEl = document.getElementById('todayDate');
+    const shiftEl = document.getElementById('todayShift');
+    const hoursEl = document.getElementById('todayHours');
+
+    const key = dateKey(now.getFullYear(), now.getMonth(), now.getDate());
+    dateEl.textContent = `${WEEKDAYS_PL[now.getDay()]}, ${now.getDate()} ${MONTHS_PL[now.getMonth()]} ${now.getFullYear()}`;
+
+    const shift = schedule[key];
+    if (shift && SHIFT_LABELS[shift]) {
+      shiftEl.textContent = SHIFT_LABELS[shift];
+      shiftEl.classList.remove('unset');
+      card.style.setProperty('--today-color', SHIFT_COLORS[shift]);
+      hoursEl.textContent = (shift !== 'wolne' && hours[shift]) ? hours[shift] : '';
+    } else {
+      shiftEl.textContent = now.getFullYear() === 2026 ? 'nie ustawiono' : 'poza rokiem 2026';
+      shiftEl.classList.add('unset');
+      card.style.setProperty('--today-color', 'var(--text-faint)');
+      hoursEl.textContent = '';
+    }
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowKey = dateKey(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+    const tomorrowShift = schedule[tomorrowKey];
+    const tomorrowHint = document.getElementById('tomorrowHint');
+    const tomorrowEl = document.getElementById('tomorrowShift');
+    if (tomorrowShift && SHIFT_LABELS[tomorrowShift]) {
+      tomorrowEl.textContent = SHIFT_LABELS[tomorrowShift];
+      tomorrowHint.style.setProperty('--tomorrow-color', SHIFT_COLORS[tomorrowShift]);
+      tomorrowHint.style.display = '';
+    } else {
+      tomorrowHint.style.display = 'none';
+    }
+  }
+
+  function renderWeek() {
+    const container = document.getElementById('weekPreview');
+    container.innerHTML = '';
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    const dayOfWeek = (now.getDay() + 6) % 7;
+    startOfWeek.setDate(now.getDate() - dayOfWeek);
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+      const shift = schedule[key];
+      const isToday = d.toDateString() === now.toDateString();
+
+      const el = document.createElement('div');
+      el.className = 'week-day' + (isToday ? ' today' : '');
+      const dotStyle = shift ? `background: ${SHIFT_COLORS[shift]}` : '';
+      el.innerHTML = `
+        <div class="week-day-name">${WEEKDAYS_SHORT[i]}</div>
+        <div class="week-day-num">${d.getDate()}</div>
+        <div class="week-day-dot" style="${dotStyle}"></div>
+      `;
+      el.addEventListener('click', () => openModal(d));
+      container.appendChild(el);
+    }
+  }
+
+  function renderMonth() {
+    const year = 2026;
+    document.getElementById('monthTitle').textContent = `${MONTHS_PL[currentMonth]} ${year}`;
+    document.getElementById('statsMonthLabel').textContent = MONTHS_PL[currentMonth];
+
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(year, currentMonth, 1);
+    const daysInMonth = new Date(year, currentMonth + 1, 0).getDate();
+    const startDayIdx = (firstDay.getDay() + 6) % 7;
+
+    for (let i = 0; i < startDayIdx; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      grid.appendChild(empty);
+    }
+
+    const now = new Date();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const key = dateKey(year, currentMonth, d);
+      const shift = schedule[key];
+      const cell = document.createElement('div');
+      cell.className = 'cal-day' + (shift ? ' ' + shift : '');
+      const isToday = now.getFullYear() === year && now.getMonth() === currentMonth && now.getDate() === d;
+      if (isToday) cell.classList.add('today');
+
+      const mark = shift ? getShiftMark(shift) : '';
+      cell.innerHTML = `
+        <div class="cal-day-num">${d}</div>
+        ${mark ? `<div class="cal-day-mark">${mark}</div>` : ''}
+      `;
+
+      cell.addEventListener('click', () => {
+        openModal(new Date(year, currentMonth, d));
+      });
+
+      grid.appendChild(cell);
+    }
+
+    renderStats();
+    renderYearOverview();
+  }
+
+  function getShiftMark(shift) {
+    switch(shift) {
+      case 'ranka': return 'R';
+      case 'popoludnie': return 'P';
+      case 'nocka': return 'N';
+      case 'wolne': return '–';
+      default: return '';
+    }
+  }
+
+  function renderStats() {
+    const year = 2026;
+    const daysInMonth = new Date(year, currentMonth + 1, 0).getDate();
+    let counts = {ranka:0,popoludnie:0,nocka:0,wolne:0};
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const s = schedule[dateKey(year, currentMonth, d)];
+      if (s && counts[s] !== undefined) counts[s]++;
+    }
+
+    document.getElementById('stats').innerHTML = `
+      <div class="stat" style="--stat-color: var(--ranka)">
+        <div class="stat-label">Ranka</div>
+        <div class="stat-value">${counts.ranka}<span class="stat-unit">dni</span></div>
+      </div>
+      <div class="stat" style="--stat-color: var(--popoludnie)">
+        <div class="stat-label">Popołudnie</div>
+        <div class="stat-value">${counts.popoludnie}<span class="stat-unit">dni</span></div>
+      </div>
+      <div class="stat" style="--stat-color: var(--nocka)">
+        <div class="stat-label">Nocka</div>
+        <div class="stat-value">${counts.nocka}<span class="stat-unit">dni</span></div>
+      </div>
+      <div class="stat" style="--stat-color: var(--wolne)">
+        <div class="stat-label">Wolne</div>
+        <div class="stat-value">${counts.wolne}<span class="stat-unit">dni</span></div>
+      </div>
+    `;
+  }
+
+  function renderYearOverview() {
+    const year = 2026;
+    const container = document.getElementById('yearMonths');
+    container.innerHTML = '';
+
+    for (let m = 0; m < 12; m++) {
+      const days = new Date(year, m + 1, 0).getDate();
+      let counts = {ranka:0,popoludnie:0,nocka:0,wolne:0};
+      for (let d = 1; d <= days; d++) {
+        const s = schedule[dateKey(year, m, d)];
+        if (s && counts[s] !== undefined) counts[s]++;
+      }
+
+      const el = document.createElement('div');
+      el.className = 'year-month' + (m === currentMonth ? ' current' : '');
+      el.innerHTML = `
+        <div class="year-month-name">${MONTHS_SHORT[m]}</div>
+        <div class="year-month-bar">
+          ${counts.ranka > 0 ? `<span class="b-ranka" style="flex:${counts.ranka}"></span>` : ''}
+          ${counts.popoludnie > 0 ? `<span class="b-popoludnie" style="flex:${counts.popoludnie}"></span>` : ''}
+          ${counts.nocka > 0 ? `<span class="b-nocka" style="flex:${counts.nocka}"></span>` : ''}
+          ${counts.wolne > 0 ? `<span class="b-wolne" style="flex:${counts.wolne}"></span>` : ''}
+        </div>
+      `;
+      el.addEventListener('click', () => {
+        currentMonth = m;
+        renderMonth();
+        document.querySelector('.calendar').scrollIntoView({behavior:'smooth', block:'nearest'});
+      });
+      container.appendChild(el);
+    }
+  }
+
+  function openModal(dateObj) {
+    activeDateKey = dateKey(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+    document.getElementById('modalDate').textContent = `${dateObj.getDate()} ${MONTHS_PL[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+    document.getElementById('modalDay').textContent = WEEKDAYS_PL[dateObj.getDay()];
+
+    document.querySelectorAll('.shift-option').forEach(el => {
+      el.classList.toggle('selected', el.dataset.shift === (schedule[activeDateKey] || ''));
+    });
+
+    document.getElementById('editRanka').value = hours.ranka;
+    document.getElementById('editPopoludnie').value = hours.popoludnie;
+    document.getElementById('editNocka').value = hours.nocka;
+
+    document.getElementById('hoursRanka').textContent = hours.ranka;
+    document.getElementById('hoursPopoludnie').textContent = hours.popoludnie;
+    document.getElementById('hoursNocka').textContent = hours.nocka;
+
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    activeDateKey = null;
+  }
+
+  function setShift(shift) {
+    if (!activeDateKey) return;
+    if (shift) schedule[activeDateKey] = shift;
+    else delete schedule[activeDateKey];
+    save();
+    renderAll();
+    closeModal();
+    toast(shift ? `Zmiana: ${SHIFT_LABELS[shift]}` : 'Wyczyszczono');
+  }
+
+  function bindEvents() {
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      currentMonth = (currentMonth - 1 + 12) % 12;
+      renderMonth();
+    });
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      currentMonth = (currentMonth + 1) % 12;
+      renderMonth();
+    });
+
+    document.getElementById('todayCard').addEventListener('click', () => {
+      const now = new Date();
+      if (now.getFullYear() === 2026) openModal(now);
+    });
+
+    document.querySelectorAll('.shift-option').forEach(el => {
+      el.addEventListener('click', () => setShift(el.dataset.shift));
+    });
+
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') closeModal();
+    });
+
+    document.getElementById('saveHours').addEventListener('click', () => {
+      hours.ranka = document.getElementById('editRanka').value || hours.ranka;
+      hours.popoludnie = document.getElementById('editPopoludnie').value || hours.popoludnie;
+      hours.nocka = document.getElementById('editNocka').value || hours.nocka;
+      save();
+      renderToday();
+      document.getElementById('hoursRanka').textContent = hours.ranka;
+      document.getElementById('hoursPopoludnie').textContent = hours.popoludnie;
+      document.getElementById('hoursNocka').textContent = hours.nocka;
+      toast('Zapisano godziny');
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const data = {schedule, hours, exportedAt: new Date().toISOString()};
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `grafik-2026-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('Wyeksportowano');
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+      document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (data.schedule) schedule = data.schedule;
+          if (data.hours) hours = {...hours, ...data.hours};
+          save();
+          renderAll();
+          toast('Zaimportowano');
+        } catch(err) { toast('Błąd importu'); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (confirm('Przywrócić oryginalny grafik z PDF? Wszystkie Twoje zmiany zostaną utracone.')) {
+        schedule = {...BUILTIN_SCHEDULE};
+        save();
+        renderAll();
+        toast('Przywrócono oryginał');
+      }
+    });
+  }
+
+  function renderAll() {
+    renderToday();
+    renderWeek();
+    renderMonth();
+  }
+
+  load();
+  bindEvents();
+  renderAll();
+</script>
+</body>
+</html>

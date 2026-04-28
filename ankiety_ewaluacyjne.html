@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zrozumieć AI — ewaluacja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #0a0d12;
+    --bg-2:         #0f141c;
+    --surface:      #141a24;
+    --surface-2:    #1a2230;
+    --line:         #243042;
+    --line-soft:    #1e2837;
+    --ink:          #ebe6db;
+    --ink-soft:     #b8b3a8;
+    --ink-mute:     #6e7585;
+    --ink-dim:      #4a5160;
+
+    /* AI palette */
+    --cyan:         #4ee1c5;
+    --teal-deep:    #1f9b85;
+    --amber:        #ffb938;
+    --amber-soft:   #f5d16f;
+    --magenta:      #d971ff;
+    --coral:        #ff7864;
+    --rust:         #e85a3c;
+
+    /* Rating colors (2..6) — calibrated for dark glow */
+    --r2: #e85a3c;
+    --r3: #ff9c4e;
+    --r4: #f0c674;
+    --r5: #7dd6a8;
+    --r6: #4ee1c5;
+
+    --glow-cyan:  0 0 24px rgba(78, 225, 197, 0.35);
+    --glow-amber: 0 0 24px rgba(255, 185, 56, 0.30);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Manrope', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Aurora background */
+  body {
+    background:
+      radial-gradient(ellipse 60% 50% at 12% 10%, rgba(78, 225, 197, 0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 90% 85%, rgba(255, 185, 56, 0.08) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 75% 30%, rgba(217, 113, 255, 0.05) 0%, transparent 60%),
+      var(--bg);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Dot grid overlay */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Subtle horizontal scan line */
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: linear-gradient(180deg, transparent 0%, transparent 50%, rgba(78, 225, 197, 0.015) 50%, transparent 100%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+  }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 64px 32px 96px; position: relative; z-index: 2; }
+
+  /* ===== HEADER ===== */
+  header {
+    margin-bottom: 56px;
+    position: relative;
+  }
+
+  .badge-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .badge {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    color: var(--cyan);
+    border-radius: 3px;
+    background: rgba(78, 225, 197, 0.04);
+    font-weight: 500;
+  }
+  .badge.amber { color: var(--amber); border-color: rgba(255, 185, 56, 0.3); background: rgba(255, 185, 56, 0.04); }
+  .badge.muted { color: var(--ink-mute); border-color: var(--line-soft); background: transparent; }
+  .badge-row .ver { color: var(--ink-mute); margin-left: auto; }
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 300;
+    font-variation-settings: "opsz" 144, "SOFT" 60;
+    font-size: clamp(2.6rem, 6.2vw, 5rem);
+    line-height: 0.96;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  h1 em {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100;
+    background: linear-gradient(120deg, var(--cyan) 0%, var(--amber-soft) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .subtitle {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 24;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    max-width: 720px;
+    margin-bottom: 38px;
+  }
+
+  /* Top stats — model card style */
+  .topstats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  @media (max-width: 720px) { .topstats { grid-template-columns: repeat(2, 1fr); } }
+  .topstat {
+    background: var(--surface);
+    padding: 22px 22px 20px;
+    position: relative;
+  }
+  .topstat::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.5;
+  }
+  .topstat:nth-child(2)::before { background: linear-gradient(90deg, transparent, var(--amber), transparent); opacity: 0.4; }
+  .topstat:nth-child(3)::before { background: linear-gradient(90deg, transparent, var(--magenta), transparent); opacity: 0.35; }
+  .topstat:nth-child(4)::before { background: linear-gradient(90deg, transparent, var(--r6), transparent); opacity: 0.4; }
+
+  .topstat .num {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 96, "SOFT" 30;
+    font-size: 2.8rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .topstat .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+    margin-top: 10px;
+  }
+
+  /* ===== TABS — TIER 1 ===== */
+  .tabs-tier1 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .tab1 {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 14px 22px;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+  .tab1:hover { border-color: var(--cyan); color: var(--ink); }
+  .tab1.active {
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    border-color: var(--cyan);
+    color: var(--ink);
+    box-shadow: var(--glow-cyan);
+  }
+  .tab1 .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ink-dim);
+    transition: all 0.2s;
+  }
+  .tab1.active .dot { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  .tab1 .n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-weight: 500;
+  }
+  .tab1.active .n { color: var(--cyan); }
+  .tab1.tab1-themes { border-color: rgba(217, 113, 255, 0.35); }
+  .tab1.tab1-themes:hover { border-color: var(--magenta); }
+  .tab1.tab1-themes.active { border-color: var(--magenta); box-shadow: 0 0 24px rgba(217, 113, 255, 0.25); }
+  .tab1.tab1-themes.active .dot { background: var(--magenta); box-shadow: 0 0 8px var(--magenta); }
+  .tab1.tab1-themes.active .n { color: var(--magenta); }
+
+  /* ===== TABS — TIER 2 ===== */
+  .tabs-tier2 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 48px;
+    padding: 0 0 0 4px;
+    border-left: 1px dashed var(--line);
+    margin-left: 14px;
+    padding-top: 8px;
+    padding-left: 18px;
+    min-height: 0;
+    transition: opacity 0.2s;
+  }
+  .tabs-tier2.empty { display: none; }
+  .tab2 {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--ink-mute);
+    padding: 7px 14px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border-radius: 99px;
+    transition: all 0.18s;
+  }
+  .tab2:hover { color: var(--ink); background: var(--surface); }
+  .tab2.active {
+    background: var(--surface-2);
+    color: var(--amber);
+    border-color: rgba(255, 185, 56, 0.4);
+  }
+  .tab2 .n { color: var(--ink-dim); margin-left: 6px; }
+  .tab2.active .n { color: var(--amber); opacity: 0.7; }
+
+  /* ===== PANEL ===== */
+  .panel { display: none; animation: fade 0.4s ease-out; }
+  .panel.active { display: block; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .course-head {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 56px;
+    margin-bottom: 56px;
+    align-items: center;
+    padding: 36px 38px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .course-head::before {
+    content: "";
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, var(--cyan) 0%, transparent 65%);
+    opacity: 0.07;
+    pointer-events: none;
+  }
+  @media (max-width: 820px) { .course-head { grid-template-columns: 1fr; padding: 28px 22px; gap: 32px; } }
+
+  .ch-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ch-meta::before {
+    content: "";
+    width: 18px; height: 1px; background: var(--cyan); opacity: 0.6;
+  }
+  .ch-text h2 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 96, "SOFT" 40;
+    font-weight: 400;
+    font-size: clamp(1.9rem, 4vw, 2.9rem);
+    line-height: 1.04;
+    letter-spacing: -0.018em;
+    margin-bottom: 22px;
+    color: var(--ink);
+  }
+
+  .bigavg { display: flex; align-items: baseline; gap: 16px; margin-bottom: 14px; }
+  .bigavg .v {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 144, "SOFT" 80;
+    font-weight: 300;
+    font-size: 6.5rem;
+    line-height: 0.85;
+    background: linear-gradient(180deg, var(--amber-soft) 0%, var(--amber) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.04em;
+    text-shadow: 0 0 40px rgba(255, 185, 56, 0.25);
+  }
+  .bigavg .denom {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    color: var(--ink-mute);
+    font-weight: 300;
+  }
+  .scale-cap {
+    font-size: 12.5px;
+    color: var(--ink-mute);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+    line-height: 1.5;
+  }
+
+  /* Donut */
+  .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .donut-svg { width: 100%; max-width: 340px; height: auto; filter: drop-shadow(0 6px 30px rgba(0,0,0,0.5)); }
+  .donut-svg .seg {
+    cursor: pointer;
+    transition: opacity 0.25s, transform 0.2s;
+    transform-origin: center;
+  }
+  .donut-svg .seg:hover { opacity: 0.85; }
+  .donut-svg .seg.dimmed { opacity: 0.18; }
+  .donut-svg .seg.selected { filter: drop-shadow(0 0 12px currentColor) brightness(1.15); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 10px; justify-content: center; font-size: 12px; }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 5px 11px 5px 9px;
+    border-radius: 99px;
+    transition: all 0.18s;
+    border: 1px solid var(--line-soft);
+    background: var(--surface);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .legend-item:hover { border-color: var(--ink-mute); }
+  .legend-item.selected { border-color: var(--ink); background: var(--surface-2); }
+  .legend-item .swatch {
+    width: 10px; height: 10px; border-radius: 2px;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .legend-item .lbl-num { font-weight: 700; color: var(--ink); font-size: 13px; }
+  .legend-item .lbl-cnt { color: var(--ink-mute); font-size: 10.5px; }
+
+  /* Survey breakdown — for aggregate panels */
+  .breakdown {
+    margin-top: 8px;
+    padding: 28px 32px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .breakdown-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+    margin-bottom: 22px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .breakdown-title::before {
+    content: "▸";
+    color: var(--cyan);
+    font-size: 14px;
+  }
+  .breakdown-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line-soft);
+    align-items: center;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .br-name {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 24;
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  .br-name .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    margin-left: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .br-name .sem-tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 3px;
+    margin-right: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    border: 1px solid;
+  }
+  .sem-tag.winter { color: var(--cyan); border-color: rgba(78, 225, 197, 0.3); background: rgba(78, 225, 197, 0.06); }
+  .sem-tag.summer { color: var(--amber); border-color: rgba(255, 185, 56, 0.3); background: rgba(255, 185, 56, 0.06); }
+  .br-bar-wrap {
+    display: flex; align-items: center; gap: 14px;
+    width: 280px;
+  }
+  @media (max-width: 720px) { .br-bar-wrap { width: 180px; } .breakdown-row { gap: 8px; } }
+  .br-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--line-soft);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+  }
+  .br-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--rust), var(--amber), var(--r5), var(--cyan));
+    box-shadow: 0 0 10px rgba(78, 225, 197, 0.3);
+  }
+  .br-avg {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 36;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--amber-soft);
+    min-width: 48px;
+    text-align: right;
+    letter-spacing: -0.01em;
+  }
+  .br-row-clickable { cursor: pointer; transition: background 0.2s; padding-left: 10px; padding-right: 10px; margin: 0 -10px; border-radius: 4px; }
+  .br-row-clickable:hover { background: var(--surface-2); }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--cyan);
+    margin-top: 36px;
+    margin-bottom: 28px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    border-radius: 0 4px 4px 0;
+  }
+  .filter-bar.hidden { display: none; }
+  .filter-bar strong { color: var(--cyan); font-family: 'JetBrains Mono', monospace; padding: 0 4px; }
+  .filter-clear {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 99px;
+    transition: all 0.18s;
+  }
+  .filter-clear:hover { background: var(--cyan); color: var(--bg); border-color: var(--cyan); }
+
+  /* Quote sections */
+  .sections { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 980px) { .sections { grid-template-columns: 1fr; } }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px 22px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .section::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--cyan);
+    opacity: 0.7;
+  }
+  .section.s-liked::before { background: var(--r5); }
+  .section.s-improve::before { background: var(--amber); }
+  .section.s-comment::before { background: var(--magenta); }
+
+  .section h3 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 36;
+    font-weight: 400;
+    font-size: 1.35rem;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .section .icon { margin-right: 10px; }
+  .s-liked .icon { color: var(--r5); }
+  .s-improve .icon { color: var(--amber); }
+  .s-comment .icon { color: var(--magenta); }
+  .section .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-mute);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .section .count { color: var(--cyan); font-weight: 700; }
+
+  .quote-list {
+    display: flex; flex-direction: column; gap: 12px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .quote-list::-webkit-scrollbar { width: 5px; }
+  .quote-list::-webkit-scrollbar-track { background: transparent; }
+  .quote-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  .quote-list::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
+
+  .quote {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    padding: 14px 16px 14px 18px;
+    border-left: 2px solid var(--line);
+    background: var(--bg-2);
+    border-radius: 0 3px 3px 0;
+    transition: opacity 0.25s, border-color 0.25s;
+  }
+  .quote.hidden { display: none; }
+  .s-liked .quote { border-left-color: var(--r5); }
+  .s-improve .quote { border-left-color: var(--amber); }
+  .s-comment .quote { border-left-color: var(--magenta); }
+
+  .quote .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--ink-soft);
+    padding: 2px 8px;
+    border-radius: 99px;
+    letter-spacing: 0.05em;
+    margin-right: 10px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+  .quote .badge.badge-unlinked {
+    background: transparent;
+    color: var(--magenta);
+    border: 1px solid rgba(217, 113, 255, 0.4);
+    text-transform: none;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    padding: 1px 8px;
+  }
+
+  .qual-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 18px;
+    background: rgba(217, 113, 255, 0.05);
+    border: 1px solid rgba(217, 113, 255, 0.18);
+    border-radius: 4px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+  }
+  .qual-note strong { color: var(--magenta); font-weight: 600; }
+  .qual-note-icon {
+    color: var(--magenta);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+
+  .filter-bar .fr-warn {
+    color: var(--magenta);
+    font-style: normal;
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+    font-size: 12.5px;
+    margin-left: 4px;
+  }
+
+  .empty {
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 13px;
+    padding: 18px 4px;
+    font-family: 'Fraunces', serif;
+  }
+
+  /* Insights */
+  .insights {
+    margin-top: 72px;
+    padding: 40px 44px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .insights::before {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, var(--magenta) 0%, transparent 65%);
+    opacity: 0.10;
+    pointer-events: none;
+  }
+  .insights::after {
+    content: "";
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, var(--cyan) 0%, transparent 65%);
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .insights h2 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 96, "SOFT" 50;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 2rem;
+    margin-bottom: 26px;
+    position: relative;
+    color: var(--ink);
+  }
+  .insights ul {
+    list-style: none; display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px 40px; position: relative;
+  }
+  @media (max-width: 720px) { .insights ul { grid-template-columns: 1fr; } }
+  .insights li {
+    padding-left: 26px;
+    position: relative;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .insights li::before {
+    content: "✦";
+    position: absolute;
+    left: 0; top: 0;
+    color: var(--amber);
+    font-size: 13px;
+  }
+  .insights li strong { color: var(--cyan); font-weight: 700; }
+  .insights li em { color: var(--amber-soft); font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+
+  /* ===== THEMES SECTION ===== */
+  .themes-section {
+    margin-top: 80px;
+    position: relative;
+  }
+  .themes-header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .themes-header .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .themes-header .eyebrow::before {
+    content: "▣";
+    font-size: 12px;
+  }
+  .themes-header h2 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 96, "SOFT" 50;
+    font-weight: 300;
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .themes-header h2 em {
+    font-style: italic;
+    background: linear-gradient(120deg, var(--magenta) 0%, var(--cyan) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .themes-header .lead {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 24;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 760px;
+    line-height: 1.55;
+  }
+
+  .theme-block {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 32px 36px 36px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .theme-block::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--amber));
+    opacity: 0.6;
+  }
+  .theme-block.improve::before { background: linear-gradient(90deg, var(--rust), var(--magenta)); opacity: 0.5; }
+
+  .theme-block-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .theme-block h3 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 48;
+    font-weight: 400;
+    font-size: 1.7rem;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .theme-block h3 .icon {
+    margin-right: 10px;
+    font-size: 1.3rem;
+    vertical-align: middle;
+  }
+  .theme-block .head-stats {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+  }
+  .theme-block .head-stats .v { color: var(--cyan); font-weight: 700; }
+  .theme-block.improve .head-stats .v { color: var(--magenta); }
+  .theme-block .caption {
+    font-size: 13px;
+    color: var(--ink-mute);
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+    font-style: italic;
+    margin-bottom: 26px;
+  }
+
+  .theme-legend {
+    display: flex; gap: 18px;
+    margin-bottom: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .theme-legend-item { display: inline-flex; align-items: center; gap: 7px; }
+  .theme-legend-item .sw {
+    width: 10px; height: 10px; border-radius: 2px;
+    box-shadow: 0 0 6px currentColor;
+  }
+  .sw-winter { background: var(--cyan); color: var(--cyan); }
+  .sw-summer { background: var(--amber); color: var(--amber); }
+
+  /* ===== STACKED BAR ROWS (chart 1) ===== */
+  .theme-rows { display: flex; flex-direction: column; gap: 4px; }
+  .theme-row {
+    display: grid;
+    grid-template-columns: 240px 1fr 70px;
+    gap: 18px;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  .theme-row:hover { background: var(--surface-2); }
+  .theme-row.expanded { background: var(--surface-2); }
+  @media (max-width: 720px) {
+    .theme-row { grid-template-columns: 1fr; gap: 6px; padding: 12px; }
+  }
+  .theme-label {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 24;
+    font-size: 1.02rem;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .theme-label .sub {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  .stacked-bar {
+    height: 22px;
+    background: var(--bg-2);
+    border-radius: 99px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: inset 0 0 0 1px var(--line-soft);
+    position: relative;
+  }
+  .stacked-bar .seg-w {
+    background: linear-gradient(90deg, var(--teal-deep), var(--cyan));
+    box-shadow: 0 0 12px rgba(78, 225, 197, 0.35);
+    transition: filter 0.2s;
+  }
+  .stacked-bar .seg-s {
+    background: linear-gradient(90deg, var(--amber), #ffce6b);
+    box-shadow: 0 0 12px rgba(255, 185, 56, 0.3);
+    transition: filter 0.2s;
+  }
+  .stacked-bar .seg-num {
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 22px;
+    padding: 0 8px;
+    white-space: nowrap;
+  }
+  .theme-row:hover .stacked-bar .seg-w,
+  .theme-row:hover .stacked-bar .seg-s { filter: brightness(1.1); }
+
+  .theme-total {
+    text-align: right;
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 36;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--amber-soft);
+    letter-spacing: -0.01em;
+  }
+  .theme-row .chevron {
+    display: inline-block;
+    transition: transform 0.2s;
+    color: var(--ink-mute);
+    font-size: 11px;
+    margin-left: 6px;
+  }
+  .theme-row.expanded .chevron { transform: rotate(90deg); color: var(--cyan); }
+
+  /* ===== DIVERGING BARS (chart 2) ===== */
+  .theme-rows.diverging .theme-row {
+    grid-template-columns: 1fr 280px 1fr;
+    align-items: center;
+    padding: 12px 14px;
+  }
+  @media (max-width: 720px) {
+    .theme-rows.diverging .theme-row { grid-template-columns: 1fr; gap: 4px; }
+    .theme-rows.diverging .div-left, .theme-rows.diverging .div-right { display: none; }
+  }
+  .div-left, .div-right {
+    display: flex;
+    align-items: center;
+    height: 24px;
+    gap: 8px;
+  }
+  .div-left { justify-content: flex-end; }
+  .div-right { justify-content: flex-start; }
+  .div-bar {
+    height: 18px;
+    border-radius: 3px;
+    transition: filter 0.2s;
+    min-width: 1px;
+  }
+  .div-bar-w {
+    background: linear-gradient(90deg, var(--teal-deep), var(--cyan));
+    box-shadow: 0 0 10px rgba(78, 225, 197, 0.3);
+  }
+  .div-bar-s {
+    background: linear-gradient(90deg, #ffce6b, var(--amber));
+    box-shadow: 0 0 10px rgba(255, 185, 56, 0.3);
+  }
+  .div-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 22px;
+    text-align: center;
+  }
+  .div-num.zero { color: var(--ink-dim); font-weight: 400; }
+  .div-center {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 24;
+    font-size: 0.98rem;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.25;
+    padding: 0 12px;
+  }
+  .div-center .sub {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: var(--ink-mute);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-style: normal;
+  }
+  .theme-rows.diverging .theme-row:hover .div-bar { filter: brightness(1.15); }
+
+  /* ===== EXPANDED EXAMPLES ===== */
+  .theme-examples {
+    grid-column: 1 / -1;
+    display: none;
+    margin: 12px 0 6px;
+    padding: 18px 20px 20px;
+    background: var(--bg-2);
+    border-left: 2px solid var(--cyan);
+    border-radius: 0 4px 4px 0;
+  }
+  .theme-block.improve .theme-examples { border-left-color: var(--magenta); }
+  .theme-row.expanded + .theme-examples,
+  .theme-examples.show { display: block; }
+
+  .theme-examples h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 10px;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .theme-examples h4 .badge-mini {
+    padding: 1px 7px;
+    border: 1px solid;
+    border-radius: 99px;
+    font-size: 9px;
+  }
+  .theme-examples h4.zima .badge-mini { color: var(--cyan); border-color: rgba(78,225,197,0.4); }
+  .theme-examples h4.lato .badge-mini { color: var(--amber); border-color: rgba(255,185,56,0.4); }
+
+  .theme-examples-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 720px) {
+    .theme-examples-cols { grid-template-columns: 1fr; gap: 14px; }
+  }
+  .theme-examples ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .theme-examples li {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    padding-left: 14px;
+    position: relative;
+  }
+  .theme-examples li::before {
+    content: "›";
+    position: absolute;
+    left: 0; top: 0;
+    color: var(--ink-mute);
+  }
+  .theme-examples .none {
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 12px;
+    padding-left: 14px;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    text-transform: uppercase;
+  }
+  footer .credit { color: var(--cyan); }
+
+  /* ===== THEMES PANEL ===== */
+  .themes-intro {
+    padding: 28px 32px 24px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .themes-intro::before {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, var(--magenta) 0%, transparent 65%);
+    opacity: 0.08;
+  }
+  .themes-intro h2 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 96, "SOFT" 50;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 1.85rem;
+    color: var(--ink);
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .themes-intro p {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 18;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 720px;
+    position: relative;
+  }
+  .themes-intro .meta {
+    margin-top: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .chart-section {
+    margin-bottom: 56px;
+  }
+  .chart-header {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .chart-header h3 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 96, "SOFT" 40;
+    font-weight: 400;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+  }
+  .chart-header h3 em {
+    font-style: italic;
+    background: linear-gradient(120deg, var(--cyan), var(--amber-soft));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .chart-header .count-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    background: var(--surface);
+  }
+  .chart-sub {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+    font-style: italic;
+    color: var(--ink-mute);
+    font-size: 13.5px;
+    margin-bottom: 28px;
+    max-width: 720px;
+  }
+
+  .chart-legend {
+    display: inline-flex;
+    gap: 18px;
+    align-items: center;
+    margin-left: auto;
+  }
+  .chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .chart-legend-item .dot {
+    width: 12px; height: 12px; border-radius: 2px;
+  }
+  .chart-legend-item.winter .dot { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  .chart-legend-item.summer .dot { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+  .bar-chart {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px 26px 24px;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.2fr) 3fr auto;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 12px;
+    margin: 0 -12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  @media (max-width: 720px) {
+    .bar-row { grid-template-columns: 1fr; gap: 8px; padding: 14px 10px; }
+  }
+  .bar-row:hover { background: var(--surface-2); }
+  .bar-row.expanded { background: var(--surface-2); }
+
+  .bar-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 24;
+    font-size: 1rem;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .bar-label .icon {
+    font-size: 1.4rem;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+  }
+  .bar-label .desc {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 3px;
+    font-weight: 500;
+  }
+  .bar-label-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .bar-label-text .name { font-weight: 500; }
+
+  .bar-track {
+    height: 28px;
+    background: var(--bg-2);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line-soft);
+  }
+  .bar-track.split { display: flex; flex-direction: column; gap: 3px; height: auto; background: transparent; border: none; padding: 2px 0; }
+  .bar-track.split .bar-fill { height: 13px; }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--bg);
+    text-transform: uppercase;
+  }
+  .bar-fill.fill-total {
+    background: linear-gradient(90deg, var(--teal-deep) 0%, var(--cyan) 100%);
+    box-shadow: 0 0 14px rgba(78, 225, 197, 0.25);
+  }
+  .bar-fill.fill-winter {
+    background: linear-gradient(90deg, var(--teal-deep) 0%, var(--cyan) 100%);
+    box-shadow: 0 0 10px rgba(78, 225, 197, 0.25);
+  }
+  .bar-fill.fill-summer {
+    background: linear-gradient(90deg, #c2820e 0%, var(--amber) 100%);
+    box-shadow: 0 0 10px rgba(255, 185, 56, 0.22);
+    color: #2b1f08;
+  }
+  .bar-fill .inline-label {
+    font-size: 9.5px;
+    opacity: 0.7;
+    margin-right: 6px;
+  }
+
+  .bar-numbers {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 36;
+    font-size: 1.5rem;
+    color: var(--ink);
+    min-width: 64px;
+    justify-content: flex-end;
+  }
+  .bar-numbers .total {
+    font-weight: 400;
+    color: var(--amber-soft);
+    text-shadow: 0 0 18px rgba(255, 185, 56, 0.3);
+  }
+  .bar-numbers .split-nums {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .bar-numbers .split-nums span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    font-feature-settings: "tnum";
+  }
+  .bar-numbers .nw { color: var(--cyan); }
+  .bar-numbers .ns { color: var(--amber); }
+
+  .bar-row .chev {
+    color: var(--ink-mute);
+    font-size: 11px;
+    transition: transform 0.2s;
+    margin-left: 6px;
+  }
+  .bar-row.expanded .chev { transform: rotate(90deg); color: var(--cyan); }
+
+  .theme-quotes {
+    grid-column: 1 / -1;
+    display: none;
+    padding: 14px 4px 8px;
+    margin-top: 6px;
+    border-top: 1px dashed var(--line);
+  }
+  .bar-row.expanded .theme-quotes { display: block; }
+
+  .theme-quotes-group + .theme-quotes-group { margin-top: 18px; }
+  .theme-quotes-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-mute);
+    margin-bottom: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .theme-quotes-title .pill-w {
+    color: var(--cyan);
+    border: 1px solid rgba(78, 225, 197, 0.3);
+    padding: 1px 8px;
+    border-radius: 99px;
+    background: rgba(78, 225, 197, 0.06);
+    font-size: 10px;
+  }
+  .theme-quotes-title .pill-s {
+    color: var(--amber);
+    border: 1px solid rgba(255, 185, 56, 0.3);
+    padding: 1px 8px;
+    border-radius: 99px;
+    background: rgba(255, 185, 56, 0.06);
+    font-size: 10px;
+  }
+  .theme-quotes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .theme-quote {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: "opsz" 14;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    padding: 10px 14px;
+    background: var(--bg-2);
+    border-left: 2px solid var(--line);
+    border-radius: 0 3px 3px 0;
+  }
+  .theme-quote.q-winter { border-left-color: var(--cyan); }
+  .theme-quote.q-summer { border-left-color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge-row">
+      <span class="badge">DATA · STUDENT FEEDBACK</span>
+      <span class="badge amber">N = 101</span>
+      <span class="badge muted">2 SEMESTRY · 6 ANKIET</span>
+      <span class="ver">v.2.0</span>
+    </div>
+    <h1>Zrozumieć AI<br><em>— ewaluacja</em></h1>
+    <p class="subtitle">Sześć ankiet ewaluacyjnych z dwóch semestrów. Skala 1–6. Kliknij wycinek koła lub wiersz w zestawieniu, żeby filtrować szczegóły. Ten widok pokazuje również wypowiedzi studentów, gdy są dostępne.</p>
+
+    <div class="topstats">
+      <div class="topstat"><div class="num">101</div><div class="lbl">Wszystkich ankiet</div></div>
+      <div class="topstat"><div class="num">5,15</div><div class="lbl">Średnia łączna</div></div>
+      <div class="topstat"><div class="num">78%</div><div class="lbl">Ocen 5 lub 6</div></div>
+      <div class="topstat"><div class="num">+0,30</div><div class="lbl">Zima: mid → final</div></div>
+    </div>
+  </header>
+
+  <nav class="tabs-tier1" id="tabsTier1"></nav>
+  <nav class="tabs-tier2" id="tabsTier2"></nav>
+
+  <main id="panels"></main>
+
+
+  <section class="themes-section">
+    <div class="themes-header">
+      <div class="eyebrow">Analiza jakościowa · 164 komentarze · 6 ankiet</div>
+      <h2>Kluczowe wątki<br><em>— co wybrzmiewa najczęściej</em></h2>
+      <p class="lead">Komentarze pogrupowane tematycznie. Jeden komentarz może wpaść do kilku tematów (np. "luźna atmosfera + AI newsy + prowadzący"), więc liczymy <strong>wzmianki</strong>, nie pojedynczych studentów. Kliknij wątek, żeby zobaczyć przykładowe wypowiedzi.</p>
+    </div>
+
+    <div class="theme-block" id="block-liked">
+      <div class="theme-block-head">
+        <h3><span class="icon">✦</span>Co się podobało</h3>
+        <div class="head-stats"><span class="v" id="liked-mentions">—</span> wzmianek · <span class="v" id="liked-themes-count">—</span> wątków</div>
+      </div>
+      <div class="caption">Skala paska = liczba wzmianek. Kolor: zima vs lato (proporcjonalnie).</div>
+      <div class="theme-legend">
+        <span class="theme-legend-item"><span class="sw sw-winter"></span>zima 2025</span>
+        <span class="theme-legend-item"><span class="sw sw-summer"></span>lato 2025/26</span>
+      </div>
+      <div class="theme-rows" id="rows-liked"></div>
+    </div>
+
+    <div class="theme-block improve" id="block-improve">
+      <div class="theme-block-head">
+        <h3><span class="icon">⟳</span>Co warto poprawić</h3>
+        <div class="head-stats"><span class="v" id="improve-mentions">—</span> wzmianek · <span class="v" id="improve-themes-count">—</span> wątków</div>
+      </div>
+      <div class="caption">Wykres rozdzielony — zima rozciąga się w lewo, lato w prawo. Tak widać, gdzie który semestr ma swoje napięcia.</div>
+      <div class="theme-legend">
+        <span class="theme-legend-item"><span class="sw sw-winter"></span>zima ←</span>
+        <span class="theme-legend-item">→ lato <span class="sw sw-summer"></span></span>
+      </div>
+      <div class="theme-rows diverging" id="rows-improve"></div>
+    </div>
+  </section>
+
+  <section class="insights">
+    <h2>Co wynika z ankiet?</h2>
+    <ul>
+      <li><strong>Sześć ankiet, 101 odpowiedzi, średnia <em>5,15 / 6</em>.</strong> Wszystkie ankiety mają średnią ≥ 4,5; cztery z sześciu ≥ 5,0.</li>
+      <li><strong>Zima rośnie — i ogon znika.</strong> Średnia "Zrozumieć AI" idzie z 5,13 (mid-term, grudzień) do 5,43 (końcowa, luty), <em>+0,30</em>. W mid-termie były dwie "2" i jedna "3" — w lutym żadnej "2", została jedna "3".</li>
+      <li><strong>Lato bardziej zróżnicowane.</strong> Średnia 4,98 — niższa o 0,29 niż zima. W AI Project LAB pojawiły się pojedyncze 2 i 3 (podobnie jak wcześniej w mid-termie zimowym).</li>
+      <li><strong>Najwyższa średnia: <em>Sztuka Współistnienia</em> — 5,75</strong> (n=4). Mała grupa, bardzo silny sygnał.</li>
+      <li><strong>Najsłabszy wynik: <em>AI Project LAB</em> — 4,56.</strong> Główne wątki krytyki: chaos w pracy projektowej, oczekiwanie wyraźniejszej struktury i głębszego omówienia narzędzi.</li>
+      <li><strong>Wspólny mianownik pochwał:</strong> aktualność (AI newsy), atmosfera, praktyczność, prowadzący jako osoba — w każdej ankiecie z wypowiedziami.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>SOURCE · GOOGLE FORMS · 6 SURVEYS · N=101</span>
+    <span class="credit">LUCID ACADEMY · TORUŃ · 2026</span>
+  </footer>
+</div>
+
+<script>
+const SURVEYS = {"winter_mid": {"id": "winter_mid", "label": "Zrozumieć AI · Mid-term", "short": "Mid-term grudzień", "semester": "winter", "date": "12 / 2025", "has_qual": true, "rows": [{"rating": 2}, {"rating": 2}, {"rating": 3}, {"rating": 4}, {"rating": 4}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}], "qual_unlinked": true, "qual": {"liked": ["przygotowanie prowadzącego do zajęć", "luźne podejście prowadzącego", "Dużo interakcji, luźna atmosfera, sam pomysł tematu (zrozumienie AI), miła atmosfera.", "Przyjazna, luźna atmosfera", "Dużo ciekawostek", "Informacje, o których nie miałam pojęcia", "Aktywność na discord: newsy, ciekawostki, najnowszy update. Otwartość prowadzącego.", "Sposób prowadzenia (nie mówienie monotonnie)", "Merytoryczna i przewidywalna forma zajęć. Wszystkie zajęcia wpisywały się w podobny schemat", "Newsy AI", "Podoba mi się, że dowiaduję się o alternatywach Chata GPT i jakie możliwości już teraz ma AI np to tworzenie wirtualnych wszechświatów", "W porównaniu z innymi zajęciami temat jest ciekawie śledzony, pomaga w tym dobrze zrobione prezentacje i nie powolny sposób opowiadania.", "filmiki, polecania (książkowe inside AI)", "Konkrety w informacjach :)", "Są angażujące, pobudzające do myślenia i dyskusji, odmienne od innych zajęć. Stanowią miłą odskocznię.", "segment Newsów jest przydatny", "Dowiedziałam się dużo nowych informacji i ciekawostek o AI", "sposób prowadzenia zajęć", "Newsy", "filmiki (interaktywność zajęć)", "luźna atmosfera na zajęciach, wolność słowa (można bez problemu powiedzieć swoje zdanie), fajna tematyka zajęć", "cotygodniowe newsy dot. AI", "możliwość dyskusji", "uważam, że jest zaliczenie jest adekwatne i super, że można odrabiać zajęcia", "Mega są AI news", "Filmiki ; sposób prowadzenia zajęć;", "Filmiki", "Prezentacje", "Tematy zajęć", "elastyczność jeśli chodzi o komunikację, „zarażanie\" pasją, luz w zwracaniu się do siebie (zmniejsza dystans)", "Newsy z AI są totalnie cool!", "organizacja zajęć (są newsy, filmiki, praca w grupach), dużo dodatkowych materiałów, zajęcia są prowadzone z pasją i ogólnie jest super!", "w prosty i przyjemny sposób przedstawiona tematyka", "informacje przekazywane są rzeczywiście „ważne\" i użyteczne", "Mega ważne, rozwojowe, przyszłościowe (i teraźniejszościowe)", "Tematyka b. ciekawa, bardzo lubię AI newsy, liczne pomysły, przykłady i zorganizowane wgłębianie się w AI step-by step.", "Podoba mi się tematyka zajęć i z tego względu cieszę się, że znalazłam te zajęcia. Uważam, że poruszamy ważne tematy, mamy przestrzeń do własnych przemyśleń i uwag, które zawsze są wysłuchiwane. Widać zaangażowanie i świetną pracę prowadzącego.", "Ciekawostki o AI, dyskusje, nowości, polecajki, super podejście do studenta", "Najnowsza wiedza / AI news", "Flow prowadzącego", "Odwołania do praktyków i przyszłości", "ciekawostki, AI news, forma prowadzenia zajęć (luźna dyskusja), tworzenie discorda, ćwiczenia na zajęciach", "dobry kontakt ze Studentami", "AI newsy na początku wszystkich zajęć", "ankieta w środku semestru :)", "ciekawa tematyka, dobry dobór materiału", "otwarcie na opinie", "Klub Dyskusyjny", "alternatywne zadania dla osób, które akurat nie pracują w zespołach", "zapotrzebowanie na taką tematykę", "swobodna formuła, ciekawa tematyka i w widoczny sposób szczere zaangażowanie prowadzącego w temat (nie zawsze tak jest)"], "disliked": ["spodziewałem się bardziej analitycznego spojrzenia jak działa AI, spojrzenie w kod, jak AI analizuje prompty itp.", "dodać więcej informacji na temat tego jak LLMy działają od środka", "dodać machine learning", "odjąć informacje, które są łatwo dostępne, wiedzą powszechną", "Dużo rzeczy w obszarach o których nawet nie słyszałam, zbyt małe wyjaśnienia na ich temat, za dużo czasu na rozważaniu jednej rzeczy (np. wspominanie o jednym wydarzeniu na różnych zajęciach).", "Po zajęciach czasami wychodzę z myślą „nie chcę żyć, bo AI zabierze nam wszystko\". Może lepiej by było zrobić pół zajęć dobijających nas, a drugie pół bardziej miłymi tematami", "Punkty za obecność - nie mogę ich zebrać, bo boję się mówić na forum", "Całe myślę, że tu nie trzeba nic zmieniać, to mój indywidualny problem :)", "Dyskusja na temat poważnych współczesnych problemów, nie powierzchownie. Szukanie ciekawszych filmów (dłuższych - wspólne oglądanie i komentarz).", "Pora dnia (choć problem s. zimowego) (-)", "Większe zaangażowanie i pytanie każdego o opinie, nie tylko tych, co się zgłaszają. + interaktywne treści.", "Na początku były ciekawsze tematy zajęć.", "Większy rygor co do udzielania głosu studentom - czasem niektórzy albo powtarzali podobne odpowiedzi albo niektórzy silnie odpływali - strata cennego czasu", "czasami trudne nazwy takie informatyczno ścisłe", "nie podoba mi się że 30% oceny to aktywność bo mam lęki społeczne i ciężko zabrać głos :(", "ciężko powiedzieć.", "nierówne zaangażowanie grupy od wyjścia", "Nie jestem fanką pracy w grupach.", "przedstawienie Tech CEO oligarchów (np. Altman, Musk) było zbyt mało szczegółowe i niedokładnie opisuje ich układ w AI (np. początki openAi jako non profit, wkład Muska w openAI, nazwanie Altmana „twórcą chataGPT\" XD)", "Praktyczne wykorzystanie narzędzi AI i jak możemy je użyć w praktyce w nauce/pracy", "moim skromnym zdaniem, powinna być jedna nieobecność bez konsekwencji (tak totalnie)", "Uważam, że jest dobrze tak jak jest. Nie trzeba niczego poprawiać/dodawać", "Więcej ćwiczeń i grupowej dyskusji z narzędziami", "Stosunkowo rygorystyczne ocenianie obecności (niższa ocena przy 2 nieobecnościach)", "być może więcej zaangażowania w grupach? ćwiczeń, aby podtrzymywać zaangażowanie i uwagę :)", "mi podoba się wszystko", "jest super :) można byłoby dodać rzeczywiście dodatkowe korzystanie z nowych narzędzi (jak to do programowania)", "Niektóre dyskusje otwarte wnoszą dużo pojedynczym osobom, ale nie dla całej grupy - zbyt spersonalizowane", "może trochę praktyki pracy na narzędziach.", "Krótkie ćwiczenia na każdych/prawie każdych zajęciach z AI (np. zadanie, aby uzyskać od AI konkretną odpowiedź)", "Więcej o narzędziach AI", "więcej filmików, wywiadów, eksperymentów odnośnie AI", "forma zaliczenia - mało precyzyjne wytyczne", "zadania domowe - niejasne, co jest zadane", "trochę chaotyczny Discord", "moooże trochę za mało dyscypliny, nieco zbyt nieformalna atmosfera", "może czasem za bardzo przeważa dyskusja? chętnie słyszałbym więcej informacji w może bardziej wykładowej formie", "jest fajnie, ale czasem część zajęć robi się mniej merytoryczna"], "comments": []}}, "winter_final": {"id": "winter_final", "label": "Zrozumieć AI · Ewaluacja końcowa", "short": "Końcowa luty", "semester": "winter", "date": "02 / 2026", "has_qual": false, "rows": [{"rating": 3}, {"rating": 4}, {"rating": 4}, {"rating": 4}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 5}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}, {"rating": 6}]}, "ai_project_lab": {"id": "ai_project_lab", "label": "AI Project LAB", "short": "AI Project LAB", "semester": "summer", "date": "2025/26", "has_qual": true, "rows": [{"rating": 4, "liked": "Możliwość wykorzystania praktycznie ai", "disliked": "Zbyt duży chaos w pracy w grupach", "comments": ""}, {"rating": 5, "liked": "Co kazde zajecia cos nowego - nowe pomysly, inspiracje, propozycje, informacje… Mega", "disliked": "w sumie to nie wiem", "comments": ""}, {"rating": 6, "liked": "Kontakt z nowo poznanymi osobami oraz prowadzącym, dużo udostępnionej wiedzy", "disliked": "Zaczynanie bardziej od podstaw", "comments": ""}, {"rating": 5, "liked": "Wychodzenie z projektem poza uczelnie", "disliked": "", "comments": ""}, {"rating": 6, "liked": "Praktyczna praca nad aktualną tematyką AI co do której warto się edukować", "disliked": "", "comments": ""}, {"rating": 4, "liked": "Praca w grupach. Prowadzący który potrafił udzielać wystarczająco czasu każdej grupie.", "disliked": "-", "comments": "-"}, {"rating": 4, "liked": "Wyjście z sali na przypisywanie tematów do koszyków", "disliked": "Troszkę więcej organizacji prac grup. Takie ramy działań - może bardziej stanowczo? Że dziś musimy wyjść z planami. Super pomysłem byłoby aby były na początku zajęć były krótkie przemówienia co się dzieje w projekcie (taki raport).", "comments": "Trzymanie się w ramach czasowych zajęć :)"}, {"rating": 3, "liked": "Charakter impact projektow- mamy realny wplyw na otoczenie.", "disliked": "Lepsza organizacja grup. Wiecej tematow technicznych.", "comments": ""}, {"rating": 4, "liked": "Możliwość poznania wielu narzędzi, dostosowanych do wybranych zadań(grafika, kodowanie, generacja tekstu)", "disliked": "Brak pojedynczych zajęć przedstawiający działanie i funkcje narzędzi, wymagało to przeglądania ich samodzielnie i prowadzenia powtarzalnych testów.", "comments": "-tworzenie pomniejszych zadań jako obowiązkowe (karta postaci, pojedyńcze zadania jako \"praca domowa\")\n-prowadzenie jednych zajęć poświęconym przedstawieniu wszystkich narzędzi, do każdego zadania(programowanie, generacja tekstu, generacja i korekty graficzne, text to speech)\n-"}, {"rating": 4, "liked": "Możliwość realizacji projektów", "disliked": "Zbyt duży chaos jeśli chodzi o pracę w grupach", "comments": ""}, {"rating": 2, "liked": "Narzędzia ai - ale w tym celu lepiej zapisać się na narzędziownik", "disliked": "Nie rozumiem celu spotkań. Niewiele się dzieje i koncepcja jest niejasna. Co tydzień nowe polecajki, ale już męczą. Samo podejście do zajęć wg mnie za mocno idealistyczne", "comments": ""}, {"rating": 5, "liked": "To ze działamy poza zajeciami", "disliked": "", "comments": ""}, {"rating": 6, "liked": "Możliwość zrobienia projektu, prowadzenie", "disliked": "", "comments": ""}, {"rating": 6, "liked": "prowadzący spoko ziomek, wprowadza miłą atmosferę, motywuje i zdaje się być dobrze rozeznanym w temacie", "disliked": "nie wiem, sorry.", "comments": ""}, {"rating": 5, "liked": "Luźna atmosfera, aktualna wiedza i praktycznie podejście", "disliked": "", "comments": ""}, {"rating": 4, "liked": "Możliwość zrobienia czegoś praktycznego, praca w zespole, sprawna komunikacja na Discordzie, nauka nowych narzędzi i ich realizacja w praktyce, miła atmosfera", "disliked": "Przez side questy jest trochę chaos. Bardzo dużo pracy w domu, a mało czasu na pracę podczas zajęć (dużo czasu na zajęciach schodzi na ogólne sprawy organizacyjne, opowiadanie o AI, pokazywanie innych projektów - jest za mało czasu na pracę w grupach). Mało czasu na konsultacje podczas zajęć. Proces zawężania listy pomysłów był niefortunny. Lepiej byłoby wrzucić wszystko pomysły na jakąś stronę lub wypisać je na Discordzie, żeby uczestnicy mogli głosować. Na Discordzie jest trochę chaos - za dużo wątków i kanałów, lepiej jakby wszystkie zajęcia były osobno", "comments": ""}]}, "narzedzia_ai": {"id": "narzedzia_ai", "label": "Narzędzia AI", "short": "Narzędzia AI", "semester": "summer", "date": "2025/26", "has_qual": true, "rows": [{"rating": 4, "liked": "Atmosfera", "disliked": "", "comments": ""}, {"rating": 6, "liked": "Miła atmosfera, sympatyczni prowadzący", "disliked": "Nic", "comments": ""}, {"rating": 5, "liked": "poznanie nowych narzędzi AI, ćwiczenia", "disliked": "niektórzy prowadzący (liczba pojedyńcza)", "comments": ""}, {"rating": 4, "liked": "Wszechstronność tematów", "disliked": "Za mało uwagi poświęconej kontrowersja związanym z AI", "comments": ""}, {"rating": 6, "liked": "Pokazywanie nowych możliwości o których nawet nie miałam pojęcia", "disliked": "Sale aby sufit nie gnił a tak to wszystko dobrze", "comments": ""}, {"rating": 6, "liked": "Najbardziej mi się podobają prowadzące, i przygotowany materiał na zajęciach, ale chciał bym bardziej sposób użycia ai i jeszcze więcej narzędzi", "disliked": "W sumie nie wiem co powiedzieć", "comments": "-"}, {"rating": 6, "liked": "Praktyczne zastosowania narzędzi, cheaty jak oszczędzać tokeny, bardzo dużo nowych narzędzi, których w ogóle nie znałam, luźna atmosfera", "disliked": "Element zajęć o grammarly, Wordzie i etyce był masakryczny, ale chyba nie dało się bez tego", "comments": "Rozpiska z dostępnymi ai i porównanie ich szczególnej skuteczności / wad."}, {"rating": 4, "liked": "Wiedza o nowych instrumentach ai oraz jak imi korzystać się.", "disliked": "Niektóre zadania zaproszonych nauczycieli byli nie realistyczne do spełnienia w ramach czasowych zajęcia.", "comments": ""}, {"rating": 5, "liked": "Atmosfera, praktyka przez \"zabawę\" :D", "disliked": "Zajęcia z Zotero mogły być troche mniej anty-ai i straszące ludzi (minus dla prowadzącej :( )", "comments": ""}, {"rating": 5, "liked": "Zrozumiałe przedstawianie narzędzi, różnorodność (dzięki kilku prowadzącym), aktualność informacji i ciekawe „nowinki”", "disliked": "Zabrakło mi mocniejszej struktury i ramy przy oddawaniu zadań domowych — opcje wysłania na forum/wysłania prywatnie/nie wysłania wcale/wysłania poza discordem są trochę przytłaczające i skłaniały mnie do trzeciej opcji mimo wykonania zadania", "comments": ""}, {"rating": 5, "liked": "Poznalem 12 roznych narzedzi.", "disliked": "Duzo czasu spedza sie na badaniu i sprawdzaniu narzedzi.", "comments": "Pokazac wiecej przykladow jak uzytkownicy uzywaja narzedzi. Student ma jasnosc jakie 12 rozwiazania moze rozwinac. Ponadto samodzielnie odkrywa wlasne."}]}, "zrozumiec_og": {"id": "zrozumiec_og", "label": "Zrozumieć AI (OG)", "short": "Zrozumieć AI (OG)", "semester": "summer", "date": "2025/26", "has_qual": true, "rows": [{"rating": 6, "liked": "Aktualności, nowości", "disliked": "", "comments": ""}, {"rating": 6, "liked": "Al news, bardzo interesujące", "disliked": "Nic takiego nie przychodzi mi na myśl", "comments": "Nie mam uwag"}, {"rating": 5, "liked": "AI newsy", "disliked": "nic bym nie zmienial", "comments": ""}, {"rating": 4, "liked": "Bardzo bieżące informacje", "disliked": "Przydało by się trochę bardziej krytycznego i mniej czasem lekko naiwnie optymistycznego podejścia do ai (szeroko).", "comments": ""}, {"rating": 5, "liked": "Bieżące newsy związane z AI", "disliked": "Wprowadzić słownik ważnych pojęć dla osób, które nie mają dużego obeznanie w temacie, w formie pliku Word", "comments": ""}, {"rating": 5, "liked": "Praca w parach (omawianie tematu)", "disliked": "Salę :), poza tym nie widzę co możnaby zmienić", "comments": ""}, {"rating": 5, "liked": "Przedstawianie przez Prowadzącego nowości związane z AI (nowe modele, ciekawostki, odkrycia)", "disliked": "Można by było zwiększyć częstotliwość rozmów/dyskusji - np. dotyczących moralności korzystania z AI, jego wpływu na relacje międzyludzkie czy naszą prywatność", "comments": ""}, {"rating": 4, "liked": "AI newsy, wiedza prowadzącego na temat zagadnienia AI, luzne i przyjazne podejście do studentów, chęć konwersacji ze studentami, anegdoty żarty itp", "disliked": "nie wiem 😭", "comments": ""}, {"rating": 6, "liked": "Prowadzący w bardzo ciekawy sposób omawia temat rozumienia AI, atmosfera panująca na zajęciach", "disliked": "Nie mam się do czego przyczepić", "comments": ""}, {"rating": 6, "liked": "Otwartość do tematu AI w sposób konstruktywny, nie w pełni za i nie w pełni przeciw", "disliked": "Gubiłem się czasem w formie zajęć, przez to że jednocześnie są zajęcia wydziałowe i ogón na discordzie gubię się co należy do ogóna, a co do wydziałowego", "comments": "Myślę że fajne by był jakby część zajęć była w formie hybrydowej, zdalnej, albo po prostu dodatkowo jakieś spotkania pokazujące online jak działać z różnymi narzędziami AI"}, {"rating": 5, "liked": "Przedstawienie materiału w różnych dziedzinach i jak i nawiązań do dzisiejszych problemów świata", "disliked": "Lepsze wyjaśnienie projektu, na czym polega co można zrobić ponieważ uważam, że było tego mało a jest bardzo ważne jako zaliczenie końcowe", "comments": "Nie jak dla mnie wszystko w porządku miłego dnia"}]}, "sztuka": {"id": "sztuka", "label": "Zrozumieć AI: Sztuka Współistnienia", "short": "Zrozumieć AI: Sztuka Współistnienia", "semester": "summer", "date": "2025/26", "has_qual": true, "rows": [{"rating": 6, "liked": "Ai news i możliwość rozkmina", "disliked": "Niewystarczający dostęp do materiałów z zajęć", "comments": ""}, {"rating": 6, "liked": "swobodna atmosfera, dyskusje na tematy ktore nas rzeczywiscie interesuja", "disliked": "nic", "comments": ""}, {"rating": 5, "liked": "Dyskusje", "disliked": "Więcej porad do promptów", "comments": "Więcej porad jak pisać prompty"}, {"rating": 6, "liked": "Podejmujemy bardzo ciekawe i ważne dla nas jako jednostek i ludzkości tematy.", "disliked": "-", "comments": "-"}]}};
+const THEMES_DATA = {"themes_liked": {"news": {"label": "AI newsy i aktualność", "icon": "📡", "desc": "Cotygodniowe newsy AI, najnowsze modele, nowości", "count": 17, "items": ["Aktywność na discord: newsy, ciekawostki, najnowszy update. Otwartość prowadzącego.", "Newsy AI", "segment Newsów jest przydatny", "Newsy", "cotygodniowe newsy dot. AI", "Mega są AI news", "Newsy z AI są totalnie cool!", "Najnowsza wiedza / AI news", "AI newsy na początku wszystkich zajęć", "Aktualności, nowości", "Al news, bardzo interesujące", "AI newsy", "Bardzo bieżące informacje", "Bieżące newsy związane z AI", "Przedstawianie przez Prowadzącego nowości związane z AI (nowe modele, ciekawostki itp)", "AI newsy, wiedza prowadzącego na temat zagadnienia AI, luzne i przyjazne podejście", "Ai news i możliwość rozkmina"], "winter_count": 9, "summer_count": 8}, "host": {"label": "Prowadzący", "icon": "🎓", "desc": "Osoba, pasja, podejście, kontakt ze studentami, \"flow\"", "count": 10, "items": ["przygotowanie prowadzącego do zajęć", "luźne podejście prowadzącego", "elastyczność jeśli chodzi o komunikację, „zarażanie\" pasją, luz w zwracaniu się do siebie (zmniejsza dystans)", "Flow prowadzącego", "dobry kontakt ze Studentami", "swobodna formuła, ciekawa tematyka i w widoczny sposób szczere zaangażowanie prowadzącego w temat (nie zawsze tak jest)", "Praca w grupach. Prowadzący który potrafił udzielać wystarczająco czasu każdej grupie", "prowadzący spoko ziomek, wprowadza miłą atmosferę, motywuje i zdaje się być dobrze zorientowany", "Najbardziej mi się podobają prowadzące, i przygotowany materiał na zajęciach, a także spoiwo które utrzymuje wszystko razem", "Prowadzący w bardzo ciekawy sposób omawia temat rozumienia AI, atmosfera panująca na zajęciach"], "winter_count": 6, "summer_count": 4}, "vibe": {"label": "Atmosfera", "icon": "🌿", "desc": "Luźna, swobodna, miła, wolność słowa", "count": 7, "items": ["Dużo interakcji, luźna atmosfera, sam pomysł tematu (zrozumienie AI), miła atmosfera.", "Przyjazna, luźna atmosfera", "luźna atmosfera na zajęciach, wolność słowa (można bez problemu powiedzieć swoje zdanie), fajna tematyka zajęć", "Luźna atmosfera, aktualna wiedza i praktycznie podejście", "Atmosfera", "Miła atmosfera, sympatyczni prowadzący", "Atmosfera, praktyka przez \"zabawę\" :D"], "winter_count": 3, "summer_count": 4}, "tools": {"label": "Narzędzia AI", "icon": "🛠️", "desc": "Poznanie nowych narzędzi, praktyka", "count": 8, "items": ["Możliwość wykorzystania praktycznie ai", "Możliwość poznania wielu narzędzi, dostosowanych do wybranych zadań(grafika, kod, prezentacje, dokumenty)", "Narzędzia ai - ale w tym celu lepiej zapisać się na narzędziownik", "poznanie nowych narzędzi AI, ćwiczenia", "Praktyczne zastosowania narzędzi, cheaty jak oszczędzać tokeny, bardzo dużo nowych perspektyw", "Wiedza o nowych instrumentach ai oraz jak imi korzystać się.", "Zrozumiałe przedstawianie narzędzi, różnorodność (dzięki kilku prowadzącym), aktualne informacje na temat AI", "Poznalem 12 roznych narzedzi."], "winter_count": 0, "summer_count": 8}, "discoveries": {"label": "Ciekawostki / nowa wiedza", "icon": "💡", "desc": "Alternatywy ChatGPT, rzeczy o których \"nie miałam pojęcia\"", "count": 9, "items": ["Dużo ciekawostek", "Informacje, o których nie miałam pojęcia", "Podoba mi się, że dowiaduję się o alternatywach Chata GPT i jakie możliwości już teraz ma AI np to tworzenie wirtualnych wszechświatów", "Konkrety w informacjach :)", "Dowiedziałam się dużo nowych informacji i ciekawostek o AI", "Ciekawostki o AI, dyskusje, nowości, polecajki, super podejście do studenta", "ciekawostki, AI news, forma prowadzenia zajęć (luźna dyskusja), tworzenie discorda, ćwiczenia na zajęciach", "Co kazde zajecia cos nowego - nowe pomysly, inspiracje, propozycje, informacje… Mega", "Pokazywanie nowych możliwości o których nawet nie miałam pojęcia"], "winter_count": 7, "summer_count": 2}, "topics": {"label": "Tematyka", "icon": "📚", "desc": "Ważna, przyszłościowa, dobrze dobrana", "count": 12, "items": ["Tematy zajęć", "informacje przekazywane są rzeczywiście „ważne\" i użyteczne", "Mega ważne, rozwojowe, przyszłościowe (i teraźniejszościowe)", "Tematyka b. ciekawa, bardzo lubię AI newsy, liczne pomysły, przykłady i zorganizowane wgłębianie się w AI step-by step.", "Podoba mi się tematyka zajęć i z tego względu cieszę się, że znalazłam te zajęcia. Uważam, że poruszamy ważne tematy, mamy przestrzeń do własnych przemyśleń i uwag, które zawsze są wysłuchiwane. Widać zaangażowanie i świetną pracę prowadzącego.", "Odwołania do praktyków i przyszłości", "ciekawa tematyka, dobry dobór materiału", "zapotrzebowanie na taką tematykę", "Wszechstronność tematów", "Otwartość do tematu AI w sposób konstruktywny, nie w pełni za i nie w pełni przeciw", "Przedstawienie materiału w różnych dziedzinach i jak i nawiązań do dzisiejszych czasów", "Podejmujemy bardzo ciekawe i ważne dla nas jako jednostek i ludzkości tematy."], "winter_count": 8, "summer_count": 4}, "projects": {"label": "Praktyczne projekty", "icon": "🚀", "desc": "Realne wpływ, wychodzenie poza uczelnię", "count": 7, "items": ["Wychodzenie z projektem poza uczelnie", "Praktyczna praca nad aktualną tematyką AI co do której warto się edukować", "Charakter impact projektow- mamy realny wplyw na otoczenie.", "Możliwość realizacji projektów", "To ze działamy poza zajeciami", "Możliwość zrobienia projektu, prowadzenie", "Możliwość zrobienia czegoś praktycznego, praca w zespole, sprawna komunikacja na zajęciach"], "winter_count": 0, "summer_count": 7}, "discussions": {"label": "Dyskusje i interaktywność", "icon": "💬", "desc": "Możliwość rozmowy, klub dyskusyjny", "count": 8, "items": ["Są angażujące, pobudzające do myślenia i dyskusji, odmienne od innych zajęć. Stanowią miłą odskocznię.", "możliwość dyskusji", "otwarcie na opinie", "Klub Dyskusyjny", "Kontakt z nowo poznanymi osobami oraz prowadzącym, dużo udostępnionej wiedzy", "Praca w parach (omawianie tematu)", "swobodna atmosfera, dyskusje na tematy ktore nas rzeczywiscie interesuja", "Dyskusje"], "winter_count": 4, "summer_count": 4}, "format": {"label": "Forma zajęć", "icon": "🎬", "desc": "Filmiki, prezentacje, organizacja, struktura", "count": 15, "items": ["Sposób prowadzenia (nie mówienie monotonnie)", "Merytoryczna i przewidywalna forma zajęć. Wszystkie zajęcia wpisywały się w podobny schemat", "W porównaniu z innymi zajęciami temat jest ciekawie śledzony, pomaga w tym dobrze zrobione prezentacje i nie powolny sposób opowiadania.", "filmiki, polecania (książkowe inside AI)", "sposób prowadzenia zajęć", "filmiki (interaktywność zajęć)", "uważam, że jest zaliczenie jest adekwatne i super, że można odrabiać zajęcia", "Filmiki ; sposób prowadzenia zajęć;", "Filmiki", "Prezentacje", "organizacja zajęć (są newsy, filmiki, praca w grupach), dużo dodatkowych materiałów, zajęcia są prowadzone z pasją i ogólnie jest super!", "w prosty i przyjemny sposób przedstawiona tematyka", "ankieta w środku semestru :)", "alternatywne zadania dla osób, które akurat nie pracują w zespołach", "Wyjście z sali na przypisywanie tematów do koszyków"], "winter_count": 14, "summer_count": 1}}, "themes_disliked": {"more_practice": {"label": "Więcej praktyki z narzędziami AI", "icon": "🛠️", "desc": "Krótkie ćwiczenia, więcej testowania narzędzi", "winter_count": 8, "summer_count": 2, "total_count": 10, "winter_items": ["Większe zaangażowanie i pytanie każdego o opinie, nie tylko tych, co się zgłaszają. + interaktywne treści.", "Praktyczne wykorzystanie narzędzi AI i jak możemy je użyć w praktyce w nauce/pracy", "Więcej ćwiczeń i grupowej dyskusji z narzędziami", "być może więcej zaangażowania w grupach? ćwiczeń, aby podtrzymywać zaangażowanie i uwagę :)", "jest super :) można byłoby dodać rzeczywiście dodatkowe korzystanie z nowych narzędzi (jak to do programowania)", "może trochę praktyki pracy na narzędziach.", "Krótkie ćwiczenia na każdych/prawie każdych zajęciach z AI (np. zadanie, aby uzyskać od AI konkretną odpowiedź)", "Więcej o narzędziach AI"], "summer_items": ["Brak pojedynczych zajęć przedstawiający działanie i funkcje narzędzi, wymagało to ode mnie samodzielnego sprawdzania i instalacji", "Więcej porad do promptów"]}, "deeper_tech": {"label": "Głębiej technicznie", "icon": "🧠", "desc": "Jak działają LLMy, machine learning, kod", "winter_count": 3, "summer_count": 0, "total_count": 3, "winter_items": ["spodziewałem się bardziej analitycznego spojrzenia jak działa AI, spojrzenie w kod, jak AI analizuje prompty itp.", "dodać więcej informacji na temat tego jak LLMy działają od środka", "dodać machine learning"], "summer_items": []}, "project_chaos": {"label": "Chaos / niejasna struktura projektu", "icon": "🌪️", "desc": "Brak ram, niejasny cel spotkań, side questy", "winter_count": 0, "summer_count": 6, "total_count": 6, "winter_items": [], "summer_items": ["Troszkę więcej organizacji prac grup. Takie ramy działań - może bardziej stanowczo i konkretnie", "Lepsza organizacja grup. Wiecej tematow technicznych.", "Nie rozumiem celu spotkań. Niewiele się dzieje i koncepcja jest niejasna. Co tydzień to samo", "Przez side questy jest trochę chaos. Bardzo dużo pracy w domu, a mało czasu na pracę w sali", "Gubiłem się czasem w formie zajęć, przez to że jednocześnie są zajęcia wydziałowe a jednocześnie projekt", "Lepsze wyjaśnienie projektu, na czym polega co można zrobić ponieważ uważam, że jest mało jasno wytłumaczony"]}, "grading": {"label": "Forma zaliczenia / wymagania", "icon": "📋", "desc": "Niejasne zadania domowe, kryteria oceniania", "winter_count": 2, "summer_count": 3, "total_count": 5, "winter_items": ["forma zaliczenia - mało precyzyjne wytyczne", "zadania domowe - niejasne, co jest zadane"], "summer_items": ["Niektóre zadania zaproszonych nauczycieli byli nie realistyczne do spełnienia w wymaganym terminie", "Zabrakło mi mocniejszej struktury i ramy przy oddawaniu zadań domowych — opcje wyboru i jasne wytyczne pomogłyby skończyć projekt na czas", "Duzo czasu spedza sie na badaniu i sprawdzaniu narzedzi."]}, "group_work": {"label": "Praca w grupach", "icon": "👥", "desc": "Problemy z grupą, nierówne zaangażowanie", "winter_count": 2, "summer_count": 2, "total_count": 4, "winter_items": ["nierówne zaangażowanie grupy od wyjścia", "Nie jestem fanką pracy w grupach."], "summer_items": ["Zbyt duży chaos w pracy w grupach", "Zbyt duży chaos jeśli chodzi o pracę w grupach"]}, "attendance": {"label": "Obecności / aktywność / lęk", "icon": "🎤", "desc": "Punkty za aktywność jako problem dla introwertyków", "winter_count": 4, "summer_count": 0, "total_count": 4, "winter_items": ["Punkty za obecność - nie mogę ich zebrać, bo boję się mówić na forum", "nie podoba mi się że 30% oceny to aktywność bo mam lęki społeczne i ciężko zabrać głos :(", "moim skromnym zdaniem, powinna być jedna nieobecność bez konsekwencji (tak totalnie)", "Stosunkowo rygorystyczne ocenianie obecności (niższa ocena przy 2 nieobecnościach)"], "summer_items": []}, "content": {"label": "Treść do poprawy", "icon": "📉", "desc": "Powierzchowność, błędy faktograficzne, dobór tematów", "winter_count": 6, "summer_count": 6, "total_count": 12, "winter_items": ["odjąć informacje, które są łatwo dostępne, wiedzą powszechną", "Dyskusja na temat poważnych współczesnych problemów, nie powierzchownie. Szukanie ciekawszych filmów (dłuższych - wspólne oglądanie i komentarz).", "Na początku były ciekawsze tematy zajęć.", "przedstawienie Tech CEO oligarchów (np. Altman, Musk) było zbyt mało szczegółowe i niedokładnie opisuje ich układ w AI (np. początki openAi jako non profit, wkład Muska w openAI, nazwanie Altmana „twórcą chataGPT\" XD)", "może czasem za bardzo przeważa dyskusja? chętnie słyszałbym więcej informacji w może bardziej wykładowej formie", "jest fajnie, ale czasem część zajęć robi się mniej merytoryczna"], "summer_items": ["niektórzy prowadzący (liczba pojedyńcza)", "Za mało uwagi poświęconej kontrowersja związanym z AI", "Element zajęć o grammarly, Wordzie i etyce był masakryczny, ale chyba nie dało się tego zrobić lepiej", "Zajęcia z Zotero mogły być troche mniej anty-ai i straszące ludzi (minus dla prowadzącego)", "Przydało by się trochę bardziej krytycznego i mniej czasem lekko naiwnie optymistycznego podejścia", "Można by było zwiększyć częstotliwość rozmów/dyskusji - np. dotyczących moralności i etyki w korzystaniu z AI"]}, "all_good": {"label": "\"Wszystko OK\" / nie wiem", "icon": "✓", "desc": "Brak konkretnych sugestii zmian", "winter_count": 4, "summer_count": 9, "total_count": 13, "winter_items": ["Całe myślę, że tu nie trzeba nic zmieniać, to mój indywidualny problem :)", "ciężko powiedzieć.", "Uważam, że jest dobrze tak jak jest. Nie trzeba niczego poprawiać/dodawać", "mi podoba się wszystko"], "summer_items": ["w sumie to nie wiem", "nie wiem, sorry.", "Nic", "W sumie nie wiem co powiedzieć", "Nic takiego nie przychodzi mi na myśl", "nic bym nie zmienial", "nie wiem 😭", "Nie mam się do czego przyczepić", "nic"]}, "other": {"label": "Inne pojedyncze sygnały", "icon": "➕", "desc": "Sala, pora dnia, Discord, atmosfera, dla początkujących, multimedia", "winter_count": 9, "summer_count": 5, "total_count": 14, "winter_items": ["Dużo rzeczy w obszarach o których nawet nie słyszałam, zbyt małe wyjaśnienia na ich temat, za dużo czasu na rozważaniu jednej rzeczy (np. wspominanie o jednym wydarzeniu na różnych zajęciach).", "Po zajęciach czasami wychodzę z myślą „nie chcę żyć, bo AI zabierze nam wszystko\". Może lepiej by było zrobić pół zajęć dobijających nas, a drugie pół bardziej miłymi tematami", "Pora dnia (choć problem s. zimowego) (-)", "Większy rygor co do udzielania głosu studentom - czasem niektórzy albo powtarzali podobne odpowiedzi albo niektórzy silnie odpływali - strata cennego czasu", "czasami trudne nazwy takie informatyczno ścisłe", "Niektóre dyskusje otwarte wnoszą dużo pojedynczym osobom, ale nie dla całej grupy - zbyt spersonalizowane", "więcej filmików, wywiadów, eksperymentów odnośnie AI", "trochę chaotyczny Discord", "moooże trochę za mało dyscypliny, nieco zbyt nieformalna atmosfera"], "summer_items": ["Zaczynanie bardziej od podstaw", "Sale aby sufit nie gnił a tak to wszystko dobrze", "Wprowadzić słownik ważnych pojęć dla osób, które nie mają dużego obeznanie w temacie", "Salę :), poza tym nie widzę co możnaby zmienić", "Niewystarczający dostęp do materiałów z zajęć"]}}};
+// Aggregate definitions — tier-1 tabs
+const AGGREGATES = {
+  all: {
+    label: 'Wszystkie ankiety',
+    short: 'Wszystkie',
+    surveyIds: Object.keys(SURVEYS),
+    tagline: 'Łącznie · 2 semestry · 6 ankiet',
+  },
+  winter: {
+    label: 'Semestr zimowy 2025',
+    short: 'Zima 2025',
+    surveyIds: Object.keys(SURVEYS).filter(id => SURVEYS[id].semester === 'winter'),
+    tagline: 'Zrozumieć AI · 2 ankiety · grudzień + luty',
+  },
+  summer: {
+    label: 'Semestr letni 2025/26',
+    short: 'Lato 2025/26',
+    surveyIds: Object.keys(SURVEYS).filter(id => SURVEYS[id].semester === 'summer'),
+    tagline: '4 kursy · ankiety końcowe',
+  },
+};
+
+const RATING_COLORS = { 1: '#a8362a', 2: '#e85a3c', 3: '#ff9c4e', 4: '#f0c674', 5: '#7dd6a8', 6: '#4ee1c5' };
+const SCALE_LABELS = { 1: 'niedost.', 2: 'mierna', 3: 'dop.', 4: 'dobra', 5: 'b.dobra', 6: 'celująca' };
+
+const SECTIONS = [
+  { key: 'liked',    cls: 's-liked',   icon: '✦', title: 'Co się podobało',   sub: 'Mocne strony zajęć' },
+  { key: 'disliked', cls: 's-improve', icon: '⟳', title: 'Co warto poprawić', sub: 'Sugestie zmian' },
+  { key: 'comments', cls: 's-comment', icon: '＋', title: 'Inne uwagi',         sub: 'Dodatkowe komentarze' },
+];
+
+const t1El = document.getElementById('tabsTier1');
+const t2El = document.getElementById('tabsTier2');
+const panelsEl = document.getElementById('panels');
+
+let activeFilter = {};
+let currentTier1 = 'all';
+let currentTier2 = null; // null = aggregate view; otherwise survey id
+
+// ===== HELPERS =====
+function avg(arr) { return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function median(arr) {
+  const s = [...arr].sort((a,b)=>a-b);
+  const m = Math.floor(s.length/2);
+  return s.length % 2 ? s[m] : ((s[m-1]+s[m])/2).toFixed(1);
+}
+function plRows(n) { return n === 1 ? 'głos' : (n < 5 && n > 0 ? 'głosy' : 'głosów'); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+function getRows(view) {
+  // view: { type:'aggregate', id:'all'|'winter'|'summer' } OR { type:'survey', id:surveyId }
+  if (view.type === 'aggregate') {
+    return AGGREGATES[view.id].surveyIds.flatMap(sid => SURVEYS[sid].rows);
+  } else {
+    return SURVEYS[view.id].rows;
+  }
+}
+
+function viewKey(view) {
+  return view.type + ':' + view.id;
+}
+
+// ===== DONUT =====
+function buildDonut(rows, viewKeyStr) {
+  const counts = {};
+  rows.forEach(r => counts[r.rating] = (counts[r.rating]||0) + 1);
+  const ratings = Object.keys(counts).map(Number).sort((a,b)=>a-b);
+  const total = rows.length;
+
+  const cx = 110, cy = 110, r = 82, r2 = 52;
+  let acc = 0;
+
+  const segs = ratings.map(rating => {
+    const count = counts[rating];
+    const frac = count / total;
+    const startA = acc * 2 * Math.PI - Math.PI/2;
+    acc += frac;
+    const endA = acc * 2 * Math.PI - Math.PI/2;
+    const large = frac > 0.5 ? 1 : 0;
+    let path;
+    if (frac >= 0.999) {
+      path = `M ${cx} ${cy-r} A ${r} ${r} 0 1 1 ${cx-0.01} ${cy-r} L ${cx-0.01} ${cy-r2} A ${r2} ${r2} 0 1 0 ${cx} ${cy-r2} Z`;
+    } else {
+      const x1 = cx + r * Math.cos(startA);
+      const y1 = cy + r * Math.sin(startA);
+      const x2 = cx + r * Math.cos(endA);
+      const y2 = cy + r * Math.sin(endA);
+      const x3 = cx + r2 * Math.cos(endA);
+      const y3 = cy + r2 * Math.sin(endA);
+      const x4 = cx + r2 * Math.cos(startA);
+      const y4 = cy + r2 * Math.sin(startA);
+      path = `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${x3} ${y3} A ${r2} ${r2} 0 ${large} 0 ${x4} ${y4} Z`;
+    }
+    return { rating, count, path, frac };
+  });
+
+  const a = avg(rows.map(r=>r.rating));
+  const svg = `
+    <svg class="donut-svg" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(78,225,197,0.06)"/>
+          <stop offset="100%" stop-color="rgba(78,225,197,0)"/>
+        </radialGradient>
+      </defs>
+      <circle cx="110" cy="110" r="48" fill="url(#centerGlow)"/>
+      ${segs.map(s => `<path class="seg" data-rating="${s.rating}" data-view="${viewKeyStr}" d="${s.path}" fill="${RATING_COLORS[s.rating]}" style="color:${RATING_COLORS[s.rating]}"/>`).join('')}
+      <text x="110" y="106" text-anchor="middle" font-family="Fraunces, serif" font-size="34" font-weight="500" fill="#ebe6db" style="font-variation-settings: 'opsz' 96;">${a.toFixed(2)}</text>
+      <text x="110" y="126" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="2" fill="#6e7585" font-weight="500">N = ${total}</text>
+    </svg>
+  `;
+
+  const legend = ratings.map(rt => `
+    <span class="legend-item" data-rating="${rt}" data-view="${viewKeyStr}">
+      <span class="swatch" style="background:${RATING_COLORS[rt]}; color:${RATING_COLORS[rt]}"></span>
+      <span class="lbl-num">${rt}</span>
+      <span class="lbl-cnt">${counts[rt]} ${plRows(counts[rt])}</span>
+    </span>
+  `).join('');
+
+  return svg + `<div class="legend">${legend}</div>`;
+}
+
+// ===== BREAKDOWN (per-survey mini-bars) =====
+function buildBreakdown(surveyIds, currentAggKey) {
+  const ranges = surveyIds.map(sid => {
+    const s = SURVEYS[sid];
+    const ratings = s.rows.map(r => r.rating);
+    return { sid, label: s.label, short: s.short, semester: s.semester, date: s.date, n: s.rows.length, avg: avg(ratings) };
+  });
+
+  // bar fill: scale avg from 1 to 6 → 0..100% so the visual matches actual scale
+  const rows = ranges.map(r => `
+    <div class="breakdown-row br-row-clickable" data-survey="${r.sid}">
+      <div class="br-name">
+        <span class="sem-tag ${r.semester}">${r.semester === 'winter' ? 'ZIMA' : 'LATO'}</span>
+        ${escapeHtml(r.short)}
+        <span class="meta">${r.date} · n=${r.n}</span>
+      </div>
+      <div class="br-bar-wrap">
+        <div class="br-bar"><div class="br-bar-fill" style="width: ${(r.avg / 6 * 100).toFixed(1)}%"></div></div>
+        <span class="br-avg">${r.avg.toFixed(2)}</span>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="breakdown">
+      <div class="breakdown-title">Rozkład wg ankiety</div>
+      ${rows}
+    </div>
+  `;
+}
+
+// ===== QUAL ITEMS — returns flat list with optional rating + source =====
+function getQualItems(view, sectionKey) {
+  const surveyIds = view.type === 'aggregate'
+    ? AGGREGATES[view.id].surveyIds
+    : [view.id];
+  const items = [];
+  for (const sid of surveyIds) {
+    const s = SURVEYS[sid];
+    if (!s.has_qual) continue;
+    if (s.qual_unlinked) {
+      const arr = (s.qual && s.qual[sectionKey]) || [];
+      arr.forEach(text => items.push({ rating: null, source: s.short, text, surveyId: sid }));
+    } else {
+      s.rows.forEach(r => {
+        const v = r[sectionKey];
+        if (v && v !== '-' && v.length > 0) {
+          items.push({ rating: r.rating, source: s.short, text: v, surveyId: sid });
+        }
+      });
+    }
+  }
+  return items;
+}
+
+function viewHasUnlinkedQual(view) {
+  const ids = view.type === 'aggregate' ? AGGREGATES[view.id].surveyIds : [view.id];
+  return ids.some(sid => SURVEYS[sid].has_qual && SURVEYS[sid].qual_unlinked);
+}
+
+function viewHasAnyQual(view) {
+  const ids = view.type === 'aggregate' ? AGGREGATES[view.id].surveyIds : [view.id];
+  return ids.some(sid => SURVEYS[sid].has_qual);
+}
+
+// ===== SECTION (quotes) =====
+function buildSection(view, secDef, viewKeyStr) {
+  const items = getQualItems(view, secDef.key);
+  // Sort: rated items first (by rating desc), then unrated at the end
+  items.sort((a, b) => {
+    if (a.rating === null && b.rating === null) return 0;
+    if (a.rating === null) return 1;
+    if (b.rating === null) return -1;
+    return b.rating - a.rating;
+  });
+
+  const list = items.length === 0
+    ? `<div class="empty">— brak wpisów w tej kategorii —</div>`
+    : `<div class="quote-list" data-section="${secDef.key}" data-view="${viewKeyStr}">
+        ${items.map(it => {
+          const ratingAttr = it.rating === null ? 'null' : it.rating;
+          const badge = it.rating === null
+            ? `<span class="badge badge-unlinked" title="Komentarz nie był przypisany do konkretnej oceny">— · ${escapeHtml(it.source)}</span>`
+            : `<span class="badge">ocena ${it.rating}</span>`;
+          return `
+          <div class="quote" data-rating="${ratingAttr}">
+            ${badge}
+            ${escapeHtml(it.text)}
+          </div>`;
+        }).join('')}
+      </div>`;
+
+  return `
+    <div class="section ${secDef.cls}">
+      <h3><span class="icon">${secDef.icon}</span>${secDef.title}</h3>
+      <div class="sub">${secDef.sub} · <span class="count">${items.length}</span></div>
+      ${list}
+    </div>
+  `;
+}
+
+// ===== PANEL =====
+function buildPanel(view) {
+  const isAgg = view.type === 'aggregate';
+  const rows = getRows(view);
+  const a = avg(rows.map(r=>r.rating));
+  const ratings = rows.map(r=>r.rating);
+  const vk = viewKey(view);
+
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.dataset.view = vk;
+
+  let title, meta, hasQual = false;
+  if (isAgg) {
+    title = AGGREGATES[view.id].label;
+    meta = AGGREGATES[view.id].tagline + ` · ${rows.length} odpowiedzi`;
+    hasQual = viewHasAnyQual(view);
+  } else {
+    const s = SURVEYS[view.id];
+    title = s.label;
+    meta = `${s.semester === 'winter' ? 'Semestr zimowy' : 'Semestr letni'} · ${s.date} · ${rows.length} odpowiedzi`;
+    hasQual = s.has_qual;
+  }
+
+  const hasUnlinked = viewHasUnlinkedQual(view);
+
+  const breakdownHtml = isAgg && AGGREGATES[view.id].surveyIds.length > 1
+    ? buildBreakdown(AGGREGATES[view.id].surveyIds, view.id) : '';
+
+  const unlinkedNote = hasUnlinked ? `
+    <div class="qual-note">
+      <span class="qual-note-icon">ⓘ</span>
+      Część komentarzy (mid-term zima 2025) zebrana była anonimowo i <strong>nie jest powiązana z konkretną oceną</strong>. W tych wpisach badge pokazuje źródło ankiety zamiast oceny.
+    </div>` : '';
+
+  const filterAndSections = hasQual ? `
+    <div class="filter-bar hidden" data-view="${vk}">
+      <span>Pokazuję wypowiedzi tylko od osób, które wystawiły ocenę <strong class="fr-rating">—</strong>.${hasUnlinked ? ' <em class="fr-warn">(komentarze bez przypisanej oceny są ukryte)</em>' : ''}</span>
+      <button class="filter-clear" data-view="${vk}">Pokaż wszystkie</button>
+    </div>
+
+    ${unlinkedNote}
+
+    <div class="sections">
+      ${SECTIONS.map(s => buildSection(view, s, vk)).join('')}
+    </div>
+  ` : '';
+
+  const minR = Math.min(...ratings), maxR = Math.max(...ratings);
+  const med = median(ratings);
+
+  panel.innerHTML = `
+    <div class="course-head">
+      <div class="ch-text">
+        <div class="ch-meta">${meta}</div>
+        <h2>${escapeHtml(title)}</h2>
+        <div class="bigavg">
+          <span class="v">${a.toFixed(2)}</span>
+          <span class="denom">/ 6</span>
+        </div>
+        <div class="scale-cap">Skala 1–6 (akademicka). Mediana: ${med}, rozstęp: ${minR}–${maxR}.${isAgg ? ' Ten widok agreguje oceny ze wszystkich ankiet w tej grupie.' : (hasQual ? '' : ' Ankieta tylko z oceną liczbową.')}</div>
+      </div>
+      <div class="donut-wrap">${buildDonut(rows, vk)}</div>
+    </div>
+
+    ${breakdownHtml}
+    ${filterAndSections}
+  `;
+
+  return panel;
+}
+
+// ===== APPLY FILTER =====
+function applyFilter(viewKeyStr, rating) {
+  activeFilter[viewKeyStr] = rating;
+  const panel = document.querySelector(`.panel[data-view="${viewKeyStr}"]`);
+  if (!panel) return;
+
+  panel.querySelectorAll('.seg, .legend-item').forEach(el => {
+    if (rating == null) {
+      el.classList.remove('dimmed', 'selected');
+    } else if (Number(el.dataset.rating) === rating) {
+      el.classList.add('selected'); el.classList.remove('dimmed');
+    } else {
+      el.classList.add('dimmed'); el.classList.remove('selected');
+    }
+  });
+
+  panel.querySelectorAll('.quote').forEach(q => {
+    if (rating == null || Number(q.dataset.rating) === rating) q.classList.remove('hidden');
+    else q.classList.add('hidden');
+  });
+
+  panel.querySelectorAll('.quote-list').forEach(list => {
+    const visible = list.querySelectorAll('.quote:not(.hidden)').length;
+    let empty = list.querySelector('.filter-empty');
+    if (visible === 0) {
+      if (!empty) {
+        empty = document.createElement('div');
+        empty.className = 'empty filter-empty';
+        empty.textContent = '— nikt z tą oceną nie wpisał nic w tej sekcji —';
+        list.appendChild(empty);
+      }
+    } else if (empty) { empty.remove(); }
+  });
+
+  const bar = panel.querySelector('.filter-bar');
+  if (bar) {
+    if (rating == null) bar.classList.add('hidden');
+    else { bar.classList.remove('hidden'); bar.querySelector('.fr-rating').textContent = rating; }
+  }
+}
+
+// ===== TIER NAVIGATION =====
+function showView(view) {
+  const vk = viewKey(view);
+  let panel = document.querySelector(`.panel[data-view="${vk}"]`);
+  if (!panel) {
+    if (view.type === 'themes') {
+      panel = buildThemesPanel();
+      panel.dataset.view = vk;
+      panel.className = 'panel';
+    } else {
+      panel = buildPanel(view);
+    }
+    panelsEl.appendChild(panel);
+  }
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  panel.classList.add('active');
+}
+
+// ===== THEMES PANEL (bar charts) =====
+function buildThemesBar(themeArr, mode) {
+  // mode: 'total' (single bar) or 'split' (winter+summer paired)
+  // Determine max for scaling
+  const max = mode === 'total'
+    ? Math.max(...themeArr.map(t => t.count))
+    : Math.max(...themeArr.map(t => Math.max(t.winter_count, t.summer_count)));
+
+  const sorted = [...themeArr].sort((a, b) => {
+    if (mode === 'total') return b.count - a.count;
+    return b.total_count - a.total_count;
+  });
+
+  return sorted.map((t, idx) => {
+    const themeId = t.id;
+    let trackHtml, numbersHtml;
+
+    if (mode === 'total') {
+      const pct = max > 0 ? (t.count / max * 100) : 0;
+      trackHtml = `
+        <div class="bar-track">
+          <div class="bar-fill fill-total" style="width: ${pct.toFixed(1)}%">
+            ${pct > 18 ? `<span>${t.count}</span>` : ''}
+          </div>
+        </div>`;
+      numbersHtml = `
+        <div class="bar-numbers">
+          <span class="total">${t.count}</span>
+          <span class="chev">▶</span>
+        </div>`;
+    } else {
+      const wPct = max > 0 ? (t.winter_count / max * 100) : 0;
+      const sPct = max > 0 ? (t.summer_count / max * 100) : 0;
+      trackHtml = `
+        <div class="bar-track split">
+          <div class="bar-fill fill-winter" style="width: ${wPct.toFixed(1)}%">
+            ${t.winter_count > 0 ? `<span class="inline-label">ZIMA</span>${t.winter_count}` : ''}
+          </div>
+          <div class="bar-fill fill-summer" style="width: ${sPct.toFixed(1)}%">
+            ${t.summer_count > 0 ? `<span class="inline-label">LATO</span>${t.summer_count}` : ''}
+          </div>
+        </div>`;
+      numbersHtml = `
+        <div class="bar-numbers">
+          <div class="split-nums">
+            <span class="nw">Z ${t.winter_count}</span>
+            <span class="ns">L ${t.summer_count}</span>
+          </div>
+          <span class="chev">▶</span>
+        </div>`;
+    }
+
+    return `
+      <div class="bar-row" data-theme="${themeId}" data-mode="${mode}">
+        <div class="bar-label">
+          <span class="icon">${t.icon}</span>
+          <span class="bar-label-text">
+            <span class="name">${escapeHtml(t.label)}</span>
+            <span class="desc">${escapeHtml(t.desc)}</span>
+          </span>
+        </div>
+        ${trackHtml}
+        ${numbersHtml}
+        <div class="theme-quotes" data-theme="${themeId}" data-mode="${mode}"></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function buildThemeQuotes(theme, mode) {
+  if (mode === 'total') {
+    // For LIKED: show items by semester pill
+    // theme.items isn't separated, so reconstruct from winter_count/summer_count proportions
+    // Better: we have items as flat list; we need to know which were winter/summer
+    // Quick approach: split using THEMES_DATA structure (we don't have per-item semester for liked)
+    // Simplification: just show all items. Indicate distribution in title.
+    const items = theme.items || [];
+    const list = items.map(q => `<div class="theme-quote">${escapeHtml(q)}</div>`).join('');
+    return `
+      <div class="theme-quotes-group">
+        <div class="theme-quotes-title">
+          <span>Cytaty</span>
+          <span class="pill-w">ZIMA · ${theme.winter_count}</span>
+          <span class="pill-s">LATO · ${theme.summer_count}</span>
+        </div>
+        <div class="theme-quotes-list">${list}</div>
+      </div>
+    `;
+  } else {
+    // split mode: separate winter / summer
+    const wList = (theme.winter_items || []).map(q => `<div class="theme-quote q-winter">${escapeHtml(q)}</div>`).join('');
+    const sList = (theme.summer_items || []).map(q => `<div class="theme-quote q-summer">${escapeHtml(q)}</div>`).join('');
+    let html = '';
+    if (theme.winter_count > 0) {
+      html += `
+        <div class="theme-quotes-group">
+          <div class="theme-quotes-title"><span class="pill-w">SEMESTR ZIMOWY · ${theme.winter_count}</span></div>
+          <div class="theme-quotes-list">${wList}</div>
+        </div>`;
+    }
+    if (theme.summer_count > 0) {
+      html += `
+        <div class="theme-quotes-group">
+          <div class="theme-quotes-title"><span class="pill-s">SEMESTR LETNI · ${theme.summer_count}</span></div>
+          <div class="theme-quotes-list">${sList}</div>
+        </div>`;
+    }
+    return html;
+  }
+}
+
+function buildThemesPanel() {
+  const panel = document.createElement('div');
+
+  // Convert objects to arrays preserving id
+  const likedArr = Object.entries(THEMES_DATA.themes_liked).map(([id, t]) => ({ id, ...t }));
+  const dislikedArr = Object.entries(THEMES_DATA.themes_disliked).map(([id, t]) => ({ id, ...t }));
+
+  const totalLiked = likedArr.reduce((s, t) => s + t.count, 0);
+  const totalDislikedW = dislikedArr.reduce((s, t) => s + t.winter_count, 0);
+  const totalDislikedS = dislikedArr.reduce((s, t) => s + t.summer_count, 0);
+
+  panel.innerHTML = `
+    <div class="themes-intro">
+      <h2>Co studenci faktycznie napisali — zwinięte w motywy</h2>
+      <p>
+        Każda wypowiedź studencka została ręcznie przypisana do jednego głównego tematu.
+        Jeśli wpis dotyczył kilku spraw (np. "atmosfera + newsy"), wybrałem ten, który
+        wybrzmiewał najmocniej. Kliknij motyw, żeby zobaczyć konkretne cytaty.
+      </p>
+      <div class="meta">Kodowanie ręczne · ${totalLiked} pochwał · ${totalDislikedW + totalDislikedS} sugestii zmian · 5 ankiet z odpowiedziami otwartymi</div>
+    </div>
+
+    <section class="chart-section">
+      <div class="chart-header">
+        <h3>Co się <em>podobało</em></h3>
+        <span class="count-pill">${totalLiked} wypowiedzi · sortowane malejąco</span>
+      </div>
+      <p class="chart-sub">
+        Najczęściej wymieniane motywy w odpowiedzi na pytanie "co najbardziej Ci się podobało?"
+        Łącznie z mid-termu zimy 2025 i 4 ankiet letnich.
+      </p>
+      <div class="bar-chart" data-chart="liked">
+        ${buildThemesBar(likedArr, 'total')}
+      </div>
+    </section>
+
+    <section class="chart-section">
+      <div class="chart-header">
+        <h3>Co warto <em>poprawić</em></h3>
+        <span class="count-pill">ZIMA ${totalDislikedW} · LATO ${totalDislikedS}</span>
+        <span class="chart-legend">
+          <span class="chart-legend-item winter"><span class="dot"></span>Zima</span>
+          <span class="chart-legend-item summer"><span class="dot"></span>Lato</span>
+        </span>
+      </div>
+      <p class="chart-sub">
+        Sugestie zmian z podziałem na semestry. Niektóre tematy są wyraźnie zimowe
+        (obecności, lęk społeczny), inne typowo letnie (chaos projektu) — różnica wynika
+        z formatu zajęć.
+      </p>
+      <div class="bar-chart" data-chart="disliked">
+        ${buildThemesBar(dislikedArr, 'split')}
+      </div>
+    </section>
+  `;
+
+  // Hydrate quotes after innerHTML set, attach inside each row
+  panel.querySelectorAll('.bar-row').forEach(row => {
+    const themeId = row.dataset.theme;
+    const mode = row.dataset.mode;
+    const themesObj = mode === 'total' ? THEMES_DATA.themes_liked : THEMES_DATA.themes_disliked;
+    const theme = { id: themeId, ...themesObj[themeId] };
+    const quotesEl = row.querySelector('.theme-quotes');
+    quotesEl.innerHTML = buildThemeQuotes(theme, mode);
+  });
+
+  return panel;
+}
+
+function selectTier1(aggId) {
+  currentTier1 = aggId;
+  currentTier2 = null;
+
+  document.querySelectorAll('.tab1').forEach(t => t.classList.toggle('active', t.dataset.agg === aggId));
+
+  // Themes view: special — no tier-2 tabs
+  if (aggId === 'themes') {
+    t2El.innerHTML = '';
+    t2El.classList.add('empty');
+    showView({ type: 'themes', id: 'themes' });
+    return;
+  }
+
+  // Build tier-2 tabs
+  t2El.innerHTML = '';
+  if (aggId === 'all') {
+    t2El.classList.add('empty');
+  } else {
+    t2El.classList.remove('empty');
+    const surveyIds = AGGREGATES[aggId].surveyIds;
+    if (surveyIds.length > 1) {
+      const allBtn = document.createElement('button');
+      allBtn.className = 'tab2 active';
+      allBtn.dataset.survey = '__agg__';
+      allBtn.innerHTML = `▸ Średnia ${aggId === 'winter' ? 'zimy' : 'lata'}<span class="n">n=${getRows({type:'aggregate',id:aggId}).length}</span>`;
+      allBtn.addEventListener('click', () => selectTier2(null));
+      t2El.appendChild(allBtn);
+
+      surveyIds.forEach(sid => {
+        const s = SURVEYS[sid];
+        const btn = document.createElement('button');
+        btn.className = 'tab2';
+        btn.dataset.survey = sid;
+        btn.innerHTML = `${s.short}<span class="n">n=${s.rows.length}</span>`;
+        btn.addEventListener('click', () => selectTier2(sid));
+        t2El.appendChild(btn);
+      });
+    }
+  }
+
+  showView({ type: 'aggregate', id: aggId });
+}
+
+function selectTier2(surveyId) {
+  currentTier2 = surveyId;
+  document.querySelectorAll('.tab2').forEach(t => {
+    const v = t.dataset.survey;
+    t.classList.toggle('active', (surveyId == null && v === '__agg__') || v === surveyId);
+  });
+  if (surveyId == null) {
+    showView({ type: 'aggregate', id: currentTier1 });
+  } else {
+    showView({ type: 'survey', id: surveyId });
+  }
+}
+
+// ===== INIT =====
+['all','winter','summer'].forEach(aggId => {
+  const a = AGGREGATES[aggId];
+  const n = getRows({type:'aggregate',id:aggId}).length;
+  const btn = document.createElement('button');
+  btn.className = 'tab1';
+  btn.dataset.agg = aggId;
+  btn.innerHTML = `<span class="dot"></span><span>${a.label}</span><span class="n">n=${n}</span>`;
+  btn.addEventListener('click', () => selectTier1(aggId));
+  t1El.appendChild(btn);
+});
+
+// Themes tab — visually distinct
+const themesBtn = document.createElement('button');
+themesBtn.className = 'tab1 tab1-themes';
+themesBtn.dataset.agg = 'themes';
+themesBtn.innerHTML = `<span class="dot"></span><span>🏷️ Tematy</span><span class="n">analiza</span>`;
+themesBtn.addEventListener('click', () => selectTier1('themes'));
+t1El.appendChild(themesBtn);
+
+selectTier1('all');
+
+// Click delegation for donut filtering, breakdown rows, theme expansion
+document.addEventListener('click', e => {
+  const seg = e.target.closest('.seg, .legend-item');
+  if (seg) {
+    const r = Number(seg.dataset.rating);
+    const v = seg.dataset.view;
+    if (activeFilter[v] === r) applyFilter(v, null);
+    else applyFilter(v, r);
+    return;
+  }
+  const clear = e.target.closest('.filter-clear');
+  if (clear) { applyFilter(clear.dataset.view, null); return; }
+
+  // Theme row expand/collapse — but ignore clicks inside .theme-quotes (so reading doesn't collapse)
+  const barRow = e.target.closest('.bar-row');
+  if (barRow && !e.target.closest('.theme-quotes')) {
+    barRow.classList.toggle('expanded');
+    return;
+  }
+
+  const brRow = e.target.closest('.br-row-clickable');
+  if (brRow) {
+    const sid = brRow.dataset.survey;
+    // Only navigate if this survey is in current tier-1
+    if (AGGREGATES[currentTier1].surveyIds.includes(sid)) {
+      selectTier2(sid);
+      window.scrollTo({ top: t2El.offsetTop - 40, behavior: 'smooth' });
+    }
+  }
+});
+// ===== THEMES VISUALIZATION =====
+const THEMES = {"liked": [{"key": "TEMATYKA", "label": "Tematyka i merytoryka", "sub": "ważne, ciekawe, rozwojowe tematy", "winter": 21, "summer": 14, "total": 35, "examples_w": ["Dużo interakcji, luźna atmosfera, sam pomysł tematu (zrozumienie AI), miła atmosfera.", "Informacje, o których nie miałam pojęcia", "Merytoryczna i przewidywalna forma zajęć. Wszystkie zajęcia wpisywały się w podobny schemat", "Podoba mi się, że dowiaduję się o alternatywach Chata GPT i jakie możliwości już teraz ma AI np to tworzenie wirtualnych wszechświatów", "Konkrety w informacjach :)"], "examples_s": ["Możliwość wykorzystania praktycznie ai", "Kontakt z nowo poznanymi osobami oraz prowadzącym, dużo udostępnionej wiedzy", "Możliwość poznania wielu narzędzi, dostosowanych do wybranych zadań(grafika, kodowanie, generacja tekstu)", "Możliwość realizacji projektów", "Możliwość zrobienia projektu, prowadzenie"]}, {"key": "AI_NEWS", "label": "AI newsy / aktualności", "sub": "cotygodniowe newsy, ciekawostki, polecajki", "winter": 15, "summer": 12, "total": 27, "examples_w": ["Dużo ciekawostek", "Aktywność na discord: newsy, ciekawostki, najnowszy update. Otwartość prowadzącego.", "Newsy AI", "segment Newsów jest przydatny", "Dowiedziałam się dużo nowych informacji i ciekawostek o AI"], "examples_s": ["Co kazde zajecia cos nowego - nowe pomysly, inspiracje, propozycje, informacje… Mega", "Praktyczna praca nad aktualną tematyką AI co do której warto się edukować", "Luźna atmosfera, aktualna wiedza i praktycznie podejście", "Zrozumiałe przedstawianie narzędzi, różnorodność (dzięki kilku prowadzącym), aktualność informacji i ciekawe „nowinki”", "Aktualności, nowości"]}, {"key": "PROWADZACY", "label": "Prowadzący", "sub": "pasja, kontakt, podejście do studenta", "winter": 12, "summer": 10, "total": 22, "examples_w": ["przygotowanie prowadzącego do zajęć", "luźne podejście prowadzącego", "Aktywność na discord: newsy, ciekawostki, najnowszy update. Otwartość prowadzącego.", "elastyczność jeśli chodzi o komunikację, „zarażanie\" pasją, luz w zwracaniu się do siebie (zmniejsza dystans)", "organizacja zajęć (są newsy, filmiki, praca w grupach), dużo dodatkowych materiałów, zajęcia są prowadzone z pasją i ogólnie jest super!"], "examples_s": ["Kontakt z nowo poznanymi osobami oraz prowadzącym, dużo udostępnionej wiedzy", "Praca w grupach. Prowadzący który potrafił udzielać wystarczająco czasu każdej grupie.", "prowadzący spoko ziomek, wprowadza miłą atmosferę, motywuje i zdaje się być dobrze rozeznanym w temacie", "Miła atmosfera, sympatyczni prowadzący", "Najbardziej mi się podobają prowadzące, i przygotowany materiał na zajęciach, ale chciał bym bardziej sposób użycia ai i jeszcze więcej narzędzi"]}, {"key": "ATMOSFERA", "label": "Atmosfera", "sub": "luźna, swobodna, przyjazna", "winter": 7, "summer": 10, "total": 17, "examples_w": ["luźne podejście prowadzącego", "Dużo interakcji, luźna atmosfera, sam pomysł tematu (zrozumienie AI), miła atmosfera.", "Przyjazna, luźna atmosfera", "luźna atmosfera na zajęciach, wolność słowa (można bez problemu powiedzieć swoje zdanie), fajna tematyka zajęć", "elastyczność jeśli chodzi o komunikację, „zarażanie\" pasją, luz w zwracaniu się do siebie (zmniejsza dystans)"], "examples_s": ["prowadzący spoko ziomek, wprowadza miłą atmosferę, motywuje i zdaje się być dobrze rozeznanym w temacie", "Luźna atmosfera, aktualna wiedza i praktycznie podejście", "Możliwość zrobienia czegoś praktycznego, praca w zespole, sprawna komunikacja na Discordzie, nauka nowych narzędzi i ich realizacja w praktyce, miła atmosfera", "Atmosfera", "Miła atmosfera, sympatyczni prowadzący"]}, {"key": "PRAKTYKA", "label": "Praktyka i narzędzia", "sub": "ćwiczenia, narzędzia AI, praca z nimi", "winter": 1, "summer": 12, "total": 13, "examples_w": ["ciekawostki, AI news, forma prowadzenia zajęć (luźna dyskusja), tworzenie discorda, ćwiczenia na zajęciach"], "examples_s": ["Możliwość wykorzystania praktycznie ai", "Kontakt z nowo poznanymi osobami oraz prowadzącym, dużo udostępnionej wiedzy", "Praktyczna praca nad aktualną tematyką AI co do której warto się edukować", "Możliwość poznania wielu narzędzi, dostosowanych do wybranych zadań(grafika, kodowanie, generacja tekstu)", "Narzędzia ai - ale w tym celu lepiej zapisać się na narzędziownik"]}, {"key": "STYL_FORMA", "label": "Styl i forma zajęć", "sub": "organizacja, niemonotonne prowadzenie", "winter": 10, "summer": 1, "total": 11, "examples_w": ["Sposób prowadzenia (nie mówienie monotonnie)", "Merytoryczna i przewidywalna forma zajęć. Wszystkie zajęcia wpisywały się w podobny schemat", "W porównaniu z innymi zajęciami temat jest ciekawie śledzony, pomaga w tym dobrze zrobione prezentacje i nie powolny sposób opowiadania.", "sposób prowadzenia zajęć", "Filmiki ; sposób prowadzenia zajęć;"], "examples_s": ["Wyjście z sali na przypisywanie tematów do koszyków"]}, {"key": "DYSKUSJE", "label": "Dyskusje i interakcja", "sub": "Klub Dyskusyjny, otwarte rozmowy", "winter": 6, "summer": 3, "total": 9, "examples_w": ["Dużo interakcji, luźna atmosfera, sam pomysł tematu (zrozumienie AI), miła atmosfera.", "Są angażujące, pobudzające do myślenia i dyskusji, odmienne od innych zajęć. Stanowią miłą odskocznię.", "możliwość dyskusji", "Ciekawostki o AI, dyskusje, nowości, polecajki, super podejście do studenta", "ciekawostki, AI news, forma prowadzenia zajęć (luźna dyskusja), tworzenie discorda, ćwiczenia na zajęciach"], "examples_s": ["Praca w parach (omawianie tematu)", "swobodna atmosfera, dyskusje na tematy ktore nas rzeczywiscie interesuja", "Dyskusje"]}, {"key": "MATERIALY", "label": "Materiały dodatkowe", "sub": "filmiki, prezentacje, polecajki książkowe", "winter": 8, "summer": 0, "total": 8, "examples_w": ["W porównaniu z innymi zajęciami temat jest ciekawie śledzony, pomaga w tym dobrze zrobione prezentacje i nie powolny sposób opowiadania.", "filmiki, polecania (książkowe inside AI)", "filmiki (interaktywność zajęć)", "Filmiki ; sposób prowadzenia zajęć;", "Filmiki"], "examples_s": []}, {"key": "DISCORD", "label": "Discord / wspólnota", "sub": "aktywność poza zajęciami", "winter": 2, "summer": 1, "total": 3, "examples_w": ["Aktywność na discord: newsy, ciekawostki, najnowszy update. Otwartość prowadzącego.", "ciekawostki, AI news, forma prowadzenia zajęć (luźna dyskusja), tworzenie discorda, ćwiczenia na zajęciach"], "examples_s": ["Możliwość zrobienia czegoś praktycznego, praca w zespole, sprawna komunikacja na Discordzie, nauka nowych narzędzi i ich realizacja w praktyce, miła atmosfera"]}, {"key": "IMPACT", "label": "Realny impact poza salą", "sub": "wychodzenie poza zajęcia, prawdziwy wpływ", "winter": 0, "summer": 3, "total": 3, "examples_w": [], "examples_s": ["Wychodzenie z projektem poza uczelnie", "Charakter impact projektow- mamy realny wplyw na otoczenie.", "To ze działamy poza zajeciami"]}], "improve": [{"key": "NIC_OK", "label": "Nic do zmiany", "sub": "wszystko OK, nie wiem co zmienić", "winter": 6, "summer": 8, "total": 14, "examples_w": ["Całe myślę, że tu nie trzeba nic zmieniać, to mój indywidualny problem :)", "ciężko powiedzieć.", "Uważam, że jest dobrze tak jak jest. Nie trzeba niczego poprawiać/dodawać", "mi podoba się wszystko", "jest super :) można byłoby dodać rzeczywiście dodatkowe korzystanie z nowych narzędzi (jak to do programowania)"], "examples_s": ["w sumie to nie wiem", "nie wiem, sorry.", "Sale aby sufit nie gnił a tak to wszystko dobrze", "W sumie nie wiem co powiedzieć", "Nic takiego nie przychodzi mi na myśl"]}, {"key": "GRUPY", "label": "Praca w grupach", "sub": "chaos, nie lubię grup, nierówne zaangażowanie", "winter": 5, "summer": 5, "total": 10, "examples_w": ["nierówne zaangażowanie grupy od wyjścia", "Nie jestem fanką pracy w grupach.", "Więcej ćwiczeń i grupowej dyskusji z narzędziami", "być może więcej zaangażowania w grupach? ćwiczeń, aby podtrzymywać zaangażowanie i uwagę :)", "Niektóre dyskusje otwarte wnoszą dużo pojedynczym osobom, ale nie dla całej grupy - zbyt spersonalizowane"], "examples_s": ["Zbyt duży chaos w pracy w grupach", "Troszkę więcej organizacji prac grup. Takie ramy działań - może bardziej stanowczo? Że dziś musimy wyjść z planami. Super pomysłem byłoby aby były na początku zajęć były krótkie przemówienia co się dzieje w projekcie (taki raport).", "Lepsza organizacja grup. Wiecej tematow technicznych.", "Zbyt duży chaos jeśli chodzi o pracę w grupach", "Przez side questy jest trochę chaos. Bardzo dużo pracy w domu, a mało czasu na pracę podczas zajęć (dużo czasu na zajęciach schodzi na ogólne sprawy organizacyjne, opowiadanie o AI, pokazywanie innych projektów - jest za mało czasu na pracę w grupach). Mało czasu na konsultacje podczas zajęć. Proces zawężania listy pomysłów był niefortunny. Lepiej byłoby wrzucić wszystko pomysły na jakąś stronę lub wypisać je na Discordzie, żeby uczestnicy mogli głosować. Na Discordzie jest trochę chaos - za dużo wątków i kanałów, lepiej jakby wszystkie zajęcia były osobno"]}, {"key": "WIECEJ_PRAKTYKI", "label": "Więcej praktyki / narzędzi", "sub": "więcej ćwiczeń, hands-on, prompty", "winter": 6, "summer": 2, "total": 8, "examples_w": ["Praktyczne wykorzystanie narzędzi AI i jak możemy je użyć w praktyce w nauce/pracy", "Więcej ćwiczeń i grupowej dyskusji z narzędziami", "jest super :) można byłoby dodać rzeczywiście dodatkowe korzystanie z nowych narzędzi (jak to do programowania)", "może trochę praktyki pracy na narzędziach.", "Krótkie ćwiczenia na każdych/prawie każdych zajęciach z AI (np. zadanie, aby uzyskać od AI konkretną odpowiedź)"], "examples_s": ["Brak pojedynczych zajęć przedstawiający działanie i funkcje narzędzi, wymagało to przeglądania ich samodzielnie i prowadzenia powtarzalnych testów.", "Więcej porad do promptów"]}, {"key": "CHAOS_FORMY", "label": "Chaos / niejasna struktura", "sub": "niejasne zadania, zgubienie w formie", "winter": 2, "summer": 6, "total": 8, "examples_w": ["zadania domowe - niejasne, co jest zadane", "jest fajnie, ale czasem część zajęć robi się mniej merytoryczna"], "examples_s": ["Zbyt duży chaos w pracy w grupach", "Zbyt duży chaos jeśli chodzi o pracę w grupach", "Nie rozumiem celu spotkań. Niewiele się dzieje i koncepcja jest niejasna. Co tydzień nowe polecajki, ale już męczą. Samo podejście do zajęć wg mnie za mocno idealistyczne", "Przez side questy jest trochę chaos. Bardzo dużo pracy w domu, a mało czasu na pracę podczas zajęć (dużo czasu na zajęciach schodzi na ogólne sprawy organizacyjne, opowiadanie o AI, pokazywanie innych projektów - jest za mało czasu na pracę w grupach). Mało czasu na konsultacje podczas zajęć. Proces zawężania listy pomysłów był niefortunny. Lepiej byłoby wrzucić wszystko pomysły na jakąś stronę lub wypisać je na Discordzie, żeby uczestnicy mogli głosować. Na Discordzie jest trochę chaos - za dużo wątków i kanałów, lepiej jakby wszystkie zajęcia były osobno", "Gubiłem się czasem w formie zajęć, przez to że jednocześnie są zajęcia wydziałowe i ogón na discordzie gubię się co należy do ogóna, a co do wydziałowego"]}, {"key": "TEMATYKA_KRYT", "label": "Tematyka — głębia", "sub": "zbyt powierzchownie, więcej krytyki, ciekawsze tematy", "winter": 5, "summer": 2, "total": 7, "examples_w": ["odjąć informacje, które są łatwo dostępne, wiedzą powszechną", "Dyskusja na temat poważnych współczesnych problemów, nie powierzchownie. Szukanie ciekawszych filmów (dłuższych - wspólne oglądanie i komentarz).", "Na początku były ciekawsze tematy zajęć.", "czasami trudne nazwy takie informatyczno ścisłe", "przedstawienie Tech CEO oligarchów (np. Altman, Musk) było zbyt mało szczegółowe i niedokładnie opisuje ich układ w AI (np. początki openAi jako non profit, wkład Muska w openAI, nazwanie Altmana „twórcą chataGPT\" XD)"], "examples_s": ["Za mało uwagi poświęconej kontrowersja związanym z AI", "Przydało by się trochę bardziej krytycznego i mniej czasem lekko naiwnie optymistycznego podejścia do ai (szeroko)."]}, {"key": "ZALICZENIE", "label": "Zaliczenie i obecność", "sub": "aktywność jako 30%, lęki społeczne, rygor", "winter": 6, "summer": 1, "total": 7, "examples_w": ["Punkty za obecność - nie mogę ich zebrać, bo boję się mówić na forum", "nie podoba mi się że 30% oceny to aktywność bo mam lęki społeczne i ciężko zabrać głos :(", "moim skromnym zdaniem, powinna być jedna nieobecność bez konsekwencji (tak totalnie)", "Stosunkowo rygorystyczne ocenianie obecności (niższa ocena przy 2 nieobecnościach)", "forma zaliczenia - mało precyzyjne wytyczne"], "examples_s": ["Zabrakło mi mocniejszej struktury i ramy przy oddawaniu zadań domowych — opcje wysłania na forum/wysłania prywatnie/nie wysłania wcale/wysłania poza discordem są trochę przytłaczające i skłaniały mnie do trzeciej opcji mimo wykonania zadania"]}, {"key": "DYSKUSJA", "label": "Dyskusje", "sub": "zbyt długie, spersonalizowane, nieefektywne", "winter": 4, "summer": 2, "total": 6, "examples_w": ["Dyskusja na temat poważnych współczesnych problemów, nie powierzchownie. Szukanie ciekawszych filmów (dłuższych - wspólne oglądanie i komentarz).", "Więcej ćwiczeń i grupowej dyskusji z narzędziami", "Niektóre dyskusje otwarte wnoszą dużo pojedynczym osobom, ale nie dla całej grupy - zbyt spersonalizowane", "może czasem za bardzo przeważa dyskusja? chętnie słyszałbym więcej informacji w może bardziej wykładowej formie"], "examples_s": ["Brak pojedynczych zajęć przedstawiający działanie i funkcje narzędzi, wymagało to przeglądania ich samodzielnie i prowadzenia powtarzalnych testów.", "Można by było zwiększyć częstotliwość rozmów/dyskusji - np. dotyczących moralności korzystania z AI, jego wpływu na relacje międzyludzkie czy naszą prywatność"]}, {"key": "WIECEJ_TEORII", "label": "Więcej teorii / kodu", "sub": "jak działa AI od środka, LLM, ML, słownik pojęć", "winter": 3, "summer": 2, "total": 5, "examples_w": ["spodziewałem się bardziej analitycznego spojrzenia jak działa AI, spojrzenie w kod, jak AI analizuje prompty itp.", "dodać więcej informacji na temat tego jak LLMy działają od środka", "dodać machine learning"], "examples_s": ["Zaczynanie bardziej od podstaw", "Wprowadzić słownik ważnych pojęć dla osób, które nie mają dużego obeznanie w temacie, w formie pliku Word"]}, {"key": "DYSCYPLINA", "label": "Więcej dyscypliny / wykładu", "sub": "mniej luzu, więcej formy wykładowej", "winter": 4, "summer": 1, "total": 5, "examples_w": ["Większy rygor co do udzielania głosu studentom - czasem niektórzy albo powtarzali podobne odpowiedzi albo niektórzy silnie odpływali - strata cennego czasu", "Stosunkowo rygorystyczne ocenianie obecności (niższa ocena przy 2 nieobecnościach)", "moooże trochę za mało dyscypliny, nieco zbyt nieformalna atmosfera", "może czasem za bardzo przeważa dyskusja? chętnie słyszałbym więcej informacji w może bardziej wykładowej formie"], "examples_s": ["Brak pojedynczych zajęć przedstawiający działanie i funkcje narzędzi, wymagało to przeglądania ich samodzielnie i prowadzenia powtarzalnych testów."]}, {"key": "INNI_PROWAD", "label": "Inni prowadzący", "sub": "zaproszeni — Zotero, Word, etyka — krytycznie", "winter": 0, "summer": 4, "total": 4, "examples_w": [], "examples_s": ["niektórzy prowadzący (liczba pojedyńcza)", "Element zajęć o grammarly, Wordzie i etyce był masakryczny, ale chyba nie dało się bez tego", "Niektóre zadania zaproszonych nauczycieli byli nie realistyczne do spełnienia w ramach czasowych zajęcia.", "Zajęcia z Zotero mogły być troche mniej anty-ai i straszące ludzi (minus dla prowadzącej :( )"]}, {"key": "CZAS", "label": "Czas i tempo", "sub": "pora dnia, powtórzenia, długość", "winter": 2, "summer": 1, "total": 3, "examples_w": ["Dużo rzeczy w obszarach o których nawet nie słyszałam, zbyt małe wyjaśnienia na ich temat, za dużo czasu na rozważaniu jednej rzeczy (np. wspominanie o jednym wydarzeniu na różnych zajęciach).", "Pora dnia (choć problem s. zimowego) (-)"], "examples_s": ["Duzo czasu spedza sie na badaniu i sprawdzaniu narzedzi."]}, {"key": "INNE", "label": "Inne / pojedyncze", "sub": "pojedyncze uwagi, niesklasyfikowane", "winter": 1, "summer": 2, "total": 3, "examples_w": ["trochę chaotyczny Discord"], "examples_s": ["Nic", "nic"]}, {"key": "INFRA_DOSTEP", "label": "Infrastruktura i dostęp", "sub": "sala, dostęp do materiałów", "winter": 0, "summer": 3, "total": 3, "examples_w": [], "examples_s": ["Sale aby sufit nie gnił a tak to wszystko dobrze", "Salę :), poza tym nie widzę co możnaby zmienić", "Niewystarczający dostęp do materiałów z zajęć"]}], "liked_total_mentions": 148, "improve_total_mentions": 83};
+
+function renderLikedChart() {
+  const container = document.getElementById('rows-liked');
+  document.getElementById('liked-mentions').textContent = THEMES.liked_total_mentions;
+  document.getElementById('liked-themes-count').textContent = THEMES.liked.length;
+
+  const maxTotal = Math.max(...THEMES.liked.map(t => t.total));
+  const html = THEMES.liked.map((t, i) => {
+    const wPct = (t.winter / maxTotal * 100).toFixed(1);
+    const sPct = (t.summer / maxTotal * 100).toFixed(1);
+    return `
+      <div class="theme-row" data-theme-key="${t.key}" data-chart="liked">
+        <div class="theme-label">
+          ${escapeHtml(t.label)}<span class="chevron">▸</span>
+          <span class="sub">${escapeHtml(t.sub)}</span>
+        </div>
+        <div class="stacked-bar">
+          ${t.winter > 0 ? `<div class="seg-w" style="width: ${wPct}%"><span class="seg-num">${t.winter}</span></div>` : ''}
+          ${t.summer > 0 ? `<div class="seg-s" style="width: ${sPct}%"><span class="seg-num">${t.summer}</span></div>` : ''}
+        </div>
+        <div class="theme-total">${t.total}</div>
+      </div>
+      <div class="theme-examples" data-examples-for="${t.key}-liked">
+        ${renderExamples(t)}
+      </div>
+    `;
+  }).join('');
+  container.innerHTML = html;
+}
+
+function renderImproveChart() {
+  const container = document.getElementById('rows-improve');
+  document.getElementById('improve-mentions').textContent = THEMES.improve_total_mentions;
+  document.getElementById('improve-themes-count').textContent = THEMES.improve.length;
+
+  const maxSide = Math.max(
+    ...THEMES.improve.map(t => Math.max(t.winter, t.summer))
+  );
+
+  const html = THEMES.improve.map(t => {
+    const wPct = (t.winter / maxSide * 100).toFixed(1);
+    const sPct = (t.summer / maxSide * 100).toFixed(1);
+    return `
+      <div class="theme-row" data-theme-key="${t.key}" data-chart="improve">
+        <div class="div-left">
+          ${t.winter > 0 ? `<div class="div-bar div-bar-w" style="width: ${wPct}%"></div>` : ''}
+          <span class="div-num ${t.winter === 0 ? 'zero' : ''}">${t.winter}</span>
+        </div>
+        <div class="div-center">
+          ${escapeHtml(t.label)}<span class="chevron">▸</span>
+          <span class="sub">${escapeHtml(t.sub)}</span>
+        </div>
+        <div class="div-right">
+          <span class="div-num ${t.summer === 0 ? 'zero' : ''}">${t.summer}</span>
+          ${t.summer > 0 ? `<div class="div-bar div-bar-s" style="width: ${sPct}%"></div>` : ''}
+        </div>
+      </div>
+      <div class="theme-examples" data-examples-for="${t.key}-improve">
+        ${renderExamples(t)}
+      </div>
+    `;
+  }).join('');
+  container.innerHTML = html;
+}
+
+function renderExamples(t) {
+  const wList = (t.examples_w || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+  const sList = (t.examples_s || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+  return `
+    <div class="theme-examples-cols">
+      <div>
+        <h4 class="zima"><span class="badge-mini">ZIMA</span> wzmianek: ${t.winter}</h4>
+        ${wList ? `<ul>${wList}</ul>` : '<div class="none">— brak wzmianek z zimy w tym wątku —</div>'}
+      </div>
+      <div>
+        <h4 class="lato"><span class="badge-mini">LATO</span> wzmianek: ${t.summer}</h4>
+        ${sList ? `<ul>${sList}</ul>` : '<div class="none">— brak wzmianek z lata w tym wątku —</div>'}
+      </div>
+    </div>
+  `;
+}
+
+renderLikedChart();
+renderImproveChart();
+
+// Click to expand themes
+document.addEventListener('click', e => {
+  const row = e.target.closest('.theme-row[data-theme-key]');
+  if (!row) return;
+  const key = row.dataset.themeKey;
+  const chart = row.dataset.chart;
+  const targetId = `${key}-${chart}`;
+  const examples = document.querySelector(`.theme-examples[data-examples-for="${targetId}"]`);
+  if (!examples) return;
+
+  const wasExpanded = row.classList.contains('expanded');
+
+  // Collapse all in this chart
+  const block = chart === 'liked' ? document.getElementById('block-liked') : document.getElementById('block-improve');
+  block.querySelectorAll('.theme-row.expanded').forEach(r => r.classList.remove('expanded'));
+  block.querySelectorAll('.theme-examples.show').forEach(e => e.classList.remove('show'));
+
+  if (!wasExpanded) {
+    row.classList.add('expanded');
+    examples.classList.add('show');
+  }
+});
+
+</script>
+</body>
+</html>

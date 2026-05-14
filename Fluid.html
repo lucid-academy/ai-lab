@@ -1,0 +1,2555 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fluid Momentum - Dziennik treningowy</title>
+  <style>
+    :root {
+      --bg: #f2f3f6;
+      --card: #ffffff;
+      --ink: #17171d;
+      --muted: #7f8490;
+      --line: #e2e3e8;
+      --pink: #c60068;
+      --pink-2: #ef4c9a;
+      --pink-soft: #ffd2e5;
+      --yellow: #ffd816;
+      --shadow: 0 18px 38px rgba(24, 27, 36, .09);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+
+    :focus-visible {
+      outline: 3px solid rgba(198, 0, 104, .34);
+      outline-offset: 3px;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 82% 8%, rgba(255, 216, 22, .16), transparent 24%),
+        linear-gradient(180deg, #fbfbfd 0, var(--bg) 160px, var(--bg) 100%);
+      color: var(--ink);
+      overflow-wrap: break-word;
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    .app {
+      width: min(100%, 460px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 0 22px 104px;
+      position: relative;
+    }
+
+    .topbar {
+      height: 82px;
+      margin: 0 -22px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, .78);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 1px 0 rgba(15, 18, 27, .04);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 34% 28%, #ffffff 0 5%, transparent 6%),
+        radial-gradient(circle at 68% 72%, #00d0b7 0 10%, transparent 11%),
+        linear-gradient(135deg, #111827, #263348 45%, #c60068);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.8);
+      flex: 0 0 auto;
+    }
+
+    .brand strong {
+      color: var(--pink);
+      font-size: 18px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      display: inline-grid;
+      place-items: center;
+      background: transparent;
+      color: #69707d;
+    }
+
+    .hero {
+      padding: 32px 0 18px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      max-width: 330px;
+      font-size: clamp(42px, 13vw, 58px);
+      line-height: .92;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      margin: 16px 0 0;
+      color: #5f626b;
+      font-style: italic;
+      line-height: 1.45;
+      max-width: 315px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .screen-kicker {
+      margin: 0 0 8px;
+      color: #6d717d;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .screen-title {
+      margin: 0;
+      font-size: clamp(40px, 12vw, 56px);
+      line-height: .93;
+      letter-spacing: 0;
+    }
+
+    .screen-lead {
+      margin: 14px 0 0;
+      color: #5f626b;
+      line-height: 1.45;
+      max-width: 320px;
+    }
+
+    .date-row {
+      margin: 14px 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #2e3036;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .date-row input {
+      width: 170px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font-weight: 800;
+      outline: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .activity {
+      min-height: 112px;
+      padding: 20px 12px 16px;
+      border-radius: 28px;
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .activity svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .activity.active {
+      background: linear-gradient(135deg, var(--pink), #d90078);
+      color: #fff;
+    }
+
+    .activity.other {
+      grid-column: span 1;
+    }
+
+    .card {
+      margin-top: 26px;
+      padding: 24px;
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .stat-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .stat-card strong {
+      color: var(--pink);
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .stat-card span,
+    .quiet-list span {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .quiet-list {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .quiet-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+      font-weight: 850;
+    }
+
+    .quiet-list li:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .mini-progress {
+      height: 9px;
+      border-radius: 999px;
+      background: #e6e7eb;
+      overflow: hidden;
+    }
+
+    .mini-progress i {
+      display: block;
+      height: 100%;
+      width: var(--value, 45%);
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--yellow), var(--pink-2));
+    }
+
+    .plan-card {
+      background: linear-gradient(135deg, #ffd3e8, #f5abc9);
+      border-left: 6px solid var(--pink);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plan-card::after {
+      content: "";
+      width: 58px;
+      height: 120px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.35);
+      position: absolute;
+      right: 22px;
+      top: -22px;
+      transform: rotate(12deg);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #6f324e;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .plan-card h2 {
+      margin: 0 0 8px;
+      max-width: 270px;
+      font-size: 26px;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .plan-card p {
+      margin: 0;
+      max-width: 280px;
+      color: #5c3447;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 18px;
+      line-height: 1.15;
+    }
+
+    .section-title span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .pill {
+      min-height: 44px;
+      border-radius: 999px;
+      background: #eaebee;
+      color: #333741;
+      font-weight: 900;
+      transition: transform .16s ease, background .16s ease;
+    }
+
+    .pill:active,
+    .activity:active,
+    .primary:active,
+    .secondary:active {
+      transform: scale(.98);
+    }
+
+    .pill.active {
+      background: var(--yellow);
+    }
+
+    .series-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .series-row {
+      display: grid;
+      grid-template-columns: 54px repeat(3, minmax(0, 1fr)) 36px;
+      gap: 8px;
+      align-items: center;
+      padding: 12px 8px 12px 12px;
+      border-radius: 26px;
+      background: #f1f2f5;
+    }
+
+    .series-row label {
+      color: var(--pink);
+      font-weight: 900;
+      font-size: 13px;
+      line-height: 1.05;
+    }
+
+    .mini-field {
+      min-width: 0;
+    }
+
+    .mini-field span {
+      display: block;
+      margin: 0 0 4px;
+      color: #747986;
+      font-size: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .mini-field input {
+      width: 100%;
+      min-height: 38px;
+      border: 0;
+      border-radius: 20px;
+      background: #fff;
+      color: #22242b;
+      text-align: center;
+      font-weight: 800;
+      outline: 0;
+    }
+
+    .delete-row {
+      width: 34px;
+      height: 34px;
+      border-radius: 17px;
+      background: transparent;
+      color: #9aa0aa;
+      display: grid;
+      place-items: center;
+    }
+
+    .add-series {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--pink);
+      background: transparent;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .field label {
+      color: #595e69;
+      font-size: 10px;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 0;
+      border-radius: 24px;
+      background: #e9eaee;
+      color: #24262d;
+      min-height: 54px;
+      padding: 0 20px;
+      outline: 0;
+    }
+
+    .field textarea {
+      min-height: 90px;
+      resize: vertical;
+      padding: 16px 20px;
+      line-height: 1.35;
+    }
+
+    .range-field {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .range-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #595e69;
+      font-size: 10px;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--pink);
+    }
+
+    .chip-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .chip {
+      min-height: 54px;
+      border-radius: 24px;
+      background: #eaebee;
+      color: #333741;
+      font-weight: 850;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      padding: 10px 12px;
+    }
+
+    .chip.active {
+      background: linear-gradient(135deg, var(--pink), #d90078);
+      color: #fff;
+    }
+
+    .body-map {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      text-align: center;
+    }
+
+    .body-column {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+    }
+
+    .body-column span {
+      color: #858a95;
+      font-size: 10px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .body-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 56px);
+      gap: 10px;
+    }
+
+    .body-point {
+      min-height: 42px;
+      border-radius: 18px;
+      background: #eceef2;
+      color: #676d78;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .body-point.active {
+      background: var(--pink-soft);
+      color: var(--pink);
+      box-shadow: inset 0 0 0 2px var(--pink);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .switch {
+      width: 58px;
+      height: 34px;
+      padding: 4px;
+      border-radius: 999px;
+      background: #dfe1e6;
+      display: inline-flex;
+      justify-content: flex-start;
+      transition: background .18s ease;
+    }
+
+    .switch i {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,.12);
+      transition: transform .18s ease;
+    }
+
+    .switch.active {
+      background: var(--pink);
+    }
+
+    .switch.active i {
+      transform: translateX(24px);
+    }
+
+    .metric-stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .compact-card {
+      margin-top: 14px;
+      padding: 22px;
+    }
+
+    .competition-list,
+    .goal-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .competition-row,
+    .goal-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 22px;
+      background: #f4f5f7;
+    }
+
+    .competition-date {
+      min-width: 54px;
+      color: var(--pink);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .competition-row input,
+    .goal-row input[type="text"] {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 18px;
+      background: #fff;
+      padding: 0 14px;
+      outline: 0;
+      font-weight: 750;
+    }
+
+    .goal-row input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--pink);
+    }
+
+    .tiny-action {
+      width: 38px;
+      height: 38px;
+      border-radius: 19px;
+      background: #fff;
+      color: var(--pink);
+      display: grid;
+      place-items: center;
+    }
+
+    .upload-box {
+      border: 1px dashed #bfc3cc;
+      border-radius: 26px;
+      padding: 22px;
+      text-align: center;
+      background: #fbfbfc;
+    }
+
+    .upload-box input {
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .attachment {
+      margin-top: 14px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: 20px;
+      background: #fff;
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 850;
+    }
+
+    .attachment.show {
+      display: flex;
+    }
+
+    .attachment small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .calendar-head h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .calendar-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .calendar-controls button {
+      width: 38px;
+      height: 38px;
+      border-radius: 19px;
+      background: #eef0f3;
+      color: #535966;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      text-align: center;
+    }
+
+    .calendar-weekday {
+      color: #737884;
+      font-size: 9px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .calendar-day {
+      position: relative;
+      min-height: 38px;
+      border-radius: 16px;
+      background: transparent;
+      color: #20232a;
+      font-weight: 850;
+    }
+
+    .calendar-day.muted {
+      color: #c5c8cf;
+    }
+
+    .calendar-day.has-training::after {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--pink);
+      position: absolute;
+      left: 50%;
+      bottom: 5px;
+      transform: translateX(-50%);
+    }
+
+    .calendar-day.selected {
+      background: var(--pink-soft);
+      color: var(--pink);
+    }
+
+    .bar-chart {
+      height: 142px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-items: end;
+      gap: 10px;
+      padding-top: 14px;
+    }
+
+    .bar {
+      min-width: 0;
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      color: #7d838f;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .bar i {
+      width: min(100%, 28px);
+      height: var(--height, 18px);
+      min-height: 12px;
+      border-radius: 999px 999px 10px 10px;
+      background: #e6e8ec;
+      display: block;
+    }
+
+    .bar.active i {
+      background: linear-gradient(180deg, var(--pink), var(--pink-2));
+    }
+
+    .record-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .record-row {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .record-row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .record-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 15px;
+      background: var(--yellow);
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .record-row strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .record-row span {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .record-row b {
+      color: var(--pink);
+      white-space: nowrap;
+    }
+
+    .notice {
+      margin-top: 18px;
+      border-radius: 22px;
+      background: #fff8d2;
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 1.35;
+      color: #4b4021;
+    }
+
+    .actions {
+      margin-top: 26px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .primary,
+    .secondary {
+      min-height: 58px;
+      border-radius: 999px;
+      font-weight: 900;
+      box-shadow: 0 14px 28px rgba(198, 0, 104, .22);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--pink), var(--pink-2));
+      color: #fff;
+    }
+
+    .secondary {
+      background: #fff;
+      color: var(--pink);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .saved-card {
+      border: 1px solid rgba(255,255,255,.7);
+    }
+
+    .session {
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 10px;
+    }
+
+    .session:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .session-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .session strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .session small {
+      display: block;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .badge {
+      border-radius: 999px;
+      background: var(--yellow);
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .metric {
+      border-radius: 18px;
+      background: #f4f5f7;
+      padding: 10px;
+    }
+
+    .metric span {
+      display: block;
+      color: #787e8a;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .metric b {
+      display: block;
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    .empty {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px dashed #c8cbd3;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 96px;
+      transform: translateX(-50%) translateY(20px);
+      width: min(calc(100% - 44px), 416px);
+      padding: 14px 18px;
+      border-radius: 20px;
+      background: #17171d;
+      color: #fff;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .data-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      place-items: end center;
+      padding: 22px;
+      background: rgba(17, 19, 26, .34);
+    }
+
+    .data-panel.open {
+      display: grid;
+    }
+
+    .data-sheet {
+      width: min(100%, 416px);
+      max-height: calc(100vh - 44px);
+      overflow: auto;
+      border-radius: 30px;
+      background: #fff;
+      padding: 24px;
+      box-shadow: 0 24px 70px rgba(17, 19, 26, .24);
+      overscroll-behavior: contain;
+    }
+
+    .data-sheet header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .data-sheet h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .data-sheet p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .file-import {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px dashed #bfc3cc;
+      border-radius: 24px;
+      background: #fbfbfc;
+    }
+
+    .file-import input {
+      width: 100%;
+    }
+
+    @media (min-width: 760px) {
+      .data-panel {
+        place-items: center;
+      }
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      width: min(calc(100% - 28px), 432px);
+      transform: translateX(-50%);
+      min-height: 72px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 18px 48px rgba(24, 27, 36, .16);
+      backdrop-filter: blur(18px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 8px;
+      z-index: 10;
+    }
+
+    .nav-item {
+      min-width: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #8b919c;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      font-size: 9px;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .nav-item svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .nav-item.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--pink), var(--pink-2));
+      box-shadow: 0 12px 26px rgba(198, 0, 104, .28);
+    }
+
+    @media (min-width: 760px) {
+      body {
+        background:
+          linear-gradient(90deg, #edeff4 0, #f8f8fb 22%, #f8f8fb 78%, #edeff4 100%);
+      }
+
+      .app {
+        padding-inline: 28px;
+      }
+
+      .topbar {
+        margin-inline: -28px;
+        padding-inline: 28px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .app { padding-inline: 16px; }
+      .topbar { margin-inline: -16px; padding-inline: 16px; }
+      .brand strong { font-size: 16px; }
+      .hero { padding-top: 24px; }
+      .card { padding: 20px; border-radius: 24px; }
+      .grid { gap: 12px; }
+      .activity { min-height: 98px; border-radius: 24px; }
+      .metrics { grid-template-columns: 1fr; }
+      .series-row {
+        grid-template-columns: 1fr;
+      }
+      .series-row label {
+        text-align: center;
+      }
+      .delete-row {
+        width: 100%;
+        background: #fff;
+      }
+      .bottom-nav {
+        width: calc(100% - 16px);
+        bottom: 8px;
+      }
+      .data-panel {
+        padding: 12px;
+      }
+      .data-sheet {
+        max-height: calc(100vh - 24px);
+        border-radius: 26px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar" aria-label="Górny pasek">
+      <div class="brand">
+        <div class="avatar" aria-hidden="true"></div>
+        <strong>Fluid Momentum</strong>
+      </div>
+      <button class="icon-button" type="button" aria-label="Ustawienia danych" id="open-data-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.36a1.7 1.7 0 0 0-1 .57 1.7 1.7 0 0 0-.4 1.1V21a2 2 0 1 1-4 0v-.08a1.7 1.7 0 0 0-.4-1.1 1.7 1.7 0 0 0-1-.57 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.64 15a1.7 1.7 0 0 0-.57-1 1.7 1.7 0 0 0-1.1-.4H3a2 2 0 1 1 0-4h.08a1.7 1.7 0 0 0 1.1-.4 1.7 1.7 0 0 0 .57-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.64a1.7 1.7 0 0 0 1-.57 1.7 1.7 0 0 0 .4-1.1V3a2 2 0 1 1 4 0v.08a1.7 1.7 0 0 0 .4 1.1 1.7 1.7 0 0 0 1 .57 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.36 9a1.7 1.7 0 0 0 .57 1 1.7 1.7 0 0 0 1.1.4H21a2 2 0 1 1 0 4h-.08a1.7 1.7 0 0 0-1.1.4 1.7 1.7 0 0 0-.42.2Z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <section class="screen active" data-screen="training">
+    <section class="hero" aria-labelledby="page-title">
+      <h1 id="page-title">Dziennik Treningowy</h1>
+      <p>Rytm, siła i precyzja w każdym pociągnięciu.</p>
+    </section>
+
+    <form id="training-form">
+      <div class="date-row">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#c60068" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><rect x="4" y="5" width="16" height="16" rx="2"></rect>
+        </svg>
+        <input id="date" type="date" aria-label="Data treningu" required>
+      </div>
+
+      <section class="grid" aria-label="Typ aktywności">
+        <button class="activity active" type="button" data-activity="Woda">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 20l4-9 4 9"></path><path d="M8.5 11.5 4 9"></path><path d="m15.5 11.5 4.5-2.5"></path><circle cx="12" cy="5" r="2"></circle>
+          </svg>
+          Woda
+        </button>
+        <button class="activity" type="button" data-activity="Ergometr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 17h14"></path><path d="M7 17l4-8h6"></path><path d="M11 9 8 5"></path><path d="M16 9l2-4"></path><circle cx="6" cy="19" r="1"></circle><circle cx="18" cy="19" r="1"></circle>
+          </svg>
+          Ergometr
+        </button>
+        <button class="activity" type="button" data-activity="Siłownia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 7v10"></path><path d="M18 7v10"></path><path d="M3 9v6"></path><path d="M21 9v6"></path><path d="M6 12h12"></path>
+          </svg>
+          Siłownia
+        </button>
+        <button class="activity" type="button" data-activity="Bieganie">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="13" cy="4" r="2"></circle><path d="M9 17l-3 4"></path><path d="M14 21l-2-5-3-2 2-5"></path><path d="m16 8 2 3 3 1"></path><path d="M9 9h4l3-2"></path>
+          </svg>
+          Bieganie
+        </button>
+        <button class="activity other" type="button" data-activity="Inny">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 13v.01"></path><path d="M6 13v.01"></path><path d="M18 13v.01"></path>
+          </svg>
+          Inny
+        </button>
+      </section>
+
+      <section class="card plan-card" aria-label="Temat treningu">
+        <p class="eyebrow">Temat treningu wg planu</p>
+        <h2 id="plan-heading">6 x 1 min / 30s przerwy</h2>
+        <p>Cel: budowa mocy eksplozywnej i stabilizacja tętna w strefie T4.</p>
+      </section>
+
+      <section class="card" aria-labelledby="boat-title">
+        <h2 class="section-title" id="boat-title">
+          <span>
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#c60068" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 18h18"></path><path d="M5 14l7-9 7 9"></path><path d="M9 14h6"></path>
+            </svg>
+            Konfiguracja łodzi
+          </span>
+        </h2>
+        <div class="pill-grid" id="boat-options">
+          <button type="button" class="pill active" data-boat="1x">1x</button>
+          <button type="button" class="pill" data-boat="2x">2x</button>
+          <button type="button" class="pill" data-boat="2-">2-</button>
+          <button type="button" class="pill" data-boat="4x">4x</button>
+          <button type="button" class="pill" data-boat="4-">4-</button>
+          <button type="button" class="pill" data-boat="8+">8+</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="series-title">
+        <h2 class="section-title" id="series-title">
+          Zapisz Serii
+          <button class="add-series" type="button" id="add-series">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="#c60068" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4h4v2h-4v4h-2v-4H7v-2h4V7h2Z"></path></svg>
+            Dodaj serię
+          </button>
+        </h2>
+        <div class="series-list" id="series-list"></div>
+      </section>
+
+      <section class="card" aria-labelledby="details-title">
+        <h2 class="section-title" id="details-title">
+          <span>
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#c60068" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 17c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path><path d="M3 12c3 0 3-2 6-2s3 2 6 2 3-2 6-2"></path>
+            </svg>
+            Szczegóły wodne
+          </span>
+        </h2>
+        <div class="field">
+          <label for="distance">Dystans całkowity (km)</label>
+          <input id="distance" inputmode="decimal" placeholder="np. 12.5" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="crew">Osada i skład</label>
+          <textarea id="crew" placeholder="Kowalski, Nowak..."></textarea>
+        </div>
+        <div class="notice">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#6c5700" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 18h18"></path><path d="M5 14l7-9 7 9"></path><path d="M9 14h6"></path>
+          </svg>
+          <div>
+            <strong>Warunki:</strong>
+            <input id="conditions" type="text" placeholder="Lustro, lekki wiatr zachodni..." style="margin-top:6px;width:100%;border:0;background:transparent;outline:0;color:#4b4021;">
+          </div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="primary" type="submit">Zapisz trening</button>
+        <button class="secondary" type="button" id="reset-form">Wyczyść formularz</button>
+      </div>
+    </form>
+
+    <section class="card saved-card" aria-labelledby="saved-title">
+      <h2 class="section-title" id="saved-title">Ostatnie treningi</h2>
+      <div id="saved-list"></div>
+    </section>
+    </section>
+
+    <section class="screen" data-screen="status" aria-labelledby="status-title">
+      <section class="hero">
+        <p class="screen-kicker">Raport poranny</p>
+        <h1 class="screen-title" id="status-title">Mój Stan</h1>
+        <p class="screen-lead">Regeneracja, energia i objawy przed kolejną jednostką.</p>
+      </section>
+      <form id="status-form">
+        <div class="date-row">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#c60068" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><rect x="4" y="5" width="16" height="16" rx="2"></rect>
+          </svg>
+          <input id="status-date" type="date" aria-label="Data raportu stanu" required>
+        </div>
+
+        <section class="card stat-card">
+          <span>Regeneracja</span>
+          <strong id="recovery-value">88%</strong>
+          <input id="recovery" type="range" min="0" max="100" step="1" value="88" aria-label="Regeneracja w procentach">
+          <div class="mini-progress" aria-hidden="true"><i id="recovery-bar" style="--value:88%"></i></div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">Witalność i Nastrój</h2>
+          <div class="grid">
+            <div class="field" style="margin-top:0">
+              <label for="sleep-hours">Sen: godziny</label>
+              <input id="sleep-hours" inputmode="numeric" placeholder="7" value="7">
+            </div>
+            <div class="field" style="margin-top:0">
+              <label for="sleep-minutes">Sen: minuty</label>
+              <input id="sleep-minutes" inputmode="numeric" placeholder="42" value="42">
+            </div>
+          </div>
+          <div class="range-field">
+            <div class="range-head"><span>Poziom energii</span><strong id="energy-label">Wysoki</strong></div>
+            <input id="energy" type="range" min="0" max="100" step="1" value="75" aria-label="Poziom energii">
+          </div>
+          <div class="range-field">
+            <div class="range-head"><span>Nastrój</span><strong id="mood-label">Pozytywny</strong></div>
+            <input id="mood" type="range" min="0" max="100" step="1" value="72" aria-label="Nastrój">
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">Objawy i Notatki</h2>
+          <div class="chip-grid" id="symptom-options">
+            <button class="chip active" type="button" data-symptom="Ból mięśni">Ból mięśni</button>
+            <button class="chip" type="button" data-symptom="Zmęczenie">Zmęczenie</button>
+            <button class="chip" type="button" data-symptom="Katar">Katar</button>
+            <button class="chip" type="button" data-symptom="Ból głowy">Ból głowy</button>
+            <button class="chip" type="button" data-symptom="Złe trawienie">Złe trawienie</button>
+            <button class="chip" type="button" data-symptom="Inne">Inne</button>
+          </div>
+          <div class="field">
+            <label for="status-notes">Twoje przemyślenia</label>
+            <textarea id="status-notes" placeholder="Jak się dzisiaj czujesz psychicznie?"></textarea>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">Mapa Bolesności</h2>
+          <div class="body-map" id="body-map">
+            <div class="body-column">
+              <span>Przód</span>
+              <div class="body-buttons">
+                <button class="body-point" type="button" data-soreness="Przód barki">Barki</button>
+                <button class="body-point active" type="button" data-soreness="Przód ręce">Ręce</button>
+                <button class="body-point" type="button" data-soreness="Przód brzuch">Brzuch</button>
+                <button class="body-point" type="button" data-soreness="Przód nogi">Nogi</button>
+              </div>
+            </div>
+            <div class="body-column">
+              <span>Tył</span>
+              <div class="body-buttons">
+                <button class="body-point" type="button" data-soreness="Tył barki">Barki</button>
+                <button class="body-point active" type="button" data-soreness="Plecy">Plecy</button>
+                <button class="body-point" type="button" data-soreness="Pośladki">Biodra</button>
+                <button class="body-point" type="button" data-soreness="Tył nogi">Nogi</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="toggle-row">
+            <h2 class="section-title" style="margin:0">Choroba / Przeziębienie</h2>
+            <button class="switch" id="sick-toggle" type="button" role="switch" aria-checked="false" aria-label="Choroba lub przeziębienie"><i></i></button>
+          </div>
+          <div class="field">
+            <label for="sick-state">Aktualny stan</label>
+            <input id="sick-state" placeholder="Lekki katar, osłabienie...">
+          </div>
+          <div class="field">
+            <label for="medications">Przyjęte leki</label>
+            <input id="medications" placeholder="Witamina C, magnez...">
+          </div>
+        </section>
+
+        <div class="actions">
+          <button class="primary" type="submit">Zapisz dzisiejszy stan</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="screen" data-screen="plan" aria-labelledby="plan-title">
+      <section class="hero">
+        <p class="screen-kicker">Postęp miesięczny</p>
+        <h1 class="screen-title" id="plan-title">Plan</h1>
+        <p class="screen-lead">Cel kilometrowy, jednostki i nadchodzące starty.</p>
+      </section>
+      <form id="plan-form">
+        <section class="card plan-card">
+          <p class="eyebrow">Postęp miesięczny</p>
+          <h2><span id="plan-month-distance">0</span>/<span id="plan-month-goal-label">250</span> km</h2>
+          <p id="plan-month-copy">Zapisuj treningi, żeby widzieć postęp miesiąca.</p>
+          <div class="mini-progress" aria-hidden="true" style="margin-top:18px"><i id="plan-month-progress" style="--value:0%"></i></div>
+          <div class="field">
+            <label for="monthly-goal">Cel miesięczny (km)</label>
+            <input id="monthly-goal" inputmode="decimal" value="250">
+          </div>
+        </section>
+
+        <section class="metric-stack">
+          <div class="card compact-card stat-card">
+            <span>Objętość tygodniowa</span>
+            <strong id="plan-week-distance">0 km</strong>
+            <div class="field" style="margin-top:0">
+              <label for="weekly-hours">Cel godzinowy tygodnia</label>
+              <input id="weekly-hours" inputmode="decimal" value="12.5">
+            </div>
+          </div>
+          <div class="card compact-card stat-card">
+            <span>Średnie tempo</span>
+            <strong id="plan-average-split">—</strong>
+            <span>/500m split</span>
+          </div>
+          <div class="card compact-card stat-card">
+            <span>Jednostki treningowe</span>
+            <strong><span id="plan-session-count">0</span>/<span id="plan-session-goal-label">6</span></strong>
+            <div class="field" style="margin-top:0">
+              <label for="weekly-sessions">Cel sesji w tygodniu</label>
+              <input id="weekly-sessions" inputmode="numeric" value="6">
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">Wgraj swój plan treningowy</h2>
+          <div class="upload-box">
+            <strong>PDF albo zdjęcie papierowego planu</strong>
+            <p class="screen-lead" style="margin:8px auto 0">Plik zapisze się lokalnie w tej przeglądarce, jeśli ma maksymalnie 1.5 MB.</p>
+            <input id="plan-file" type="file" accept="application/pdf,image/*">
+            <div class="attachment" id="plan-attachment">
+              <div>
+                <span id="plan-file-name">Brak pliku</span>
+                <small id="plan-file-size"></small>
+              </div>
+              <button class="tiny-action" type="button" id="remove-plan-file" aria-label="Usuń plan">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">
+            Nadchodzące Zawody
+            <button class="add-series" type="button" id="add-competition">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#c60068" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4h4v2h-4v4h-2v-4H7v-2h4V7h2Z"></path></svg>
+              Dodaj nowe
+            </button>
+          </h2>
+          <div class="competition-list" id="competition-list"></div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">
+            Cele Sezonowe
+            <button class="add-series" type="button" id="add-goal">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#c60068" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4h4v2h-4v4h-2v-4H7v-2h4V7h2Z"></path></svg>
+              Dodaj cel
+            </button>
+          </h2>
+          <div class="goal-list" id="season-goals"></div>
+        </section>
+
+        <div class="actions">
+          <button class="primary" type="submit">Zapisz plan</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="screen" data-screen="reports" aria-labelledby="reports-title">
+      <section class="hero">
+        <h1 class="screen-title" id="reports-title">Raporty i Historia</h1>
+        <p class="screen-lead">Przegląd postępów i ostatnich zapisanych treningów.</p>
+      </section>
+      <section class="grid" aria-label="Podsumowanie raportów">
+        <div class="card stat-card" style="margin-top:0">
+          <span>Dystans miesiąca</span>
+          <strong id="report-distance">0 km</strong>
+        </div>
+        <div class="card stat-card" style="margin-top:0">
+          <span>Sesje</span>
+          <strong id="report-count">0</strong>
+        </div>
+      </section>
+      <section class="card">
+        <div class="calendar-head">
+          <h2 id="report-month-label">Maj 2026</h2>
+          <div class="calendar-controls">
+            <button type="button" id="report-prev-month" aria-label="Poprzedni miesiąc">‹</button>
+            <button type="button" id="report-next-month" aria-label="Następny miesiąc">›</button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="report-calendar" aria-label="Kalendarz treningów"></div>
+      </section>
+      <section class="card">
+        <h2 class="section-title">Aktywność tygodniowa</h2>
+        <div class="bar-chart" id="weekly-bars" aria-label="Aktywność tygodniowa"></div>
+        <div class="mini-progress" aria-hidden="true"><i id="report-progress" style="--value:0%"></i></div>
+      </section>
+      <section class="card">
+        <h2 class="section-title">Sesje z wybranego dnia</h2>
+        <div id="report-day-sessions"></div>
+      </section>
+      <section class="card">
+        <h2 class="section-title">Rekordy Osobiste</h2>
+        <div class="record-grid" id="personal-records"></div>
+      </section>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Nawigacja aplikacji">
+      <button class="nav-item active" type="button" aria-current="page" data-screen-target="training">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 20l4-9 4 9"></path><path d="M8.5 11.5 4 9"></path><path d="m15.5 11.5 4.5-2.5"></path><circle cx="12" cy="5" r="2"></circle></svg>
+        Trening
+      </button>
+      <button class="nav-item" type="button" data-screen-target="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
+        Status
+      </button>
+      <button class="nav-item" type="button" data-screen-target="plan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18"></path></svg>
+        Plan
+      </button>
+      <button class="nav-item" type="button" data-screen-target="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"></path><path d="M8 17v-6"></path><path d="M13 17V8"></path><path d="M18 17v-3"></path><path d="M4 19h17"></path></svg>
+        Raporty
+      </button>
+    </nav>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <section class="data-panel" id="data-panel" aria-labelledby="data-panel-title" aria-hidden="true">
+    <div class="data-sheet" role="dialog" aria-modal="true">
+      <header>
+        <div>
+          <h2 id="data-panel-title">Dane aplikacji</h2>
+          <p>Eksportuj lub wczytaj lokalną kopię treningów, raportów stanu i planu.</p>
+        </div>
+        <button class="icon-button" type="button" id="close-data-panel" aria-label="Zamknij panel danych">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </header>
+
+      <div class="actions">
+        <button class="primary" type="button" id="export-json">Eksportuj JSON</button>
+      </div>
+
+      <div class="file-import">
+        <strong>Import JSON</strong>
+        <p>Wczytanie pliku zastąpi dane tej aplikacji w obecnej przeglądarce.</p>
+        <input id="import-json" type="file" accept="application/json,.json">
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const STORAGE_KEY = "fluidMomentum.trainings.v1";
+    const STATUS_KEY = "fluidMomentum.dailyStatus.v1";
+    const PLAN_KEY = "fluidMomentum.plan.v1";
+    const SCREEN_KEY = "fluidMomentum.activeScreen.v1";
+    const form = document.querySelector("#training-form");
+    const statusForm = document.querySelector("#status-form");
+    const planForm = document.querySelector("#plan-form");
+    const dateInput = document.querySelector("#date");
+    const statusDateInput = document.querySelector("#status-date");
+    const seriesList = document.querySelector("#series-list");
+    const savedList = document.querySelector("#saved-list");
+    const toast = document.querySelector("#toast");
+    const dataPanel = document.querySelector("#data-panel");
+    const screens = document.querySelectorAll("[data-screen]");
+    const navItems = document.querySelectorAll("[data-screen-target]");
+
+    const state = {
+      activity: "Woda",
+      boat: "1x",
+      series: [
+        { watts: "", hr: "", split: "" },
+        { watts: "", hr: "", split: "" }
+      ]
+    };
+
+    let planState = null;
+    let reportCursor = new Date();
+    let selectedReportDate = "";
+
+    const formatDate = (value) => {
+      if (!value) return "";
+      const [year, month, day] = value.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      return new Intl.DateTimeFormat("pl-PL", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+      }).format(date);
+    };
+
+    const escapeHtml = (value) => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    const todayLocal = () => {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+    };
+
+    const loadTrainings = () => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    };
+
+    const saveTrainings = (trainings) => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trainings));
+    };
+
+    const loadStatuses = () => {
+      try {
+        return JSON.parse(localStorage.getItem(STATUS_KEY)) || {};
+      } catch {
+        return {};
+      }
+    };
+
+    const saveStatuses = (statuses) => {
+      localStorage.setItem(STATUS_KEY, JSON.stringify(statuses));
+    };
+
+    const defaultPlan = () => ({
+      monthlyGoal: "250",
+      weeklyHours: "12.5",
+      weeklySessions: "6",
+      attachment: null,
+      competitions: [
+        { date: "2026-05-22", name: "Enea Poznań Triathlon", details: "Jezioro Maltańskie, 1/4" },
+        { date: "2026-06-15", name: "Warszawski Triathlon", details: "Dystans Olimpijski" },
+        { date: "2026-07-02", name: "Regaty Wioślarskie", details: "Bydgoszcz, 2000 m" }
+      ],
+      goals: [
+        { done: true, text: "Ukończyć 250 km w miesiącu" },
+        { done: false, text: "Nowy PR na 2000 m" },
+        { done: false, text: "Waga startowa 78 kg" },
+        { done: false, text: "Regularność: 5 tren./tydz." }
+      ]
+    });
+
+    const loadPlan = () => {
+      try {
+        return { ...defaultPlan(), ...(JSON.parse(localStorage.getItem(PLAN_KEY)) || {}) };
+      } catch {
+        return defaultPlan();
+      }
+    };
+
+    const savePlan = () => {
+      localStorage.setItem(PLAN_KEY, JSON.stringify(planState));
+    };
+
+    const setScreen = (screenName) => {
+      const selected = document.querySelector(`[data-screen="${screenName}"]`) ? screenName : "training";
+      screens.forEach((screen) => {
+        screen.classList.toggle("active", screen.dataset.screen === selected);
+      });
+      navItems.forEach((item) => {
+        const isActive = item.dataset.screenTarget === selected;
+        item.classList.toggle("active", isActive);
+        if (isActive) {
+          item.setAttribute("aria-current", "page");
+        } else {
+          item.removeAttribute("aria-current");
+        }
+      });
+      localStorage.setItem(SCREEN_KEY, selected);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (selected === "reports") renderReports();
+      if (selected === "plan") renderPlan();
+    };
+
+    const levelLabel = (value, low, mid, high) => {
+      const number = Number(value);
+      if (number < 35) return low;
+      if (number < 68) return mid;
+      return high;
+    };
+
+    const updateStatusLabels = () => {
+      const recovery = document.querySelector("#recovery").value;
+      const energy = document.querySelector("#energy").value;
+      const mood = document.querySelector("#mood").value;
+      document.querySelector("#recovery-value").textContent = `${recovery}%`;
+      document.querySelector("#recovery-bar").style.setProperty("--value", `${recovery}%`);
+      document.querySelector("#energy-label").textContent = levelLabel(energy, "Niski", "Stabilny", "Wysoki");
+      document.querySelector("#mood-label").textContent = levelLabel(mood, "Przytłoczony", "Neutralny", "Pozytywny");
+    };
+
+    const selectedValues = (selector, attr) => Array.from(document.querySelectorAll(`${selector}.active`))
+      .map((item) => item.dataset[attr]);
+
+    const setActiveValues = (selector, attr, values) => {
+      document.querySelectorAll(selector).forEach((item) => {
+        item.classList.toggle("active", values.includes(item.dataset[attr]));
+        item.setAttribute("aria-pressed", String(values.includes(item.dataset[attr])));
+      });
+    };
+
+    const setSick = (value) => {
+      const toggle = document.querySelector("#sick-toggle");
+      toggle.classList.toggle("active", value);
+      toggle.setAttribute("aria-checked", String(value));
+    };
+
+    const defaultStatus = () => ({
+      recovery: "88",
+      sleepHours: "7",
+      sleepMinutes: "42",
+      energy: "75",
+      mood: "72",
+      symptoms: ["Ból mięśni"],
+      notes: "",
+      soreness: ["Przód ręce", "Plecy"],
+      sick: false,
+      sickState: "",
+      medications: ""
+    });
+
+    const applyStatus = (status) => {
+      document.querySelector("#recovery").value = status.recovery;
+      document.querySelector("#sleep-hours").value = status.sleepHours;
+      document.querySelector("#sleep-minutes").value = status.sleepMinutes;
+      document.querySelector("#energy").value = status.energy;
+      document.querySelector("#mood").value = status.mood;
+      document.querySelector("#status-notes").value = status.notes;
+      document.querySelector("#sick-state").value = status.sickState;
+      document.querySelector("#medications").value = status.medications;
+      setActiveValues(".chip", "symptom", status.symptoms || []);
+      setActiveValues(".body-point", "soreness", status.soreness || []);
+      setSick(Boolean(status.sick));
+      updateStatusLabels();
+    };
+
+    const loadStatusForDate = () => {
+      const statuses = loadStatuses();
+      applyStatus(statuses[statusDateInput.value] || defaultStatus());
+    };
+
+    const showToast = (message) => {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+    };
+
+    const openDataPanel = () => {
+      dataPanel.classList.add("open");
+      dataPanel.setAttribute("aria-hidden", "false");
+    };
+
+    const closeDataPanel = () => {
+      dataPanel.classList.remove("open");
+      dataPanel.setAttribute("aria-hidden", "true");
+    };
+
+    const syncPressed = (selector, dataName) => {
+      document.querySelectorAll(selector).forEach((item) => {
+        if (item.dataset[dataName] !== undefined) {
+          item.setAttribute("aria-pressed", String(item.classList.contains("active")));
+        }
+      });
+    };
+
+    const collectExportData = () => ({
+      app: "Fluid Momentum",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: {
+        trainings: loadTrainings(),
+        statuses: loadStatuses(),
+        plan: loadPlan(),
+        activeScreen: localStorage.getItem(SCREEN_KEY) || "training"
+      }
+    });
+
+    const downloadJson = () => {
+      const exportData = collectExportData();
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = `fluid-momentum-kopia-${stamp}.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("Eksport JSON gotowy.");
+    };
+
+    const normalizeImportData = (payload) => {
+      const source = payload && payload.data ? payload.data : payload;
+      if (!source || typeof source !== "object") throw new Error("Nieprawidłowy format pliku.");
+      const trainings = Array.isArray(source.trainings) ? source.trainings : [];
+      const statuses = source.statuses && typeof source.statuses === "object" && !Array.isArray(source.statuses) ? source.statuses : {};
+      const plan = source.plan && typeof source.plan === "object" && !Array.isArray(source.plan) ? { ...defaultPlan(), ...source.plan } : defaultPlan();
+      const activeScreen = ["training", "status", "plan", "reports"].includes(source.activeScreen) ? source.activeScreen : "training";
+      return { trainings, statuses, plan, activeScreen };
+    };
+
+    const refreshAllViews = () => {
+      planState = loadPlan();
+      renderSeries();
+      renderSaved();
+      renderReports();
+      renderPlan();
+      loadStatusForDate();
+      setScreen(localStorage.getItem(SCREEN_KEY) || "training");
+    };
+
+    const importJsonFile = (file) => {
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("Plik JSON jest większy niż 5 MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        try {
+          const imported = normalizeImportData(JSON.parse(reader.result));
+          const confirmed = window.confirm("Import zastąpi lokalne treningi, statusy i plan w tej przeglądarce. Kontynuować?");
+          if (!confirmed) {
+            showToast("Import anulowany.");
+            return;
+          }
+          saveTrainings(imported.trainings);
+          saveStatuses(imported.statuses);
+          localStorage.setItem(PLAN_KEY, JSON.stringify(imported.plan));
+          localStorage.setItem(SCREEN_KEY, imported.activeScreen);
+          refreshAllViews();
+          closeDataPanel();
+          showToast("Import JSON zakończony.");
+        } catch {
+          showToast("Nie udało się wczytać pliku JSON.");
+        }
+      });
+      reader.readAsText(file);
+    };
+
+    const renderSeries = () => {
+      seriesList.innerHTML = "";
+      state.series.forEach((serie, index) => {
+        const row = document.createElement("div");
+        row.className = "series-row";
+        row.innerHTML = `
+          <label>Seria<br>${index + 1}</label>
+          <div class="mini-field">
+            <span>Średnie waty</span>
+            <input inputmode="decimal" aria-label="Średnie waty seria ${index + 1}" value="${escapeHtml(serie.watts)}" data-field="watts" data-index="${index}" placeholder="W">
+          </div>
+          <div class="mini-field">
+            <span>Tętno HR</span>
+            <input inputmode="numeric" aria-label="Tętno seria ${index + 1}" value="${escapeHtml(serie.hr)}" data-field="hr" data-index="${index}" placeholder="BPM">
+          </div>
+          <div class="mini-field">
+            <span>Tempo /500m</span>
+            <input aria-label="Tempo seria ${index + 1}" value="${escapeHtml(serie.split)}" data-field="split" data-index="${index}" placeholder="1:45">
+          </div>
+          <button class="delete-row" type="button" aria-label="Usuń serię ${index + 1}" data-delete="${index}">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path>
+            </svg>
+          </button>
+        `;
+        seriesList.append(row);
+      });
+    };
+
+    const sanitizeNumber = (value) => value.trim().replace(",", ".");
+
+    const average = (items, key) => {
+      const numbers = items
+        .map((item) => Number(sanitizeNumber(item[key] || "")))
+        .filter((number) => Number.isFinite(number) && number > 0);
+      if (!numbers.length) return "—";
+      return Math.round(numbers.reduce((sum, number) => sum + number, 0) / numbers.length);
+    };
+
+    const currentMonthTrainings = () => {
+      const now = new Date();
+      return loadTrainings().filter((training) => {
+        const date = new Date(`${training.date}T12:00:00`);
+        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+      });
+    };
+
+    const currentWeekTrainings = () => {
+      const now = new Date();
+      const day = now.getDay() || 7;
+      const weekStart = new Date(now);
+      weekStart.setHours(0, 0, 0, 0);
+      weekStart.setDate(now.getDate() - day + 1);
+      return loadTrainings().filter((training) => {
+        const date = new Date(`${training.date}T12:00:00`);
+        return date >= weekStart && date <= now;
+      });
+    };
+
+    const sumDistance = (trainings) => trainings.reduce((sum, training) => {
+      const value = Number(sanitizeNumber(training.distance || ""));
+      return Number.isFinite(value) ? sum + value : sum;
+    }, 0);
+
+    const parseSplit = (value) => {
+      const match = String(value || "").trim().match(/^(\d+):([0-5]\d)$/);
+      if (!match) return null;
+      return Number(match[1]) * 60 + Number(match[2]);
+    };
+
+    const formatSplit = (seconds) => {
+      if (!Number.isFinite(seconds)) return "—";
+      const rounded = Math.round(seconds);
+      return `${Math.floor(rounded / 60)}:${String(rounded % 60).padStart(2, "0")}`;
+    };
+
+    const averageSplit = (trainings) => {
+      const splits = trainings
+        .flatMap((training) => training.series || [])
+        .map((serie) => parseSplit(serie.split))
+        .filter((seconds) => seconds !== null);
+      if (!splits.length) return "—";
+      return formatSplit(splits.reduce((sum, seconds) => sum + seconds, 0) / splits.length);
+    };
+
+    const formatCompactDate = (value) => {
+      if (!value) return "—";
+      const date = new Date(`${value}T12:00:00`);
+      return new Intl.DateTimeFormat("pl-PL", { day: "2-digit", month: "short" }).format(date);
+    };
+
+    const dateKey = (date) => {
+      const offset = date.getTimezoneOffset() * 60000;
+      return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+    };
+
+    const weekdayIndex = (date) => (date.getDay() + 6) % 7;
+
+    const splitToDisplay = (value) => value || "—";
+
+    const renderSaved = () => {
+      const trainings = loadTrainings()
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 5);
+
+      if (!trainings.length) {
+        savedList.innerHTML = `<div class="empty">Nie ma jeszcze zapisanych treningów. Wpisz pierwszą sesję i zapisz ją poniższym przyciskiem.</div>`;
+        return;
+      }
+
+      savedList.innerHTML = trainings.map((training) => `
+        <article class="session">
+          <div class="session-head">
+            <div>
+              <strong>${escapeHtml(training.activity)} ${training.boat ? "• " + escapeHtml(training.boat) : ""}</strong>
+              <small>${escapeHtml(formatDate(training.date))}${training.conditions ? " • " + escapeHtml(training.conditions) : ""}</small>
+            </div>
+            <span class="badge">${training.series.length} ser.</span>
+          </div>
+          <div class="metrics">
+            <div class="metric"><span>Dystans</span><b>${escapeHtml(training.distance || "—")} km</b></div>
+            <div class="metric"><span>Śr. HR</span><b>${average(training.series, "hr")} bpm</b></div>
+            <div class="metric"><span>Śr. waty</span><b>${average(training.series, "watts")}</b></div>
+          </div>
+        </article>
+      `).join("");
+    };
+
+    const renderReports = () => {
+      const monthTrainings = currentMonthTrainings();
+      const distance = sumDistance(monthTrainings);
+      const goalPercent = Math.min(100, Math.round((distance / 250) * 100));
+
+      document.querySelector("#report-distance").textContent = `${distance.toFixed(distance % 1 ? 1 : 0)} km`;
+      document.querySelector("#report-count").textContent = String(monthTrainings.length);
+      document.querySelector("#report-progress").style.setProperty("--value", `${goalPercent}%`);
+      renderReportCalendar();
+      renderWeeklyBars();
+      renderReportDaySessions();
+      renderPersonalRecords();
+    };
+
+    const renderReportCalendar = () => {
+      const calendar = document.querySelector("#report-calendar");
+      const trainings = loadTrainings();
+      const year = reportCursor.getFullYear();
+      const month = reportCursor.getMonth();
+      const first = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const leading = weekdayIndex(first);
+      const monthLabel = new Intl.DateTimeFormat("pl-PL", { month: "long", year: "numeric" }).format(first);
+      const trainingDates = new Set(trainings.map((training) => training.date));
+      const weekdays = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Ndz"];
+      const cells = weekdays.map((day) => `<div class="calendar-weekday">${day}</div>`);
+
+      document.querySelector("#report-month-label").textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+
+      for (let i = 0; i < leading; i += 1) {
+        cells.push(`<button class="calendar-day muted" type="button" disabled aria-hidden="true"></button>`);
+      }
+
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const key = dateKey(new Date(year, month, day));
+        const classes = [
+          "calendar-day",
+          trainingDates.has(key) ? "has-training" : "",
+          key === selectedReportDate ? "selected" : ""
+        ].filter(Boolean).join(" ");
+        cells.push(`<button class="${classes}" type="button" data-report-date="${key}" aria-label="${escapeHtml(formatDate(key))}">${day}</button>`);
+      }
+
+      calendar.innerHTML = cells.join("");
+    };
+
+    const renderWeeklyBars = () => {
+      const weekTrainings = currentWeekTrainings();
+      const byDay = Array.from({ length: 7 }, () => 0);
+      weekTrainings.forEach((training) => {
+        const date = new Date(`${training.date}T12:00:00`);
+        byDay[weekdayIndex(date)] += Number(sanitizeNumber(training.distance || "")) || 0;
+      });
+      const max = Math.max(...byDay, 1);
+      const labels = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Ndz"];
+      document.querySelector("#weekly-bars").innerHTML = byDay.map((distance, index) => {
+        const height = Math.max(16, Math.round((distance / max) * 96));
+        return `
+          <div class="bar ${distance > 0 ? "active" : ""}" title="${distance.toFixed(distance % 1 ? 1 : 0)} km">
+            <i style="--height:${height}px"></i>
+            <span>${labels[index]}</span>
+          </div>
+        `;
+      }).join("");
+    };
+
+    const sessionCard = (training) => `
+      <article class="session">
+        <div class="session-head">
+          <div>
+            <strong>${escapeHtml(training.activity)} ${training.boat ? "• " + escapeHtml(training.boat) : ""}</strong>
+            <small>${escapeHtml(formatDate(training.date))}${training.conditions ? " • " + escapeHtml(training.conditions) : ""}</small>
+          </div>
+          <span class="badge">${training.series.length} ser.</span>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span>Dystans</span><b>${escapeHtml(training.distance || "—")} km</b></div>
+          <div class="metric"><span>Śr. HR</span><b>${average(training.series, "hr")} bpm</b></div>
+          <div class="metric"><span>Split</span><b>${splitToDisplay(averageSplit([training]))}</b></div>
+        </div>
+      </article>
+    `;
+
+    const renderReportDaySessions = () => {
+      const list = document.querySelector("#report-day-sessions");
+      const sessions = loadTrainings()
+        .filter((training) => training.date === selectedReportDate)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+      if (!sessions.length) {
+        list.innerHTML = `<div class="empty">Wybierz dzień z kropką w kalendarzu albo zapisz trening, żeby zobaczyć historię.</div>`;
+        return;
+      }
+
+      list.innerHTML = sessions.map(sessionCard).join("");
+    };
+
+    const bestTrainingByDistance = (trainings) => trainings.reduce((best, training) => {
+      const distance = Number(sanitizeNumber(training.distance || ""));
+      if (!Number.isFinite(distance)) return best;
+      if (!best || distance > best.distance) return { training, distance };
+      return best;
+    }, null);
+
+    const bestSplitRecord = (trainings) => {
+      let best = null;
+      trainings.forEach((training) => {
+        (training.series || []).forEach((serie) => {
+          const seconds = parseSplit(serie.split);
+          if (seconds === null) return;
+          if (!best || seconds < best.seconds) best = { training, seconds };
+        });
+      });
+      return best;
+    };
+
+    const maxWattsRecord = (trainings) => {
+      let best = null;
+      trainings.forEach((training) => {
+        (training.series || []).forEach((serie) => {
+          const watts = Number(sanitizeNumber(serie.watts || ""));
+          if (!Number.isFinite(watts)) return;
+          if (!best || watts > best.watts) best = { training, watts };
+        });
+      });
+      return best;
+    };
+
+    const renderPersonalRecords = () => {
+      const records = document.querySelector("#personal-records");
+      const trainings = loadTrainings();
+      const distance = bestTrainingByDistance(trainings);
+      const split = bestSplitRecord(trainings);
+      const watts = maxWattsRecord(trainings);
+
+      if (!trainings.length) {
+        records.innerHTML = `<div class="empty">Rekordy pojawią się po zapisaniu pierwszych treningów.</div>`;
+        return;
+      }
+
+      records.innerHTML = `
+        <div class="record-row">
+          <div class="record-icon">1</div>
+          <div><span>Najdłuższy dystans</span><strong>${distance ? escapeHtml(formatDate(distance.training.date)) : "—"}</strong></div>
+          <b>${distance ? distance.distance.toFixed(distance.distance % 1 ? 1 : 0) + " km" : "—"}</b>
+        </div>
+        <div class="record-row">
+          <div class="record-icon">2</div>
+          <div><span>Najszybszy split</span><strong>${split ? escapeHtml(formatDate(split.training.date)) : "—"}</strong></div>
+          <b>${split ? formatSplit(split.seconds) : "—"}</b>
+        </div>
+        <div class="record-row">
+          <div class="record-icon">3</div>
+          <div><span>Najwyższe waty</span><strong>${watts ? escapeHtml(formatDate(watts.training.date)) : "—"}</strong></div>
+          <b>${watts ? Math.round(watts.watts) + " W" : "—"}</b>
+        </div>
+      `;
+    };
+
+    const renderCompetitions = () => {
+      const list = document.querySelector("#competition-list");
+      if (!planState.competitions.length) {
+        list.innerHTML = `<div class="empty">Nie ma jeszcze zawodów w planie.</div>`;
+        return;
+      }
+      list.innerHTML = planState.competitions.map((competition, index) => `
+        <div class="competition-row">
+          <div class="competition-date">${escapeHtml(formatCompactDate(competition.date))}</div>
+          <div>
+            <input data-competition="${index}" data-field="name" value="${escapeHtml(competition.name)}" aria-label="Nazwa zawodów ${index + 1}">
+            <input data-competition="${index}" data-field="details" value="${escapeHtml(competition.details)}" aria-label="Szczegóły zawodów ${index + 1}" style="margin-top:8px">
+            <input type="date" data-competition="${index}" data-field="date" value="${escapeHtml(competition.date)}" aria-label="Data zawodów ${index + 1}" style="margin-top:8px">
+          </div>
+          <button class="tiny-action" type="button" data-delete-competition="${index}" aria-label="Usuń zawody ${index + 1}">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg>
+          </button>
+        </div>
+      `).join("");
+    };
+
+    const renderGoals = () => {
+      document.querySelector("#season-goals").innerHTML = planState.goals.map((goal, index) => `
+        <div class="goal-row">
+          <input type="checkbox" data-goal="${index}" data-field="done" aria-label="Cel ukończony ${index + 1}" ${goal.done ? "checked" : ""}>
+          <input type="text" data-goal="${index}" data-field="text" value="${escapeHtml(goal.text)}" aria-label="Treść celu ${index + 1}">
+          <button class="tiny-action" type="button" data-delete-goal="${index}" aria-label="Usuń cel ${index + 1}">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg>
+          </button>
+        </div>
+      `).join("");
+    };
+
+    const renderAttachment = () => {
+      const attachment = document.querySelector("#plan-attachment");
+      if (!planState.attachment) {
+        attachment.classList.remove("show");
+        document.querySelector("#plan-file-name").textContent = "Brak pliku";
+        document.querySelector("#plan-file-size").textContent = "";
+        return;
+      }
+      attachment.classList.add("show");
+      document.querySelector("#plan-file-name").textContent = planState.attachment.name;
+      document.querySelector("#plan-file-size").textContent = `${Math.round(planState.attachment.size / 1024)} KB`;
+    };
+
+    const renderPlan = () => {
+      const monthTrainings = currentMonthTrainings();
+      const weekTrainings = currentWeekTrainings();
+      const monthDistance = sumDistance(monthTrainings);
+      const weekDistance = sumDistance(weekTrainings);
+      const monthlyGoal = Number(sanitizeNumber(planState.monthlyGoal || "250")) || 250;
+      const weeklySessions = Number(planState.weeklySessions || "6") || 6;
+      const monthPercent = Math.min(100, Math.round((monthDistance / monthlyGoal) * 100));
+
+      document.querySelector("#monthly-goal").value = planState.monthlyGoal;
+      document.querySelector("#weekly-hours").value = planState.weeklyHours;
+      document.querySelector("#weekly-sessions").value = planState.weeklySessions;
+      document.querySelector("#plan-month-distance").textContent = monthDistance.toFixed(monthDistance % 1 ? 1 : 0);
+      document.querySelector("#plan-month-goal-label").textContent = monthlyGoal;
+      document.querySelector("#plan-month-copy").textContent = monthPercent >= 100
+        ? "Cel miesiąca domknięty. Możesz spokojnie planować kolejny blok."
+        : `Pozostało ${Math.max(0, monthlyGoal - monthDistance).toFixed(0)} km do celu miesiąca.`;
+      document.querySelector("#plan-month-progress").style.setProperty("--value", `${monthPercent}%`);
+      document.querySelector("#plan-week-distance").textContent = `${weekDistance.toFixed(weekDistance % 1 ? 1 : 0)} km`;
+      document.querySelector("#plan-average-split").textContent = averageSplit(monthTrainings);
+      document.querySelector("#plan-session-count").textContent = String(weekTrainings.length);
+      document.querySelector("#plan-session-goal-label").textContent = String(weeklySessions);
+      renderAttachment();
+      renderCompetitions();
+      renderGoals();
+    };
+
+    const resetForm = () => {
+      state.activity = "Woda";
+      state.boat = "1x";
+      state.series = [
+        { watts: "", hr: "", split: "" },
+        { watts: "", hr: "", split: "" }
+      ];
+      form.reset();
+      dateInput.value = todayLocal();
+      document.querySelectorAll(".activity").forEach((button) => {
+        button.classList.toggle("active", button.dataset.activity === state.activity);
+      });
+      document.querySelectorAll(".pill").forEach((button) => {
+        button.classList.toggle("active", button.dataset.boat === state.boat);
+      });
+      syncPressed(".activity", "activity");
+      syncPressed(".pill", "boat");
+      renderSeries();
+    };
+
+    document.querySelectorAll(".activity").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.activity = button.dataset.activity;
+        document.querySelectorAll(".activity").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        syncPressed(".activity", "activity");
+      });
+    });
+
+    document.querySelectorAll(".pill").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.boat = button.dataset.boat;
+        document.querySelectorAll(".pill").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        syncPressed(".pill", "boat");
+      });
+    });
+
+    seriesList.addEventListener("input", (event) => {
+      const input = event.target.closest("input[data-field]");
+      if (!input) return;
+      state.series[Number(input.dataset.index)][input.dataset.field] = input.value;
+    });
+
+    seriesList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete]");
+      if (!button) return;
+      if (state.series.length === 1) {
+        showToast("Zostawiam co najmniej jedną serię.");
+        return;
+      }
+      state.series.splice(Number(button.dataset.delete), 1);
+      renderSeries();
+    });
+
+    document.querySelector("#add-series").addEventListener("click", () => {
+      state.series.push({ watts: "", hr: "", split: "" });
+      renderSeries();
+    });
+
+    document.querySelector("#reset-form").addEventListener("click", () => {
+      resetForm();
+      showToast("Formularz wyczyszczony.");
+    });
+
+    document.querySelectorAll("#recovery, #energy, #mood").forEach((input) => {
+      input.addEventListener("input", updateStatusLabels);
+    });
+
+    document.querySelector("#symptom-options").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-symptom]");
+      if (!button) return;
+      button.classList.toggle("active");
+      syncPressed(".chip", "symptom");
+    });
+
+    document.querySelector("#body-map").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-soreness]");
+      if (!button) return;
+      button.classList.toggle("active");
+      syncPressed(".body-point", "soreness");
+    });
+
+    document.querySelector("#sick-toggle").addEventListener("click", () => {
+      const isSick = document.querySelector("#sick-toggle").classList.contains("active");
+      setSick(!isSick);
+    });
+
+    statusDateInput.addEventListener("change", loadStatusForDate);
+
+    document.querySelector("#monthly-goal").addEventListener("input", (event) => {
+      planState.monthlyGoal = event.target.value;
+      renderPlan();
+    });
+
+    document.querySelector("#weekly-hours").addEventListener("input", (event) => {
+      planState.weeklyHours = event.target.value;
+    });
+
+    document.querySelector("#weekly-sessions").addEventListener("input", (event) => {
+      planState.weeklySessions = event.target.value;
+      renderPlan();
+    });
+
+    document.querySelector("#add-competition").addEventListener("click", () => {
+      planState.competitions.unshift({ date: todayLocal(), name: "Nowe zawody", details: "" });
+      renderCompetitions();
+    });
+
+    document.querySelector("#competition-list").addEventListener("input", (event) => {
+      const input = event.target.closest("[data-competition]");
+      if (!input) return;
+      planState.competitions[Number(input.dataset.competition)][input.dataset.field] = input.value;
+      if (input.dataset.field === "date") renderCompetitions();
+    });
+
+    document.querySelector("#competition-list").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete-competition]");
+      if (!button) return;
+      planState.competitions.splice(Number(button.dataset.deleteCompetition), 1);
+      renderCompetitions();
+    });
+
+    document.querySelector("#add-goal").addEventListener("click", () => {
+      planState.goals.push({ done: false, text: "Nowy cel sezonowy" });
+      renderGoals();
+    });
+
+    document.querySelector("#season-goals").addEventListener("input", (event) => {
+      const input = event.target.closest("[data-goal]");
+      if (!input) return;
+      const goal = planState.goals[Number(input.dataset.goal)];
+      goal[input.dataset.field] = input.type === "checkbox" ? input.checked : input.value;
+    });
+
+    document.querySelector("#season-goals").addEventListener("change", (event) => {
+      const input = event.target.closest("[data-goal]");
+      if (!input) return;
+      planState.goals[Number(input.dataset.goal)][input.dataset.field] = input.checked;
+    });
+
+    document.querySelector("#season-goals").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete-goal]");
+      if (!button) return;
+      if (planState.goals.length === 1) {
+        showToast("Zostawiam co najmniej jeden cel.");
+        return;
+      }
+      planState.goals.splice(Number(button.dataset.deleteGoal), 1);
+      renderGoals();
+    });
+
+    document.querySelector("#remove-plan-file").addEventListener("click", () => {
+      planState.attachment = null;
+      document.querySelector("#plan-file").value = "";
+      renderAttachment();
+      showToast("Plan usunięty z pamięci lokalnej.");
+    });
+
+    document.querySelector("#plan-file").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 1.5 * 1024 * 1024) {
+        event.target.value = "";
+        showToast("Plik jest większy niż 1.5 MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        planState.attachment = {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          dataUrl: reader.result
+        };
+        renderAttachment();
+        savePlan();
+        showToast("Plan zapisany lokalnie.");
+      });
+      reader.readAsDataURL(file);
+    });
+
+    document.querySelector("#open-data-panel").addEventListener("click", openDataPanel);
+    document.querySelector("#close-data-panel").addEventListener("click", closeDataPanel);
+    dataPanel.addEventListener("click", (event) => {
+      if (event.target === dataPanel) closeDataPanel();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && dataPanel.classList.contains("open")) closeDataPanel();
+    });
+    document.querySelector("#export-json").addEventListener("click", downloadJson);
+    document.querySelector("#import-json").addEventListener("change", (event) => {
+      importJsonFile(event.target.files[0]);
+      event.target.value = "";
+    });
+
+    document.querySelectorAll("[data-soon]").forEach((button) => {
+      button.addEventListener("click", () => showToast("Ten element dodamy w kolejnej iteracji."));
+    });
+
+    navItems.forEach((button) => {
+      button.addEventListener("click", () => setScreen(button.dataset.screenTarget));
+    });
+
+    document.querySelector("#report-prev-month").addEventListener("click", () => {
+      reportCursor = new Date(reportCursor.getFullYear(), reportCursor.getMonth() - 1, 1);
+      renderReports();
+    });
+
+    document.querySelector("#report-next-month").addEventListener("click", () => {
+      reportCursor = new Date(reportCursor.getFullYear(), reportCursor.getMonth() + 1, 1);
+      renderReports();
+    });
+
+    document.querySelector("#report-calendar").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-report-date]");
+      if (!button) return;
+      selectedReportDate = button.dataset.reportDate;
+      renderReportCalendar();
+      renderReportDaySessions();
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const cleanedSeries = state.series
+        .map((serie) => ({
+          watts: serie.watts.trim(),
+          hr: serie.hr.trim(),
+          split: serie.split.trim()
+        }))
+        .filter((serie) => serie.watts || serie.hr || serie.split);
+
+      if (!cleanedSeries.length) {
+        showToast("Dodaj dane przynajmniej jednej serii.");
+        return;
+      }
+
+      const training = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        date: dateInput.value,
+        activity: state.activity,
+        boat: state.activity === "Woda" ? state.boat : "",
+        series: cleanedSeries,
+        distance: sanitizeNumber(document.querySelector("#distance").value),
+        crew: document.querySelector("#crew").value.trim(),
+        conditions: document.querySelector("#conditions").value.trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      const trainings = loadTrainings();
+      trainings.push(training);
+      saveTrainings(trainings);
+      renderSaved();
+      renderReports();
+      resetForm();
+      showToast("Trening zapisany lokalnie.");
+    });
+
+    statusForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const status = {
+        recovery: document.querySelector("#recovery").value,
+        sleepHours: document.querySelector("#sleep-hours").value.trim(),
+        sleepMinutes: document.querySelector("#sleep-minutes").value.trim(),
+        energy: document.querySelector("#energy").value,
+        mood: document.querySelector("#mood").value,
+        symptoms: selectedValues(".chip", "symptom"),
+        notes: document.querySelector("#status-notes").value.trim(),
+        soreness: selectedValues(".body-point", "soreness"),
+        sick: document.querySelector("#sick-toggle").classList.contains("active"),
+        sickState: document.querySelector("#sick-state").value.trim(),
+        medications: document.querySelector("#medications").value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const statuses = loadStatuses();
+      statuses[statusDateInput.value] = status;
+      saveStatuses(statuses);
+      showToast("Stan zapisany lokalnie.");
+    });
+
+    planForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      planState.monthlyGoal = document.querySelector("#monthly-goal").value.trim() || "250";
+      planState.weeklyHours = document.querySelector("#weekly-hours").value.trim() || "12.5";
+      planState.weeklySessions = document.querySelector("#weekly-sessions").value.trim() || "6";
+      planState.competitions = planState.competitions
+        .map((competition) => ({
+          date: competition.date,
+          name: competition.name.trim(),
+          details: competition.details.trim()
+        }))
+        .filter((competition) => competition.name);
+      planState.goals = planState.goals
+        .map((goal) => ({ done: Boolean(goal.done), text: goal.text.trim() }))
+        .filter((goal) => goal.text);
+      savePlan();
+      renderPlan();
+      showToast("Plan zapisany lokalnie.");
+    });
+
+    dateInput.value = todayLocal();
+    statusDateInput.value = todayLocal();
+    selectedReportDate = todayLocal();
+    reportCursor = new Date(`${selectedReportDate}T12:00:00`);
+    planState = loadPlan();
+    syncPressed(".activity", "activity");
+    syncPressed(".pill", "boat");
+    renderSeries();
+    renderSaved();
+    renderReports();
+    renderPlan();
+    loadStatusForDate();
+    setScreen(localStorage.getItem(SCREEN_KEY) || "training");
+  </script>
+</body>
+</html>

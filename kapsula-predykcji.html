@@ -222,6 +222,15 @@
   .seal-screen .reopen{
     margin-top:28px;background:transparent;border:1px solid #4a4636;color:#b8b2a2;
   }
+  .seal-screen #sealOut{
+    width:100%;max-width:520px;min-height:200px;
+    background:#1b1f29;border:1px solid #36312a;border-radius:4px;
+    color:#cfc9ba;font-family:'Spline Sans Mono',monospace;font-size:12.5px;
+    line-height:1.55;padding:16px;resize:vertical;
+  }
+  .seal-screen #sealOut:focus{outline:none;border-color:var(--violet)}
+  .seal-screen .btn-copy{background:var(--violet);color:#fff;font-weight:600;margin-top:0}
+  .seal-screen .btn-copy:hover{background:var(--violet-deep)}
 </style>
 </head>
 <body>
@@ -389,10 +398,14 @@
 
 <div class="seal-screen" id="sealScreen">
   <div class="wax">L</div>
-  <h2>Kapsuła zapieczętowana.</h2>
-  <p>Otworzył się gotowy mail do prowadzącego z Twoimi predykcjami. Kliknij „wyślij" w swojej skrzynce — i zapomnij o nich do jesieni.</p>
-  <p style="color:#7a7464;font-size:13px">Wtedy otworzymy wszystkie naraz i policzymy, kto czytał przyszłość — a kto czytał Twittera.</p>
-  <button class="reopen" onclick="document.getElementById('sealScreen').classList.remove('on')">Wróć i popraw</button>
+  <h2>Kapsuła gotowa do wysłania.</h2>
+  <p>Spróbowaliśmy otworzyć Twój program pocztowy z gotowym mailem. Jeśli się nie otworzył, skopiuj treść poniżej i wyślij ją ręcznie na adres prowadzącego.</p>
+  <p style="color:#7a7464;font-size:13px;margin-bottom:22px">Wyślij na: <b style="color:#d8b9ad">Piotr.jarczyk.ai@gmail.com</b></p>
+  <textarea id="sealOut" readonly></textarea>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px">
+    <button class="btn-copy" onclick="copyOut()">Kopiuj wszystko</button>
+    <button class="reopen" onclick="document.getElementById('sealScreen').classList.remove('on')">Wróć i popraw</button>
+  </div>
 </div>
 
 <script>
@@ -421,14 +434,32 @@
 
   function seal(){
     const {who,out} = collect();
-    const hasContent = [...document.querySelectorAll('textarea')].some(t=>t.value.trim());
+    const hasContent = [...document.querySelectorAll('textarea:not(#sealOut)')].some(t=>t.value.trim());
     if(!hasContent){ alert("Wpisz najpierw choć jedną predykcję — pusta kapsuła nic nie powie."); return; }
+    document.getElementById('sealOut').value = out;
+    document.getElementById('sealScreen').classList.add('on');
     const subject = "Kapsuła predykcji — " + who;
     const mailto = "mailto:" + RECIPIENT
       + "?subject=" + encodeURIComponent(subject)
       + "&body=" + encodeURIComponent(out);
-    window.location.href = mailto;
-    document.getElementById('sealScreen').classList.add('on');
+    try{ window.open(mailto, "_blank"); }catch(e){}
+  }
+
+  function copyOut(){
+    const ta = document.getElementById('sealOut');
+    const btn = document.querySelector('.btn-copy');
+    ta.select(); ta.setSelectionRange(0, 99999);
+    let ok = false;
+    try{ ok = document.execCommand('copy'); }catch(e){}
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(ta.value).then(()=>{ flash(btn,"Skopiowano ✓"); }).catch(()=>{ if(ok) flash(btn,"Skopiowano ✓"); else flash(btn,"Zaznacz i Ctrl+C"); });
+    } else {
+      flash(btn, ok ? "Skopiowano ✓" : "Zaznacz i Ctrl+C");
+    }
+  }
+  function flash(btn,msg){
+    const orig = btn.textContent; btn.textContent = msg;
+    setTimeout(()=>btn.textContent=orig, 1800);
   }
 
   function save(){

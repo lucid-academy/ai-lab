@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Od skryptu do agenta · Lucid Academy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root{
+  --bg:#08070d;
+  --bg2:#0e0c17;
+  --ink:#ECEAF6;
+  --muted:#9089a8;
+  --violet:#7B2FFF;
+  --violet-soft:#8000FF;
+  --cyan:#22D3EE;
+  --line:rgba(123,47,255,.22);
+  --line2:rgba(34,211,238,.18);
+  --ok:#34d399;
+  --warn:#fbbf24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Sora',system-ui,sans-serif;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- stage ---- */
+.deck{position:fixed;inset:0}
+.slide{
+  position:absolute;inset:0;
+  display:none;
+  padding:clamp(28px,5vw,80px);
+  flex-direction:column;
+  justify-content:center;
+  opacity:0;
+  overflow-y:auto;
+}
+.slide.active{display:flex;animation:fade .5s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ambient */
+.deck::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(60vw 60vw at 12% 8%, rgba(123,47,255,.16), transparent 60%),
+    radial-gradient(50vw 50vw at 92% 96%, rgba(34,211,238,.10), transparent 60%);
+}
+.slide>*{position:relative;z-index:1}
+
+/* ---- type ---- */
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:1.4rem;display:flex;gap:.8rem;align-items:center;
+}
+.eyebrow::before{content:"";width:28px;height:1px;background:var(--cyan);opacity:.7}
+h1{font-size:clamp(2.2rem,6vw,4.6rem);font-weight:800;line-height:1.02;letter-spacing:-.02em}
+h2{font-size:clamp(1.7rem,4.2vw,3rem);font-weight:700;line-height:1.08;letter-spacing:-.015em;margin-bottom:1.4rem}
+h3{font-size:1.15rem;font-weight:600;margin-bottom:.5rem}
+p{font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.6;color:var(--muted);max-width:62ch}
+.lead{color:var(--ink);font-size:clamp(1.05rem,1.8vw,1.35rem)}
+strong{color:var(--ink);font-weight:600}
+.grad{background:linear-gradient(100deg,var(--violet),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---- title slide ---- */
+.signet{width:64px;height:64px;margin-bottom:2.2rem}
+.kicker{margin-top:2rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);letter-spacing:.1em}
+
+/* ---- grids / cards ---- */
+.cols{display:grid;gap:1.1rem;margin-top:1.6rem}
+.cols.two{grid-template-columns:1fr 1fr}
+.cols.three{grid-template-columns:repeat(3,1fr)}
+.card{
+  background:linear-gradient(160deg,var(--bg2),rgba(14,12,23,.4));
+  border:1px solid var(--line);
+  border-radius:16px;padding:1.3rem 1.4rem;
+}
+.card .n{font-family:'JetBrains Mono',monospace;color:var(--violet);font-size:.8rem;letter-spacing:.1em}
+.card p{font-size:.95rem}
+
+/* chatbot vs agent loop */
+.loop{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem;align-items:center}
+.node{
+  font-family:'JetBrains Mono',monospace;font-size:.85rem;
+  padding:.55rem .9rem;border-radius:10px;
+  border:1px solid var(--line2);background:rgba(34,211,238,.05);color:var(--ink);
+}
+.arrow{color:var(--violet);font-weight:700}
+
+/* ---- interactive levels explorer ---- */
+.explorer{display:grid;grid-template-columns:300px 1fr;gap:1.6rem;margin-top:1.2rem;width:100%;max-width:1180px;align-items:start}
+@media(max-width:900px){.explorer{grid-template-columns:1fr}}
+.lvbtns{display:flex;flex-direction:column;gap:.5rem}
+.lvbtn{
+  display:grid;grid-template-columns:42px 1fr;gap:.85rem;align-items:center;
+  text-align:left;cursor:pointer;width:100%;
+  padding:.7rem .8rem;border-radius:12px;
+  border:1px solid var(--line);background:linear-gradient(90deg,rgba(123,47,255,.05),transparent);
+  color:var(--ink);font-family:'Sora';transition:.25s;
+}
+.lvbtn:hover{border-color:var(--line2)}
+.lvbtn.on{border-color:var(--cyan);background:linear-gradient(90deg,rgba(34,211,238,.12),transparent);box-shadow:0 0 0 1px var(--cyan) inset}
+.lvbtn .lvn{font-family:'JetBrains Mono';font-weight:600;font-size:1.25rem;color:var(--cyan)}
+.lvbtn .role{font-weight:600;font-size:.98rem;line-height:1.1}
+.lvbtn .sub{font-size:.74rem;color:var(--muted);font-family:'JetBrains Mono';letter-spacing:.02em}
+.autobar{height:5px;border-radius:3px;margin:.5rem 0 1.1rem;background:rgba(255,255,255,.06);overflow:hidden}
+.autofill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .5s ease;width:20%}
+.panel{
+  border:1px solid var(--line);border-radius:18px;padding:1.5rem 1.7rem;
+  background:linear-gradient(160deg,var(--bg2),rgba(14,12,23,.3));min-height:340px;
+}
+.panel .pr{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.5rem;margin-bottom:.2rem}
+.panel h3{font-size:1.5rem;margin:0}
+.panel .role-tag{font-family:'JetBrains Mono';font-size:.78rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase}
+.panel .scene{
+  margin:1rem 0 1.2rem;padding:1rem 1.1rem;border-left:2px solid var(--violet);
+  background:rgba(123,47,255,.06);border-radius:0 10px 10px 0;
+  font-size:1rem;line-height:1.55;color:var(--ink);
+}
+.panel .scene b{color:var(--cyan);font-weight:600}
+.metarow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.4rem}
+@media(max-width:560px){.metarow{grid-template-columns:1fr}}
+.meta-k{font-family:'JetBrains Mono';font-size:.68rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem}
+.meta-v{font-size:.92rem;color:var(--ink);line-height:1.4}
+.realchips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
+.realchip{font-family:'JetBrains Mono';font-size:.72rem;padding:.28rem .65rem;border-radius:7px;background:rgba(34,211,238,.08);border:1px solid var(--line2);color:#bfeef7}
+.takeover{margin-top:1rem;font-size:.82rem;color:var(--muted);font-style:italic}
+
+/* ---- levels (legacy ladder, kept for reference slide) ---- */
+.levels{display:flex;flex-direction:column;gap:.55rem;margin-top:1.4rem}
+.lvl{
+  display:grid;grid-template-columns:48px 1fr;gap:1rem;align-items:center;
+  padding:.7rem .9rem;border-radius:12px;border:1px solid var(--line);
+  background:linear-gradient(90deg,rgba(123,47,255,.06),transparent);
+  transition:border-color .3s,transform .3s;
+}
+.lvl:hover{border-color:var(--cyan);transform:translateX(4px)}
+.lvl .lv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:1.3rem;color:var(--cyan)}
+.lvl h3{margin:0;font-size:1.02rem}
+.lvl small{color:var(--muted);font-size:.85rem}
+
+/* ---- live agent ---- */
+.lab{
+  display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.2rem;
+  width:100%;max-width:1100px;
+}
+@media(max-width:840px){.lab{grid-template-columns:1fr}.cols.two,.cols.three{grid-template-columns:1fr}}
+.term{
+  background:#060509;border:1px solid var(--line);border-radius:14px;
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  display:flex;flex-direction:column;min-height:300px;overflow:hidden;
+}
+.term-bar{display:flex;gap:.4rem;padding:.7rem .9rem;border-bottom:1px solid var(--line);align-items:center}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.term-bar span{margin-left:.6rem;color:var(--muted);font-size:.72rem;letter-spacing:.08em}
+.term-body{padding:.9rem 1rem;overflow-y:auto;flex:1;line-height:1.7}
+.ln{margin-bottom:.15rem;white-space:pre-wrap;word-break:break-word}
+.ln.user{color:var(--cyan)}
+.ln.think{color:var(--muted)}
+.ln.tool{color:var(--warn)}
+.ln.obs{color:#7dd3fc}
+.ln.final{color:var(--ok)}
+.term-in{display:flex;border-top:1px solid var(--line)}
+.term-in input{
+  flex:1;background:transparent;border:none;color:var(--ink);
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:.8rem 1rem;outline:none;
+}
+.term-in button{
+  background:var(--violet);color:#fff;border:none;padding:0 1.2rem;
+  font-family:'Sora';font-weight:600;cursor:pointer;font-size:.85rem;
+}
+.term-in button:hover{background:var(--violet-soft)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:.7rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+.chip{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  border:1px solid var(--line2);border-radius:20px;padding:.3rem .7rem;
+  color:var(--cyan);cursor:pointer;background:rgba(34,211,238,.04);
+}
+.chip:hover{background:rgba(34,211,238,.14)}
+
+/* ---- exercise / use cases ---- */
+.use-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+@media(max-width:840px){.use-grid{grid-template-columns:1fr}}
+.use{
+  border:1px solid var(--line);border-radius:16px;padding:1.2rem;
+  background:linear-gradient(160deg,var(--bg2),transparent);
+  cursor:pointer;transition:.3s;position:relative;overflow:hidden;
+}
+.use:hover{border-color:var(--violet);transform:translateY(-4px)}
+.use .ic{font-size:1.6rem;margin-bottom:.6rem}
+.use h3{font-size:1.05rem}
+.use p{font-size:.88rem;margin-top:.3rem}
+.use .for{margin-top:.7rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--cyan);letter-spacing:.06em}
+
+/* steps */
+/* ---- agent builder ---- */
+.builder{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;margin-top:1rem;width:100%;max-width:1180px;align-items:stretch}
+@media(max-width:900px){.builder{grid-template-columns:1fr}}
+.bcol{display:flex;flex-direction:column;gap:.8rem}
+.bstep{border:1px solid var(--line);border-radius:14px;padding:.9rem 1.05rem;background:linear-gradient(160deg,var(--bg2),rgba(14,12,23,.3))}
+.bstep .bhd{display:flex;align-items:center;gap:.6rem;margin-bottom:.55rem}
+.bstep .bnum{font-family:'JetBrains Mono';font-weight:600;font-size:.78rem;color:#fff;background:var(--violet);width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex:none}
+.bstep .btt{font-weight:600;font-size:.98rem}
+.bstep .bhint{font-size:.78rem;color:var(--muted);margin-top:.05rem}
+.toolpick{display:flex;flex-wrap:wrap;gap:.4rem}
+.tool-opt{
+  font-family:'JetBrains Mono';font-size:.78rem;cursor:pointer;
+  border:1px solid var(--line);border-radius:8px;padding:.4rem .7rem;
+  background:rgba(123,47,255,.05);color:var(--ink);transition:.2s;display:flex;gap:.35rem;align-items:center;
+}
+.tool-opt:hover{border-color:var(--line2)}
+.tool-opt.on{border-color:var(--cyan);background:rgba(34,211,238,.14);box-shadow:0 0 0 1px var(--cyan) inset}
+.b-in,.b-ta{
+  width:100%;background:#060509;border:1px solid var(--line);border-radius:9px;
+  color:var(--ink);font-family:'Sora';font-size:.9rem;padding:.6rem .75rem;outline:none;resize:vertical;
+}
+.b-in:focus,.b-ta:focus{border-color:var(--cyan)}
+.b-ta{min-height:84px;line-height:1.45}
+.stoppick{display:flex;flex-wrap:wrap;gap:.4rem}
+.fillbtn{font-size:.74rem;font-family:'JetBrains Mono';color:var(--cyan);background:none;border:1px dashed var(--line2);border-radius:7px;padding:.3rem .6rem;cursor:pointer}
+.fillbtn:hover{background:rgba(34,211,238,.08)}
+.btest{border:1px solid var(--line2);border-radius:14px;background:#060509;display:flex;flex-direction:column;overflow:hidden;min-height:420px}
+.btest-hd{padding:.7rem .9rem;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:.5rem}
+.btest-hd .led{width:9px;height:9px;border-radius:50%;background:#444;transition:.3s}
+.btest-hd .led.live{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.btest-hd span{font-family:'JetBrains Mono';font-size:.74rem;color:var(--muted);letter-spacing:.08em}
+.btest-body{flex:1;overflow-y:auto;padding:.9rem 1rem;font-family:'JetBrains Mono';font-size:.8rem;line-height:1.65}
+.btest-body .empty{color:var(--muted);font-style:italic}
+.btest-in{display:flex;border-top:1px solid var(--line)}
+.btest-in input{flex:1;background:transparent;border:none;color:var(--ink);font-family:'JetBrains Mono';font-size:.8rem;padding:.75rem .9rem;outline:none}
+.btest-in button{background:var(--violet);color:#fff;border:none;padding:0 1.1rem;font-family:'Sora';font-weight:600;cursor:pointer;font-size:.82rem}
+.btest-in button:hover{background:var(--violet-soft)}
+.btest-in button:disabled{opacity:.4;cursor:not-allowed}
+.tline{margin-bottom:.2rem;white-space:pre-wrap;word-break:break-word}
+.tline.u{color:var(--cyan)}
+.tline.t{color:var(--muted)}
+.tline.k{color:var(--warn)}
+.tline.o{color:#7dd3fc}
+.tline.f{color:var(--ok)}
+.tline.e{color:#ff8080}
+
+/* steps (instruction slide) */
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:.9rem;margin-top:1.4rem;max-width:70ch}
+.step{display:grid;grid-template-columns:36px 1fr;gap:1rem;align-items:start}
+.step::before{
+  counter-increment:s;content:counter(s);
+  width:36px;height:36px;border-radius:10px;
+  display:grid;place-items:center;font-family:'JetBrains Mono';font-weight:600;
+  background:rgba(123,47,255,.12);border:1px solid var(--line);color:var(--cyan);
+}
+.step h3{font-size:1rem;margin-bottom:.15rem}
+.step p{font-size:.9rem}
+code{font-family:'JetBrains Mono';background:rgba(123,47,255,.12);padding:.1rem .4rem;border-radius:5px;color:var(--cyan);font-size:.85em}
+
+ul.clean{list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.7rem;max-width:64ch}
+ul.clean li{padding-left:1.4rem;position:relative;color:var(--muted);font-size:1.02rem;line-height:1.5}
+ul.clean li::before{content:"→";position:absolute;left:0;color:var(--violet)}
+ul.clean li strong{color:var(--ink)}
+
+.quote{border-left:2px solid var(--cyan);padding-left:1.4rem;margin-top:1.4rem;max-width:60ch}
+.quote p{color:var(--ink);font-size:clamp(1.1rem,2vw,1.5rem);font-weight:300;line-height:1.4}
+.quote cite{display:block;margin-top:.8rem;color:var(--muted);font-style:normal;font-family:'JetBrains Mono';font-size:.8rem}
+
+.stat{display:flex;gap:2.5rem;margin-top:1.6rem;flex-wrap:wrap}
+.stat .big{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;color:var(--cyan);line-height:1;font-family:'Sora'}
+.stat small{display:block;color:var(--muted);font-size:.82rem;margin-top:.4rem;max-width:18ch}
+
+/* ---- chrome ---- */
+.bar{
+  position:fixed;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--violet),var(--cyan));
+  z-index:20;transition:width .4s ease;
+}
+.nav{
+  position:fixed;bottom:18px;right:22px;z-index:20;display:flex;gap:.5rem;align-items:center;
+  font-family:'JetBrains Mono';font-size:.78rem;color:var(--muted);
+}
+.nav button{
+  background:var(--bg2);border:1px solid var(--line);color:var(--ink);
+  width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:1rem;
+}
+.nav button:hover{border-color:var(--cyan)}
+.brand{position:fixed;top:20px;left:clamp(28px,5vw,80px);z-index:20;display:flex;gap:.6rem;align-items:center;font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.brand svg{width:18px;height:18px}
+.count{position:fixed;top:20px;right:22px;z-index:20;font-family:'JetBrains Mono';font-size:.72rem;color:var(--muted)}
+.kbd{font-family:'JetBrains Mono';font-size:.7rem;border:1px solid var(--line);border-radius:4px;padding:.05rem .35rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <svg viewBox="0 0 40 40" fill="none"><path d="M4 4h22a10 10 0 0 1 10 10v22H14A10 10 0 0 1 4 26V4Z" fill="url(#g)"/><defs><linearGradient id="g" x1="4" y1="4" x2="36" y2="36"><stop stop-color="#7B2FFF"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+  Lucid Academy
+</div>
+<div class="count"><span id="cur">1</span> / <span id="tot">11</span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide active">
+    <svg class="signet" viewBox="0 0 40 40" fill="none"><path d="M4 4h22a10 10 0 0 1 10 10v22H14A10 10 0 0 1 4 26V4Z" fill="url(#g2)"/><defs><linearGradient id="g2" x1="4" y1="4" x2="36" y2="36"><stop stop-color="#7B2FFF"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+    <div class="eyebrow">Zrozumieć AI · Warsztat</div>
+    <h1>Od skryptu do agenta,<br><span class="grad">który się uczy</span></h1>
+    <p class="lead" style="margin-top:1.6rem">Zbudujemy najprostszego agenta, ułożymy mapę pięciu poziomów autonomii i poznamy Hermesa — agenta, który działa beze mnie i sam się rozwija.</p>
+    <div class="kicker">Lucid Academy · UMK Kognitywistyka &nbsp;·&nbsp; nawigacja: <span class="kbd">←</span> <span class="kbd">→</span> lub spacja</div>
+  </section>
+
+  <!-- 2 PLAN -->
+  <section class="slide">
+    <div class="eyebrow">Plan na dziś</div>
+    <h2>Trzy ruchy</h2>
+    <div class="cols three">
+      <div class="card"><div class="n">01 · ROBIMY</div><h3>Czym jest agent</h3><p>Chatbot odpowiada. Agent działa w pętli. Zbudujesz własnego — od zera, w jednym pliku.</p></div>
+      <div class="card"><div class="n">02 · KLASYFIKUJEMY</div><h3>Pięć poziomów autonomii</h3><p>Mapa, na której umieścisz każde narzędzie AI, jakie znasz. Oś: jaka jest rola człowieka?</p></div>
+      <div class="card"><div class="n">03 · POZNAJEMY</div><h3>Hermes</h3><p>Agent z górnej półki tej mapy: trwała pamięć, samodoskonalenie, działa 24/7.</p></div>
+    </div>
+    <p style="margin-top:1.6rem">Łuk: <strong>ja klikam każdy krok</strong> → <strong>klasyfikuję cudze agenty</strong> → <strong>agent, który radzi sobie sam</strong>.</p>
+  </section>
+
+  <!-- 3 CHATBOT VS AGENT -->
+  <section class="slide">
+    <div class="eyebrow">Część 01 · Definicja</div>
+    <h2>Chatbot odpowiada.<br>Agent ma <span class="grad">pętlę</span>.</h2>
+    <p>Różnica nie jest w modelu — ten sam model napędza oba. Różnica jest w tym, czy model tylko zwraca tekst, czy <strong>obserwuje skutek swojego działania i decyduje, co dalej</strong>.</p>
+    <div class="loop">
+      <span class="node">🎯 cel</span><span class="arrow">→</span>
+      <span class="node">🧠 plan</span><span class="arrow">→</span>
+      <span class="node">🔧 narzędzie</span><span class="arrow">→</span>
+      <span class="node">👀 obserwacja</span><span class="arrow">↺</span>
+      <span class="node" style="border-color:var(--ok);color:var(--ok)">✓ odpowiedź</span>
+    </div>
+    <p style="margin-top:1.4rem">Minimalny agent = <strong>model + narzędzie + pętla</strong>. To wszystko. Reszta to skala tej samej idei.</p>
+  </section>
+
+  <!-- 4 LIVE AGENT -->
+  <section class="slide">
+    <div class="eyebrow">Część 01 · Żywy agent</div>
+    <h2 style="margin-bottom:.4rem">Zobacz pętlę w akcji</h2>
+    <p style="margin-bottom:.3rem">Ten agent ma dwa narzędzia: <code>kalkulator</code> i <code>czas</code>. Nie zna odpowiedzi — sam decyduje, którego użyć, patrzy na wynik i odpowiada. Zadaj mu coś.</p>
+    <div class="lab">
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span>mini-agent · trace pętli</span></div>
+        <div class="term-body" id="out">
+          <div class="ln think">agent gotowy. czeka na cel...</div>
+        </div>
+        <div class="term-in">
+          <input id="inp" placeholder="np. ile to 47 * 89 + 12 ?" autocomplete="off">
+          <button id="run">▶ uruchom</button>
+        </div>
+      </div>
+      <div>
+        <h3 style="color:var(--cyan)">Co się dzieje pod spodem</h3>
+        <p style="font-size:.92rem">Każdy wiersz to jeden krok pętli. <span style="color:var(--muted)">myśl</span> → <span style="color:var(--warn)">wywołanie narzędzia</span> → <span style="color:#7dd3fc">obserwacja</span> → <span style="color:var(--ok)">odpowiedź</span>. Dokładnie ten sam wzorzec napędza Hermesa — tylko z setką narzędzi i pamięcią.</p>
+        <div class="chips">
+          <span class="chip" data-q="ile to 47 * 89 + 12 ?">47 × 89 + 12</span>
+          <span class="chip" data-q="która godzina?">która godzina?</span>
+          <span class="chip" data-q="ile to (320 - 45) / 5 ?">(320−45)/5</span>
+          <span class="chip" data-q="cześć">cześć</span>
+        </div>
+        <p class="hint">To czysty JavaScript w przeglądarce — żeby pokazać <em>mechanikę</em>. Prawdziwy agent w pętli wywołuje model językowy. Wzorzec jest identyczny.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 LEVELS INTRO -->
+  <section class="slide">
+    <div class="eyebrow">Część 02 · Mapa</div>
+    <h2>Pięć poziomów autonomii</h2>
+    <p class="lead">Framework z pracy <em>Levels of Autonomy for AI Agents</em> (Feng, McDonald, Zhang — University of Washington / Knight First Amendment Institute, arXiv 2506.12469). Nie pyta „jak mądry jest agent?", tylko:</p>
+    <div class="quote">
+      <p>Jaką rolę przyjmuje człowiek w interakcji z&nbsp;agentem?</p>
+      <cite>— oś, wokół której zbudowano cały framework</cite>
+    </div>
+    <p style="margin-top:1.4rem">Kluczowa teza, nieoczywista dla większości: <strong>autonomia to decyzja projektowa, niezależna od zdolności.</strong> Autorzy rozróżniają <em>agency</em> (ile narzędzi, ile może zrobić) od <em>autonomy</em> (jak bardzo działa bez nadzoru). Potężny agent może być trzymany na krótkiej smyczy — i odwrotnie.</p>
+  </section>
+
+  <!-- 6 INTERACTIVE EXPLORER -->
+  <section class="slide">
+    <div class="eyebrow">Część 02 · Eksplorator · <span style="color:var(--muted)">to samo zadanie, pięć poziomów</span></div>
+    <h2 style="margin-bottom:.3rem">To samo zlecenie. Pięć ról człowieka.</h2>
+    <p style="font-size:.95rem;margin-bottom:.2rem">Zadanie dla agenta jest <strong>identyczne</strong> na każdym poziomie: <em>„Pomóż mi zrozumieć wpływ generatywnego AI na gospodarkę USA od premiery ChatGPT."</em> Zmienia się tylko jedno — ile robi człowiek. Klikaj poziomy.</p>
+    <div class="explorer">
+      <div>
+        <div class="autobar"><div class="autofill" id="autofill"></div></div>
+        <div class="meta-k" style="margin:-.6rem 0 .7rem">↑ autonomia agenta &nbsp;·&nbsp; ↓ udział człowieka</div>
+        <div class="lvbtns" id="lvbtns">
+          <button class="lvbtn on" data-l="0"><span class="lvn">L1</span><span><span class="role">Operator</span><br><span class="sub">człowiek prowadzi, agent podpowiada</span></span></button>
+          <button class="lvbtn" data-l="1"><span class="lvn">L2</span><span><span class="role">Współpracownik</span><br><span class="sub">planują i dzielą pracę razem</span></span></button>
+          <button class="lvbtn" data-l="2"><span class="lvn">L3</span><span><span class="role">Konsultant</span><br><span class="sub">agent prowadzi, pyta o zdanie</span></span></button>
+          <button class="lvbtn" data-l="3"><span class="lvn">L4</span><span><span class="role">Zatwierdzający</span><br><span class="sub">agent działa, pyta tylko gdy ryzyko</span></span></button>
+          <button class="lvbtn" data-l="4"><span class="lvn">L5</span><span><span class="role">Obserwator</span><br><span class="sub">agent w pełni autonomiczny, ty patrzysz</span></span></button>
+        </div>
+      </div>
+      <div class="panel" id="panel"><!-- filled by JS --></div>
+    </div>
+  </section>
+
+  <!-- 7 REAL PRODUCTS ANCHOR -->
+  <section class="slide">
+    <div class="eyebrow">Część 02 · Kotwice w realu</div>
+    <h2 style="margin-bottom:.5rem">Gdzie na tej osi są narzędzia, których używacie?</h2>
+    <p style="margin-bottom:.2rem">Te same poziomy, ale na konkretnych produktach. Uwaga na pułapkę: ten sam produkt bywa na różnych poziomach zależnie od trybu.</p>
+    <div class="cols" style="grid-template-columns:repeat(5,1fr);gap:.7rem;margin-top:1.2rem">
+      <div class="card" style="padding:1rem"><div class="n" style="font-size:1.1rem">L1</div><h3 style="font-size:.95rem">Operator</h3><p style="font-size:.82rem">GitHub Copilot autouzupełnianie · ChatGPT w oknie czatu · Cursor „w locie"</p></div>
+      <div class="card" style="padding:1rem"><div class="n" style="font-size:1.1rem">L2</div><h3 style="font-size:.95rem">Współpracownik</h3><p style="font-size:.82rem">OpenAI Operator · Claude w trybie planowania · pair-programming z agentem</p></div>
+      <div class="card" style="padding:1rem"><div class="n" style="font-size:1.1rem">L3</div><h3 style="font-size:.95rem">Konsultant</h3><p style="font-size:.82rem">Deep Research · Devin piszący feature · agent obsługi klienta z eskalacją</p></div>
+      <div class="card" style="padding:1rem"><div class="n" style="font-size:1.1rem">L4</div><h3 style="font-size:.95rem">Zatwierdzający</h3><p style="font-size:.82rem">Agent CI/CD wdrażający kod · bot moderujący · trading z progiem akceptacji</p></div>
+      <div class="card" style="padding:1rem"><div class="n" style="font-size:1.1rem">L5</div><h3 style="font-size:.95rem">Obserwator</h3><p style="font-size:.82rem">Hermes 24/7 na serwerze · agenty w systemie wieloagentowym · monitoring w tle</p></div>
+    </div>
+    <p class="hint" style="margin-top:1.3rem">Z pracy: autorzy klasyfikują <strong>OpenAI Operator jako L2</strong>, mimo nazwy „operator" — bo użytkownik wciąż współplanuje. Nazwa marketingowa ≠ poziom autonomii. To dobry moment na spór z salą.</p>
+  </section>
+
+  <!-- 7b EXERCISE CLASSIFY -->
+  <section class="slide">
+    <div class="eyebrow">Część 02 · Ćwiczenie · <span style="color:var(--muted)">~10 min w parach</span></div>
+    <h2 style="margin-bottom:.4rem">Umieść je na osi L1–L5</h2>
+    <p>W parach: gdzie postawicie każde z tych narzędzi i <strong>dlaczego</strong>? Jedyne kryterium — jaka zostaje rola człowieka? Tam, gdzie się pokłócicie, jest najwięcej do nauczenia. Potem porównamy z resztą sali.</p>
+    <div class="cols three" style="margin-top:1.2rem">
+      <div class="card"><h3>Twój mini-agent ze slajdu 4</h3><p>Dostaje cel, wybiera narzędzie, oddaje wynik. Pytasz każdorazowo.</p></div>
+      <div class="card"><h3>Asystent głosowy w telefonie</h3><p>„Ustaw budzik", „jaka pogoda". Reaguje na komendę.</p></div>
+      <div class="card"><h3>Filtr antyspamowy w poczcie</h3><p>Sam, w tle, bez pytania, decyduje co jest spamem.</p></div>
+      <div class="card"><h3>Agent rezerwujący stolik</h3><p>Dzwoni, negocjuje termin, potwierdza dopiero po Twojej zgodzie.</p></div>
+      <div class="card"><h3>Hermes na serwerze 24/7</h3><p>Działa, gdy śpisz. Sam buduje sobie nowe umiejętności.</p></div>
+      <div class="card" style="border-style:dashed;border-color:var(--cyan)"><h3>+ wasz przykład</h3><p>Narzędzie z waszej pracy/studiów. Gdzie ląduje i czy w każdym trybie tak samo?</p></div>
+    </div>
+  </section>
+
+  <!-- 8 HERMES INTRO -->
+  <section class="slide">
+    <div class="eyebrow">Część 03 · Case</div>
+    <h2>Hermes — góra drabiny</h2>
+    <p class="lead">Otwartoźródłowy, autonomiczny agent od <strong>Nous Research</strong> (luty 2026, licencja MIT). Nie copilot przyklejony do edytora, nie wrapper na jedno API — <strong>żyje na twoim serwerze, pamięta, czego się nauczył, i jest sprawniejszy im dłużej działa.</strong></p>
+    <ul class="clean">
+      <li><strong>Self-hosted</strong> — od taniego VPS po stację z GPU. Dane zostają u ciebie, zero telemetrii.</li>
+      <li><strong>Trwała pamięć</strong> — pamięta, co powiedziałeś w zeszły wtorek i skrypt sprzed trzech tygodni.</li>
+      <li><strong>Wbudowana pętla uczenia</strong> — nie tylko wykonuje, ale buduje wielokrotnego użytku umiejętności.</li>
+      <li><strong>Wiele platform</strong> — Telegram, Discord, Slack, WhatsApp i kilkanaście innych z jednej bramki.</li>
+    </ul>
+  </section>
+
+  <!-- 9 HERMES SCALE -->
+  <section class="slide">
+    <div class="eyebrow">Część 03 · Dlaczego teraz</div>
+    <h2>To nie nisza — to fala</h2>
+    <div class="stat">
+      <div><div class="big">140 000+</div><small>gwiazdek na GitHubie w niespełna 3 miesiące</small></div>
+      <div><div class="big">#1</div><small>najczęściej używany agent na świecie wg OpenRouter</small></div>
+      <div><div class="big">224 mld</div><small>tokenów przetwarzanych dziennie (maj 2026)</small></div>
+    </div>
+    <p style="margin-top:1.8rem">Połączenie <strong>autonomii</strong> (działa bez ciebie) i <strong>samodoskonalenia</strong> (uczy się z każdym użyciem) to nie kolejny szczebel drabiny — to nowy wymiar. I właśnie tu zaczynają się pytania o nadzór, pamięć i Goodharta. Dobre miejsce, by wejść w temat alignmentu.</p>
+  </section>
+
+  <!-- 10 BUILD YOUR OWN -->
+  <section class="slide">
+    <div class="eyebrow">Twoja kolej · Mapa zadania</div>
+    <h2 style="margin-bottom:.3rem">Zbuduj własnego agenta</h2>
+    <p>Cel: działający agent, który dostaje polecenie, sam sięga po narzędzie i oddaje wynik. Nie kod produkcyjny — <strong>zrozumienie pętli</strong>. Najpierw przejrzyj kroki, potem wybierz scenariusz, a na końcu <strong>złóż i odpal agenta na żywo</strong>.</p>
+    <div class="steps">
+      <div class="step"><div><h3>Wybierz cel i jedno narzędzie</h3><p>Czemu agent ma służyć? Z czego skorzysta? Jedno narzędzie wystarczy na start: kalkulator, zegar, „baza wiedzy", licznik znaków.</p></div></div>
+      <div class="step"><div><h3>Napisz „mózg" — instrukcję systemową</h3><p>Kim jest agent, jakie ma narzędzie, kiedy ma go użyć, jak ma odpowiadać. 4–8 zdań po polsku. To najważniejszy krok.</p></div></div>
+      <div class="step"><div><h3>Zamknij to w pętli</h3><p>polecenie → model decyduje o narzędziu → uruchamiamy narzędzie → wynik wraca do modelu → model: kolejny krok czy <code>odpowiedź</code>.</p></div></div>
+      <div class="step"><div><h3>Ustaw warunek stopu</h3><p>Kiedy agent kończy? Po finalnej odpowiedzi albo po limicie kroków. Bez tego pętla potrafi się nie zatrzymać.</p></div></div>
+      <div class="step"><div><h3>Przetestuj na 3 przypadkach</h3><p>Łatwy, trudny i taki, na który narzędzie nie pomaga. Co robi agent, gdy nie wie? To najciekawszy moment do obserwacji.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 11 USE CASES -->
+  <section class="slide">
+    <div class="eyebrow">Twoja kolej · Wybierz scenariusz</div>
+    <h2 style="margin-bottom:.2rem">Jakiego agenta chcesz?</h2>
+    <p>Sześć pomysłów. Kliknij, by zobaczyć cel, narzędzie i pętlę. Wybierz jeden jako punkt startu do kreatora na następnym slajdzie — albo wymyśl własny w tej samej ramce.</p>
+    <div class="use-grid" id="uses">
+      <div class="use" data-d="Cel: szybki research na zadany temat. Narzędzie: wyszukiwarka / baza wiedzy. Pętla: szukaj → przeczytaj wynik → brakuje czegoś? szukaj dalej → podsumuj. Stop: gdy ma 3 dobre źródła."><div class="ic">🔎</div><h3>Asystent researchu</h3><p>Zbiera i streszcza informacje o temacie.</p><div class="for">dla: studenta, dziennikarza</div></div>
+      <div class="use" data-d="Cel: zaplanować dzień / tydzień. Narzędzie: kalendarz + zegar. Pętla: sprawdź wolne sloty → dopasuj zadania → wykryj konflikt → zaproponuj zmianę. Stop: gdy plan spójny."><div class="ic">📅</div><h3>Planista dnia</h3><p>Układa zadania w wolne okna kalendarza.</p><div class="for">dla: zapracowanego, NGO</div></div>
+      <div class="use" data-d="Cel: odpowiadać na pytania z jednego dokumentu (regulamin, statut). Narzędzie: przeszukiwanie pliku. Pętla: znajdź fragment → czy odpowiada na pytanie? → tak: cytuj, nie: szukaj dalej. Stop: po znalezieniu."><div class="ic">📄</div><h3>Ekspert od dokumentu</h3><p>Odpowiada na pytania z regulaminu czy statutu.</p><div class="for">dla: fundacji, urzędu</div></div>
+      <div class="use" data-d="Cel: monitorować dane miejskie (np. zgłoszenia, geodata). Narzędzie: pobranie danych + filtr. Pętla: pobierz → odfiltruj istotne → coś się zmieniło? → zgłoś. Stop: po raporcie."><div class="ic">🏙️</div><h3>Strażnik danych miejskich</h3><p>Pilnuje zmian w otwartych danych gminy.</p><div class="for">dla: civic tech, samorządu</div></div>
+      <div class="use" data-d="Cel: pomóc napisać i poprawić tekst. Narzędzie: licznik znaków + sprawdzanie kryteriów. Pętla: napisz → oceń wg kryteriów → nie spełnia? popraw. Stop: gdy spełnia wszystkie kryteria."><div class="ic">✍️</div><h3>Redaktor z kryteriami</h3><p>Pisze i poprawia, aż tekst spełni zasady.</p><div class="for">dla: twórcy, marketingu</div></div>
+      <div class="use" data-d="Cel: poprowadzić ćwiczenie / quiz krok po kroku. Narzędzie: baza pytań + ocena odpowiedzi. Pętla: zadaj pytanie → oceń → za łatwo/za trudno? → dostosuj poziom. Stop: po N pytaniach."><div class="ic">🎓</div><h3>Korepetytor adaptacyjny</h3><p>Dopasowuje trudność pytań do ucznia.</p><div class="for">dla: edukacji, Lucid Academy</div></div>
+    </div>
+  </section>
+
+  <!-- 11b LIVE BUILDER -->
+  <section class="slide" style="justify-content:flex-start;padding-top:clamp(20px,3.5vw,48px)">
+    <div class="eyebrow">Twoja kolej · Kreator na żywo</div>
+    <h2 style="margin-bottom:.2rem;font-size:clamp(1.5rem,3.4vw,2.3rem)">Złóż agenta i przetestuj go</h2>
+    <p style="font-size:.92rem;margin-bottom:.1rem">Ustaw cztery rzeczy po lewej, potem wydaj agentowi polecenie po prawej. Agent <strong>naprawdę</strong> wywołuje model w pętli, sam decyduje o użyciu narzędzia i pokazuje każdy krok.</p>
+    <div class="builder">
+      <div class="bcol">
+        <div class="bstep">
+          <div class="bhd"><span class="bnum">1</span><div><div class="btt">Narzędzie</div><div class="bhint">Co agent może zrobić poza mówieniem? Wybierz jedno.</div></div></div>
+          <div class="toolpick" id="toolpick">
+            <button class="tool-opt on" data-tool="kalkulator">🔢 kalkulator</button>
+            <button class="tool-opt" data-tool="czas">🕐 czas</button>
+            <button class="tool-opt" data-tool="wiedza">📚 baza wiedzy</button>
+            <button class="tool-opt" data-tool="znaki">🔤 licznik znaków</button>
+          </div>
+        </div>
+        <div class="bstep">
+          <div class="bhd"><span class="bnum">2</span><div><div class="btt">Instrukcja systemowa — „mózg"</div><div class="bhint">Kim jest agent, kiedy używa narzędzia, jak odpowiada.</div></div></div>
+          <textarea class="b-ta" id="sysprompt">Jesteś rzeczowym asystentem. Masz narzędzie [kalkulator]. Gdy w poleceniu pojawia się obliczenie, ZAWSZE użyj narzędzia zamiast liczyć w głowie. Odpowiadaj krótko, po polsku.</textarea>
+          <div style="margin-top:.4rem"><button class="fillbtn" id="autofillsys">↳ dopasuj instrukcję do wybranego narzędzia</button></div>
+        </div>
+        <div class="bstep">
+          <div class="bhd"><span class="bnum">3</span><div><div class="btt">Warunek stopu</div><div class="bhint">Ile kroków pętli, zanim agent musi dać odpowiedź?</div></div></div>
+          <div class="stoppick" id="stoppick">
+            <button class="tool-opt" data-stop="2">2 kroki</button>
+            <button class="tool-opt on" data-stop="4">4 kroki</button>
+            <button class="tool-opt" data-stop="6">6 kroków</button>
+          </div>
+        </div>
+      </div>
+      <div class="bcol">
+        <div class="bstep"><div class="bhd"><span class="bnum">4</span><div><div class="btt">Test na żywo</div><div class="bhint">Wydaj polecenie. Obserwuj: myśl → narzędzie → wynik → odpowiedź.</div></div></div>
+          <div class="btest">
+            <div class="btest-hd"><span class="led" id="led"></span><span id="ledtxt">agent gotowy — czeka na polecenie</span></div>
+            <div class="btest-body" id="btestout"><div class="empty">Tu pojawi się trace pętli. Spróbuj np. „ile to 128 × 47?" albo czegoś, na co narzędzie nie pomoże — zobacz, co agent zrobi.</div></div>
+            <div class="btest-in">
+              <input id="btestin" placeholder="wydaj polecenie agentowi..." autocomplete="off">
+              <button id="btestrun">▶</button>
+            </div>
+          </div>
+          <div class="warnbox" id="apiwarn"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="bar" id="bar"></div>
+<div class="nav">
+  <button id="prev">‹</button>
+  <button id="next">›</button>
+</div>
+
+<!-- detail popover for use cases -->
+<div id="pop" style="display:none;position:fixed;inset:0;z-index:40;background:rgba(4,3,8,.78);backdrop-filter:blur(6px);place-items:center;padding:24px">
+  <div style="max-width:560px;background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:2rem">
+    <div id="popttl" style="font-size:1.3rem;font-weight:700;margin-bottom:.8rem"></div>
+    <p id="popbody" style="color:var(--ink);line-height:1.7"></p>
+    <button id="popx" style="margin-top:1.4rem;background:var(--violet);color:#fff;border:none;border-radius:10px;padding:.6rem 1.3rem;font-family:'Sora';font-weight:600;cursor:pointer">zamknij</button>
+  </div>
+</div>
+
+<script>
+/* ---------- navigation ---------- */
+const slides=[...document.querySelectorAll('.slide')];
+let i=0;
+const tot=slides.length;
+document.getElementById('tot').textContent=tot;
+function show(n){
+  i=Math.max(0,Math.min(tot-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+  document.getElementById('bar').style.width=((i+1)/tot*100)+'%';
+  document.getElementById('cur').textContent=i+1;
+}
+document.getElementById('next').onclick=()=>show(i+1);
+document.getElementById('prev').onclick=()=>show(i-1);
+addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1)}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}
+  if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+});
+show(0);
+
+/* ---------- live mini-agent (pure JS, shows the loop) ---------- */
+const out=document.getElementById('out');
+const inp=document.getElementById('inp');
+function line(txt,cls){const d=document.createElement('div');d.className='ln '+(cls||'');d.textContent=txt;out.appendChild(d);out.scrollTop=out.scrollHeight;}
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+
+const tools={
+  kalkulator:(expr)=>{ // safe arithmetic only
+    if(!/^[\d\s+\-*/().]+$/.test(expr)) throw new Error('niedozwolone znaki');
+    return Function('"use strict";return ('+expr+')')();
+  },
+  czas:()=> new Date().toLocaleTimeString('pl-PL')
+};
+
+async function agent(goal){
+  line('› '+goal,'user');
+  await wait(300);
+  const g=goal.toLowerCase();
+
+  // step: think
+  line('myśl: przeczytałem cel, sprawdzam, które narzędzie pasuje...','think');
+  await wait(550);
+
+  const mathMatch=goal.match(/[\d.]+\s*[-+*/()][\d\s+\-*/().]*/);
+  const wantsTime=/godzin|czas|która|teraz/.test(g);
+
+  if(wantsTime){
+    line('myśl: pytanie o czas → użyję narzędzia [czas]','think');
+    await wait(500);
+    line('🔧 wywołuję: czas()','tool');
+    await wait(450);
+    const t=tools.czas();
+    line('👀 obserwacja: "'+t+'"','obs');
+    await wait(400);
+    line('✓ odpowiedź: Jest '+t+'.','final');
+    return;
+  }
+
+  if(mathMatch){
+    const expr=mathMatch[0].trim();
+    line('myśl: widzę wyrażenie liczbowe → użyję narzędzia [kalkulator]','think');
+    await wait(500);
+    line('🔧 wywołuję: kalkulator("'+expr+'")','tool');
+    await wait(450);
+    try{
+      const r=tools.kalkulator(expr);
+      line('👀 obserwacja: wynik = '+r,'obs');
+      await wait(400);
+      line('✓ odpowiedź: '+expr+' = '+r,'final');
+    }catch(e){
+      line('👀 obserwacja: błąd — '+e.message,'obs');
+      await wait(300);
+      line('✓ odpowiedź: nie umiem policzyć tego wyrażenia.','final');
+    }
+    return;
+  }
+
+  // no tool fits — the interesting case
+  line('myśl: żadne z moich narzędzi (kalkulator, czas) tu nie pomoże','think');
+  await wait(550);
+  line('✓ odpowiedź: Mam tylko kalkulator i zegar — to pytanie jest poza moim zasięgiem. (Tu właśnie prawdziwy agent sięgnąłby po model językowy albo kolejne narzędzie.)','final');
+}
+
+async function runAgent(){
+  const v=inp.value.trim();
+  if(!v)return;
+  inp.value='';
+  out.innerHTML='';
+  await agent(v);
+}
+document.getElementById('run').onclick=runAgent;
+inp.addEventListener('keydown',e=>{if(e.key==='Enter')runAgent();});
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{inp.value=c.dataset.q;runAgent();});
+
+/* ---------- interactive levels explorer ---------- */
+const LV=[
+ {n:'L1',role:'Operator — człowiek u steru',fill:20,
+  scene:'Agent <b>nic nie robi sam</b>. Otwierasz wyszukiwarkę — podpowiada zapytania. Czytasz raport — na żądanie streszcza kliknięciem. Przechodzisz do edytora kodu, by przerobić dane — agent „idzie za tobą" i sugeruje autouzupełnienia. <b>Cały plan i każda decyzja należą do ciebie.</b>',
+  control:'Pełna kontrola nad workflow. Agent nie wykonuje akcji wymagających oceny (np. które źródło wiarygodne) bez wyraźnego wywołania.',
+  use:'Zadania wysokiej stawki i wysokiej eksperckości, gdzie błąd agenta jest kosztowny — albo gdy uczysz się umiejętności z pomocą AI, nie zlecasz jej.',
+  real:['GitHub Copilot autouzupełnianie','ChatGPT w oknie czatu','Cursor „w locie"'],
+  take:'Możesz przejąć ster w każdej chwili — bo nigdy go nie oddałeś.'},
+ {n:'L2',role:'Współpracownik — planujecie razem',fill:40,
+  scene:'Agent szkicuje <b>plan działania</b>, ty go edytujesz: dodajesz, usuwasz, zmieniasz kroki. Dzielicie pracę — oddajesz agentowi czytanie i streszczanie raportów, sobie zostawiasz hipotezy i analizę danych. <b>Pracujecie równolegle</b>, na bieżąco wymieniając postępy. Agent trafia na paywall — pyta, czy pominąć artykuł.',
+  control:'Pełna widoczność pracy agenta we wspólnym dokumencie. Możesz edytować jego wkład i <b>przejąć zadanie</b>, gdy widzisz, że się zapętla lub halucynuje źródła.',
+  use:'Gdy część zadań ma wartość samodzielnego wykonania (nauka, mistrzostwo) albo gdy agent nie domaga w pewnych klasach zadań. Najbogatsza wymiana człowiek↔agent.',
+  real:['OpenAI Operator','Claude w trybie planowania','pair-programming z agentem'],
+  take:'Wciąż możesz przejąć ster — to ostatni poziom, na którym to bezpośrednio zrobisz.'},
+ {n:'L3',role:'Konsultant — agent prowadzi, pyta o zdanie',fill:60,
+  scene:'Agent sam układa <b>plan na dłuższy horyzont</b>: przegląd literatury, głębsze lektury, pytania badawcze, dane ilościowe. Ty go korygujesz <b>pośrednio</b> — wiadomością („nie analizuj danych, póki nie zobaczę pytań"), a agent regeneruje plan. W trakcie sam dopytuje, które wątki zgłębić, i przedstawia ci źródła do weryfikacji.',
+  control:'<b>Nie przejmiesz już bezpośrednio steru</b> ani nie edytujesz swobodnie wyników. Możesz pauzować, komentować w dokumencie, prosić o zmiany i kazać kontynuować.',
+  use:'Gdy ufasz agentowi w prowadzeniu, ale twoja ekspertyza i preferencje wciąż są kluczowe na rozstajach. Wymaga „okresu docierania" — to agent uczy się ciebie.',
+  real:['Deep Research','Devin piszący feature','agent obsługi klienta z eskalacją'],
+  take:'Sterujesz przez konsultacje i komentarze — nie przez chwytanie za kierownicę.'},
+ {n:'L4',role:'Zatwierdzający — agent działa, pyta tylko gdy ryzyko',fill:80,
+  scene:'Agent realizuje całe zadanie <b>samodzielnie</b> i angażuje cię <b>tylko</b> w sytuacjach ryzykownych lub z góry oznaczonych — np. zanim wyda pieniądze, wyśle maila na zewnątrz albo wdroży kod na produkcję. Reszta dzieje się bez ciebie. Ty jesteś bramką akceptacji w krytycznych punktach.',
+  control:'Definiujesz z góry, co wymaga twojej zgody. Poza tymi punktami agent nie pyta. Klucz: trafnie wytyczyć granicę „ryzykownego".',
+  use:'Gdy większość kroków jest bezpieczna i powtarzalna, a ryzyko skupia się w kilku momentach. Pozwala skalować bez ciągłego nadzoru.',
+  real:['Agent CI/CD wdrażający kod','bot moderujący treści','trading z progiem akceptacji'],
+  take:'Nie sterujesz przebiegiem — stawiasz bramki i czekasz, aż agent przy nich stanie.'},
+ {n:'L5',role:'Obserwator — pełna autonomia pod monitoringiem',fill:100,
+  scene:'Agent działa z <b>pełną autonomią</b>: sam planuje, dzieli na podzadania, wykonuje przez długi czas. Ty <b>obserwujesz</b> — masz wgląd i możesz interweniować, ale nie jesteś w pętli decyzyjnej. W systemach wieloagentowych „użytkownikiem" tego agenta bywa <b>inny agent</b>, nie człowiek.',
+  control:'Monitoring, nie sterowanie. Bezpieczeństwo przenosi się na etap projektu (granice, uprawnienia, certyfikaty autonomii) — bo w trakcie nie nadzorujesz kroków.',
+  use:'Procesy w tle, długie horyzonty, wysoka skala. Tu autonomia + samodoskonalenie rodzą realne pytania o nadzór i odpowiedzialność — wejście w temat alignmentu.',
+  real:['Hermes 24/7 na serwerze','agenty w systemie wieloagentowym','monitoring w tle'],
+  take:'Nie ma „przejęcia steru" w trakcie — jest co najwyżej wyłącznik i obserwacja.'}
+];
+const panel=document.getElementById('panel');
+const autofill=document.getElementById('autofill');
+const lvbtns=[...document.querySelectorAll('.lvbtn')];
+function renderLevel(idx){
+  const d=LV[idx];
+  autofill.style.width=d.fill+'%';
+  lvbtns.forEach((b,k)=>b.classList.toggle('on',k===idx));
+  panel.innerHTML=
+    '<div class="pr"><h3>'+d.n+' · '+d.role.split(' — ')[0]+'</h3><span class="role-tag">'+d.role.split(' — ')[1]+'</span></div>'+
+    '<div class="scene">'+d.scene+'</div>'+
+    '<div class="metarow">'+
+      '<div><div class="meta-k">Kontrola człowieka</div><div class="meta-v">'+d.control+'</div></div>'+
+      '<div><div class="meta-k">Kiedy ten poziom</div><div class="meta-v">'+d.use+'</div></div>'+
+    '</div>'+
+    '<div style="margin-top:1.1rem"><div class="meta-k">W realu</div><div class="realchips">'+
+      d.real.map(r=>'<span class="realchip">'+r+'</span>').join('')+'</div></div>'+
+    '<div class="takeover">↪ '+d.take+'</div>';
+}
+lvbtns.forEach((b)=>b.onclick=()=>renderLevel(+b.dataset.l));
+renderLevel(0);
+
+/* ---------- live agent builder (real model-in-the-loop) ---------- */
+const BLD={tool:'kalkulator',stop:4};
+const sysEl=document.getElementById('sysprompt');
+const TOOL_DEFS={
+  kalkulator:{label:'kalkulator',hint:'liczy wyrażenia arytmetyczne',
+    sys:'Jesteś rzeczowym asystentem. Masz narzędzie [kalkulator]. Gdy w poleceniu pojawia się obliczenie, ZAWSZE użyj narzędzia zamiast liczyć w głowie. Odpowiadaj krótko, po polsku.',
+    run:(arg)=>{ if(!/^[\d\s+\-*/().,]+$/.test(arg)) return 'BŁĄD: niedozwolone znaki w wyrażeniu';
+      try{return String(Function('"use strict";return ('+arg.replace(/,/g,'.')+')')());}catch(e){return 'BŁĄD: '+e.message;} }},
+  czas:{label:'czas',hint:'podaje aktualną godzinę',
+    sys:'Jesteś asystentem od czasu. Masz narzędzie [czas], które zwraca aktualną godzinę. Gdy ktoś pyta o porę dnia lub godzinę, użyj narzędzia. Odpowiadaj krótko, po polsku.',
+    run:()=> new Date().toLocaleTimeString('pl-PL')},
+  wiedza:{label:'wiedza',hint:'mała baza faktów o Lucid Academy / Toruniu',
+    sys:'Jesteś asystentem informacyjnym. Masz narzędzie [wiedza] — bazę faktów. Gdy pytanie dotyczy faktu, odpytaj bazę słowem kluczowym, zanim odpowiesz. Jeśli baza nic nie zwróci, powiedz wprost, że nie wiesz. Po polsku.',
+    run:(arg)=>{ const db={
+        'lucid':'Fundacja Lucid Academy — edukacja AI, Toruń, założona 2025.',
+        'torun':'Toruń — miasto nad Wisłą, ok. 200 tys. mieszkańców, UNESCO.',
+        'toruń':'Toruń — miasto nad Wisłą, ok. 200 tys. mieszkańców, UNESCO.',
+        'hermes':'Hermes — otwartoźródłowy agent Nous Research, luty 2026, licencja MIT.',
+        'agent':'Agent AI = model + narzędzia + pętla działania.'};
+      const k=Object.keys(db).find(k=>arg.toLowerCase().includes(k));
+      return k?db[k]:'(brak wyniku w bazie)'; }},
+  znaki:{label:'znaki',hint:'liczy znaki w podanym tekście',
+    sys:'Jesteś asystentem redakcyjnym. Masz narzędzie [znaki], które zwraca liczbę znaków tekstu. Gdy ktoś prosi o długość/limit tekstu, użyj narzędzia. Po polsku.',
+    run:(arg)=> arg.trim().length+' znaków'}
+};
+
+const toolpick=document.getElementById('toolpick');
+toolpick.querySelectorAll('.tool-opt').forEach(b=>b.onclick=()=>{
+  toolpick.querySelectorAll('.tool-opt').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); BLD.tool=b.dataset.tool;
+});
+document.getElementById('autofillsys').onclick=()=>{ sysEl.value=TOOL_DEFS[BLD.tool].sys; };
+const stoppick=document.getElementById('stoppick');
+stoppick.querySelectorAll('.tool-opt').forEach(b=>b.onclick=()=>{
+  stoppick.querySelectorAll('.tool-opt').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); BLD.stop=+b.dataset.stop;
+});
+
+const bout=document.getElementById('btestout');
+const bin=document.getElementById('btestin');
+const brun=document.getElementById('btestrun');
+const led=document.getElementById('led');
+const ledtxt=document.getElementById('ledtxt');
+const apiwarn=document.getElementById('apiwarn');
+function tl(txt,cls){const d=document.createElement('div');d.className='tline '+cls;d.textContent=txt;bout.appendChild(d);bout.scrollTop=bout.scrollHeight;}
+
+// Parse a model turn for a tool call of form: NARZEDZIE: <arg>  or  ODPOWIEDZ: <text>
+function parseTurn(text){
+  const tMatch=text.match(/NARZ[EĘ]DZIE\s*:\s*(.+)/i);
+  const aMatch=text.match(/ODPOWIED[ZŹ]\s*:\s*([\s\S]+)/i);
+  if(tMatch) return {type:'tool',arg:tMatch[1].trim()};
+  if(aMatch) return {type:'final',text:aMatch[1].trim()};
+  return {type:'final',text:text.trim()}; // fallback: treat as answer
+}
+
+async function callModel(messages,sys){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages})
+  });
+  if(!res.ok) throw new Error('API '+res.status);
+  const data=await res.json();
+  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+}
+
+async function runBuilt(){
+  const goal=bin.value.trim(); if(!goal) return;
+  bin.value=''; bout.innerHTML=''; brun.disabled=true; apiwarn.classList.remove('show');
+  led.classList.add('live'); ledtxt.textContent='pętla działa...';
+  const def=TOOL_DEFS[BLD.tool];
+
+  // Build the agent system prompt: user's "brain" + the loop protocol we wrap around it
+  const protocol='\n\nPROTOKÓŁ PĘTLI (obowiązkowy format odpowiedzi):\n'+
+    'Masz dostęp do narzędzia ['+def.label+'] ('+def.hint+').\n'+
+    'W KAŻDEJ turze odpowiedz w DOKŁADNIE jednym z dwóch formatów:\n'+
+    '  NARZĘDZIE: <argument do przekazania narzędziu>\n'+
+    '  ODPOWIEDŹ: <ostateczna odpowiedź dla użytkownika>\n'+
+    'Najpierw, jeśli to pomaga, użyj narzędzia. Gdy masz już dość informacji, daj ODPOWIEDŹ. '+
+    'Jeśli narzędzie nie jest potrzebne lub nie pomoże, od razu daj ODPOWIEDŹ.';
+  const sys=sysEl.value.trim()+protocol;
+
+  const messages=[{role:'user',content:goal}];
+  tl('› '+goal,'u');
+
+  try{
+    for(let step=1; step<=BLD.stop; step++){
+      tl('myśl: krok '+step+'/'+BLD.stop+' — pytam model, co robić...','t');
+      const turn=await callModel(messages,sys);
+      const parsed=parseTurn(turn);
+
+      if(parsed.type==='tool'){
+        tl('🔧 wywołuję: '+def.label+'("'+parsed.arg+'")','k');
+        const result=def.run(parsed.arg);
+        tl('👀 obserwacja: '+result,'o');
+        // feed both the model's action and the tool result back into the conversation
+        messages.push({role:'assistant',content:turn});
+        messages.push({role:'user',content:'WYNIK NARZĘDZIA ['+def.label+']: '+result+'\nKontynuuj pętlę.'});
+        if(step===BLD.stop){
+          tl('⛔ osiągnięto limit '+BLD.stop+' kroków — wymuszam odpowiedź','t');
+          const forced=await callModel(messages.concat([{role:'user',content:'Limit kroków. Daj teraz ODPOWIEDŹ na podstawie tego, co masz.'}]),sys);
+          const fp=parseTurn(forced);
+          tl('✓ '+(fp.text||forced),'f');
+        }
+      } else {
+        tl('✓ '+parsed.text,'f');
+        break;
+      }
+    }
+  }catch(err){
+    tl('błąd: '+err.message,'e');
+    apiwarn.textContent='Ten kreator wywołuje model przez API i działa wewnątrz Claude.ai (artefakt). Jeśli otworzyłeś plik lokalnie albo na GitHub Pages, wywołanie modelu nie zadziała — pętla i mechanika pozostają te same, ale do testu na żywo użyj wersji w Claude.ai lub podłącz własny klucz API.';
+    apiwarn.classList.add('show');
+  }finally{
+    brun.disabled=false; led.classList.remove('live'); ledtxt.textContent='agent gotowy — czeka na polecenie';
+  }
+}
+brun.onclick=runBuilt;
+bin.addEventListener('keydown',e=>{if(e.key==='Enter')runBuilt();});
+
+/* ---------- use-case popover ---------- */
+const pop=document.getElementById('pop');
+document.querySelectorAll('.use').forEach(u=>u.onclick=()=>{
+  document.getElementById('popttl').textContent=u.querySelector('h3').textContent;
+  document.getElementById('popbody').textContent=u.dataset.d;
+  pop.style.display='grid';
+});
+document.getElementById('popx').onclick=()=>pop.style.display='none';
+pop.onclick=e=>{if(e.target===pop)pop.style.display='none';};
+addEventListener('keydown',e=>{if(e.key==='Escape')pop.style.display='none';});
+</script>
+</body>
+</html>

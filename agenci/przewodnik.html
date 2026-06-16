@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Przewodnik prowadzącego · Agenci · Lucid Academy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#08070d;--bg2:#0e0c17;--ink:#ECEAF6;--muted:#9089a8;
+  --violet:#7B2FFF;--violet-soft:#8000FF;--cyan:#22D3EE;
+  --line:rgba(123,47,255,.22);--line2:rgba(34,211,238,.18);
+  --ok:#34d399;--warn:#fbbf24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:'Sora',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(50vw 50vw at 8% -5%, rgba(123,47,255,.13), transparent 60%),
+    radial-gradient(42vw 42vw at 100% 10%, rgba(34,211,238,.08), transparent 60%);
+  background-attachment:fixed;
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.wrap{max-width:880px;margin:0 auto;padding:clamp(24px,5vw,60px) clamp(20px,4vw,40px) 120px}
+.top{display:flex;align-items:center;gap:.7rem;font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:2.2rem}
+.top svg{width:20px;height:20px}
+.eyebrow{font-family:'JetBrains Mono';font-size:.74rem;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--cyan)}
+h1{font-size:clamp(2rem,5.5vw,3.3rem);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-bottom:1rem}
+.grad{background:linear-gradient(100deg,var(--violet),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(1.05rem,1.8vw,1.25rem);color:var(--ink);max-width:64ch}
+p{color:var(--muted);max-width:70ch}
+strong{color:var(--ink);font-weight:600}
+em{color:#c9c3e0}
+a{color:var(--cyan);text-decoration:none;border-bottom:1px solid var(--line2)}
+code{font-family:'JetBrains Mono';background:rgba(123,47,255,.13);padding:.12rem .42rem;border-radius:5px;color:var(--cyan);font-size:.85em}
+h2{font-size:clamp(1.35rem,3vw,1.9rem);font-weight:700;letter-spacing:-.01em;margin:3rem 0 .6rem}
+h2 .mark{font-family:'JetBrains Mono';color:var(--violet);font-size:.6em;margin-right:.5rem}
+
+/* meta strip */
+.meta{display:flex;flex-wrap:wrap;gap:.6rem;margin:1.6rem 0 .4rem}
+.pill{font-family:'JetBrains Mono';font-size:.74rem;border:1px solid var(--line);border-radius:20px;padding:.35rem .8rem;color:var(--muted);background:rgba(123,47,255,.05)}
+.pill b{color:var(--cyan);font-weight:600}
+
+/* total bar */
+.totalbar{display:flex;height:34px;border-radius:10px;overflow:hidden;margin:1.6rem 0 .4rem;border:1px solid var(--line)}
+.seg{display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-size:.7rem;color:#04140d;font-weight:600;border-right:1px solid rgba(0,0,0,.25)}
+.seg:last-child{border-right:none}
+.barleg{font-family:'JetBrains Mono';font-size:.72rem;color:var(--muted)}
+
+/* callout */
+.callout{border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1.3rem;margin:1.4rem 0;background:linear-gradient(160deg,rgba(34,211,238,.06),transparent)}
+.callout.warn{border-color:rgba(251,191,36,.3);background:linear-gradient(160deg,rgba(251,191,36,.07),transparent)}
+.callout.violet{border-color:var(--line);background:linear-gradient(160deg,rgba(123,47,255,.08),transparent)}
+.callout .ct{font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:.4rem}
+.callout.warn .ct{color:var(--warn)}
+.callout p{color:var(--ink);max-width:none}
+
+/* phase cards */
+.phase{border:1px solid var(--line);border-radius:18px;margin:1.1rem 0;overflow:hidden;background:linear-gradient(160deg,var(--bg2),rgba(14,12,23,.3))}
+.phase-hd{display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:center;padding:1.1rem 1.3rem;cursor:pointer;transition:.2s}
+.phase-hd:hover{background:rgba(123,47,255,.05)}
+.ph-time{font-family:'JetBrains Mono';font-weight:600;font-size:.92rem;color:var(--cyan);background:rgba(34,211,238,.1);border:1px solid var(--line2);border-radius:9px;padding:.45rem .7rem;white-space:nowrap}
+.ph-ti{font-weight:700;font-size:1.15rem;line-height:1.2}
+.ph-ti .sub{display:block;font-weight:400;font-size:.82rem;color:var(--muted);font-family:'JetBrains Mono';margin-top:.15rem;letter-spacing:.02em}
+.ph-toggle{font-size:1.3rem;color:var(--violet);transition:transform .25s}
+.phase.open .ph-toggle{transform:rotate(45deg)}
+.phase-body{display:none;padding:0 1.3rem 1.3rem;border-top:1px solid var(--line);margin-top:-1px}
+.phase.open .phase-body{display:block;animation:vfade .3s ease both}
+@keyframes vfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.row{display:grid;grid-template-columns:130px 1fr;gap:.9rem;padding:.75rem 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.rk{font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);padding-top:.15rem}
+.rv{font-size:.95rem;color:var(--ink)}
+.rv p{color:var(--muted);font-size:.92rem;margin:0}
+.rv ul{margin:.3rem 0 0;padding-left:1.1rem}
+.rv li{font-size:.92rem;color:var(--muted);margin-bottom:.25rem}
+.rv li strong{color:var(--ink)}
+.tool-chip{display:inline-flex;align-items:center;gap:.35rem;font-family:'JetBrains Mono';font-size:.74rem;padding:.25rem .6rem;border-radius:7px;margin:.15rem .3rem .15rem 0;border:1px solid var(--line)}
+.tool-chip.deck{background:rgba(123,47,255,.1);color:#c9a6ff}
+.tool-chip.karta{background:rgba(34,211,238,.1);color:#bfeef7}
+.tool-chip.demo{background:rgba(52,211,153,.1);color:var(--ok)}
+.say{border-left:2px solid var(--cyan);padding:.5rem 0 .5rem 1rem;margin:.5rem 0;background:rgba(34,211,238,.05);border-radius:0 8px 8px 0;font-style:italic;color:#d7d2ea;font-size:.93rem}
+
+/* checklist */
+.check{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin:1.2rem 0}
+.check li{display:flex;gap:.8rem;align-items:flex-start;padding:.7rem .9rem;border:1px solid var(--line);border-radius:11px;cursor:pointer;transition:.2s;background:linear-gradient(160deg,var(--bg2),transparent)}
+.check li:hover{border-color:var(--line2)}
+.check li.on{border-color:var(--ok);background:linear-gradient(160deg,rgba(52,211,153,.09),transparent)}
+.box{flex:none;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--muted);display:grid;place-items:center;margin-top:1px;font-size:.85rem;color:var(--ok);transition:.2s}
+.check li.on .box{border-color:var(--ok);background:rgba(52,211,153,.15)}
+.check .ct2{font-size:.95rem;color:var(--ink)}
+.check .cs{display:block;font-size:.8rem;color:var(--muted);margin-top:.1rem}
+
+.foot{margin-top:3rem;padding-top:1.4rem;border-top:1px solid var(--line);font-family:'JetBrains Mono';font-size:.74rem;color:var(--muted)}
+.controls{display:flex;gap:.6rem;margin:1.4rem 0}
+.btn{background:transparent;border:1px solid var(--line2);color:var(--cyan);border-radius:9px;font-family:'Sora';font-weight:600;font-size:.84rem;padding:.5rem 1rem;cursor:pointer}
+.btn:hover{background:rgba(34,211,238,.08)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <svg viewBox="0 0 40 40" fill="none"><path d="M4 4h22a10 10 0 0 1 10 10v22H14A10 10 0 0 1 4 26V4Z" fill="url(#g)"/><defs><linearGradient id="g" x1="4" y1="4" x2="36" y2="36"><stop stop-color="#7B2FFF"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+    Lucid Academy · Przewodnik prowadzącego
+  </div>
+
+  <div class="eyebrow">Run-of-show · Zrozumieć AI</div>
+  <h1>Agenci AI: <span class="grad">przebieg zajęć</span></h1>
+  <p class="lead">Kompletny scenariusz na ~75 minut, spinający trzy materiały: slajdy, kartę pracy i demo na żywo. Każdy student ma swój sprzęt, więc ćwiczenie jest praktyczne, nie pokazowe.</p>
+
+  <div class="meta">
+    <span class="pill"><b>Czas:</b> ~75 min</span>
+    <span class="pill"><b>Sala:</b> każdy z laptopem/stacjonarnym</span>
+    <span class="pill"><b>Modele:</b> mix darmowy + studencki Gemini Pro</span>
+  </div>
+
+  <!-- materials -->
+  <h2><span class="mark">00</span>Co masz w ręku</h2>
+  <p>Trzy materiały. W całym przewodniku oznaczam je kolorami:</p>
+  <div style="margin:.8rem 0 0">
+    <span class="tool-chip deck">▣ DECK</span> slajdy „Od skryptu do agenta" (13 slajdów, klawiatura ← →)<br>
+    <span class="tool-chip karta">▣ KARTA</span> karta pracy „Zbuduj agenta" (przełącznik darmowy/płatny)<br>
+    <span class="tool-chip demo">▣ DEMO</span> kreator na żywo (slajd 13 decku) — Ty pokazujesz na ekranie
+  </div>
+  <div class="callout violet">
+    <div class="ct">Zanim wejdziesz na salę</div>
+    <p>Otwórz <strong>deck jako artefakt w Claude.ai</strong> (kreator na slajdzie 13 woła model — działa tylko w artefakcie, nie na GitHub Pages). Wrzuć link do <strong>karty</strong> na tablicę/chat grupy, żeby studenci otworzyli ją u siebie. Sprawdź rzutnik i to, że Twój Gemini/ChatGPT jest zalogowany do demo.</p>
+  </div>
+
+  <!-- timeline bar -->
+  <h2><span class="mark">01</span>Rozkład czasu</h2>
+  <div class="totalbar" id="totalbar">
+    <div class="seg" style="flex:5;background:#7B2FFF" title="Wprowadzenie">5</div>
+    <div class="seg" style="flex:12;background:#9333ea" title="Czym jest agent">12</div>
+    <div class="seg" style="flex:18;background:#22D3EE" title="Poziomy autonomii">18</div>
+    <div class="seg" style="flex:8;background:#06b6d4" title="Hermes">8</div>
+    <div class="seg" style="flex:25;background:#34d399" title="Budowa agenta">25</div>
+    <div class="seg" style="flex:7;background:#10b981" title="Pokaz i domknięcie">7</div>
+  </div>
+  <div class="barleg">5 · wstęp &nbsp;|&nbsp; 12 · agent &nbsp;|&nbsp; 18 · poziomy &nbsp;|&nbsp; 8 · Hermes &nbsp;|&nbsp; 25 · budowa &nbsp;|&nbsp; 7 · domknięcie &nbsp; → &nbsp;<strong style="color:var(--cyan)">75 min</strong></div>
+
+  <h2><span class="mark">02</span>Fazy — klikaj, by rozwinąć</h2>
+  <div class="controls">
+    <button class="btn" id="openall">rozwiń wszystkie</button>
+    <button class="btn" id="closeall">zwiń wszystkie</button>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="phase-hd">
+      <span class="ph-time">0–5</span>
+      <span class="ph-ti">Wprowadzenie<span class="sub">deck · slajdy 1–2</span></span>
+      <span class="ph-toggle">+</span>
+    </div>
+    <div class="phase-body">
+      <div class="row"><div class="rk">Cel</div><div class="rv"><p>Ustawić ramę: dziś sami zbudujecie agenta. Zero teorii dla teorii — wszystko prowadzi do tego, że pod koniec każdy ma działającego agenta.</p></div></div>
+      <div class="row"><div class="rk">Co robisz</div><div class="rv"><p>Slajd tytułowy → slajd „Trzy ruchy". Zapowiedz łuk: <em>robimy → klasyfikujemy → poznajemy → budujemy</em>.</p></div></div>
+      <div class="row"><div class="rk">Materiał</div><div class="rv"><span class="tool-chip deck">▣ DECK 1–2</span></div></div>
+      <div class="row"><div class="rk">Mów</div><div class="rv"><div class="say">„Nie będę Wam tłumaczył, czym jest agent. Pokażę, a potem sami jednego zbudujecie — na tym, co macie: darmowy ChatGPT, Gemini, cokolwiek."</div></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="phase-hd">
+      <span class="ph-time">5–17</span>
+      <span class="ph-ti">Czym jest agent<span class="sub">deck · slajdy 3–4 · żywy mini-agent</span></span>
+      <span class="ph-toggle">+</span>
+    </div>
+    <div class="phase-body">
+      <div class="row"><div class="rk">Cel</div><div class="rv"><p>Jedno rozróżnienie: chatbot odpowiada, agent ma <strong>pętlę</strong>. Ma zostać w głowie do końca zajęć.</p></div></div>
+      <div class="row"><div class="rk">Co robisz</div><div class="rv"><ul><li>Slajd 3: pokaż pętlę cel → narzędzie → obserwacja → odpowiedź.</li><li>Slajd 4: <strong>odpal żywy mini-agent</strong>. Wpisz „ile to 47×89+12" — niech sala zobaczy trace. Potem wpisz coś, na co narzędzie nie pomaga, i pokaż, że agent uczciwie się poddaje.</li></ul></div></div>
+      <div class="row"><div class="rk">Materiał</div><div class="rv"><span class="tool-chip deck">▣ DECK 3–4</span></div></div>
+      <div class="row"><div class="rk">Na co uważać</div><div class="rv"><p>Mini-agent ze slajdu 4 jest skryptowany (czysty JS) — <em>celowo</em>. Jeśli ktoś spyta „to nie jest prawdziwe AI?", odpowiedz: tak, to pokazuje samą mechanikę pętli. Prawdziwy model wejdzie do gry w demo i w ich ćwiczeniu.</p></div></div>
+      <div class="row"><div class="rk">Mów</div><div class="rv"><div class="say">„Patrzcie na każdy wiersz — to jeden krok pętli. Dokładnie ten sam wzorzec napędza najpotężniejsze agenty na świecie. Różnica to liczba narzędzi, nie idea."</div></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase">
+    <div class="phase-hd">
+      <span class="ph-time">17–35</span>
+      <span class="ph-ti">Pięć poziomów autonomii<span class="sub">deck · slajdy 5–7b · eksplorator + ćwiczenie</span></span>
+      <span class="ph-toggle">+</span>
+    </div>
+    <div class="phase-body">
+      <div class="row"><div class="rk">Cel</div><div class="rv"><p>Dać mapę, na której umieszczą każde narzędzie AI. Klucz: autonomia ≠ zdolności; chodzi o rolę człowieka.</p></div></div>
+      <div class="row"><div class="rk">Co robisz</div><div class="rv"><ul><li>Slajd 5: wprowadź oś (rola człowieka) i rozróżnienie agency/autonomy.</li><li>Slajd 6: <strong>klikaj eksplorator</strong> L1→L5 na żywo — to samo zadanie, pięć ról. Pasek autonomii rośnie.</li><li>Slajd 7: kotwice w realu + pułapka „OpenAI Operator to L2 mimo nazwy".</li><li>Slajd 7b: <strong>ćwiczenie w parach (~8 min)</strong> — gdzie postawić asystenta głosowego, filtr antyspamowy, agenta rezerwującego stolik. Spór jest celem.</li></ul></div></div>
+      <div class="row"><div class="rk">Materiał</div><div class="rv"><span class="tool-chip deck">▣ DECK 5–7b</span></div></div>
+      <div class="row"><div class="rk">Na co uważać</div><div class="rv"><p>To najdłuższa faza dyskusyjna — pilnuj zegara. Ćwiczenie w parach łatwo się rozlewa; po ~8 min utnij i zbierz 2–3 głosy z sali, nie wszystkie.</p></div></div>
+      <div class="row"><div class="rk">Mów</div><div class="rv"><div class="say">„Nie pytam, który jest mądrzejszy. Pytam: gdzie w tym wszystkim jesteście Wy? Co zostaje człowiekowi?"</div></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase">
+    <div class="phase-hd">
+      <span class="ph-time">35–43</span>
+      <span class="ph-ti">Hermes<span class="sub">deck · slajdy 8–9</span></span>
+      <span class="ph-toggle">+</span>
+    </div>
+    <div class="phase-body">
+      <div class="row"><div class="rk">Cel</div><div class="rv"><p>Pokazać żywy przykład górnej półki (L5): agent autonomiczny + samodoskonalący się. I postawić pierwsze pytanie o nadzór.</p></div></div>
+      <div class="row"><div class="rk">Co robisz</div><div class="rv"><ul><li>Slajd 8: czym jest Hermes (open source, self-hosted, trwała pamięć, pętla uczenia).</li><li>Slajd 9: skala adopcji jako „dlaczego teraz" → mostek do alignmentu.</li></ul></div></div>
+      <div class="row"><div class="rk">Materiał</div><div class="rv"><span class="tool-chip deck">▣ DECK 8–9</span></div></div>
+      <div class="row"><div class="rk">Mów</div><div class="rv"><div class="say">„Agent, który działa, gdy śpicie, i jest sprawniejszy z każdym dniem. Świetne — i właśnie tu zaczynają się trudne pytania, do których wrócimy."</div></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 5 -->
+  <div class="phase open">
+    <div class="phase-hd">
+      <span class="ph-time">43–68</span>
+      <span class="ph-ti">Budowa agenta — serce zajęć<span class="sub">demo + karta · 25 min hands-on</span></span>
+      <span class="ph-toggle">+</span>
+    </div>
+    <div class="phase-body">
+      <div class="row"><div class="rk">Cel</div><div class="rv"><p>Każdy student wychodzi z <strong>działającym agentem do organizacji czasu i zadań</strong> i wypełnioną kartą projektu.</p></div></div>
+      <div class="row"><div class="rk">Krok 1 — demo (≈6 min)</div><div class="rv"><p>Przełącz deck na <strong>slajd 13 (kreator)</strong>. Złóż agenta na oczach sali: wybierz narzędzie, pokaż instrukcję systemową, ustaw stop, wpisz polecenie. Niech zobaczą prawdziwą pętlę na modelu. Potem wpisz coś poza zasięgiem — pokaż, jak agent przyznaje granicę.</p><span class="tool-chip demo">▣ DEMO slajd 13</span></div></div>
+      <div class="row"><div class="rk">Krok 2 — rozdaj kartę (≈1 min)</div><div class="rv"><p>Studenci otwierają <strong>kartę</strong> u siebie i klikają przełącznik: <em>darmowa</em> albo <em>płatna</em>. Powiedz wprost: kto ma studencki Gemini Pro → wersja płatna (buduje Gema); reszta → darmowa (ręczna pętla). Obie są OK.</p><span class="tool-chip karta">▣ KARTA</span></div></div>
+      <div class="row"><div class="rk">Krok 3 — praca (≈15 min)</div><div class="rv"><ul><li>Każdy buduje agenta-organizatora wg kroków w swojej wersji karty.</li><li>Krążysz po sali. Najczęstszy błąd: brak warunku stopu albo instrukcja bez „kiedy użyj narzędzia".</li><li>Kto skończy szybciej → przechodzi do rubryki „własny agent" (sekcja 05 karty).</li></ul></div></div>
+      <div class="row"><div class="rk">Krok 4 — test (≈3 min)</div><div class="rv"><p>Wszyscy testują agenta na trzech przypadkach z karty: łatwy / przeciążony / poza zasięgiem. Trzeci jest najważniejszy — czy agent zmyśla, czy przyznaje granicę?</p></div></div>
+      <div class="row"><div class="rk">Na co uważać</div><div class="rv"><ul><li><strong>Limity darmowych planów</strong>: ktoś trafi na dzienny limit wiadomości. Niech sparuje się z sąsiadem albo skróci kontekst.</li><li><strong>Gemini Pro + Workspace</strong>: najmocniejsze demo to agent czytający realny Kalendarz Google. Jeśli ktoś to odpali, pokaż całej sali.</li><li><strong>Czas</strong>: 15 min pracy zleci błyskawicznie. Nie czekaj, aż wszyscy skończą — zbierz na 68. minucie.</li></ul></div></div>
+      <div class="row"><div class="rk">Mów</div><div class="rv"><div class="say">„Nie chodzi o ładny prompt. Chodzi o to, żeby agent SAM sięgnął po narzędzie, zamiast zgadywać. To jest ta pętla z początku zajęć — teraz jest Wasza."</div></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 6 -->
+  <div class="phase">
+    <div class="phase-hd">
+      <span class="ph-time">68–75</span>
+      <span class="ph-ti">Pokaz prac i domknięcie<span class="sub">karta · refleksja</span></span>
+      <span class="ph-toggle">+</span>
+    </div>
+    <div class="phase-body">
+      <div class="row"><div class="rk">Cel</div><div class="rv"><p>Zebrać 2–3 agenty od ochotników, wrócić do poziomów autonomii, zostawić pytanie otwarte.</p></div></div>
+      <div class="row"><div class="rk">Co robisz</div><div class="rv"><ul><li>Poproś 2–3 osoby, by pokazały swojego agenta (zwłaszcza ktoś z Gemem + Workspace).</li><li>Przy każdym spytaj: <strong>na jakim poziomie autonomii to działa?</strong> (spina z fazą 3).</li><li>Rzuć pytanie z karty (sekcja 06): „Komu byś tego NIE powierzył, nawet gdyby dał radę?" — i nie domykaj odpowiedzi.</li></ul></div></div>
+      <div class="row"><div class="rk">Materiał</div><div class="rv"><span class="tool-chip karta">▣ KARTA sekcja 05–06</span></div></div>
+      <div class="row"><div class="rk">Zadanie domowe (opcja)</div><div class="rv"><p>Dokończyć rubrykę „własny agent" w karcie, wyeksportować do .txt i przynieść/wrzucić. Albo: zbudować drugiego agenta do czegoś z własnego życia.</p></div></div>
+      <div class="row"><div class="rk">Mów</div><div class="rv"><div class="say">„Zbudowaliście agenta w 15 minut. Pytanie nie brzmi już 'czy potrafię' — brzmi 'co chcę takiej rzeczy powierzyć, a czego nie'."</div></div></div>
+    </div>
+  </div>
+
+  <!-- PRE-FLIGHT -->
+  <h2><span class="mark">03</span>Checklista przed zajęciami</h2>
+  <p>Klikaj, gdy odhaczone.</p>
+  <ul class="check" id="check">
+    <li><span class="box">✓</span><span><span class="ct2">Deck otwarty jako artefakt w Claude.ai</span><span class="cs">Kreator na slajdzie 13 działa tylko w artefakcie (woła model).</span></span></li>
+    <li><span class="box">✓</span><span><span class="ct2">Link do karty wrzucony na chat/tablicę grupy</span><span class="cs">Studenci otwierają u siebie — działa na GitHub Pages.</span></span></li>
+    <li><span class="box">✓</span><span><span class="ct2">Twój model do demo zalogowany i przetestowany</span><span class="cs">Odpal raz kreator przed zajęciami, żeby uniknąć niespodzianki.</span></span></li>
+    <li><span class="box">✓</span><span><span class="ct2">Rzutnik + dźwięk + nawigacja klawiaturą sprawdzone</span><span class="cs">Deck przewijasz strzałkami ← →, Home/End skacze.</span></span></li>
+    <li><span class="box">✓</span><span><span class="ct2">Plan B na limity darmowych planów</span><span class="cs">Parowanie studentów, którym skończą się wiadomości.</span></span></li>
+    <li><span class="box">✓</span><span><span class="ct2">Zapasowy przykład grafiku do wgrania (Gemini Pro)</span><span class="cs">Gotowy PDF/Sheet, jeśli chcesz pokazać agenta czytającego kalendarz.</span></span></li>
+  </ul>
+
+  <div class="foot">
+    Lucid Academy · „Zrozumieć AI, zanim ono zrozumie nas" · przewodnik do warsztatu o agentach.<br>
+    Materiały towarzyszące: deck (slajdy), karta pracy (ćwiczenie), kreator na żywo (slajd 13).
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.phase-hd').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
+document.getElementById('openall').onclick=()=>document.querySelectorAll('.phase').forEach(p=>p.classList.add('open'));
+document.getElementById('closeall').onclick=()=>document.querySelectorAll('.phase').forEach(p=>p.classList.remove('open'));
+document.querySelectorAll('#check li').forEach(l=>l.onclick=()=>l.classList.toggle('on'));
+</script>
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karta pracy · Zbuduj własnego agenta · Lucid Academy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#08070d;--bg2:#0e0c17;--ink:#ECEAF6;--muted:#9089a8;
+  --violet:#7B2FFF;--violet-soft:#8000FF;--cyan:#22D3EE;
+  --line:rgba(123,47,255,.22);--line2:rgba(34,211,238,.18);
+  --ok:#34d399;--warn:#fbbf24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:'Sora',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(50vw 50vw at 8% -5%, rgba(123,47,255,.13), transparent 60%),
+    radial-gradient(40vw 40vw at 100% 12%, rgba(34,211,238,.08), transparent 60%);
+  background-attachment:fixed;
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.wrap{max-width:860px;margin:0 auto;padding:clamp(24px,5vw,64px) clamp(20px,4vw,40px) 120px}
+
+/* header */
+.top{display:flex;align-items:center;gap:.7rem;font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:2.4rem}
+.top svg{width:20px;height:20px}
+.eyebrow{font-family:'JetBrains Mono';font-size:.74rem;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--cyan)}
+h1{font-size:clamp(2rem,5.5vw,3.4rem);font-weight:800;line-height:1.04;letter-spacing:-.02em;margin-bottom:1rem}
+.grad{background:linear-gradient(100deg,var(--violet),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(1.05rem,1.8vw,1.25rem);color:var(--ink);max-width:64ch}
+p{color:var(--muted);max-width:68ch}
+strong{color:var(--ink);font-weight:600}
+em{color:#c9c3e0}
+h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;letter-spacing:-.01em;margin:3.2rem 0 .4rem;scroll-margin-top:20px}
+h2 .mark{font-family:'JetBrains Mono';color:var(--violet);font-size:.6em;margin-right:.5rem;vertical-align:middle}
+h3{font-size:1.12rem;font-weight:600;margin:1.6rem 0 .5rem}
+a{color:var(--cyan);text-decoration:none;border-bottom:1px solid var(--line2)}
+code{font-family:'JetBrains Mono';background:rgba(123,47,255,.13);padding:.12rem .42rem;border-radius:5px;color:var(--cyan);font-size:.86em}
+hr{border:none;border-top:1px solid var(--line);margin:2.4rem 0}
+
+/* meta strip */
+.meta{display:flex;flex-wrap:wrap;gap:.6rem;margin:1.8rem 0 .5rem}
+.pill{font-family:'JetBrains Mono';font-size:.74rem;border:1px solid var(--line);border-radius:20px;padding:.35rem .8rem;color:var(--muted);background:rgba(123,47,255,.05)}
+.pill b{color:var(--cyan);font-weight:600}
+
+/* callout */
+.callout{border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1.3rem;margin:1.4rem 0;background:linear-gradient(160deg,rgba(34,211,238,.06),transparent)}
+.callout.warn{border-color:rgba(251,191,36,.3);background:linear-gradient(160deg,rgba(251,191,36,.07),transparent)}
+.callout .ct{font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:.4rem}
+.callout.warn .ct{color:var(--warn)}
+.callout p{color:var(--ink);max-width:none}
+
+/* version switcher */
+.switcher{border:1px solid var(--line2);border-radius:18px;padding:1.3rem;margin:1.8rem 0;background:linear-gradient(160deg,rgba(34,211,238,.05),transparent)}
+.switcher .sq{font-weight:700;font-size:1.15rem;margin-bottom:.3rem}
+.switcher .ss{font-size:.9rem;color:var(--muted);margin-bottom:1rem}
+.vchoose{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media(max-width:600px){.vchoose{grid-template-columns:1fr}}
+.vbtn{text-align:left;cursor:pointer;border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem;background:linear-gradient(160deg,var(--bg2),transparent);color:var(--ink);font-family:'Sora';transition:.25s}
+.vbtn:hover{border-color:var(--line2);transform:translateY(-2px)}
+.vbtn.on{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan) inset;background:linear-gradient(160deg,rgba(34,211,238,.1),transparent)}
+.vbtn .vt{font-weight:700;font-size:1.08rem;display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem}
+.vbtn .vbadge{font-family:'JetBrains Mono';font-size:.64rem;padding:.18rem .5rem;border-radius:6px;letter-spacing:.05em;text-transform:uppercase}
+.vbtn .vbadge.free{background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.3);color:var(--ok)}
+.vbtn .vbadge.paid{background:rgba(123,47,255,.16);border:1px solid var(--line);color:#c9a6ff}
+.vbtn p{font-size:.86rem;margin:0;color:var(--muted)}
+.vnote{margin-top:1rem;font-family:'JetBrains Mono';font-size:.78rem;color:var(--cyan);display:none}
+.vnote.show{display:block}
+
+/* version-gated sections */
+.vsection{display:none}
+.vsection.show{display:block;animation:vfade .4s ease both}
+@keyframes vfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vtag{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono';font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .7rem;border-radius:7px;margin-bottom:.4rem}
+.vtag.free{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--ok)}
+.vtag.paid{background:rgba(123,47,255,.14);border:1px solid var(--line);color:#c9a6ff}
+.gate-hint{border:1px dashed var(--line);border-radius:12px;padding:1.4rem;text-align:center;color:var(--muted);font-size:.92rem;margin:1.4rem 0}
+
+/* steps */
+.step{display:grid;grid-template-columns:44px 1fr;gap:1.1rem;padding:1.3rem 0;border-top:1px solid var(--line)}
+.step:first-of-type{border-top:none}
+.snum{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-family:'JetBrains Mono';font-weight:600;font-size:1.1rem;background:rgba(123,47,255,.12);border:1px solid var(--line);color:var(--cyan)}
+.step h3{margin:0 0 .4rem}
+.step p{margin-bottom:.5rem}
+.ex{border-left:2px solid var(--violet);padding:.5rem 0 .5rem 1rem;margin:.7rem 0;background:rgba(123,47,255,.05);border-radius:0 8px 8px 0}
+.ex .xl{font-family:'JetBrains Mono';font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--violet);margin-bottom:.25rem}
+.ex p{color:var(--ink);font-size:.95rem;margin:0}
+
+/* prompt block */
+.prompt{position:relative;background:#060509;border:1px solid var(--line);border-radius:12px;margin:1rem 0;overflow:hidden}
+.prompt-hd{display:flex;justify-content:space-between;align-items:center;padding:.6rem .9rem;border-bottom:1px solid var(--line);font-family:'JetBrains Mono';font-size:.72rem;color:var(--muted);letter-spacing:.06em}
+.prompt-body{padding:.9rem 1.05rem;font-family:'JetBrains Mono';font-size:.82rem;line-height:1.6;color:#d7d2ea;white-space:pre-wrap;word-break:break-word}
+.copy{background:var(--violet);color:#fff;border:none;border-radius:7px;font-family:'Sora';font-weight:600;font-size:.72rem;padding:.35rem .8rem;cursor:pointer}
+.copy:hover{background:var(--violet-soft)}
+.copy.done{background:var(--ok)}
+
+/* free-path cards */
+.paths{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin:1.4rem 0}
+@media(max-width:720px){.paths{grid-template-columns:1fr}}
+.path{border:1px solid var(--line);border-radius:14px;padding:1.1rem;background:linear-gradient(160deg,var(--bg2),transparent)}
+.path .pn{font-family:'JetBrains Mono';font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);margin-bottom:.35rem}
+.path h3{margin:0 0 .4rem;font-size:1.05rem}
+.path p{font-size:.86rem;margin:0}
+.path .tag{display:inline-block;margin-top:.6rem;font-family:'JetBrains Mono';font-size:.68rem;padding:.2rem .55rem;border-radius:6px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--ok)}
+.path.primary{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan) inset;background:linear-gradient(160deg,rgba(34,211,238,.09),transparent)}
+.path.primary .pn{color:var(--cyan)}
+.path.primary .tag{background:rgba(34,211,238,.14);border-color:var(--line2);color:#bfeef7}
+
+/* loop sim */
+.sim{border:1px solid var(--line2);border-radius:16px;background:#060509;overflow:hidden;margin:1.4rem 0}
+.sim-hd{padding:.8rem 1rem;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono';font-size:.74rem;color:var(--muted)}
+.sim-hd .d{width:9px;height:9px;border-radius:50%}
+.sim-body{padding:1.1rem;font-family:'JetBrains Mono';font-size:.83rem;line-height:1.7}
+.sl{margin-bottom:.3rem;white-space:pre-wrap}
+.sl.u{color:var(--cyan)}.sl.t{color:var(--muted)}.sl.k{color:var(--warn)}.sl.o{color:#7dd3fc}.sl.f{color:var(--ok)}
+.sim-foot{padding:.9rem 1rem;border-top:1px solid var(--line)}
+.simbtn{background:var(--violet);color:#fff;border:none;border-radius:9px;font-family:'Sora';font-weight:600;font-size:.85rem;padding:.55rem 1.1rem;cursor:pointer}
+.simbtn:hover{background:var(--violet-soft)}
+.simbtn.ghost{background:transparent;border:1px solid var(--line2);color:var(--cyan)}
+
+/* checklist */
+.check{list-style:none;display:flex;flex-direction:column;gap:.55rem;margin:1.2rem 0}
+.check li{display:flex;gap:.8rem;align-items:flex-start;padding:.7rem .9rem;border:1px solid var(--line);border-radius:11px;cursor:pointer;transition:.2s;background:linear-gradient(160deg,var(--bg2),transparent)}
+.check li:hover{border-color:var(--line2)}
+.check li.on{border-color:var(--ok);background:linear-gradient(160deg,rgba(52,211,153,.09),transparent)}
+.box{flex:none;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--muted);display:grid;place-items:center;margin-top:1px;font-size:.85rem;color:var(--ok);transition:.2s}
+.check li.on .box{border-color:var(--ok);background:rgba(52,211,153,.15)}
+.check .ct2{font-size:.96rem;color:var(--ink)}
+.check .cs{display:block;font-size:.8rem;color:var(--muted);margin-top:.1rem}
+.progress{font-family:'JetBrains Mono';font-size:.8rem;color:var(--cyan);margin-top:.3rem}
+
+/* rubric / reflection */
+.field{border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;margin:.9rem 0;background:linear-gradient(160deg,var(--bg2),transparent)}
+.field label{display:block;font-weight:600;font-size:.98rem;margin-bottom:.15rem}
+.field .fl{font-size:.82rem;color:var(--muted);margin-bottom:.55rem}
+.field textarea,.field input{width:100%;background:#060509;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:'Sora';font-size:.92rem;padding:.6rem .75rem;outline:none;resize:vertical}
+.field textarea:focus,.field input:focus{border-color:var(--cyan)}
+.field textarea{min-height:64px;line-height:1.5}
+.lvlrow{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.2rem}
+.lvlopt{font-family:'JetBrains Mono';font-size:.76rem;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:.4rem .65rem;color:var(--ink);background:rgba(123,47,255,.05);transition:.2s}
+.lvlopt:hover{border-color:var(--line2)}
+.lvlopt.on{border-color:var(--cyan);background:rgba(34,211,238,.14);box-shadow:0 0 0 1px var(--cyan) inset}
+
+/* reflection */
+.q{padding:1rem 0;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:none}
+.q .qq{font-weight:600;color:var(--ink);margin-bottom:.3rem}
+.q p{font-size:.9rem;margin:0}
+
+/* footer actions */
+.actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.6rem}
+.btn{background:var(--violet);color:#fff;border:none;border-radius:10px;font-family:'Sora';font-weight:600;font-size:.92rem;padding:.7rem 1.3rem;cursor:pointer}
+.btn:hover{background:var(--violet-soft)}
+.btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--cyan)}
+.foot{margin-top:3rem;padding-top:1.4rem;border-top:1px solid var(--line);font-family:'JetBrains Mono';font-size:.74rem;color:var(--muted)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ok);color:#04140d;font-weight:600;padding:.7rem 1.3rem;border-radius:10px;font-size:.88rem;transition:transform .35s;z-index:50}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <svg viewBox="0 0 40 40" fill="none"><path d="M4 4h22a10 10 0 0 1 10 10v22H14A10 10 0 0 1 4 26V4Z" fill="url(#g)"/><defs><linearGradient id="g" x1="4" y1="4" x2="36" y2="36"><stop stop-color="#7B2FFF"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+    Lucid Academy · Karta pracy
+  </div>
+
+  <div class="eyebrow">Ćwiczenie · Zrozumieć AI</div>
+  <h1>Zbuduj agenta do <span class="grad">organizacji czasu i zadań</span></h1>
+  <p class="lead">Twoim zadaniem jest zaprojektować i przetestować własnego agenta — na darmowym modelu, jaki masz pod ręką. Nie chodzi o kod. Chodzi o to, byś <strong>sam zamknął agenta w pętli</strong> i zobaczył, jak instrukcja, którą napiszesz, steruje jego decyzjami.</p>
+
+  <div class="meta">
+    <span class="pill"><b>Czas:</b> 30–40 min</span>
+    <span class="pill"><b>Forma:</b> w parach lub solo</span>
+    <span class="pill"><b>Narzędzie:</b> dowolny darmowy LLM</span>
+    <span class="pill"><b>Efekt:</b> działający agent + karta projektu</span>
+  </div>
+
+  <div class="callout">
+    <div class="ct">Cel ćwiczenia</div>
+    <p>Po tym zadaniu potrafisz: nazwać, czemu agent służy, napisać jego „mózg" (instrukcję systemową), uruchomić go w pętli <em>narzędzie → wynik → decyzja</em> i ocenić, na którym poziomie autonomii działa. Zbudujesz agenta-organizatora, a potem zaprojektujesz własnego.</p>
+  </div>
+
+  <!-- WHY THIS AGENT -->
+  <h2><span class="mark">00</span>Po co agent do czasu i zadań?</h2>
+  <p>Bo to problem, który każdy z was zna: rozsypana lista zadań, terminy, brak priorytetów. Agent-organizator dostaje twój bałagan i ma go uporządkować — ale <strong>nie zgaduje</strong>. Używa „narzędzi": sprawdza godzinę, liczy, ile czasu zostało, dopytuje o priorytet. To idealny pierwszy agent: cel jest oczywisty, a pętla — widoczna gołym okiem.</p>
+
+  <!-- VERSION SWITCHER -->
+  <div class="switcher" id="switcher">
+    <div class="sq">Najpierw: jaki model masz pod ręką?</div>
+    <div class="ss">Od tego zależy, jak zbudujesz agenta. Wybierz — dalsza instrukcja dopasuje się do Ciebie. Możesz przełączać w każdej chwili.</div>
+    <div class="vchoose">
+      <button class="vbtn" data-v="free">
+        <div class="vt">Wersja darmowa <span class="vbadge free">0 zł</span></div>
+        <p>Darmowy ChatGPT, Gemini lub Claude. Zbudujesz agenta przez <strong>ręczne odgrywanie pętli</strong> — sam wcielasz się w środowisko wykonujące narzędzia.</p>
+      </button>
+      <button class="vbtn" data-v="paid">
+        <div class="vt">Wersja płatna <span class="vbadge paid">Plus / Pro</span></div>
+        <p>Masz studencki <strong>Gemini Pro</strong> (albo ChatGPT Plus / Claude Pro)? Zbudujesz <strong>prawdziwego agenta</strong> z realnymi narzędziami i automatyczną pętlą — Gem, Custom GPT albo Projekt.</p>
+      </button>
+    </div>
+    <div class="vnote" id="vnote"></div>
+  </div>
+
+  <div class="gate-hint" id="gatehint">↑ Wybierz wersję powyżej, by zobaczyć instrukcję budowy dopasowaną do Twojego modelu.</div>
+
+  <!-- ============ FREE VERSION ============ -->
+  <div class="vsection" data-section="free">
+
+  <!-- FREE PATHS -->
+  <h2><span class="mark">01</span><span class="vtag free">wersja darmowa</span><br>Wybierz darmową ścieżkę</h2>
+  <p>Na darmowych planach nie zbudujesz „prawdziwego" agenta z automatycznymi narzędziami — ale możesz zrobić coś lepszego do nauki: <strong>odegrać pętlę ręcznie</strong>, wcielając się w środowisko, które wykonuje narzędzia. Wybierz to, co masz:</p>
+  <div class="paths">
+    <div class="path">
+      <div class="pn">Ścieżka A · działa wszędzie</div>
+      <h3>Ręczna pętla w czacie</h3>
+      <p>Dowolny darmowy model (ChatGPT, Gemini, Claude). Wklejasz instrukcję systemową jako pierwszą wiadomość, a wyniki narzędzi podajesz ręcznie. Ty jesteś „środowiskiem".</p>
+      <span class="tag">0 zł · zero limitów funkcji</span>
+    </div>
+    <div class="path">
+      <div class="pn">Ścieżka B · jeśli masz Gemini</div>
+      <h3>Zapisz jako Gema</h3>
+      <p>Darmowy Gemini pozwala zapisać własnego Gema z instrukcją systemową. Twój agent staje się klikalny i wraca w każdej rozmowie — bez przeklejania promptu.</p>
+      <span class="tag">0 zł · trwała konfiguracja</span>
+    </div>
+    <div class="path">
+      <div class="pn">Ścieżka C · Projekt w Claude</div>
+      <h3>Projekt (darmowy, do 5)</h3>
+      <p>Darmowy Claude pozwala stworzyć do pięciu Projektów z własnymi instrukcjami i plikiem wiedzy. Bez automatycznych narzędzi, ale z trwałym kontekstem.</p>
+      <span class="tag">0 zł · limit 5 projektów</span>
+    </div>
+  </div>
+  <div class="callout warn">
+    <div class="ct">Uwaga na limity</div>
+    <p>Darmowe plany mają dzienne limity wiadomości i rotują modele (np. po przekroczeniu schodzisz na słabszy model). Trzymaj rozmowę zwięzłą — to też dobra lekcja: <strong>krótszy kontekst = tańsza i sprawniejsza pętla</strong>.</p>
+  </div>
+
+  <!-- STEPS (FREE) -->
+  <h2><span class="mark">02</span><span class="vtag free">wersja darmowa</span><br>Zbuduj agenta — krok po kroku</h2>
+
+  <div class="step">
+    <div class="snum">1</div>
+    <div>
+      <h3>Nazwij cel i jedno narzędzie</h3>
+      <p>Czemu agent ma służyć i z czego skorzysta? Na start <strong>jedno</strong> narzędzie. Dla organizatora czasu narzędziem może być coś, czego model sam nie wie na pewno — np. aktualna godzina albo dane, które tylko ty masz.</p>
+      <div class="ex"><div class="xl">przykład</div><p>Cel: uporządkować moją listę zadań na dziś według priorytetu i czasu. Narzędzie: <code>kalendarz</code> (zwraca moje wolne okna) — bo model nie zna mojego grafiku, musi go „odpytać".</p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">2</div>
+    <div>
+      <h3>Napisz „mózg" — instrukcję systemową</h3>
+      <p>To najważniejszy krok. Określ: <strong>kim jest agent, jakie ma narzędzie, kiedy go używa, jak odpowiada, kiedy kończy</strong>. 5–8 zdań. Gotowy wzorzec niżej — skopiuj i przerób pod siebie.</p>
+      <div class="prompt">
+        <div class="prompt-hd"><span>instrukcja systemowa · agent-organizator</span><button class="copy" data-c="sys1">kopiuj</button></div>
+        <div class="prompt-body" id="sys1">Jesteś moim asystentem do organizacji czasu i zadań. Pomagasz uporządkować listę zadań według priorytetu i dostępnego czasu.
+
+Masz dostęp do jednego narzędzia:
+[KALENDARZ] — zwraca moje wolne okna czasowe na dziś.
+
+ZASADY:
+- Nie zgaduj mojego grafiku. Gdy potrzebujesz wolnych okien, użyj narzędzia, pisząc w osobnej linii: NARZĘDZIE: kalendarz
+- Po otrzymaniu wyniku zaplanuj zadania w dostępnych oknach, od najwyższego priorytetu.
+- Jeśli zadań jest więcej niż czasu, powiedz wprost, co się nie zmieści, i zaproponuj, co przenieść.
+- Gdy masz gotowy plan, napisz: ODPOWIEDŹ: a po niej plan dnia.
+- Odpowiadaj krótko i konkretnie, po polsku.</div>
+      </div>
+      <div class="callout">
+        <div class="ct">Dlaczego ten format działa</div>
+        <p>Słowa <code>NARZĘDZIE:</code> i <code>ODPOWIEDŹ:</code> to umowny protokół. Dzięki nim <em>ty</em> (albo program) wiesz, kiedy agent chce użyć narzędzia, a kiedy daje finalną odpowiedź. To jest pętla — uczyniona widzialną.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">3</div>
+    <div>
+      <h3>Uruchom pętlę — ty jesteś środowiskiem</h3>
+      <p>Wklej instrukcję jako pierwszą wiadomość. Potem podaj polecenie. Gdy agent napisze <code>NARZĘDZIE: kalendarz</code>, <strong>ty</strong> odsyłasz mu wynik (np. realne okna z twojego dnia). Agent czyta wynik i planuje dalej. Tak krąży pętla, aż padnie <code>ODPOWIEDŹ:</code></p>
+      <div class="prompt">
+        <div class="prompt-hd"><span>twoje pierwsze polecenie do agenta</span><button class="copy" data-c="task1">kopiuj</button></div>
+        <div class="prompt-body" id="task1">Mam dziś do zrobienia: dokończyć prezentację (2h), odpowiedzieć na maile (30 min), spotkanie z zespołem (1h, stałe o 14:00), przygotować się do jutrzejszych zajęć (1h), zakupy (45 min). Ułóż mi z tego realny plan dnia.</div>
+      </div>
+      <p>Zobacz, jak wygląda jeden pełny obieg pętli — kliknij i prześledź krok po kroku:</p>
+      <div class="sim">
+        <div class="sim-hd"><span class="d" id="simd" style="background:#444"></span><span id="simlbl">symulator ręcznej pętli — gotowy</span></div>
+        <div class="sim-body" id="simout"><div class="sl t">Naciśnij „odtwórz pętlę", by zobaczyć, jak agent i ty (środowisko) wymieniacie się turami.</div></div>
+        <div class="sim-foot"><button class="simbtn" id="simplay">▶ odtwórz pętlę</button> <button class="simbtn ghost" id="simreset">reset</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">4</div>
+    <div>
+      <h3>Ustaw warunek stopu</h3>
+      <p>Agent musi wiedzieć, <strong>kiedy przestać</strong> — inaczej będzie w kółko dopytywał albo planował. Dopisz do instrukcji limit: „daj ODPOWIEDŹ najpóźniej po 3 użyciach narzędzia" albo „gdy plan obejmuje wszystkie zadania, kończ". Bez tego pętla się nie domyka.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">5</div>
+    <div>
+      <h3>Przetestuj na trzech przypadkach</h3>
+      <p>Sprawdź agenta na trzech sytuacjach — to ujawnia, czy instrukcja jest dobra:</p>
+      <div class="ex"><div class="xl">łatwy</div><p>Mało zadań, dużo czasu. Czy plan jest sensowny i zwięzły?</p></div>
+      <div class="ex"><div class="xl">trudny</div><p>Więcej zadań niż czasu. Czy agent <em>przyznaje</em>, że coś się nie zmieści, zamiast upychać na siłę?</p></div>
+      <div class="ex"><div class="xl">poza zasięgiem</div><p>Pytasz o coś, czego narzędzie nie obejmuje („zarezerwuj mi bilet"). Czy agent uczciwie mówi, że nie potrafi — czy zmyśla? To najważniejszy test.</p></div>
+    </div>
+  </div>
+
+  </div><!-- /vsection free -->
+
+  <!-- ============ PAID VERSION ============ -->
+  <div class="vsection" data-section="paid">
+
+  <!-- PAID PATHS -->
+  <h2><span class="mark">01</span><span class="vtag paid">wersja płatna</span><br>Twoja platforma</h2>
+  <p>Na płatnym planie budujesz <strong>prawdziwego agenta</strong>: dajesz mu realne narzędzia (przeglądarka, kod, pliki), a model sam prowadzi pętlę — bez Twojego ręcznego podawania wyników. Większość z Was ma <strong>studencki Gemini Pro</strong>, więc to jest ścieżka główna.</p>
+
+  <div class="path primary">
+    <div class="pn">★ Ścieżka główna · studencki Gemini Pro (Google AI Pro)</div>
+    <h3>Gem z narzędziami w Gemini 3.1 Pro</h3>
+    <p>Plan studencki to <strong>pełny Google AI Pro</strong> — bez okrojeń: Gemini 3.1 Pro, Deep Research, Canvas, generowanie obrazu, Workspace AI w Docs/Sheets/Gmail, Gemini in Chrome i 2 TB miejsca. Zbudujesz Gema z instrukcją, plikami wiedzy i narzędziem domyślnym, który sam prowadzi pętlę.</p>
+    <span class="tag">★ to budujesz w krokach niżej</span>
+  </div>
+
+  <p style="margin-top:1.4rem;font-size:.92rem">Masz inny płatny model? Zasada jest ta sama, zmienia się tylko interfejs:</p>
+  <div class="paths">
+    <div class="path">
+      <div class="pn">Alternatywa · ChatGPT Plus/Pro</div>
+      <h3>Custom GPT + Agent Mode</h3>
+      <p>Builder „Explore GPTs → Create": nazwa, instrukcje, pliki wiedzy, włączane narzędzia (web, kod). Agent Mode = automatyczna pętla wieloetapowa.</p>
+      <span class="tag">odpowiednik Gema</span>
+    </div>
+    <div class="path">
+      <div class="pn">Alternatywa · Claude Pro</div>
+      <h3>Projekt + RAG</h3>
+      <p>Projekt z instrukcjami i bazą wiedzy (do 30 MB/plik), automatyczny RAG (~10× pojemności). Najmocniejszy do pracy z dokumentami.</p>
+      <span class="tag">odpowiednik Gema</span>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="ct">Czym to się różni od wersji darmowej</div>
+    <p>Tu <strong>nie odgrywasz pętli ręcznie</strong>. Definiujesz narzędzie raz, a agent sam decyduje, kiedy go użyć, wykonuje je i czyta wynik — pętla dzieje się automatycznie. Twoja rola przesuwa się z „środowiska" na <strong>projektanta i nadzorcę</strong> (przypomnij sobie poziomy autonomii — to skok z L1–L2 w stronę L3–L4).</p>
+  </div>
+
+  <!-- STEPS (PAID) -->
+  <h2><span class="mark">02</span><span class="vtag paid">wersja płatna · Gemini Pro</span><br>Zbuduj Gema-agenta — krok po kroku</h2>
+
+  <div class="step">
+    <div class="snum">1</div>
+    <div>
+      <h3>Otwórz builder Gemów</h3>
+      <p>W Gemini: <code>menu profilu → Gems → New Gem</code>. Builder ma dwa panele — konfigurację po lewej i podgląd na żywo po prawej. Nadaj nazwę i krótki opis, np. „Organizator dnia".</p>
+      <div class="ex"><div class="xl">masz inny model?</div><p>ChatGPT: <code>Explore GPTs → Create</code>. Claude: <code>claude.ai/projects → New Project</code>. Dalsze kroki są analogiczne.</p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">2</div>
+    <div>
+      <h3>Wklej instrukcję w pole „Instructions"</h3>
+      <p>To „DNA" agenta — ale <strong>bez protokołu NARZĘDZIE:/ODPOWIEDŹ:</strong>, bo Gemini sam obsłuży narzędzia. Skup się na roli, zasadach i granicach. Możesz kliknąć ikonę różdżki, by Gemini dopracował Twoją instrukcję.</p>
+      <div class="prompt">
+        <div class="prompt-hd"><span>instrukcja systemowa · Gem-organizator</span><button class="copy" data-c="psys1">kopiuj</button></div>
+        <div class="prompt-body" id="psys1">Jesteś moim asystentem do organizacji czasu i zadań. Porządkujesz moją listę zadań według priorytetu i dostępnego czasu.
+
+ZASADY:
+- Gdy potrzebujesz aktualnej daty lub godziny, ustal ją, zamiast zgadywać.
+- Jeśli mam podpięty Kalendarz Google lub przesłany plik z grafikiem, sprawdź tam wolne okna, zanim zaplanujesz dzień.
+- Najpierw uporządkuj zadania od najwyższego priorytetu, potem dopasuj je do dostępnego czasu.
+- Jeśli zadań jest więcej niż czasu, powiedz wprost, co się nie zmieści, i zaproponuj, co przenieść na inny dzień.
+- Pytaj o priorytet tylko wtedy, gdy naprawdę nie da się go wywnioskować z kontekstu.
+- Odpowiadaj krótko, konkretnie, po polsku. Na końcu podaj gotowy plan dnia z godzinami.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">3</div>
+    <div>
+      <h3>Dodaj wiedzę i ustaw narzędzie domyślne</h3>
+      <p>Tu zaczyna się prawdziwa różnica wobec wersji darmowej. W Gemie:</p>
+      <div class="ex"><div class="xl">pliki wiedzy</div><p>W sekcji <code>Knowledge</code> wgraj swój tygodniowy grafik (PDF/Doc/Sheet) i listę stałych zobowiązań. Gem będzie z nich korzystał w każdej rozmowie zamiast zgadywać.</p></div>
+      <div class="ex"><div class="xl">narzędzie domyślne</div><p>Wybierz to, które pasuje do celu: <code>Deep Research</code> (gdy agent ma zbierać info), <code>Canvas</code> (gdy ma budować i edytować plan na żywo).</p></div>
+      <div class="ex"><div class="xl">atut Gemini Pro</div><p>Twój plan ma Workspace AI — możesz prosić agenta, by korzystał z danych w Docs/Sheets/Gmail, a w Gemini in Chrome działał na otwartej stronie. To realne narzędzia, nie symulacja.</p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">4</div>
+    <div>
+      <h3>Przetestuj — pozwól Gemowi prowadzić pętlę</h3>
+      <p>Wydaj to samo polecenie co w wersji darmowej, ale teraz <strong>nie podajesz wyników narzędzi</strong> — obserwuj, jak agent sam sięga po datę, plik czy Deep Research. To jest automatyczna pętla.</p>
+      <div class="prompt">
+        <div class="prompt-hd"><span>polecenie testowe</span><button class="copy" data-c="ptask1">kopiuj</button></div>
+        <div class="prompt-body" id="ptask1">Mam dziś do zrobienia: dokończyć prezentację (2h), odpowiedzieć na maile (30 min), spotkanie z zespołem (1h, stałe o 14:00), przygotować się do jutrzejszych zajęć (1h), zakupy (45 min). Ustal aktualną godzinę, sprawdź mój grafik z wiedzy Gema, a potem ułóż realny plan dnia.</div>
+      </div>
+      <div class="callout">
+        <div class="ct">Na co patrzeć</div>
+        <p>Czy Gem <strong>sam</strong> sięgnął po narzędzie (data, plik z grafiku), zamiast zgadywać? Czy pokazał kroki, czy od razu dał plan? To różnica między „inteligentnym czatem" a agentem prowadzącym pętlę.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="snum">5</div>
+    <div>
+      <h3>Ustaw granice i zapisz Gema</h3>
+      <p>Dopisz do instrukcji warunek stopu i <strong>granice</strong> — co agent robi sam, a co musi z Tobą skonsultować (świadome ustawienie poziomu autonomii). Kliknij <code>Save</code> — Gem pojawi się w „My Gems" i wraca w każdej rozmowie. Przetestuj na trzech przypadkach: łatwy / przeciążony / poza zasięgiem.</p>
+      <div class="ex"><div class="xl">masz inny model?</div><p>ChatGPT: w selektorze modelu włącz <code>Agent Mode</code>, by zobaczyć pełną automatyczną pętlę; zapis przez <code>Save → tylko ja</code>. Claude: projekt jest gotowy od razu po dodaniu plików.</p></div>
+    </div>
+  </div>
+
+  </div><!-- /vsection paid -->
+
+  <!-- ============ COMMON (both versions) ============ -->
+  <!-- VARIANT PROMPTS -->
+  <h2><span class="mark">03</span>Gotowe warianty „mózgu" do wypróbowania</h2>
+  <p>Te same kroki, inne narzędzia. Skopiuj, wklej, porównaj zachowanie. Zwróć uwagę, jak zmiana jednego zdania w instrukcji zmienia agenta.</p>
+
+  <div class="prompt">
+    <div class="prompt-hd"><span>wariant · agent priorytetyzujący (metoda Eisenhowera)</span><button class="copy" data-c="sys2">kopiuj</button></div>
+    <div class="prompt-body" id="sys2">Jesteś asystentem priorytetyzacji zadań. Porządkujesz moje zadania metodą Eisenhowera (pilne/ważne).
+
+Narzędzie:
+[DOPYTAJ] — gdy nie wiesz, czy zadanie jest pilne lub ważne, zadaj mi JEDNO pytanie, pisząc: NARZĘDZIE: dopytaj <pytanie>
+
+ZASADY:
+- Najpierw sklasyfikuj zadania do 4 ćwiartek (zrób teraz / zaplanuj / deleguj / odpuść).
+- Dopytuj tylko, gdy naprawdę nie da się zgadnąć — maksymalnie 2 razy.
+- Gdy masz klasyfikację, napisz: ODPOWIEDŹ: a po niej tabelę ćwiartek i 3 pierwsze kroki.
+- Krótko, po polsku.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-hd"><span>wariant · agent pomodoro (rozbija na bloki)</span><button class="copy" data-c="sys3">kopiuj</button></div>
+    <div class="prompt-body" id="sys3">Jesteś asystentem skupienia. Rozbijasz moje zadania na bloki Pomodoro (25 min pracy + 5 min przerwy).
+
+Narzędzie:
+[CZAS] — zwraca aktualną godzinę. Użyj go, pisząc: NARZĘDZIE: czas
+
+ZASADY:
+- Oszacuj, ile bloków Pomodoro zajmie każde zadanie.
+- Korzystając z aktualnej godziny, ułóż realny harmonogram bloków do końca dnia roboczego (do 17:00).
+- Jeśli zadania nie mieszczą się do 17:00, powiedz, ile bloków zostaje na jutro.
+- Gdy harmonogram gotowy: ODPOWIEDŹ: a po niej lista bloków z godzinami.
+- Zwięźle, po polsku.</div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <h2><span class="mark">04</span>Kryteria oceny — sprawdź swojego agenta</h2>
+  <p>Klikaj, gdy spełnione. To także rubryka oceny na zajęciach.</p>
+  <ul class="check" id="check">
+    <li data-k="c1"><span class="box">✓</span><span><span class="ct2">Cel jest jasny w jednym zdaniu</span><span class="cs">Wiadomo, czemu agent służy i komu.</span></span></li>
+    <li data-k="c2"><span class="box">✓</span><span><span class="ct2">Agent ma zdefiniowane co najmniej jedno narzędzie</span><span class="cs">I instrukcja mówi, kiedy go użyć.</span></span></li>
+    <li data-k="c3"><span class="box">✓</span><span><span class="ct2">Pętla działa: agent prosi o narzędzie, czeka na wynik, planuje dalej</span><span class="cs">Widać format NARZĘDZIE / ODPOWIEDŹ.</span></span></li>
+    <li data-k="c4"><span class="box">✓</span><span><span class="ct2">Jest warunek stopu</span><span class="cs">Agent kończy — nie zapętla się ani nie dopytuje bez końca.</span></span></li>
+    <li data-k="c5"><span class="box">✓</span><span><span class="ct2">Agent radzi sobie z przeciążeniem</span><span class="cs">Gdy zadań > czasu, mówi wprost, co się nie mieści.</span></span></li>
+    <li data-k="c6"><span class="box">✓</span><span><span class="ct2">Agent uczciwie przyznaje granice</span><span class="cs">Na zadanie poza zasięgiem narzędzia nie zmyśla.</span></span></li>
+  </ul>
+  <div class="progress" id="progress">0 / 6 spełnionych</div>
+
+  <!-- RUBRIC: OWN AGENT -->
+  <h2><span class="mark">05</span>Zaprojektuj własnego agenta</h2>
+  <p>Teraz porzuć organizatora i wymyśl <strong>swojego</strong> agenta — do czegokolwiek. Wypełnij rubrykę. To twój projekt do oddania / pokazania na zajęciach.</p>
+
+  <div class="field">
+    <label>Nazwa i cel agenta</label>
+    <div class="fl">Czemu służy i komu? Jedno–dwa zdania.</div>
+    <textarea data-s="r_goal" placeholder="np. Agent-redaktor, który skraca moje posty do limitu 280 znaków bez gubienia sensu..."></textarea>
+  </div>
+  <div class="field">
+    <label>Narzędzie (jedno)</label>
+    <div class="fl">Czego agent sam nie wie / nie umie, więc musi „odpytać"?</div>
+    <input data-s="r_tool" placeholder="np. licznik znaków, kalendarz, baza wiedzy, wyszukiwarka...">
+  </div>
+  <div class="field">
+    <label>Instrukcja systemowa — „mózg"</label>
+    <div class="fl">Kim jest, kiedy używa narzędzia, jak odpowiada, kiedy kończy. Użyj formatu NARZĘDZIE: / ODPOWIEDŹ:</div>
+    <textarea data-s="r_sys" style="min-height:120px" placeholder="Jesteś..."></textarea>
+  </div>
+  <div class="field">
+    <label>Warunek stopu</label>
+    <div class="fl">Kiedy agent ma przestać?</div>
+    <input data-s="r_stop" placeholder="np. po maks. 3 użyciach narzędzia / gdy tekst mieści się w limicie">
+  </div>
+  <div class="field">
+    <label>Na jakim poziomie autonomii działa? (L1–L5)</label>
+    <div class="fl">Operator → Współpracownik → Konsultant → Zatwierdzający → Obserwator. Im wyżej, tym mniej ciebie w pętli.</div>
+    <div class="lvlrow" id="lvlrow">
+      <button class="lvlopt" data-l="L1">L1 · Operator</button>
+      <button class="lvlopt" data-l="L2">L2 · Współpracownik</button>
+      <button class="lvlopt" data-l="L3">L3 · Konsultant</button>
+      <button class="lvlopt" data-l="L4">L4 · Zatwierdzający</button>
+      <button class="lvlopt" data-l="L5">L5 · Obserwator</button>
+    </div>
+  </div>
+
+  <!-- REFLECTION -->
+  <h2><span class="mark">06</span>Pytania do refleksji</h2>
+  <div class="q"><div class="qq">1. Po co tu w ogóle agent?</div><p>Czy twój problem naprawdę wymaga pętli z narzędziem — czy wystarczyłaby zwykła rozmowa z modelem? Kiedy „agent" to przerost formy?</p></div>
+  <div class="q"><div class="qq">2. Gdzie jest człowiek?</div><p>Na którym poziomie autonomii ustawiłeś agenta i dlaczego? Co musiałoby się zmienić, by bezpiecznie podnieść go o jeden poziom?</p></div>
+  <div class="q"><div class="qq">3. Co robi, gdy nie wie?</div><p>Najtrudniejszy moment każdego agenta. Czy twój przyznaje granice, czy zmyśla? Jak instrukcja może to wymusić?</p></div>
+  <div class="q"><div class="qq">4. Komu byś tego nie powierzył?</div><p>Jakie zadanie celowo zostawiłbyś człowiekowi, nawet gdyby agent dał radę? Dlaczego?</p></div>
+
+  <div class="actions">
+    <button class="btn" id="exportbtn">↓ Pobierz moją kartę (.txt)</button>
+    <button class="btn ghost" id="printbtn">🖨 Drukuj / PDF</button>
+  </div>
+
+  <div class="foot">
+    Lucid Academy · „Zrozumieć AI, zanim ono zrozumie nas" · karta pracy do warsztatu o agentach.<br>
+    Poziomy autonomii wg Feng, McDonald, Zhang, <em>Levels of Autonomy for AI Agents</em> (University of Washington / Knight First Amendment Institute).
+  </div>
+</div>
+
+<div class="toast" id="toast">skopiowano</div>
+
+<script>
+/* copy buttons */
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400);}
+
+/* version switcher */
+const vnotes={
+  free:'✓ Wersja darmowa — budujesz przez ręczne odgrywanie pętli. Działa na każdym darmowym modelu.',
+  paid:'✓ Wersja płatna — budujesz prawdziwego agenta z narzędziami. Pętla działa automatycznie.'
+};
+function setVersion(v){
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  document.querySelectorAll('.vsection').forEach(s=>s.classList.toggle('show',s.dataset.section===v));
+  const note=document.getElementById('vnote');note.textContent=vnotes[v];note.classList.add('show');
+  document.getElementById('gatehint').style.display='none';
+}
+document.querySelectorAll('.vbtn').forEach(b=>b.onclick=()=>setVersion(b.dataset.v));
+document.querySelectorAll('.copy').forEach(b=>b.onclick=()=>{
+  const el=document.getElementById(b.dataset.c);
+  const txt=el.innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    b.textContent='skopiowano ✓';b.classList.add('done');toast('skopiowano do schowka');
+    setTimeout(()=>{b.textContent='kopiuj';b.classList.remove('done');},1600);
+  }).catch(()=>toast('zaznacz i skopiuj ręcznie'));
+});
+
+/* loop simulator */
+const SIM=[
+  ['u','› [TY] '+'Mam dziś: prezentacja (2h), maile (30min), spotkanie 14:00 (1h), przygotowanie do zajęć (1h), zakupy (45min). Ułóż plan.'],
+  ['t','[AGENT] myśl: nie znam Twoich wolnych okien — muszę odpytać kalendarz.'],
+  ['k','[AGENT] NARZĘDZIE: kalendarz'],
+  ['o','[TY = środowisko] WYNIK: wolne okna dziś: 9:00–14:00 oraz 15:00–18:00.'],
+  ['t','[AGENT] myśl: mam 8h okien, zadań na ~5h15. Mieści się. Układam wg priorytetu, spotkanie wpada o 14:00.'],
+  ['f','[AGENT] ODPOWIEDŹ: 9:00 prezentacja (2h) · 11:00 przygotowanie do zajęć (1h) · 12:00 maile (30min) · 12:30 przerwa/zapas · 14:00 spotkanie (1h) · 15:00 zakupy (45min). Wszystko się mieści, masz zapas po południu.']
+];
+const simout=document.getElementById('simout'),simd=document.getElementById('simd'),simlbl=document.getElementById('simlbl');
+let simTimer=null;
+function simReset(){if(simTimer)clearTimeout(simTimer);simout.innerHTML='<div class="sl t">Naciśnij „odtwórz pętlę", by zobaczyć obieg tura po turze.</div>';simd.style.background='#444';simlbl.textContent='symulator ręcznej pętli — gotowy';}
+function simPlay(){
+  simout.innerHTML='';simd.style.background='var(--ok)';simd.style.boxShadow='0 0 8px var(--ok)';simlbl.textContent='pętla w toku...';
+  let i=0;
+  (function next(){
+    if(i>=SIM.length){simlbl.textContent='pętla domknięta — agent dał ODPOWIEDŹ';simd.style.boxShadow='none';simd.style.background='var(--cyan)';return;}
+    const [cls,txt]=SIM[i++];
+    const d=document.createElement('div');d.className='sl '+cls;d.textContent=txt;simout.appendChild(d);simout.scrollTop=simout.scrollHeight;
+    simTimer=setTimeout(next,900);
+  })();
+}
+document.getElementById('simplay').onclick=simPlay;
+document.getElementById('simreset').onclick=simReset;
+
+/* checklist */
+const checkLis=[...document.querySelectorAll('#check li')];
+function updProg(){const n=checkLis.filter(l=>l.classList.contains('on')).length;document.getElementById('progress').textContent=n+' / 6 spełnionych'+(n===6?' — gotowe ✓':'');}
+checkLis.forEach(l=>l.onclick=()=>{l.classList.toggle('on');updProg();});
+
+/* level pick */
+let chosenLevel='';
+document.querySelectorAll('#lvlrow .lvlopt').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#lvlrow .lvlopt').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');chosenLevel=b.dataset.l;
+});
+
+/* export */
+function gv(sel){const el=document.querySelector('[data-s="'+sel+'"]');return el?el.value.trim():'';}
+document.getElementById('exportbtn').onclick=()=>{
+  const lines=[
+    'KARTA PROJEKTU AGENTA — Lucid Academy','='.repeat(40),'',
+    'WERSJA: '+(document.querySelector('.vbtn.on')?document.querySelector('.vbtn.on').dataset.v:'(nie wybrano)'),'',
+    'CEL: '+(gv('r_goal')||'(nie wypełniono)'),'',
+    'NARZĘDZIE: '+(gv('r_tool')||'(nie wypełniono)'),'',
+    'INSTRUKCJA SYSTEMOWA:','-'.repeat(20),(gv('r_sys')||'(nie wypełniono)'),'-'.repeat(20),'',
+    'WARUNEK STOPU: '+(gv('r_stop')||'(nie wypełniono)'),'',
+    'POZIOM AUTONOMII: '+(chosenLevel||'(nie wybrano)'),'',
+    'KRYTERIA SPEŁNIONE: '+checkLis.filter(l=>l.classList.contains('on')).length+' / 6'
+  ];
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='moj-agent.txt';a.click();
+  toast('pobrano kartę');
+};
+document.getElementById('printbtn').onclick=()=>window.print();
+
+updProg();
+</script>
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapsuła Predykcji — Zrozumieć AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Spline+Sans+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10131a;
+    --paper:#f3efe6;
+    --paper-deep:#e8e2d4;
+    --line:#c9c0ac;
+    --violet:#5b3df2;
+    --violet-deep:#3a23b8;
+    --rust:#c2491d;
+    --dim:#5a5648;
+    --seal:#8a1f12;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(91,61,242,.05), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(194,73,29,.05), transparent 42%);
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+
+  /* ---- HERO ---- */
+  header.hero{
+    padding:72px 0 36px;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:'Spline Sans Mono',monospace;
+    font-size:12px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--violet-deep);
+    display:flex;align-items:center;gap:12px;
+    margin-bottom:28px;
+  }
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(40px,8vw,72px);
+    line-height:.96;
+    letter-spacing:-.02em;
+    margin-bottom:4px;
+  }
+  h1 .em{font-style:italic;color:var(--violet-deep)}
+  .subtitle{
+    font-family:'Fraunces',serif;
+    font-size:clamp(18px,3vw,23px);
+    font-weight:400;
+    color:var(--dim);
+    max-width:46ch;
+    margin-top:18px;
+  }
+  .meta-row{
+    margin-top:32px;
+    display:flex;flex-wrap:wrap;gap:8px 28px;
+    font-family:'Spline Sans Mono',monospace;
+    font-size:12.5px;letter-spacing:.04em;color:var(--dim);
+  }
+  .meta-row b{color:var(--ink);font-weight:500}
+
+  /* ---- BRIEF ---- */
+  .brief{padding:46px 0 8px}
+  .brief p{font-size:16.5px;margin-bottom:18px;max-width:62ch}
+  .brief p.lead{
+    font-family:'Fraunces',serif;
+    font-size:21px;line-height:1.42;color:var(--ink);
+  }
+  .brief strong{font-weight:600}
+  .rule-note{
+    margin:30px 0;
+    padding:22px 26px;
+    background:var(--paper-deep);
+    border-left:3px solid var(--rust);
+  }
+  .rule-note h3{
+    font-family:'Spline Sans Mono',monospace;
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--rust);margin-bottom:12px;
+  }
+  .rule-note p{font-size:15px;margin-bottom:0}
+  .rule-note .ex{
+    display:block;margin-top:14px;font-size:14.5px;
+    padding-top:14px;border-top:1px dashed var(--line);
+  }
+  .ex .bad{color:var(--seal);font-family:'Spline Sans Mono',monospace;font-size:13px}
+  .ex .good{color:var(--violet-deep);font-family:'Spline Sans Mono',monospace;font-size:13px}
+
+  /* ---- CATEGORY SECTIONS ---- */
+  .cats{padding:30px 0 0}
+  .cat{
+    border-top:1px solid var(--line);
+    padding:36px 0;
+  }
+  .cat-head{display:flex;align-items:baseline;gap:18px;margin-bottom:6px}
+  .cat-num{
+    font-family:'Spline Sans Mono',monospace;
+    font-size:13px;color:var(--violet);font-weight:600;
+    padding-top:6px;
+  }
+  .cat-title{
+    font-family:'Fraunces',serif;
+    font-size:27px;font-weight:600;letter-spacing:-.01em;
+  }
+  .cat-desc{color:var(--dim);font-size:15px;margin:8px 0 4px 0;max-width:60ch}
+  .cat-prompt{
+    font-style:italic;color:var(--violet-deep);font-size:14.5px;
+    margin-bottom:20px;
+  }
+
+  .pred{
+    margin-top:18px;
+    padding:18px 20px;
+    background:rgba(255,255,255,.5);
+    border:1px solid var(--line);
+    border-radius:2px;
+  }
+  .pred-label{
+    font-family:'Spline Sans Mono',monospace;
+    font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--dim);margin-bottom:8px;display:block;
+  }
+  textarea{
+    width:100%;border:none;background:transparent;resize:vertical;
+    font-family:'Inter',sans-serif;font-size:16px;line-height:1.5;
+    color:var(--ink);min-height:62px;padding:0;
+  }
+  textarea:focus{outline:none}
+  textarea::placeholder{color:#9b9484}
+  .conf-row{
+    display:flex;align-items:center;gap:16px;
+    margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);
+  }
+  .conf-row label{
+    font-family:'Spline Sans Mono',monospace;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+    white-space:nowrap;
+  }
+  input[type=range]{flex:1;accent-color:var(--violet);height:4px}
+  .conf-val{
+    font-family:'Spline Sans Mono',monospace;
+    font-weight:600;font-size:17px;color:var(--violet-deep);
+    min-width:48px;text-align:right;
+  }
+
+  /* ---- IDENTITY + ACTIONS ---- */
+  .signoff{
+    border-top:1px solid var(--line);
+    padding:40px 0;
+  }
+  .name-field{margin-bottom:28px}
+  .name-field label{
+    font-family:'Spline Sans Mono',monospace;
+    font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--dim);display:block;margin-bottom:8px;
+  }
+  .name-field input{
+    width:100%;border:none;border-bottom:1.5px solid var(--ink);
+    background:transparent;font-family:'Fraunces',serif;font-size:22px;
+    padding:6px 0;color:var(--ink);
+  }
+  .name-field input:focus{outline:none;border-color:var(--violet)}
+  .actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  button{
+    font-family:'Spline Sans Mono',monospace;
+    font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    cursor:pointer;border:none;border-radius:2px;
+    padding:16px 28px;transition:transform .12s ease,background .2s ease;
+  }
+  button:active{transform:translateY(1px)}
+  .btn-seal{background:var(--violet);color:#fff;font-weight:600}
+  .btn-seal:hover{background:var(--violet-deep)}
+  .btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+  .hint{
+    font-size:13px;color:var(--dim);margin-top:18px;max-width:58ch;
+  }
+  footer{
+    border-top:1px solid var(--line);
+    padding:30px 0 70px;
+    font-family:'Spline Sans Mono',monospace;
+    font-size:11.5px;letter-spacing:.06em;color:var(--dim);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
+
+  /* ---- SEAL OVERLAY ---- */
+  .seal-screen{
+    position:fixed;inset:0;background:rgba(16,19,26,.96);
+    display:none;align-items:center;justify-content:center;
+    flex-direction:column;text-align:center;padding:30px;z-index:50;
+    animation:fade .4s ease;
+  }
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .seal-screen.on{display:flex}
+  .wax{
+    width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle at 38% 32%, #b8442e, var(--seal) 70%);
+    box-shadow:0 8px 30px rgba(138,31,18,.5), inset 0 -6px 14px rgba(0,0,0,.3);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-style:italic;font-weight:600;
+    font-size:38px;color:#f3d6c8;margin-bottom:32px;
+    animation:stamp .5s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes stamp{from{transform:scale(2.4);opacity:0}to{transform:scale(1);opacity:1}}
+  .seal-screen h2{
+    font-family:'Fraunces',serif;color:var(--paper);
+    font-size:30px;font-weight:500;margin-bottom:14px;
+  }
+  .seal-screen p{color:#b8b2a2;font-size:15px;max-width:42ch;margin-bottom:8px}
+  .seal-screen .reopen{
+    margin-top:28px;background:transparent;border:1px solid #4a4636;color:#b8b2a2;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Zrozumieć AI · zadanie międzysemestralne</div>
+    <h1>Kapsuła<br><span class="em">predykcji</span></h1>
+    <p class="subtitle">Zapisujesz dziś, co Twoim zdaniem wydarzy się do następnych zajęć. Jesienią otwieramy i sprawdzamy, kto czytał przyszłość, a kto tylko hype.</p>
+    <div class="meta-row">
+      <span>Zamknięcie kapsuły: <b>dziś</b></span>
+      <span>Otwarcie: <b>pierwsze zajęcia jesienią (~4 mies.)</b></span>
+      <span>Forma: <b>4 kategorie · pewność w %</b></span>
+    </div>
+  </header>
+
+  <section class="brief">
+    <p class="lead">Nie chodzi o to, żeby zgadnąć. Chodzi o to, żeby się wystawić — postawić konkretną tezę, przy której da się jesienią powiedzieć „trafione" albo „pudło", i wziąć za nią odpowiedzialność.</p>
+    <p>Każda predykcja ma być <strong>falsyfikowalna</strong>: opisz zdarzenie tak, żeby po przerwie dało się jednoznacznie rozstrzygnąć, czy się stało. Przy każdej ustaw też <strong>poziom pewności</strong> — bo jesienią punktujemy nie tylko trafność, ale i kalibrację. Pewny na 95% i pudło boli bardziej niż ostrożne 60%. Najlepiej skalibrowana osoba dostaje osobne wyróżnienie, niezależnie od liczby trafień.</p>
+
+    <div class="rule-note">
+      <h3>Jedna zasada: żadnych oczywistości</h3>
+      <p>Predykcja, którą podpisałby każdy, nic nie waży. Unikaj kierunków bez krawędzi („AI będzie coraz lepsze", „pojawią się nowe modele"). Szukaj tezy, która ma stawkę — gdzie możesz się wyłożyć, bo coś realnie obstawiasz.</p>
+      <span class="ex">
+        <span class="bad">✗ za płasko:</span> „Powstanie nowy, mocniejszy model."<br>
+        <span class="good">✓ z krawędzią:</span> „Co najmniej jeden duży lab publicznie wycofa lub mocno ograniczy funkcję «towarzysza»/relacyjnego trybu po fali krytyki — i przyzna to wprost w komunikacie."
+      </span>
+    </div>
+  </section>
+
+  <section class="cats" id="form">
+
+    <div class="cat" data-cat="swiat">
+      <div class="cat-head">
+        <span class="cat-num">01</span>
+        <span class="cat-title">Świat</span>
+      </div>
+      <p class="cat-desc">Wielka skala: laby, firmy, regulacje, przełomy i porażki. Wydarzenia, o których przeczytasz w nagłówkach.</p>
+      <p class="cat-prompt">Co pęknie, co się odwróci, czego rynek się nie spodziewa?</p>
+
+      <div class="pred">
+        <span class="pred-label">Predykcja A</span>
+        <textarea placeholder="np. Pojawi się pierwszy głośny przypadek, w którym dwa modele AI negocjują ze sobą w imieniu użytkowników bez nadzoru człowieka — i wywoła to debatę regulacyjną."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="70" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">70%</span>
+        </div>
+      </div>
+      <div class="pred">
+        <span class="pred-label">Predykcja B <span style="opacity:.6">(opcjonalnie)</span></span>
+        <textarea placeholder="Druga teza dla tej kategorii — jeśli masz."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="65" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">65%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat" data-cat="otoczenie">
+      <div class="cat-head">
+        <span class="cat-num">02</span>
+        <span class="cat-title">Otoczenie</span>
+      </div>
+      <p class="cat-desc">Polska, Twoje miasto, uczelnia, branża, instytucje, w których się obracasz. Skala, którą realnie obserwujesz z bliska.</p>
+      <p class="cat-prompt">Gdzie globalny trend dotknie konkretnego miejsca, które znasz z imienia?</p>
+
+      <div class="pred">
+        <span class="pred-label">Predykcja A</span>
+        <textarea placeholder="np. Konkretna polska instytucja publiczna (urząd, uczelnia, redakcja), którą wskazuję z nazwy, ogłosi wewnętrzną politykę użycia AI — a w praktyce i tak będą jej używać po cichu."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="70" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">70%</span>
+        </div>
+      </div>
+      <div class="pred">
+        <span class="pred-label">Predykcja B <span style="opacity:.6">(opcjonalnie)</span></span>
+        <textarea placeholder="Druga teza dla tej kategorii — jeśli masz."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="65" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">65%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat" data-cat="osobiste">
+      <div class="cat-head">
+        <span class="cat-num">03</span>
+        <span class="cat-title">Twoje życie</span>
+      </div>
+      <p class="cat-desc">Ty. Twoje nawyki, praca, nauka, relacja z tymi narzędziami. Tu predykcja jest też zobowiązaniem — albo przeczuciem.</p>
+      <p class="cat-prompt">Czego o sobie jeszcze nie wiesz, a czego dowiesz się przez te cztery miesiące?</p>
+
+      <div class="pred">
+        <span class="pred-label">Predykcja A</span>
+        <textarea placeholder="np. Przyłapię się na tym, że oddałem AI jakąś decyzję, którą zawsze uważałem za «swoją» — i będzie mi z tym albo ulżyło, albo nieswojo. Opiszę z góry którą."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="60" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">60%</span>
+        </div>
+      </div>
+      <div class="pred">
+        <span class="pred-label">Predykcja B <span style="opacity:.6">(opcjonalnie)</span></span>
+        <textarea placeholder="Druga teza dla tej kategorii — jeśli masz."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="60" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">60%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat" data-cat="anty">
+      <div class="cat-head">
+        <span class="cat-num">04</span>
+        <span class="cat-title">Anty-predykcja</span>
+      </div>
+      <p class="cat-desc">Odwróć perspektywę. Co — wbrew całemu hype'owi i ekscytacji wokół — <em>nie</em> wydarzy się do jesieni? Tu obnaża się, czy myślisz samodzielnie, czy kupujesz cudzą narrację.</p>
+      <p class="cat-prompt">Jaka „nieuchronność" z dzisiejszych nagłówków po prostu się nie spełni?</p>
+
+      <div class="pred">
+        <span class="pred-label">Predykcja A</span>
+        <textarea placeholder="np. Mimo zapowiedzi «agentów, którzy zrobią wszystko za ciebie», do jesieni nie pojawi się żaden agent, któremu sam zaufałbym na tyle, by zostawić mu konkretne zadanie X bez sprawdzania. Wpisuję jakie X."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="75" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">75%</span>
+        </div>
+      </div>
+      <div class="pred">
+        <span class="pred-label">Predykcja B <span style="opacity:.6">(opcjonalnie)</span></span>
+        <textarea placeholder="Druga teza dla tej kategorii — jeśli masz."></textarea>
+        <div class="conf-row">
+          <label>Pewność</label>
+          <input type="range" min="50" max="99" value="70" oninput="this.nextElementSibling.textContent=this.value+'%'">
+          <span class="conf-val">70%</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="signoff">
+    <div class="name-field">
+      <label>Podpisuję się pod tymi przewidywaniami</label>
+      <input type="text" id="who" placeholder="Imię i nazwisko">
+    </div>
+    <div class="actions">
+      <button class="btn-seal" onclick="seal()">Zapieczętuj kapsułę</button>
+      <button class="btn-ghost" onclick="save()">Zapisz roboczo</button>
+    </div>
+    <p class="hint">„Zapieczętuj" otwiera gotowy mail do prowadzącego z wpisaną treścią Twoich predykcji — wystarczy kliknąć „wyślij" w swojej skrzynce. To jest moment, w którym kapsuła się zamyka. „Zapisz roboczo" trzyma wersję w tej karcie, gdybyś chciał coś jeszcze dopracować przed wysłaniem.</p>
+  </section>
+
+  <footer>
+    <span>Zrozumieć AI, zanim ono zrozumie nas</span>
+    <span>Lucid Academy</span>
+  </footer>
+
+</div>
+
+<div class="seal-screen" id="sealScreen">
+  <div class="wax">L</div>
+  <h2>Kapsuła zapieczętowana.</h2>
+  <p>Otworzył się gotowy mail do prowadzącego z Twoimi predykcjami. Kliknij „wyślij" w swojej skrzynce — i zapomnij o nich do jesieni.</p>
+  <p style="color:#7a7464;font-size:13px">Wtedy otworzymy wszystkie naraz i policzymy, kto czytał przyszłość — a kto czytał Twittera.</p>
+  <button class="reopen" onclick="document.getElementById('sealScreen').classList.remove('on')">Wróć i popraw</button>
+</div>
+
+<script>
+  const CATS = {swiat:"ŚWIAT", otoczenie:"OTOCZENIE", osobiste:"TWOJE ŻYCIE", anty:"ANTY-PREDYKCJA"};
+
+  function collect(){
+    const who = document.getElementById('who').value.trim() || "(bez podpisu)";
+    let out = "KAPSUŁA PREDYKCJI — Zrozumieć AI\n";
+    out += "Autor: " + who + "\n";
+    out += "Zapieczętowano: " + new Date().toLocaleString('pl-PL') + "\n";
+    out += "Otwarcie: pierwsze zajęcia jesienią\n";
+    out += "==================================================\n\n";
+    document.querySelectorAll('.cat').forEach(cat=>{
+      out += "## " + CATS[cat.dataset.cat] + "\n";
+      cat.querySelectorAll('.pred').forEach((p,i)=>{
+        const txt = p.querySelector('textarea').value.trim();
+        const conf = p.querySelector('.conf-val').textContent;
+        if(txt){ out += "  ["+conf+"] " + txt + "\n"; }
+      });
+      out += "\n";
+    });
+    return {who, out};
+  }
+
+  const RECIPIENT = "Piotr.jarczyk.ai@gmail.com";
+
+  function seal(){
+    const {who,out} = collect();
+    const hasContent = [...document.querySelectorAll('textarea')].some(t=>t.value.trim());
+    if(!hasContent){ alert("Wpisz najpierw choć jedną predykcję — pusta kapsuła nic nie powie."); return; }
+    const subject = "Kapsuła predykcji — " + who;
+    const mailto = "mailto:" + RECIPIENT
+      + "?subject=" + encodeURIComponent(subject)
+      + "&body=" + encodeURIComponent(out);
+    window.location.href = mailto;
+    document.getElementById('sealScreen').classList.add('on');
+  }
+
+  function save(){
+    const data = {};
+    document.querySelectorAll('textarea').forEach((t,i)=>data['t'+i]=t.value);
+    document.querySelectorAll('.conf-val').forEach((c,i)=>data['c'+i]=c.textContent);
+    data.who = document.getElementById('who').value;
+    try{
+      window.__draft = data; // in-memory fallback
+      alert("Zapisano roboczo w tej sesji. Uwaga: zamknięcie karty wyczyści wersję roboczą — do trwałego zapisu użyj „Zapieczętuj kapsułę".");
+    }catch(e){ alert("Nie udało się zapisać roboczo."); }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucida — Lucid Academy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+  .stage { position: relative; width: 100vw; height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; }
+  .frame { position: relative; height: 100vh; aspect-ratio: 9 / 16; max-width: 100vw; overflow: hidden; background: #000; cursor: crosshair; }
+  @media (max-aspect-ratio: 9/16) { .frame { width: 100vw; height: auto; aspect-ratio: 9 / 16; } }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .overlay { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+  .brand { position: absolute; top: 6.5%; left: 0; right: 0; text-align: center; font-family: 'Orbitron', sans-serif; font-weight: 500; letter-spacing: 0.55em; font-size: clamp(10px, 1.7vh, 18px); color: #c9a8ff; text-indent: 0.55em; opacity: 0; text-shadow: 0 0 12px rgba(160,90,255,0.6); animation: fadeIn 2s ease 0.6s forwards; }
+  .lower { position: absolute; left: 0; right: 0; bottom: 9%; text-align: center; }
+  .lucida { font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 0.22em; text-indent: 0.22em; font-size: clamp(40px, 9.5vh, 120px); line-height: 1; color: #f3ecff; text-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 22px rgba(180,120,255,0.95), 0 0 50px rgba(150,80,255,0.85), 0 0 90px rgba(120,50,230,0.7), 0 0 140px rgba(110,40,220,0.5); opacity: 0; animation: igniteText 2.4s cubic-bezier(.2,.7,.2,1) 1.4s forwards; }
+  .rule { width: 0; height: 1px; margin: 3.2vh auto 2.6vh; background: linear-gradient(90deg, transparent, rgba(190,140,255,0.9), transparent); box-shadow: 0 0 10px rgba(170,110,255,0.8); animation: ruleGrow 1.6s ease 2.6s forwards; }
+  .sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: clamp(15px, 2.5vh, 30px); color: #d9c8ff; letter-spacing: 0.04em; opacity: 0; text-shadow: 0 0 16px rgba(150,90,255,0.5); animation: fadeIn 1.6s ease 3s forwards; }
+  .laureate { margin-top: 1.1vh; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: clamp(15px, 2.7vh, 32px); letter-spacing: 0.08em; color: #fff; text-shadow: 0 0 10px rgba(200,160,255,0.8), 0 0 30px rgba(150,90,255,0.6); opacity: 0; animation: fadeIn 1.8s ease 3.5s forwards; }
+  .ceremony { margin-top: 2.4vh; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 400; font-size: clamp(12px, 1.9vh, 21px); color: #9a86c8; letter-spacing: 0.05em; opacity: 0; animation: fadeIn 1.8s ease 4.2s forwards; }
+  .hint { position: absolute; bottom: 2.2%; left: 0; right: 0; text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(10px, 1.4vh, 15px); color: rgba(150,130,200,0.4); opacity: 0; animation: fadeIn 2s ease 5s forwards; }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes igniteText { 0% { opacity: 0; letter-spacing: 0.55em; text-indent: 0.55em; filter: blur(14px); } 100% { opacity: 1; letter-spacing: 0.22em; text-indent: 0.22em; filter: blur(0); } }
+  @keyframes ruleGrow { to { width: min(46%, 360px); } }
+  @media (prefers-reduced-motion: reduce) { .brand,.lucida,.sub,.laureate,.ceremony,.hint { animation: none; opacity: 1; filter: none; } .lucida { letter-spacing: 0.22em; text-indent: 0.22em; } .rule { width: min(46%, 360px); animation: none; } }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="frame" id="frame">
+    <canvas id="bg"></canvas>
+    <div class="overlay">
+      <div class="brand">LUCID ACADEMY</div>
+      <div class="lower">
+        <div class="lucida">LUCIDA</div>
+        <div class="rule"></div>
+        <div class="sub">I edycja — pierwszy laureat</div>
+        <div class="laureate">prof. Arkadiusz Gut</div>
+        <div class="ceremony">uroczyste wręczenie — rok akademicki 2026/2027</div>
+      </div>
+      <div class="hint">poruszaj kursorem — kliknij, by rozpalić gwiazdę</div>
+    </div>
+  </div>
+</div>
+<script>
+const canvas=document.getElementById('bg'), frame=document.getElementById('frame'), ctx=canvas.getContext('2d');
+let W,H,DPR,STAR;
+let mouse={x:0,y:0,active:false};
+let pmouse={x:0,y:0}; // smoothed
+let burst={t:-1};        // central star flash, t = seconds since trigger (-1 = idle)
+let shockwave=null;      // expanding ring through the starfield
+function rand(a,b){return a+Math.random()*(b-a);}
+function dist(ax,ay,bx,by){return Math.hypot(ax-bx,ay-by);}
+function sArc(x,y,r){ ctx.arc(x,y,Math.max(0.01,r),0,6.2832); }
+
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  const r=canvas.getBoundingClientRect(); W=r.width; H=r.height;
+  canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  mouse.x=W*0.5; mouse.y=H*0.40; pmouse.x=mouse.x; pmouse.y=mouse.y;
+  build();
+}
+
+let layers=[];      // star layers w/ parallax depth
+let nebula=[];      // soft nebula blobs
+let dust=[];        // drifting dust motes
+let shooters=[];    // occasional shooting stars
+let bigStars=[];    // a few prominent stars with cross flares
+
+function build(){
+  STAR={x:W*0.5,y:H*0.40};
+  layers=[]; nebula=[]; dust=[]; shooters=[]; bigStars=[];
+
+  // 3 parallax depth layers of stars
+  const depthCfg=[
+    {n: Math.floor(W*H/2600), depth:0.15, rMax:0.9, aMax:0.45},
+    {n: Math.floor(W*H/4200), depth:0.4,  rMax:1.4, aMax:0.7},
+    {n: Math.floor(W*H/9000), depth:0.85, rMax:2.1, aMax:0.95},
+  ];
+  for(const cfg of depthCfg){
+    const arr=[];
+    for(let i=0;i<cfg.n;i++){
+      arr.push({
+        x:rand(0,W), y:rand(0,H),
+        r:rand(0.3,cfg.rMax),
+        a:rand(0.1,cfg.aMax),
+        tw:rand(0.3,1.6), ph:rand(0,6.28),
+        hue: Math.random()<0.78 ? 'w' : (Math.random()<0.6?'v':'b')
+      });
+    }
+    layers.push({depth:cfg.depth, stars:arr});
+  }
+
+  // nebula clouds — violet/indigo, denser around the star
+  const nb=[
+    {x:STAR.x, y:STAR.y, r:H*0.42, col:[120,60,210], a:0.16},
+    {x:STAR.x-W*0.18, y:STAR.y+H*0.10, r:H*0.30, col:[90,50,200], a:0.12},
+    {x:STAR.x+W*0.22, y:STAR.y-H*0.05, r:H*0.28, col:[150,70,230], a:0.10},
+    {x:STAR.x+W*0.05, y:STAR.y+H*0.30, r:H*0.36, col:[70,40,170], a:0.10},
+    {x:W*0.20, y:H*0.78, r:H*0.30, col:[110,55,210], a:0.09},
+    {x:W*0.82, y:H*0.20, r:H*0.26, col:[130,70,220], a:0.08},
+  ];
+  nebula=nb;
+
+  // a few prominent foreground stars (with flare), avoid dead-center
+  for(let i=0;i<7;i++){
+    let x,y;
+    do { x=rand(W*0.08,W*0.92); y=rand(H*0.06,H*0.92); }
+    while(dist(x,y,STAR.x,STAR.y) < H*0.14 || (y>H*0.62 && Math.abs(x-W*0.5)<W*0.42)); // keep clear of star + text band
+    bigStars.push({x,y,r:rand(1.6,2.8),ph:rand(0,6.28),tw:rand(0.4,1.0),hue:Math.random()<0.5?'w':'v'});
+  }
+
+  // dust
+  for(let i=0;i<60;i++) dust.push({x:rand(0,W),y:rand(0,H),r:rand(0.4,1.6),
+    vx:rand(-0.05,0.05),vy:rand(-0.08,-0.01),a:rand(0.05,0.4),ph:rand(0,6.28),depth:rand(0.2,0.9)});
+}
+
+function colStr(hue,a){
+  if(hue==='v') return `rgba(200,160,255,${a})`;
+  if(hue==='b') return `rgba(160,190,255,${a})`;
+  return `rgba(255,250,250,${a})`;
+}
+
+let t0=performance.now();
+function maybeShooter(t){
+  if(Math.random()<0.004 && shooters.length<2){
+    const fromLeft=Math.random()<0.5;
+    const x=fromLeft?rand(0,W*0.3):rand(W*0.7,W);
+    const y=rand(0,H*0.45);
+    const ang=fromLeft?rand(0.3,0.7):Math.PI-rand(0.3,0.7);
+    shooters.push({x,y,ang,life:0,len:rand(W*0.12,W*0.22),speed:rand(W*0.012,W*0.02)});
+  }
+}
+
+function draw(now){
+  const t=(now-t0)/1000; ctx.clearRect(0,0,W,H);
+
+  // smooth mouse
+  const tx=mouse.active?mouse.x:W*0.5, ty=mouse.active?mouse.y:H*0.40;
+  pmouse.x+=(tx-pmouse.x)*0.05; pmouse.y+=(ty-pmouse.y)*0.05;
+  // parallax offset (relative to center), gentle
+  const offx=(pmouse.x-W*0.5), offy=(pmouse.y-H*0.40);
+
+  // deep space base gradient
+  const bg=ctx.createRadialGradient(STAR.x,STAR.y,0,STAR.x,STAR.y,Math.max(W,H));
+  bg.addColorStop(0,'rgba(30,12,58,0.55)');
+  bg.addColorStop(0.4,'rgba(14,6,32,0.4)');
+  bg.addColorStop(1,'rgba(0,0,0,1)');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // nebula
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(const n of nebula){
+    const px=n.x - offx*0.05, py=n.y - offy*0.05;
+    const breathe=0.85+0.15*Math.sin(t*0.3+n.x*0.01);
+    const g=ctx.createRadialGradient(px,py,0,px,py,n.r*breathe);
+    g.addColorStop(0,`rgba(${n.col[0]},${n.col[1]},${n.col[2]},${n.a})`);
+    g.addColorStop(0.5,`rgba(${n.col[0]},${n.col[1]},${n.col[2]},${n.a*0.4})`);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.beginPath(); sArc(px,py,n.r*breathe); ctx.fill();
+  }
+  ctx.restore();
+
+  // star layers (parallax + cursor glow)
+  for(const layer of layers){
+    const lx=offx*layer.depth*0.12, ly=offy*layer.depth*0.12;
+    for(const s of layer.stars){
+      const tw=0.55+0.45*Math.sin(t*s.tw+s.ph);
+      let a=s.a*tw;
+      // cursor proximity brightening
+      const sx=s.x-lx, sy=s.y-ly;
+      if(mouse.active){
+        const d=dist(sx,sy,pmouse.x,pmouse.y);
+        const near=Math.max(0,1-d/(W*0.22));
+        a=Math.min(1,a+near*0.5);
+      }
+      ctx.fillStyle=colStr(s.hue,a);
+      ctx.beginPath(); sArc(sx,sy,s.r); ctx.fill();
+    }
+  }
+
+  // dust drifting
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(const d of dust){
+    d.x+=d.vx; d.y+=d.vy;
+    if(d.y<-5){d.y=H+5;d.x=rand(0,W);} if(d.x<-5)d.x=W+5; if(d.x>W+5)d.x=-5;
+    const tw=0.5+0.5*Math.sin(t*1.0+d.ph);
+    const dx=d.x-offx*d.depth*0.1, dy=d.y-offy*d.depth*0.1;
+    ctx.fillStyle=`rgba(205,170,255,${d.a*tw})`;
+    ctx.beginPath(); sArc(dx,dy,d.r); ctx.fill();
+  }
+  ctx.restore();
+
+  // prominent stars w/ cross flare
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(const b of bigStars){
+    const tw=0.6+0.4*Math.sin(t*b.tw+b.ph);
+    const bx=b.x-offx*0.5*0.12, by=b.y-offy*0.5*0.12;
+    // glow
+    const gg=ctx.createRadialGradient(bx,by,0,bx,by,b.r*6);
+    gg.addColorStop(0,colStr(b.hue,0.9*tw)); gg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=gg; ctx.beginPath(); sArc(bx,by,b.r*6); ctx.fill();
+    // cross flare
+    ctx.strokeStyle=colStr(b.hue,0.5*tw); ctx.lineWidth=1;
+    const fl=b.r*7*tw;
+    ctx.beginPath();
+    ctx.moveTo(bx-fl,by); ctx.lineTo(bx+fl,by);
+    ctx.moveTo(bx,by-fl); ctx.lineTo(bx,by+fl);
+    ctx.stroke();
+    // core
+    ctx.fillStyle=colStr('w',tw);
+    ctx.beginPath(); sArc(bx,by,b.r*0.8); ctx.fill();
+  }
+  ctx.restore();
+
+  // shooting stars
+  maybeShooter(t);
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(let i=shooters.length-1;i>=0;i--){
+    const sh=shooters[i]; sh.life+=1;
+    sh.x+=Math.cos(sh.ang)*sh.speed; sh.y+=Math.sin(sh.ang)*sh.speed;
+    const tailx=sh.x-Math.cos(sh.ang)*sh.len, taily=sh.y-Math.sin(sh.ang)*sh.len;
+    const grad=ctx.createLinearGradient(sh.x,sh.y,tailx,taily);
+    grad.addColorStop(0,'rgba(255,250,255,0.9)');
+    grad.addColorStop(0.4,'rgba(200,160,255,0.4)');
+    grad.addColorStop(1,'rgba(180,120,255,0)');
+    ctx.strokeStyle=grad; ctx.lineWidth=1.6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(sh.x,sh.y); ctx.lineTo(tailx,taily); ctx.stroke();
+    if(sh.x<-50||sh.x>W+50||sh.y>H+50||sh.life>200) shooters.splice(i,1);
+  }
+  ctx.restore();
+
+  // expanding shockwave ring
+  if(shockwave){
+    const age=t-shockwave.t0;
+    const dur=1.6;
+    if(age>dur){ shockwave=null; }
+    else {
+      const p=age/dur;
+      const rad=p*Math.max(W,H)*0.95;
+      const a=(1-p)*0.5;
+      ctx.save(); ctx.globalCompositeOperation='lighter';
+      ctx.strokeStyle=`rgba(210,170,255,${a})`;
+      ctx.lineWidth=2.5*(1-p)+0.5;
+      ctx.shadowColor='rgba(180,120,255,0.8)'; ctx.shadowBlur=20*(1-p);
+      ctx.beginPath(); sArc(STAR.x,STAR.y,rad); ctx.stroke();
+      // faint second ring
+      ctx.strokeStyle=`rgba(160,200,255,${a*0.5})`;
+      ctx.beginPath(); sArc(STAR.x,STAR.y,rad*0.82); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // central LUCIDA star
+  drawStar(t);
+
+  requestAnimationFrame(draw);
+}
+
+function drawStar(t){
+  const ignite=Math.min(1,t/2.2);
+  let pulse=0.95+0.05*Math.sin(t*0.9);
+
+  // burst flash boost
+  let boost=0;
+  if(burst.t>=0){
+    const bt=(t-burst.t);
+    if(bt>2.2){ burst.t=-1; }
+    else { boost=Math.exp(-bt*1.8)*(1-Math.min(1,bt/2.2)) ; } // sharp rise, decay
+  }
+  const R=Math.max(1, H*0.20*ignite*pulse*(1+boost*1.4));
+  const cx=STAR.x, cy=STAR.y;
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+
+  // halo
+  let halo=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+  halo.addColorStop(0,`rgba(255,251,244,${0.8*ignite})`);
+  halo.addColorStop(0.08,`rgba(248,214,255,${0.55*ignite})`);
+  halo.addColorStop(0.28,`rgba(185,125,255,${0.32*ignite})`);
+  halo.addColorStop(0.6,`rgba(120,70,230,${0.14*ignite})`);
+  halo.addColorStop(1,'rgba(70,30,170,0)');
+  ctx.fillStyle=halo; ctx.beginPath(); sArc(cx,cy,R); ctx.fill();
+
+  // long cross flare (the brightest star of the constellation)
+  const fl=R*2.1*(1+boost*0.8);
+  for(const ang of [0, Math.PI/2]){
+    const grad=ctx.createLinearGradient(cx-Math.cos(ang)*fl,cy-Math.sin(ang)*fl,cx+Math.cos(ang)*fl,cy+Math.sin(ang)*fl);
+    grad.addColorStop(0,'rgba(170,110,255,0)');
+    grad.addColorStop(0.5,`rgba(255,240,255,${Math.min(1,(0.55+boost*0.45)*ignite)})`);
+    grad.addColorStop(1,'rgba(170,110,255,0)');
+    ctx.strokeStyle=grad; ctx.lineWidth=(ang===0?2.4:2.0)*(1+boost);
+    ctx.beginPath(); ctx.moveTo(cx-Math.cos(ang)*fl,cy-Math.sin(ang)*fl); ctx.lineTo(cx+Math.cos(ang)*fl,cy+Math.sin(ang)*fl); ctx.stroke();
+  }
+  // diagonal soft rays
+  for(const ang of [Math.PI/4, -Math.PI/4]){
+    const len=R*1.4;
+    const grad=ctx.createLinearGradient(cx-Math.cos(ang)*len,cy-Math.sin(ang)*len,cx+Math.cos(ang)*len,cy+Math.sin(ang)*len);
+    grad.addColorStop(0,'rgba(170,110,255,0)');
+    grad.addColorStop(0.5,`rgba(230,200,255,${0.25*ignite})`);
+    grad.addColorStop(1,'rgba(170,110,255,0)');
+    ctx.strokeStyle=grad; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(cx-Math.cos(ang)*len,cy-Math.sin(ang)*len); ctx.lineTo(cx+Math.cos(ang)*len,cy+Math.sin(ang)*len); ctx.stroke();
+  }
+
+  // bright core
+  let core=ctx.createRadialGradient(cx,cy,0,cx,cy,R*0.11);
+  core.addColorStop(0,`rgba(255,255,255,${0.97*ignite})`);
+  core.addColorStop(0.6,`rgba(255,246,236,${0.7*ignite})`);
+  core.addColorStop(1,'rgba(255,222,192,0)');
+  ctx.fillStyle=core; ctx.beginPath(); sArc(cx,cy,R*0.11); ctx.fill();
+  ctx.restore();
+}
+
+function setMouse(e){const rect=canvas.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+  const cy=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+  mouse.x=cx; mouse.y=cy; mouse.active=true;}
+frame.addEventListener('mousemove',setMouse);
+frame.addEventListener('touchmove',(e)=>{setMouse(e);e.preventDefault();},{passive:false});
+frame.addEventListener('mouseleave',()=>{mouse.active=false;});
+frame.addEventListener('touchend',()=>{mouse.active=false;});
+
+// ---- burst: ignite the lucida ----
+function triggerBurst(){
+  const t=(performance.now()-t0)/1000;
+  burst.t=t;
+  shockwave={t0:t};
+}
+frame.addEventListener('click',triggerBurst);
+frame.addEventListener('touchstart',(e)=>{triggerBurst();},{passive:true});
+window.addEventListener('keydown',(e)=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); triggerBurst(); } });
+window.addEventListener('resize',resize);
+resize(); requestAnimationFrame(draw);
+</script>
+</body>
+</html>

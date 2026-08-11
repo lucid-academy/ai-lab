@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glosariusz Olsztyna — wędrówki po gminie Purda</title>
+<meta name="description" content="Interaktywna mapa gminy Purda: dziesięć miejscowości z quizem historycznym i bestiariusz warmińskich stworów. Gra wymyślona przez uczennice ze Szkoły Podstawowej w Klebarku Wielkim.">
+<meta name="theme-color" content="#0a0a0c">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pl_PL">
+<meta property="og:site_name" content="Glosariusz Olsztyna">
+<meta property="og:title" content="Glosariusz Olsztyna — wędrówki po gminie Purda">
+<meta property="og:description" content="Interaktywna mapa gminy Purda: dziesięć miejscowości z quizem historycznym i bestiariusz warmińskich stworów.">
+<meta property="og:image" content="media/intro-poster.jpg">
+<meta property="og:image:alt" content="Mroczny las nad Warmią — kadr z filmowego intro gry.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Glosariusz Olsztyna — wędrówki po gminie Purda">
+<meta name="twitter:description" content="Interaktywna mapa gminy Purda: quiz historyczny i bestiariusz warmińskich stworów.">
+<meta name="twitter:image" content="media/intro-poster.jpg">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0c'/%3E%3Cpath d='M16 5 L16 27 M16 11 L10 6 M16 11 L22 6 M16 19 L10 14 M16 19 L22 14' stroke='%23c6a664' stroke-width='2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Outfit:wght@300;400;500;600;700&display=swap">
+
+<style>
+/* ============================================================
+   JEDEN SYSTEM STYLÓW
+   Baza wizualna: strona B (ciemna, „glass", złoto na czerni).
+   Akcenty przeniesione ze strony A: cegła, mosiądz, mech.
+   Mobile-first: style bazowe = telefon, przełamania w górę (min-width).
+   ============================================================ */
+:root{
+  /* --- tła i płaszczyzny --- */
+  --bg:#0a0a0c;
+  --bg-2:#17130f;
+  --panel:rgba(22,19,15,.88);
+  --panel-solid:#16130f;
+  --line:rgba(246,223,176,.18);
+  --line-soft:rgba(246,223,176,.08);
+
+  /* --- tekst --- */
+  --ink:#f0e6d2;
+  --ink-mut:#b8ad98;
+
+  /* --- akcenty --- */
+  --gold:#c6a664;
+  --gold-hi:#e2c98d;
+  --cegla:#c25a3f;
+  --mosiadz:#b58a3e;
+  --mech:#7d8f5c;
+  --czerwien:#a8352f;
+  --trasa:#d6b46a;
+
+  /* --- typografia --- */
+  --font-nag:'Cinzel',Georgia,'Times New Roman',serif;
+  --font-txt:'Outfit',system-ui,-apple-system,'Segoe UI',sans-serif;
+
+  /* --- skala odstępów --- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:24px; --sp-6:32px; --sp-7:48px;
+
+  /* --- promienie i cienie --- */
+  --r-s:8px; --r-m:14px; --r-l:22px; --r-pill:999px;
+  --cien:0 18px 50px rgba(0,0,0,.55);
+  --cien-s:0 4px 14px rgba(0,0,0,.4);
+
+  /* --- ruch --- */
+  --t:.28s cubic-bezier(.25,.8,.25,1);
+
+  /* --- wymiary --- */
+  --hud-h:56px;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+body{
+  font-family:var(--font-txt);
+  font-weight:300;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  min-height:100vh;
+  min-height:100svh;
+  overflow-x:hidden;
+}
+
+h1,h2,h3{font-family:var(--font-nag);font-weight:600;line-height:1.15}
+
+img,video{display:block;max-width:100%}
+
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+
+.is-hidden{display:none !important}
+
+/* czytelne dla czytników ekranu, niewidoczne na ekranie */
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+/* jeden, spójny stan focus w całym serwisie */
+:focus-visible{
+  outline:3px solid var(--gold-hi);
+  outline-offset:3px;
+  border-radius:var(--r-s);
+}
+
+/* ============================================================
+   PRZYCISKI
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  padding:12px 22px;
+  border-radius:var(--r-pill);
+  border:1px solid var(--line);
+  background:var(--line-soft);
+  color:var(--ink);
+  font-weight:500;font-size:.95rem;
+  transition:background var(--t),border-color var(--t),transform var(--t);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  text-align:center;
+}
+.btn:hover{background:rgba(246,223,176,.16);border-color:var(--gold)}
+.btn:active{transform:translateY(1px)}
+
+.btn--primary{
+  background:var(--cegla);
+  border-color:transparent;
+  color:#fff;
+  font-weight:600;
+}
+.btn--primary:hover{background:#d1684c;border-color:transparent}
+
+.btn--icon{
+  width:40px;height:40px;padding:0;
+  border-radius:50%;
+  font-size:1rem;
+  flex:0 0 auto;
+}
+
+/* ============================================================
+   INTRO
+   ============================================================ */
+.intro{
+  position:fixed;inset:0;z-index:100;
+  background:var(--bg);
+  display:grid;place-items:center;
+  transition:opacity 1.2s ease;
+}
+.intro.zanika{opacity:0;pointer-events:none}
+
+/* Rozmyte, przyciemnione tło z kadru intro — wypełnia okno o dowolnych
+   proporcjach, żeby film pokazany w całości nie pływał na czarnym polu. */
+.intro__tlo{
+  position:absolute;inset:0;
+  background:url('media/intro-poster.jpg') center/cover no-repeat;
+  filter:blur(30px) brightness(.4) saturate(.75);
+  transform:scale(1.15);
+}
+
+.intro__video{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  /* Telefon w pionie: kadr wypełnia ekran. Film jest poziomy, więc pokazany
+     w całości skurczyłby się do wąskiego paska pośrodku czerni. */
+  object-fit:cover;
+  opacity:.9;
+}
+/* Monitor i tablet w poziomie: całe intro w kadrze — nic nie ucinamy. */
+@media (min-aspect-ratio:1/1){
+  .intro__video{object-fit:contain}
+}
+
+.intro__overlay{
+  position:relative;z-index:2;
+  text-align:center;
+  padding:var(--sp-5);
+  max-width:min(90vw,640px);
+  display:grid;
+  gap:var(--sp-4);
+  justify-items:center;
+  transition:opacity 1s ease;
+}
+/* miękka poświata pod napisami — bez niej tytuł ginie na jasnych klatkach */
+.intro__overlay::before{
+  content:'';
+  position:absolute;inset:-14% -18%;
+  z-index:-1;
+  background:radial-gradient(ellipse at center,
+             rgba(4,4,6,.88) 0%,rgba(4,4,6,.55) 52%,rgba(4,4,6,0) 76%);
+  transition:opacity 1s ease;
+}
+/* po starcie filmu napisy schodzą z drogi */
+.intro__overlay.film::before,
+.intro__overlay.film .intro__kicker{opacity:0}
+
+.intro__kicker{
+  text-transform:uppercase;letter-spacing:.3em;
+  font-size:.68rem;font-weight:600;
+  color:var(--gold);
+  transition:opacity 1s ease;
+}
+
+.intro__title{
+  font-size:clamp(2rem,9vw,4.2rem);
+  font-weight:800;
+  letter-spacing:.02em;
+  text-shadow:0 2px 30px rgba(0,0,0,.85);
+  opacity:0;transform:translateY(14px);
+  transition:opacity 1.2s ease,transform 1.2s ease;
+}
+.intro__sub{
+  font-size:clamp(.95rem,3.4vw,1.15rem);
+  color:var(--ink-mut);
+  max-width:34ch;
+  opacity:0;transform:translateY(14px);
+  transition:opacity 1.2s ease,transform 1.2s ease;
+}
+.intro__title.widoczny,.intro__sub.widoczny{opacity:1;transform:none}
+
+.intro__actions{
+  display:flex;flex-wrap:wrap;gap:var(--sp-3);
+  justify-content:center;
+  margin-top:var(--sp-3);
+}
+
+/* „Pomiń intro" i „Wycisz muzykę" — nisko przy krawędzi i przygaszone,
+   żeby nie siedziały na środku kadru w trakcie filmu. */
+.intro__sterowanie{
+  position:absolute;z-index:3;
+  /* left:0;right:0 zamiast left:50%+translate — inaczej pasek dostaje szerokość
+     tylko do prawej krawędzi i oba przyciski łamią się na telefonie do dwóch rzędów. */
+  left:0;right:0;
+  bottom:calc(var(--sp-4) + env(safe-area-inset-bottom,0px));
+  display:flex;flex-wrap:wrap;gap:var(--sp-2);
+  justify-content:center;
+  padding:0 var(--sp-3);
+}
+.btn--cichy{
+  padding:8px 16px;
+  font-size:.76rem;font-weight:500;
+  color:var(--ink-mut);
+  background:rgba(8,8,10,.5);
+  border-color:rgba(246,223,176,.12);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  opacity:.6;
+  transition:opacity var(--t),background var(--t),color var(--t);
+}
+.btn--cichy:hover,.btn--cichy:focus-visible{
+  opacity:1;color:var(--ink);
+  background:rgba(8,8,10,.82);
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud{
+  position:sticky;top:0;z-index:40;
+  min-height:var(--hud-h);
+  display:flex;align-items:center;gap:var(--sp-3);
+  flex-wrap:wrap;
+  padding:var(--sp-2) var(--sp-3);
+  background:rgba(10,10,12,.92);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-soft);
+}
+
+.hud__brand{
+  font-family:var(--font-nag);font-weight:600;
+  font-size:.98rem;letter-spacing:.02em;
+  margin-right:auto;
+}
+.hud__brand span{color:var(--gold)}
+
+.hud__xp{
+  display:flex;align-items:center;gap:var(--sp-2);
+  font-size:.85rem;font-weight:500;
+  white-space:nowrap;
+}
+.hud__xp b{color:var(--gold);font-size:1rem}
+
+.xp-tor{
+  width:76px;height:7px;
+  background:rgba(246,223,176,.14);
+  border-radius:var(--r-pill);
+  overflow:hidden;
+}
+.xp-wypelnienie{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--mosiadz),var(--gold-hi));
+  border-radius:var(--r-pill);
+  transition:width .6s cubic-bezier(.2,.8,.3,1);
+}
+
+.combo{
+  font-size:.72rem;font-weight:700;letter-spacing:.08em;
+  color:var(--bg);background:var(--gold-hi);
+  padding:3px 9px;border-radius:var(--r-pill);
+  animation:combo-puls .5s ease;
+}
+@keyframes combo-puls{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+.hud__narzedzia{display:flex;align-items:center;gap:var(--sp-2)}
+
+/* przełącznik trybu */
+.tryb{
+  display:flex;
+  border:1px solid var(--line);
+  border-radius:var(--r-pill);
+  overflow:hidden;
+}
+.tryb button{
+  padding:7px 14px;
+  font-size:.78rem;font-weight:500;
+  color:var(--ink-mut);
+  transition:background var(--t),color var(--t);
+  white-space:nowrap;
+}
+.tryb button[aria-pressed="true"]{
+  background:var(--gold);
+  color:#1a1408;
+  font-weight:600;
+}
+
+@media (min-width:640px){
+  .hud{padding:var(--sp-2) var(--sp-5);gap:var(--sp-4)}
+  .hud__brand{font-size:1.1rem}
+  .xp-tor{width:120px}
+}
+
+/* ============================================================
+   SCENA / MAPA
+   ============================================================ */
+.scena{
+  padding:var(--sp-4) var(--sp-3) var(--sp-7);
+  display:grid;
+  gap:var(--sp-5);
+}
+
+.mapa-obudowa{display:grid;gap:var(--sp-3);justify-items:center}
+
+.mapa-legenda{
+  display:flex;flex-wrap:wrap;gap:var(--sp-4);
+  justify-content:center;
+  font-size:.78rem;color:var(--ink-mut);
+}
+.mapa-legenda span{display:inline-flex;align-items:center;gap:6px}
+.kropka{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.kropka--miejsce{background:var(--gold)}
+.kropka--zaliczone{background:var(--mech)}
+.kreska{width:20px;height:2px;background:var(--trasa);flex:0 0 auto}
+
+/* Mapa jest kwadratem (obraz 1024×1024), a piny są pozycjonowane
+   procentowo — dlatego scenę trzymamy dokładnie w proporcji 1:1.
+   Ograniczamy szerokość, więc wysokość ogranicza się sama i nic
+   nie ucieka poza ekran. */
+.mapa{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:var(--r-m);
+  overflow:hidden;
+  box-shadow:var(--cien),0 0 0 1px var(--line-soft);
+}
+.mapa__obraz{width:100%;height:100%;object-fit:cover}
+
+.mapa__trasa{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  pointer-events:none;
+}
+.mapa__trasa polyline{
+  fill:none;
+  stroke:var(--trasa);
+  stroke-width:.55;
+  stroke-dasharray:2 2.4;
+  stroke-linecap:round;
+  opacity:.65;
+}
+
+.mapa__piny{position:absolute;inset:0}
+
+@media (min-width:820px){
+  .scena{padding:var(--sp-5) var(--sp-5) var(--sp-7)}
+  /* przy 1:1 limit szerokości = limit wysokości, mapa mieści się w oknie */
+  .mapa{max-width:min(1080px,calc(100vh - 210px))}
+}
+
+/* Na monitorze panel postaci idzie OBOK mapy, nie pod nią. Ustawiony pod spodem
+   spychał dolne piny poniżej krawędzi okna — trzeba było przewijać, żeby je zobaczyć.
+   Mapa dostaje wysokość okna minus HUD, legenda i marginesy, więc mieści się cała. */
+/* Orientacja pozioma (monitor, laptop, tablet w poziomie): cała gra ma się
+   zmieścić w oknie, bez przewijania i bez pinów chowających się pod krawędzią.
+   Wysokości NIE zgaduję wzorem typu `100vh - 150px` — przy innym powiększeniu
+   strony, innej wysokości paska przeglądarki albo skalowaniu systemu taki wzór
+   się rozjeżdża. Rozmiar mapy liczy `dopasujMape()` z faktycznie wolnego miejsca. */
+@media (min-width:760px) and (min-aspect-ratio:1/1){
+  #gra{
+    height:100vh;height:100svh;
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto;
+  }
+  .scena{
+    min-height:0;
+    grid-template-columns:auto 260px;   /* stała szerokość panelu = stabilny pomiar */
+    justify-content:center;
+    align-items:stretch;
+    gap:var(--sp-4);
+    padding:var(--sp-2) var(--sp-4);
+  }
+  /* align-content:start jest tu kluczowe. Domyślne `stretch` rozdmuchiwało wiersz
+     legendy o całe wolne miejsce (przy 1920 z 20 px na 160 px), więc pomiar
+     wysokości dostępnej dla mapy wychodził dużo za mały. */
+  .mapa-obudowa{min-height:0;align-content:start}
+  .mapa{max-width:100%}
+  /* Legenda w jednej linii. Zawijana rosła do trzech wierszy przy węższej mapie,
+     przez co mapy zostawało jeszcze mniej — i tak w kółko. Jedna linia zrywa
+     to sprzężenie i sprawia, że pomiar wysokości jest powtarzalny. */
+  .mapa-legenda{flex-wrap:nowrap;white-space:nowrap}
+  /* zrównanie górnej krawędzi panelu z górną krawędzią mapy (pod legendą) */
+  .postac{align-self:start;margin-top:31px}
+}
+
+/* ============================================================
+   PINY NA MAPIE
+   ============================================================ */
+.pin{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  display:grid;justify-items:center;gap:4px;
+  padding:0;
+  z-index:5;
+}
+.pin:hover,.pin:focus-visible{z-index:15}
+
+.pin__znak{
+  position:relative;
+  width:26px;height:26px;
+  border-radius:50%;
+  background:var(--cegla);
+  border:2px solid var(--ink);
+  box-shadow:0 3px 10px rgba(0,0,0,.6);
+  display:grid;place-items:center;
+  font-size:.66rem;font-weight:700;color:#fff;
+  transition:transform var(--t),background var(--t);
+}
+.pin:hover .pin__znak,.pin:focus-visible .pin__znak{transform:scale(1.2)}
+
+.pin__puls{
+  position:absolute;inset:-4px;
+  border-radius:50%;
+  border:2px solid var(--gold);
+  opacity:0;
+  animation:pin-puls 2.4s infinite;
+}
+@keyframes pin-puls{
+  0%{transform:scale(.8);opacity:.8}
+  70%{transform:scale(1.7);opacity:0}
+  100%{opacity:0}
+}
+
+.pin.zaliczony .pin__znak{background:var(--mech)}
+.pin.zaliczony .pin__puls{display:none}
+
+.pin__etykieta{
+  font-size:.62rem;font-weight:600;
+  letter-spacing:.02em;
+  color:var(--ink);
+  background:rgba(10,10,12,.88);
+  padding:2px 7px;
+  border-radius:var(--r-s);
+  white-space:nowrap;
+  border:1px solid var(--line-soft);
+  opacity:0;
+  transition:opacity var(--t);
+  pointer-events:none;
+}
+.pin:hover .pin__etykieta,
+.pin:focus-visible .pin__etykieta{opacity:1}
+
+@media (min-width:820px){
+  .pin__znak{width:32px;height:32px;font-size:.78rem}
+  .pin__etykieta{font-size:.72rem}
+}
+
+/* na ekranach dotykowych etykiety widoczne od razu — nie ma hovera */
+@media (hover:none){
+  .pin__etykieta{opacity:1}
+}
+
+/* ============================================================
+   PANEL POSTACI (przeniesiony ze strony A)
+   ============================================================ */
+.postac{
+  display:flex;align-items:center;gap:var(--sp-3);
+  padding:var(--sp-3);
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--r-m);
+  max-width:520px;
+  margin-inline:auto;
+  width:100%;
+}
+
+.postac__avatar{
+  width:56px;height:56px;flex:0 0 auto;
+  border-radius:50%;
+  overflow:hidden;
+  border:2px solid var(--gold);
+  padding:0;
+  transition:transform var(--t);
+}
+.postac__avatar:hover{transform:scale(1.06)}
+.postac__avatar img{width:100%;height:100%;object-fit:cover}
+
+.postac__dane{min-width:0;flex:1}
+.postac__imie{font-family:var(--font-nag);font-weight:600;font-size:1rem}
+.postac__tytul{font-size:.76rem;color:var(--gold);letter-spacing:.04em;margin-bottom:var(--sp-2)}
+
+.staty{display:grid;gap:3px}
+.stat{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:var(--sp-2);font-size:.68rem}
+.stat__tor{height:5px;background:rgba(246,223,176,.14);border-radius:var(--r-pill);overflow:hidden}
+.stat__tor i{display:block;height:100%;background:linear-gradient(90deg,var(--mosiadz),var(--gold-hi))}
+
+.postac__ekwipunek{
+  font-size:.68rem;color:var(--ink-mut);
+  margin-top:var(--sp-2);
+  line-height:1.4;
+}
+
+@media (min-width:640px){
+  .postac{padding:var(--sp-4);gap:var(--sp-4)}
+  .postac__avatar{width:72px;height:72px}
+}
+
+/* ============================================================
+   MODAL — jeden komponent dla quizu, lore, postaci i finiszu
+   ============================================================ */
+.modal{
+  position:fixed;inset:0;z-index:200;
+  display:grid;place-items:center;
+  padding:var(--sp-3);
+}
+.modal__tlo{
+  position:absolute;inset:0;
+  background:rgba(4,4,6,.82);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.modal__panel{
+  position:relative;
+  width:100%;max-width:560px;
+  max-height:100%;          /* obszar siatki `.modal` = okno minus jej padding */
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  background:var(--panel-solid);
+  border:1px solid var(--line);
+  border-radius:var(--r-l);
+  box-shadow:var(--cien);
+  animation:modal-wjazd .32s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes modal-wjazd{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+
+/* Panel dostaje fokus programowo przy otwarciu (żeby czytnik ekranu wszedł
+   w okno od góry). To nie jest kontrolka do klikania, więc nie rysujemy
+   przy nim obrysu — samo okno jest wystarczająco wyraźne wizualnie.
+   Obrysy na przyciskach wewnątrz działają normalnie. */
+.modal__panel:focus,
+.modal__panel:focus-visible{outline:none}
+
+.modal__zamknij{
+  position:absolute;top:var(--sp-3);right:var(--sp-3);z-index:3;
+  width:36px;height:36px;
+  border-radius:50%;
+  background:rgba(10,10,12,.7);
+  border:1px solid var(--line);
+  font-size:1.2rem;line-height:1;
+  display:grid;place-items:center;
+  transition:background var(--t);
+}
+.modal__zamknij:hover{background:var(--czerwien)}
+
+/* --- media w modalu --- */
+.media{position:relative;background:#000;border-radius:var(--r-l) var(--r-l) 0 0;overflow:hidden}
+.media img,.media video{width:100%;height:auto;max-height:52vh;object-fit:cover}
+.media::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to bottom,transparent 55%,rgba(22,19,15,.95) 100%);
+}
+.media__podpis{
+  position:absolute;left:var(--sp-3);right:var(--sp-3);bottom:var(--sp-2);z-index:2;
+  font-size:.68rem;color:var(--ink-mut);
+  text-shadow:0 1px 6px rgba(0,0,0,.9);
+}
+.media__dzwiek{
+  position:absolute;top:var(--sp-3);left:var(--sp-3);z-index:3;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(10,10,12,.7);
+  border:1px solid var(--line);
+  display:grid;place-items:center;font-size:.9rem;
+}
+.media__dzwiek:hover{background:rgba(246,223,176,.2)}
+
+/* --- treść modalu --- */
+.modal__tresc{padding:var(--sp-4)}
+
+/* ------------------------------------------------------------
+   KARTA NA EKRANIE POZIOMYM — dwie kolumny
+   W jednej kolumnie pionowa grafika (utopiec 720×1080, Borzysław 720×962)
+   wpadała w niski, szeroki kadr i `object-fit:cover` ucinał jej głowę,
+   a reszta karty i tak nie mieściła się w oknie. Tutaj grafika dostaje
+   wysoką kolumnę i `contain`, więc nie jest przycinana, a tekst przewija
+   się obok — bez chowania tytułu i przycisków pod krawędź.
+   ------------------------------------------------------------ */
+@media (min-width:900px) and (min-aspect-ratio:1/1){
+  .modal__panel{
+    max-width:min(1080px,94vw);
+    /* 100% obszaru siatki `.modal`, czyli okno minus jej padding. Ułamek `svh`
+       nie uwzględniał tego paddingu i panel wystawał poza ekran o kilka pikseli. */
+    max-height:100%;
+    min-height:min(62vh,520px);
+    min-height:min(62svh,520px);
+    display:grid;
+    grid-template-columns:minmax(0,38%) minmax(0,1fr);
+    /* KLUCZOWE: bez tego wiersz siatki rośnie do wysokości treści (np. 784 px),
+       a `max-height` panelu zwyczajnie go PRZYCINA — kolumna tekstu nigdy nie
+       staje się obszarem przewijania i koniec karty przepada. To była właściwa
+       przyczyna „uciętych" kart bestii: miejsca mieściły się poniżej progu. */
+    grid-template-rows:minmax(0,1fr);
+    overflow:hidden;            /* przewija się kolumna tekstu, nie całe okno */
+  }
+  /* finisz i inne karty bez grafiki wracają do jednej kolumny */
+  .modal__panel.bez-media{grid-template-columns:minmax(0,1fr);min-height:0}
+  .modal__panel.bez-media #modal-media{display:none}
+
+  #modal-media{min-height:0;height:100%}
+  /* Tło karty zamiast czerni: przy `contain` poziome zdjęcia zostawiają wolne
+     miejsce nad i pod kadrem — na czarnym rzucało się to w oczy jak błąd,
+     w kolorze karty wygląda jak ilustracja wpuszczona w tło. */
+  .media{height:100%;background:var(--panel-solid);border-radius:var(--r-l) 0 0 var(--r-l)}
+  .media img,.media video{
+    width:100%;height:100%;
+    max-height:none;
+    object-fit:contain;         /* nic nie ucinamy — całe malowidło widoczne */
+  }
+  /* przyciemnienie u dołu jest po to, żeby podpis był czytelny na kadrze —
+     przy `contain` kadr nie sięga krawędzi, więc gradient tylko brudzi */
+  .media::after{display:none}
+  .media__podpis{
+    background:rgba(4,4,6,.72);
+    padding:3px 8px;border-radius:var(--r-s);
+    left:var(--sp-2);right:var(--sp-2);
+  }
+
+  .modal__tresc{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-4) var(--sp-5) 0}
+
+  /* Stopka przyklejona do dołu kolumny tekstu. Przy najdłuższych wpisach
+     (południca, leszy) przyciski akcji lądowały pod krawędzią okna i wyglądały
+     na ucięte. Teraz przewija się sama treść, a akcje są widoczne zawsze —
+     niezależnie od wysokości ekranu i długości opisu. */
+  .modal__stopka{
+    position:sticky;bottom:0;z-index:2;
+    margin-top:var(--sp-3);
+    padding:var(--sp-3) 0 var(--sp-4);
+    background:var(--panel-solid);
+    box-shadow:0 -14px 18px -10px var(--panel-solid);
+  }
+  /* przypięta stopka zatrzymuje się kilkanaście pikseli nad krawędzią kolumny;
+     ta łatka domalowuje tło niżej, żeby treść nie prześwitywała pod przyciskami */
+  .modal__stopka::after{
+    content:"";position:absolute;
+    left:0;right:0;top:100%;height:var(--sp-6);
+    background:var(--panel-solid);
+  }
+
+  /* trzy bloki cech obok siebie — to skraca kartę bestii o kilkaset pikseli */
+  .bloki-cech{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-3);align-items:start}
+  .bloki-cech .blok{margin-bottom:0;height:100%}
+  /* rysunek bestii przy tytule zabiera wysokość, której karta potrzebuje na treść */
+  .szkic{width:48px;height:52px}
+
+  /* Zagęszczenie odstępów. Najdłuższy wpis bestiariusza (południca — z blokiem
+     o wierzeniach) przy pierwotnych marginesach wystawał przyciskami poza okno
+     na ekranie 768 px wysokości. Same odstępy, treść i wielkość pisma bez zmian. */
+  .naglowek-lore{margin-bottom:var(--sp-2)}
+  .modal__tytul{margin-bottom:var(--sp-2)}
+  .cytat{padding-top:0;padding-bottom:0;margin-bottom:var(--sp-2)}
+  .blok{padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-2)}
+  .modal__stopka{margin-top:var(--sp-3)}
+}
+
+.modal__nadtytul{
+  display:flex;align-items:center;gap:var(--sp-2);
+  text-transform:uppercase;letter-spacing:.18em;
+  font-size:.64rem;font-weight:600;color:var(--gold);
+  margin-bottom:var(--sp-1);
+}
+.modal__tytul{font-size:clamp(1.25rem,5vw,1.7rem);margin-bottom:var(--sp-3)}
+
+.cytat{
+  border-left:2px solid var(--gold);
+  padding:var(--sp-2) 0 var(--sp-2) var(--sp-3);
+  margin-bottom:var(--sp-3);
+  font-family:var(--font-nag);
+  font-style:italic;
+  font-size:.92rem;
+  color:var(--gold-hi);
+}
+
+.tresc-tekst{font-size:.94rem;color:var(--ink);margin-bottom:var(--sp-3)}
+.tresc-tekst + .tresc-tekst{margin-top:calc(var(--sp-3) * -1 + var(--sp-3))}
+
+.blok{
+  background:var(--line-soft);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-m);
+  padding:var(--sp-3);
+  margin-bottom:var(--sp-3);
+  font-size:.86rem;
+}
+.blok strong{color:var(--gold);font-weight:600}
+.blok--ostrzezenie{border-color:rgba(168,53,47,.4);background:rgba(168,53,47,.1)}
+
+/* Statystyki + wrażliwości + odporności. W pionie jeden pod drugim,
+   w poziomie obok siebie — patrz reguła w sekcji karty dwukolumnowej. */
+.bloki-cech{display:grid;gap:0}
+.bloki-cech .blok{margin-bottom:var(--sp-3)}
+
+.szkic{
+  width:64px;height:70px;
+  flex:0 0 auto;
+  color:var(--gold);
+  opacity:.85;
+}
+.szkic svg{width:100%;height:100%}
+
+.naglowek-lore{display:flex;align-items:flex-start;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.naglowek-lore > div{min-width:0}
+
+/* statystyki bestii */
+.gwiazdki{color:var(--gold);letter-spacing:.12em;font-size:.8rem}
+.gwiazdki .pusta{color:var(--line)}
+
+.lista-cech{display:grid;gap:var(--sp-1);margin-top:var(--sp-2)}
+.lista-cech li{
+  list-style:none;
+  font-size:.82rem;
+  padding-left:var(--sp-4);
+  position:relative;
+}
+.lista-cech li::before{
+  content:"◆";position:absolute;left:0;
+  color:var(--gold);font-size:.6rem;top:.35em;
+}
+
+/* quiz */
+.quiz__pytanie{
+  font-family:var(--font-nag);
+  font-size:1rem;font-weight:600;
+  margin-bottom:var(--sp-3);
+}
+.quiz__opcje{display:grid;gap:var(--sp-2)}
+.quiz__opcje .btn{
+  width:100%;
+  justify-content:flex-start;
+  text-align:left;
+  padding:13px 18px;
+  font-size:.9rem;
+  line-height:1.4;
+}
+.quiz__opcje .btn.dobra{background:rgba(125,143,92,.3);border-color:var(--mech)}
+.quiz__opcje .btn.zla{background:rgba(168,53,47,.25);border-color:var(--czerwien)}
+.quiz__opcje .btn:disabled{cursor:default;opacity:.75}
+
+.reakcja{
+  margin-top:var(--sp-3);
+  padding:var(--sp-3);
+  border-radius:var(--r-m);
+  font-size:.88rem;
+  border:1px solid transparent;
+}
+.reakcja--ok{background:rgba(125,143,92,.18);border-color:var(--mech)}
+.reakcja--zle{background:rgba(168,53,47,.16);border-color:var(--czerwien)}
+
+.modal__stopka{
+  display:flex;flex-wrap:wrap;gap:var(--sp-2);
+  justify-content:flex-end;
+  margin-top:var(--sp-4);
+}
+
+@media (min-width:640px){
+  .modal__tresc{padding:var(--sp-5)}
+}
+
+/* ============================================================
+   FINISZ
+   ============================================================ */
+.finisz{text-align:center;padding:var(--sp-6) var(--sp-4)}
+.finisz h2{font-size:1.4rem;margin:var(--sp-3) 0}
+.finisz p{color:var(--ink-mut);font-size:.94rem;margin-bottom:var(--sp-5)}
+/* Zapis z nazwą elementu, bo `.finisz p` wyżej ma tę samą wagę i stoi dalej —
+   sama klasa `.finisz__wynik` przegrałaby i wynik zrobiłby się mały i szary. */
+p.finisz__wynik{
+  font-family:var(--font-nag);
+  font-size:3rem;font-weight:800;
+  color:var(--gold);
+  margin-bottom:0;
+}
+.finisz__wynik small{font-size:1.1rem;color:var(--ink-mut);font-weight:400}
+
+/* ============================================================
+   STOPKA
+   ============================================================ */
+.stopka{
+  text-align:center;
+  padding:var(--sp-5) var(--sp-4) var(--sp-6);
+  font-size:.72rem;
+  color:var(--ink-mut);
+  border-top:1px solid var(--line-soft);
+  line-height:1.7;
+}
+.stopka a{color:var(--gold)}
+
+/* W układzie pełnoekranowym stopka w trzech wierszach zabierała 116 px, które
+   należą się mapie. Selektor z #gra, bo reguła bazowa stoi niżej w arkuszu. */
+@media (min-width:760px) and (min-aspect-ratio:1/1){
+  #gra .stopka{
+    display:flex;flex-wrap:wrap;
+    justify-content:center;
+    column-gap:var(--sp-4);
+    padding:var(--sp-2) var(--sp-4);
+    font-size:.68rem;
+    line-height:1.5;
+  }
+}
+
+/* ============================================================
+   OGRANICZENIE RUCHU
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  .pin__puls{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================ INTRO ============================ -->
+<section class="intro" id="intro" aria-label="Ekran powitalny">
+  <!-- Rozmyta kopia kadru wypełnia okno, a sam film leci w całości (object-fit:contain),
+       więc na szerokim monitorze nic nie jest przycięte i nie ma czarnych pasów. -->
+  <div class="intro__tlo" aria-hidden="true"></div>
+  <video class="intro__video" id="intro-video"
+         muted playsinline preload="metadata"
+         poster="media/intro-poster.jpg"
+         aria-describedby="intro-video-opis"></video>
+  <p id="intro-video-opis" class="sr-only">
+    Filmowe intro: nocna wędrówka przez mglisty warmiński las, ujęcia starych traktów,
+    jeziora i zarysów wsi w oddali. Film nie zawiera treści niezbędnych do korzystania z gry
+    i można go pominąć przyciskiem „Pomiń intro”.
+  </p>
+
+  <div class="intro__overlay" id="intro-overlay">
+    <p class="intro__kicker">Gmina Purda · Warmia</p>
+    <h1 class="intro__title" id="intro-title">Glosariusz Olsztyna</h1>
+    <p class="intro__sub" id="intro-sub">Odkryj historię i dawne ścieżki…</p>
+    <div class="intro__actions">
+      <button class="btn btn--primary" id="intro-start" type="button">Rozpocznij podróż</button>
+    </div>
+  </div>
+
+  <!-- Sterowanie drugorzędne: przy dolnej krawędzi, przygaszone — ma być pod ręką,
+       ale nie zasłaniać tego, co dzieje się na filmie. -->
+  <div class="intro__sterowanie is-hidden" id="intro-sterowanie">
+    <button class="btn btn--cichy" id="intro-dzwiek" type="button" aria-pressed="true"
+            aria-label="Wycisz muzykę">
+      <span aria-hidden="true">🔊</span> Wycisz muzykę
+    </button>
+    <button class="btn btn--cichy" id="intro-skip" type="button">Pomiń intro</button>
+  </div>
+</section>
+
+<!-- Dokładnie ta sama ścieżka, która leci w intro: strumień AAC skopiowany z intro.mp4
+     bez przekodowania i bez żadnych przejść. Gra dalej na mapie, sterowana głośnikiem w HUD. -->
+<audio id="muzyka" src="media/muzyka.m4a" loop preload="none"></audio>
+
+<!-- ============================ GRA ============================ -->
+<div id="gra" class="is-hidden">
+
+  <header class="hud">
+    <div class="hud__brand"><span>Glosariusz</span> Olsztyna</div>
+
+    <div class="hud__xp">
+      <span class="sr-only">Zdobyte doświadczenie:</span>
+      <div class="xp-tor" role="progressbar" aria-labelledby="xp-etykieta"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="xp-tor">
+        <div class="xp-wypelnienie" id="xp-wypelnienie"></div>
+      </div>
+      <span id="xp-etykieta"><b id="xp-liczba">0</b> XP</span>
+      <span class="combo is-hidden" id="combo">SERIA ×<span id="combo-mnoznik">2</span></span>
+    </div>
+
+    <div class="hud__narzedzia">
+      <div class="tryb" role="group" aria-label="Tryb zwiedzania">
+        <button type="button" id="tryb-wedrowka" aria-pressed="true">Wędrówka</button>
+        <button type="button" id="tryb-bestiariusz" aria-pressed="false">Bestiariusz</button>
+      </div>
+      <button class="btn btn--icon" id="btn-dzwiek" type="button"
+              aria-pressed="true" title="Dźwięk" aria-label="Wycisz dźwięki gry">
+        <span aria-hidden="true">🔊</span>
+      </button>
+      <button class="btn btn--icon" id="btn-reset" type="button"
+              title="Zacznij od nowa" aria-label="Zacznij od nowa">
+        <span aria-hidden="true">⟲</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="scena">
+    <div class="mapa-obudowa">
+      <p class="mapa-legenda">
+        <span><i class="kropka kropka--miejsce" aria-hidden="true"></i>Do odkrycia</span>
+        <span><i class="kropka kropka--zaliczone" aria-hidden="true"></i>Odkryte</span>
+        <span><i class="kreska" aria-hidden="true"></i>Trakt</span>
+      </p>
+
+      <div class="mapa">
+        <img class="mapa__obraz" src="media/mapa.jpg"
+             alt="Stylizowana, mroczna mapa gminy Purda i okolic Olsztyna: lasy, jeziora i drogi między wsiami."
+             width="1024" height="1024" draggable="false">
+        <svg class="mapa__trasa" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <polyline id="trasa-linia" points=""></polyline>
+        </svg>
+        <div class="mapa__piny" id="piny"></div>
+      </div>
+
+      <p class="sr-only" id="mapa-opis">
+        Mapa zawiera dziesięć punktów odpowiadających miejscowościom gminy Purda.
+        Każdy punkt jest przyciskiem — otwiera kartę miejsca z pytaniem, a w trybie
+        Bestiariusz kartę stwora lub opowieści związanej z tym miejscem.
+      </p>
+    </div>
+
+    <!-- panel postaci przeniesiony ze strony A -->
+    <section class="postac" aria-label="Twoja postać">
+      <button class="postac__avatar" id="postac-avatar" type="button"
+              aria-label="Zobacz pełną sylwetkę Borzysława">
+        <img src="media/borzyslaw-panel.jpg" alt="Portret Borzysława — brodatego łowcy w skórzanym kaftanie.">
+      </button>
+      <div class="postac__dane">
+        <div class="postac__imie">Borzysław</div>
+        <div class="postac__tytul">Łowca z Warmii</div>
+        <div class="staty" id="staty-postaci"></div>
+        <p class="postac__ekwipunek">⚔ Topór okuty żelazem · 🛡 Tarcza ze świętego dębu · ᚱ Runiczne amulety</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="stopka">
+    <p>Demo vibe codingu · Lucid Academy</p>
+    <p>Mapa i pytania: gra „Wędrówki po gminie Purda”, Szkoła Podstawowa w Klebarku Wielkim.</p>
+    <p>Zdjęcia: J. Laskowski, W. Katarzyński, P. Czułowski oraz domena publiczna.</p>
+  </footer>
+</div>
+
+<!-- ============================ MODAL ============================ -->
+<div class="modal is-hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-tytul">
+  <div class="modal__tlo" data-zamknij></div>
+  <div class="modal__panel" id="modal-panel" tabindex="-1">
+    <button class="modal__zamknij" type="button" data-zamknij aria-label="Zamknij">
+      <span aria-hidden="true">✕</span>
+    </button>
+    <div id="modal-media"></div>
+    <div class="modal__tresc" id="modal-tresc"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   GLOSARIUSZ OLSZTYNA — scalenie stron A i B
+   Jeden punkt startu, jedno źródło danych, jeden stan.
+   Bez frameworków, bez build stepu, bez zależności.
+   ============================================================ */
+
+/* ---------- Szkice piórkiem (ze strony A) ---------- */
+const SZKICE = {
+utopiec:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M62 96 Q54 60 88 50 Q100 47 112 50 Q146 60 138 96 Q142 118 124 132 Q128 150 112 160 Q100 165 88 160 Q72 150 76 132 Q58 118 62 96Z"/>
+<path d="M70 78 Q66 66 76 60 M130 78 Q134 66 124 60"/>
+<path d="M74 92 q9 -8 20 -2 M106 90 q9 -8 20 2"/>
+<ellipse cx="84" cy="96" rx="7" ry="6"/><ellipse cx="116" cy="96" rx="7" ry="6"/>
+<circle cx="84" cy="96" r="2" fill="currentColor"/><circle cx="116" cy="96" r="2" fill="currentColor"/>
+<path d="M82 100 q2 4 0 7 M118 100 q-2 4 0 7"/>
+<path d="M88 118 q12 9 24 0 q-4 7 -12 8 q-8 -1 -12 -8Z"/>
+<path d="M90 120 l3 6 M100 121 l0 7 M110 120 l-3 6"/>
+<path d="M76 110 q-4 6 0 14 M124 110 q4 6 0 14"/>
+<path d="M62 96 Q40 96 26 84 Q34 104 54 108 M138 96 Q160 96 174 84 Q166 104 146 108"/>
+<path d="M54 108 l-14 -2 l10 8 M54 108 l-12 8 M146 108 l14 -2 l-10 8 M146 108 l12 8"/>
+<path d="M84 150 Q72 178 82 206 M100 156 l0 50 M116 150 Q128 178 118 206"/>
+<path d="M82 206 l-7 1 l3 -8 M82 206 l6 3 M118 206 l7 1 l-3 -8 M118 206 l-6 3"/>
+<path d="M70 70 l4 5 M80 64 l3 5 M120 64 l-3 5 M130 70 l-4 5" stroke-width="0.9"/>
+<path d="M68 108 l4 4 M70 116 l5 3 M132 108 l-4 4 M130 116 l-5 3" stroke-width="0.8"/>
+</svg>`,
+topielica:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M80 64 Q100 46 120 64 Q130 86 120 104 Q100 118 80 104 Q70 86 80 64Z"/>
+<path d="M86 82 q7 -5 14 -1 M100 81 q7 -5 14 1"/>
+<path d="M89 84 l5 5 M111 84 l-5 5"/>
+<ellipse cx="91" cy="86" rx="3.5" ry="4.5"/><ellipse cx="109" cy="86" rx="3.5" ry="4.5"/>
+<path d="M93 104 q7 5 14 0"/>
+<path d="M80 70 Q48 104 54 168 Q58 196 72 206"/>
+<path d="M86 66 Q60 110 68 180 Q72 198 84 206"/>
+<path d="M120 70 Q152 104 146 168 Q142 196 128 206"/>
+<path d="M114 66 Q140 110 132 180 Q128 198 116 206"/>
+<path d="M100 116 Q95 160 100 206 M93 130 Q90 168 96 200 M107 130 Q110 168 104 200"/>
+<path d="M58 150 q42 16 84 0" stroke-dasharray="2 6" stroke-width="0.9"/>
+<path d="M52 170 q48 18 96 0" stroke-dasharray="2 7" stroke-width="0.9"/>
+<path d="M64 188 q36 14 72 0" stroke-dasharray="2 8" stroke-width="0.8"/>
+<path d="M70 60 l-6 -8 M88 54 l-2 -9 M112 54 l2 -9 M130 60 l6 -8" stroke-width="0.9"/>
+</svg>`,
+strzyga:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M68 80 Q56 52 84 44 Q100 38 116 44 Q144 52 132 80 Q142 100 124 110 Q134 138 112 150 Q100 156 88 150 Q66 138 76 110 Q58 100 68 80Z"/>
+<path d="M78 60 l-14 -18 l9 19 M92 50 l-7 -16 M108 50 l7 -16 M122 60 l14 -18 l-9 19"/>
+<path d="M76 54 l-6 -10 M100 46 l0 -12 M124 54 l6 -10" stroke-width="0.9"/>
+<path d="M76 82 q10 -7 18 -1 M106 81 q10 -7 18 1"/>
+<ellipse cx="85" cy="85" rx="6" ry="5"/><ellipse cx="115" cy="85" rx="6" ry="5"/>
+<circle cx="85" cy="85" r="1.8" fill="currentColor"/><circle cx="115" cy="85" r="1.8" fill="currentColor"/>
+<path d="M86 104 q14 9 28 0 q-5 9 -14 10 q-9 -1 -14 -10Z"/>
+<path d="M89 106 l2 8 M100 108 l0 9 M111 106 l-2 8"/>
+<path d="M78 150 Q66 180 76 210 M100 156 l0 54 M122 150 Q134 180 124 210"/>
+<path d="M76 210 l-6 1 l2 -8 M76 210 l6 3 M124 210 l6 1 l-2 -8 M124 210 l-6 3"/>
+<path d="M70 124 l-18 6 l5 -14 M70 124 l-14 14 M130 124 l18 6 l-5 -14 M130 124 l14 14"/>
+<path d="M52 130 l-9 9 M55 140 l-11 6 M58 122 l-12 2" stroke-width="0.9"/>
+<path d="M148 130 l9 9 M145 140 l11 6 M142 122 l12 2" stroke-width="0.9"/>
+<path d="M84 70 l3 7 M100 66 l0 8 M116 70 l-3 7" stroke-width="0.7"/>
+</svg>`,
+leszy:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M74 102 Q66 76 100 70 Q134 76 126 102 Q132 128 100 138 Q68 128 74 102Z"/>
+<path d="M82 76 Q66 44 50 30 M64 50 l-16 -6 M58 60 l-18 0 M74 56 l-12 -18 M52 40 l-12 -10"/>
+<path d="M118 76 Q134 44 150 30 M136 50 l16 -6 M142 60 l18 0 M126 56 l12 -18 M148 40 l12 -10"/>
+<path d="M100 70 Q100 46 100 26 M100 44 l-14 -10 M100 52 l14 -10 M100 36 l-10 -10 M100 36 l10 -10"/>
+<path d="M84 100 q8 -6 16 -1 M100 99 q8 -6 16 1"/>
+<ellipse cx="88" cy="102" rx="6" ry="8"/><ellipse cx="112" cy="102" rx="6" ry="8"/>
+<circle cx="88" cy="102" r="2.4" fill="currentColor"/><circle cx="112" cy="102" r="2.4" fill="currentColor"/>
+<path d="M90 122 q10 6 20 0 q-3 6 -10 7 q-7 -1 -10 -7Z"/>
+<path d="M78 138 Q66 174 76 210 M100 138 l0 72 M122 138 Q134 174 124 210"/>
+<path d="M76 165 l-16 8 M124 165 l16 8 M74 188 l-14 12 M126 188 l14 12"/>
+<path d="M76 210 q-6 4 -12 2 M124 210 q6 4 12 2"/>
+<path d="M80 92 l-4 8 q3 3 7 2 M120 92 l4 8 q-3 3 -7 2" stroke-width="0.8"/>
+<path d="M92 112 l4 4 M108 112 l-4 4" stroke-width="0.8"/>
+</svg>`,
+poludnica:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="100" cy="120" r="46" stroke-dasharray="1 7" stroke-width="0.9"/>
+<path d="M100 44 l0 -16 M76 54 l-11 -11 M124 54 l11 -11 M62 78 l-15 -5 M138 78 l15 -5" stroke-width="0.9"/>
+<ellipse cx="100" cy="64" rx="16" ry="18"/>
+<path d="M92 60 q4 -4 8 0 M100 60 q4 -4 8 0 M94 70 q6 5 12 0"/>
+<path d="M88 50 Q84 40 92 36 M112 50 Q116 40 108 36"/>
+<path d="M84 80 Q72 130 80 208 M116 80 Q128 130 120 208 M100 82 l0 126"/>
+<path d="M84 104 q16 9 32 0 M81 134 q19 11 38 0 M80 164 q20 11 40 0 M82 192 q18 9 36 0"/>
+<path d="M84 92 L40 70" stroke-width="1.6"/>
+<path d="M40 70 Q22 60 12 70 Q28 56 46 64" stroke-width="1.4"/>
+<path d="M12 70 q-2 6 2 10" stroke-width="0.9"/>
+<path d="M30 56 l-6 -8 M22 64 l-9 -3 M150 50 l8 -8 M158 58 l10 -2" stroke-width="0.9"/>
+</svg>`,
+wilkolak:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M84 56 l-12 -26 l19 17 M116 56 l12 -26 l-19 17"/>
+<path d="M76 50 l-5 -12 M100 44 l0 -12 M124 50 l5 -12" stroke-width="0.9"/>
+<path d="M70 88 Q64 62 90 54 Q100 50 110 54 Q136 62 130 88 L156 100 L132 104 Q138 124 120 132 Q100 140 80 132 Q62 124 68 104 L44 100 Z"/>
+<path d="M80 86 q9 -6 16 -1 M104 85 q9 -6 16 1"/>
+<ellipse cx="86" cy="88" rx="5" ry="6"/><ellipse cx="114" cy="88" rx="5" ry="6"/>
+<circle cx="86" cy="88" r="1.8" fill="currentColor"/><circle cx="114" cy="88" r="1.8" fill="currentColor"/>
+<path d="M44 100 l-18 -3 l15 9 M156 100 l18 -3 l-15 9"/>
+<path d="M90 108 l5 9 l5 -9 l5 9 l5 -9"/>
+<path d="M88 104 q12 7 24 0"/>
+<path d="M82 132 Q70 164 80 210 M100 138 l0 72 M118 132 Q130 164 120 210"/>
+<path d="M80 210 l-7 1 l3 -9 M80 210 l6 3 M120 210 l7 1 l-3 -9 M120 210 l-6 3"/>
+<path d="M72 116 l-18 7 q9 5 18 0 M128 116 l18 7 q-9 5 -18 0"/>
+<path d="M76 76 l-4 -7 M100 70 l0 -8 M124 76 l4 -7" stroke-width="0.7"/>
+<path d="M74 110 l3 7 M126 110 l-3 7" stroke-width="0.7"/>
+</svg>`,
+szlak:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M44 208 L92 96 M156 208 L108 96"/>
+<path d="M74 208 L100 130 M126 208 L100 130" stroke-dasharray="3 7" stroke-width="0.9"/>
+<path d="M88 96 q12 -8 24 0 l0 8 l-24 0Z"/>
+<rect x="90" y="52" width="20" height="44" rx="2"/>
+<path d="M90 64 l20 0"/>
+<path d="M98 60 l4 0 l0 -8 l-4 0Z"/>
+<path d="M100 52 l0 -12 M92 46 l16 0"/>
+<path d="M100 40 q-5 -5 0 -10 q5 5 0 10"/>
+<path d="M94 74 q6 4 12 0" stroke-width="0.8"/>
+<path d="M60 140 q40 -10 80 0" stroke-dasharray="2 8" stroke-width="0.9"/>
+<path d="M50 172 q50 -12 100 0" stroke-dasharray="2 9" stroke-width="0.9"/>
+<path d="M28 120 q10 9 4 22 M172 120 q-10 9 -4 22" stroke-width="0.9"/>
+<path d="M40 96 l-10 -6 M40 96 l-8 9 M160 96 l10 -6 M160 96 l8 9" stroke-width="0.9"/>
+<path d="M70 60 q6 8 0 18 M130 56 q6 8 0 18" stroke-dasharray="2 4" stroke-width="0.8"/>
+</svg>`,
+bagna:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M24 162 q34 -10 68 0 q44 -12 84 0"/>
+<path d="M34 182 q46 -10 132 0" stroke-dasharray="2 6" stroke-width="0.9"/>
+<path d="M28 198 q50 -8 144 0" stroke-dasharray="2 8" stroke-width="0.8"/>
+<path d="M52 162 l-3 -52 M49 110 q-5 -9 3 -16 M56 162 l5 -46 M61 116 q6 -8 -2 -14 M46 162 l-5 -38"/>
+<path d="M152 162 l3 -56 M155 106 q6 -9 -2 -16 M146 162 l-4 -44 M142 118 q-6 -8 3 -14 M158 162 l6 -38"/>
+<path d="M96 162 l0 -26 M100 162 l4 -22 M92 162 l-4 -18"/>
+<path d="M108 146 q14 -12 28 0 q-2 14 -14 16 q-12 -2 -14 -16Z"/>
+<circle cx="117" cy="148" r="2.6"/><circle cx="127" cy="148" r="2.6"/>
+<path d="M120 122 q2 -3 4 0" stroke-width="0.8"/><path d="M124 122 q2 -3 4 0" stroke-width="0.8"/>
+<path d="M116 158 l2 5 M126 158 l-1 5 M118 162 l8 0"/>
+<path d="M70 96 q6 9 0 18 M120 86 q6 9 0 18 M40 108 q5 8 0 16" stroke-dasharray="2 4" stroke-width="0.9"/>
+<path d="M158 70 q8 10 0 22 q-8 -10 0 -22" stroke-dasharray="2 3" stroke-width="0.8"/>
+<path d="M88 80 q5 7 0 14" stroke-dasharray="2 4" stroke-width="0.8"/>
+</svg>`,
+trakt:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M68 208 Q92 130 100 56 M132 208 Q108 130 100 56"/>
+<path d="M86 170 q14 -7 28 0 M82 134 q18 -7 36 0 M88 98 q12 -5 24 0 M92 74 q8 -3 16 0" stroke-dasharray="3 6" stroke-width="0.9"/>
+<path d="M38 56 l0 54 M38 68 l20 -9 M38 84 l18 7 M38 56 l-9 -7"/>
+<path d="M58 59 l16 -7 l-3 10 Z"/>
+<path d="M26 208 Q40 140 28 80 M44 208 Q58 150 50 100 M18 150 Q26 120 20 96"/>
+<path d="M174 208 Q160 140 172 80 M156 208 Q142 150 150 100 M182 150 Q174 120 180 96"/>
+<path d="M150 50 q10 12 2 28 M166 60 q8 12 0 26 M134 44 q10 12 2 26" stroke-dasharray="2 4" stroke-width="0.9"/>
+<path d="M30 48 q8 11 0 24 M48 42 q8 11 0 24" stroke-dasharray="2 4" stroke-width="0.9"/>
+<path d="M112 38 q-6 11 0 22 M128 34 q-5 11 1 22" stroke-width="0.8"/>
+</svg>`,
+rozdroze:`<svg viewBox="0 0 200 220" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M28 208 L94 128 M172 208 L106 128 M100 128 L100 70" stroke-dasharray="4 7" stroke-width="0.95"/>
+<path d="M86 128 q14 -16 28 0 l-3 46 q-11 6 -22 0 Z"/>
+<path d="M92 142 l16 0 M92 154 l16 0 M100 128 l0 46"/>
+<path d="M88 108 q12 -18 24 0"/>
+<path d="M100 70 l0 -16"/>
+<path d="M100 54 q12 -8 22 -2 q-9 0 -14 6 M122 52 l9 -3 l-3 9"/>
+<path d="M104 48 q9 -11 20 -8 q-9 5 -11 14"/>
+<path d="M48 132 q10 9 4 22 M152 132 q-10 9 -4 22" stroke-dasharray="2 6" stroke-width="0.9"/>
+<path d="M38 92 l-9 -6 M38 92 l-7 10 M162 98 l9 -6 M162 98 l7 10" stroke-width="0.9"/>
+<path d="M58 70 q8 11 0 22 M150 76 q8 11 0 22" stroke-dasharray="2 4" stroke-width="0.8"/>
+<path d="M94 120 l12 0 M96 124 l8 0" stroke-width="0.7"/>
+</svg>`
+};
+
+/* ---------- Bohater (ze strony A) ---------- */
+const HERO = {
+  imie:"Borzysław",
+  tytul:"Łowca z Warmii",
+  staty:[["Krzepa",80],["Topór",75],["Runy",55],["Łowy",65]],
+  ekwipunek:"⚔ Topór okuty żelazem · 🛡 Tarcza ze świętego dębu · ᚱ Runiczne amulety",
+};
+
+/* ---------- Kolejność trasy (ze strony B) ---------- */
+const TRASA = ['klebark-wielki','klewki','patrycki-mlyn','smutna-gora','purda',
+               'gilawy','nowa-wies','butryny','baldy','zgnilocha'];
+
+/* ---------- JEDNO ŹRÓDŁO DANYCH ----------
+   Scalenie PRZYSTANKI (A) + HISTORICAL_NODES (B) — teksty były identyczne,
+   więc zostaje jeden komplet. Warstwa `lore` pochodzi ze strony A,
+   pole `demonologia` z MONSTERS strony B, filmy ze strony B.        */
+const MIEJSCA = [
+{
+  id:'klewki', x:33, y:17, nazwa:"Klewki",
+  ciekawostka:"Klewki są starsze od Olsztyna — przywilej lokacyjny wystawiono 13 kwietnia 1352 roku, rok przed założeniem stolicy regionu. Latem 2009 na „Malinowym Wzgórzu” Juliusz Machulski kręcił sceny do filmu „Kołysanka”.",
+  pytanie:"W jakiej miejscowości odbywały się mistrzostwa Polski w brydżu sportowym, warcabach i wędkarstwie podlodowym?",
+  odp:["Klebark Wielki","Klewki","Butryny"], dobra:1,
+  wyj:"To Klewki — wieś z bogatą historią i legendą „O złotym koniu” spisaną przez Marię Zientarę-Malewską.",
+  zobacz:"Neorenesansowy pałac Lousów otoczony parkiem z 200-letnimi drzewami oraz kościół z barokowym ołtarzem. Latem — kąpiel w jeziorze Linowskim.",
+  foto:"media/klewki.jpg", podpis:"Pałac w Klewkach", autor:"Fot. W. Katarzyński",
+  lore:{
+    typ:"bestia", szkic:"utopiec",
+    nazwa:"Utopiec znad Linowskiego",
+    rodzaj:"Topielec · plugawiec wodny",
+    cytat:"Gdzie woda stoi cicho, tam utopiec liczy kości tych, co weszli za głęboko.",
+    opis:"W trzcinach jeziora Linowskiego, gdzie latem kąpią się dzieci, czai się utopiec — sczerniały od wody trup, który nie zaznał spokoju. Wciąga ofiary za kostki w muł i trzyma, póki nie przestaną się szarpać. Mieszkańcy Klewek wiedzą: po zmierzchu nad wodę się nie chodzi.",
+    statystyki:[["Siła",3],["Spryt",2],["Groza",3]],
+    wrazliwosci:["Sól i żelazo","Ogień na lądzie","Święcona woda"],
+    odpornosci:["Trucizny","Mróz"],
+    groznaBo:"Topi i dusi pod wodą, gdzie jest najsilniejszy — atakuje z zaskoczenia i nie puszcza. Na lądzie powolny i niezdarny.",
+    obraz:"media/utopiec.jpg",
+    obrazAlt:"Malowidło utopca — sczerniała, wodna postać wynurzająca się z trzcin nad jeziorem."
+  }
+},
+{
+  id:'klebark-wielki', x:26, y:15, nazwa:"Klebark Wielki",
+  ciekawostka:"To w zapisach lokacyjnych Mikołaja Kopernika z 1517 roku po raz pierwszy rozdzielono Klebark na Wielki i Mały. Kopernik, jako administrator dóbr kapituły, bywał tu trzykrotnie. We wsi urodził się też Jan Liszewski, założyciel „Gazety Olsztyńskiej”.",
+  pytanie:"Który z wielkich Polaków przebywał w Klebarku Wielkim?",
+  odp:["Mikołaj Kopernik","Jan Matejko","Adam Mickiewicz"], dobra:0,
+  wyj:"Mikołaj Kopernik — prowadził tu rekolonizację po wojnie polsko-krzyżackiej.",
+  zobacz:"Neogotyckie Sanktuarium Krzyża Świętego z relikwiami podarowanymi przez Jana Pawła II (2002) i granitową chrzcielnicą z XIV wieku. Przy świątyni pomnik papieża.",
+  foto:"media/klebark-wielki.jpg", podpis:"Kościół w Klewkach", autor:"Fot. J. Laskowski",
+  lore:{
+    typ:"miejsce", szkic:"szlak", dobra:0,
+    nazwa:"Zapomniany szlak pielgrzymi",
+    cytat:"Tędy szły niegdyś łosiery do sanktuarium. Dziś idą tędy tylko cienie.",
+    opis:"Stary trakt pielgrzymi do Klebarka, gdzie w kościele spoczywają relikwie Krzyża Świętego. Przydrożna kapliczka pamięta jeszcze czasy Kopernika. Mgła wstaje nad zarośniętą drogą, a przy słupie ktoś zostawił świeży wieniec. Coś tu czeka.",
+    wideo:"media/szlak.mp4", poster:"media/szlak-poster.jpg",
+    wideoOpis:"Animacja: zarośnięta leśna droga o zmierzchu, mgła sunąca nisko nad koleinami, przydrożna kapliczka ze świeżym wieńcem u podstawy.",
+    wybory:[
+      { etykieta:"Pomódl się przy kapliczce i ruszaj dalej",
+        wynik:"Klękasz przy spękanym słupie. Wiatr cichnie, mgła się rozstępuje. Przez chwilę czujesz na ramieniu czyjąś dłoń — lekką, życzliwą. Gdy się odwracasz, nie ma nikogo, ale droga przed tobą jest jasna i czysta. Pielgrzymi sprzed wieków przepuścili swojego." },
+      { etykieta:"Zbadaj świeży wieniec przy słupie",
+        wynik:"Kwiaty są świeże, choć nikogo nie ma na mile wokół. Pod wieńcem znajdujesz kartkę: imię, data sprzed stu lat i prośba o modlitwę za zbłąkaną duszę. Spełniasz ją. Tej nocy śni ci się wdzięczna twarz, a rankiem znajdujesz przy posłaniu suchy, biały kwiat." },
+      { etykieta:"Zejdź ze szlaku na skróty przez las",
+        wynik:"Ścieżka na skróty szybko się zwęża i gubi. Drzewa wyglądają wszędzie tak samo. Po godzinie wracasz dokładnie do tej samej kapliczki — choć szedłeś prosto. Stary szlak nie lubi, gdy się nim gardzi. Wracasz na trakt i tym razem idziesz nim pokornie." }
+    ]
+  }
+},
+{
+  id:'patrycki-mlyn', x:41, y:25, nazwa:"Patrycki Młyn",
+  ciekawostka:"Najmłodszy młyn w gminie, a zarazem jedyny zabytkowy młyn z kołem podsiębiernym na Warmii i Mazurach. Żeliwne koło o średnicy 5 m i szerokości 2,2 m odlano w 1880 roku — tak duże, by zrekompensować mniejszą wydajność tej konstrukcji.",
+  pytanie:"Z czego słynie Patrycki Młyn?",
+  odp:["Największe jezioro w gminie","Jedyne koło podsiębierne na Warmii i Mazurach","Najstarszy kościół"], dobra:1,
+  wyj:"W kole podsiębiernym woda uderza w łopatki od dołu — stąd nie trzeba spiętrzać rzeki.",
+  zobacz:"Drewniany budynek młyna na podpiwniczeniu z głazów polnych, malowniczo położony nad wodą. Dojście od strony Patryk.",
+  foto:"media/patrycki-mlyn.jpg", podpis:"Patrycki Młyn przed modernizacją", autor:"Fot. J. Laskowski",
+  lore:{
+    typ:"bestia", szkic:"topielica",
+    nazwa:"Topielica młyńska",
+    rodzaj:"Zjawa · utopiona dziewka",
+    cytat:"Koło młyńskie obraca się samo, choć młynarz dawno w ziemi. To ona kręci nim po nocach.",
+    opis:"Przy starym młynie nad Kośną utonęła niegdyś dziewczyna — porzucona, z dzieckiem pod sercem. Wraca jako topielica: blada, ociekająca wodą postać w podartej koszuli. Wabi wędrowców płaczem dziecka, a kto podejdzie nad wodę, ten ginie. Najgroźniejsza w noce, gdy mgła wstaje znad rzeki.",
+    statystyki:[["Siła",2],["Spryt",3],["Groza",3]],
+    wrazliwosci:["Imię wypowiedziane głośno","Srebro","Modlitwa za jej duszę"],
+    odpornosci:["Stal","Zimno"],
+    groznaBo:"Nie walczy wprost — wabi głosem i złudą. Ofiara sama wchodzi do wody, myśląc, że ratuje tonące dziecko.",
+    demonologia:"Topielice, zwane także wodnicami, to złowrogie demony zamieszkujące jeziora i rzeki. Stawały się nimi młode kobiety, które utonęły. Ukazywały się jako blade dziewczęta z długimi, mokrymi włosami. Śpiewem i urodą wabiły nieostrożnych wędrowców, po czym wciągały ich w mroczne głębiny na pewną śmierć.",
+    wideo:"media/topielica.mp4", poster:"media/topielica-poster.jpg",
+    wideoOpis:"Animacja: blada kobieca postać o długich, mokrych włosach unosi się tuż pod powierzchnią ciemnej wody, wokół rozchodzą się kręgi."
+  }
+},
+{
+  id:'purda', x:55, y:32, nazwa:"Purda",
+  ciekawostka:"Purda została założona przez kapitułę warmińską w 1384 roku, a jej przywilej lokacyjny obejmował aż 70 łanów — więcej niż jakakolwiek wieś w okolicy. To najstarsza wieś w sąsiedztwie.",
+  pytanie:"Gdzie mieści się siedziba Urzędu Gminy?",
+  odp:["Klewki","Purda","Butryny"], dobra:1,
+  wyj:"W Purdzie — siedzibie władz gminy od jej powstania w 1973 roku.",
+  zobacz:"Gotycki kościół św. Michała Archanioła z 1503 roku z barokowym wnętrzem i unikalnym ołtarzem myśliwskim z trofeów. W centrum także drewniana wieżyczka zabytkowej remizy.",
+  foto:"media/purda.jpg", podpis:"Kościół w Purdzie", autor:"Fot. J. Laskowski",
+  lore:{
+    typ:"bestia", szkic:"strzyga",
+    nazwa:"Strzyga z purdzkiej dzwonnicy",
+    rodzaj:"Odmieniec · nieumarły",
+    cytat:"Pochowano ją w poświęconej ziemi, lecz ziemia jej nie przyjęła. Co noc wstaje głodna.",
+    opis:"Pod gotycką wieżą kościoła w Purdzie, w starym grobowcu, śpi za dnia strzyga — przeklęta od urodzenia, dwukrotnie pochowana, dwukrotnie powstała. Nocą poluje: pazury jak sierpy, dwa rzędy kłów, ślepia świecące w mroku. Kto przetrwa nad jej grobem do trzeciego piania koguta, może zdjąć klątwę — albo zginąć, próbując.",
+    statystyki:[["Siła",4],["Spryt",2],["Groza",4]],
+    wrazliwosci:["Srebro","Przerwanie klątwy","Pierwsze pianie koguta"],
+    odpornosci:["Zwykła stal","Ból","Strach"],
+    groznaBo:"Szybka, wściekła, niemal nie do zabicia siłą — rozszarpuje pazurami i nie czuje ran. Słabsza dopiero o świcie.",
+    demonologia:"Wierzenia Słowian opisują Strzygę jako demona o rodowodzie wampirycznym. Uważano, że rodzi się z dwiema duszami, dwoma sercami i podwójnym rzędem zębów. Po śmierci jedna z dusz zostawała w ożywionym trupie, by nocami polować na ludzką krew. Broniono się przed nią dekapitując ciało lub sypiąc mak w trumnie.",
+    wideo:"media/strzyga.mp4", poster:"media/strzyga-poster.jpg",
+    wideoOpis:"Animacja: upiorna postać o bladej twarzy i długich pazurach porusza się w mroku pod kamiennym sklepieniem, oczy odbijają światło."
+  }
+},
+{
+  id:'gilawy', x:69, y:28, nazwa:"Giławy",
+  ciekawostka:"Mieszkańcy długo marzyli o własnej świątyni — w 1895 roku wieś liczyła aż 471 osób. Parafię w Giławach utworzono dopiero w 1921 roku, a pierwszym proboszczem został ks. Andrzej Barczewski.",
+  pytanie:"Gdzie znajduje się kościół pw. św. Jana Chrzciciela?",
+  odp:["Purda","Giławy","Butryny"], dobra:1,
+  wyj:"W Giławach — neogotycki kościół konsekrowano w 1903 roku.",
+  zobacz:"Strzelisty neogotycki kościół malowniczo wtopiony w skraj lasu. We wsi stała też tablica upamiętniająca dawną polską szkołę z lat 30. XX wieku.",
+  foto:"media/gilawy.jpg", podpis:"Kościół w Giławach", autor:"Fot. J. Laskowski",
+  lore:{
+    typ:"bestia", szkic:"leszy",
+    nazwa:"Leszy z giławskiego boru",
+    rodzaj:"Duch lasu · pradawny pan",
+    cytat:"Las ma swojego gospodarza. Wejdź bez pokłonu, a nie wyjdziesz wcale.",
+    opis:"W borach wokół Giław rządzi leszy — istota stara jak sam las, z czaszką jelenia i porożem zrośniętym z konarami. Plącze ścieżki, odwraca strony świata, wodzi zbłąkanych w kółko aż po kres sił. Nie jest zły — jest lasem. Ale kto ścina drzewa bez umiaru i bije zwierza ponad potrzebę, tego leszy zapamięta.",
+    statystyki:[["Siła",5],["Spryt",4],["Groza",3]],
+    wrazliwosci:["Odwrócony płaszcz i buty na opak","Dar złożony lasowi","Ogień — lecz biada, kto spali bór"],
+    odpornosci:["Stal","Trucizny","Zwid"],
+    groznaBo:"Panuje nad całym lasem naraz — zwierzęta, mgła i ścieżki są jego. W jego borze to ty jesteś zwierzyną.",
+    demonologia:"Według słowiańskiej demonologii Leszy był niekwestionowanym panem lasu i władcą zwierząt. Objawiał się pod postacią niedźwiedzia, wilka lub starca z twarzą porośniętą mchem. Mógł zmieniać swój wzrost w zależności od wysokości drzew. Wobec dobrych ludzi bywał przyjazny, lecz niszczycieli lasu wodził na manowce lub rzucał na pożarcie drapieżnikom.",
+    wideo:"media/leszy.mp4", poster:"media/leszy-poster.jpg",
+    wideoOpis:"Animacja: potężna leśna postać z jelenią czaszką i porożem zrośniętym z konarami stoi nieruchomo wśród pni, mgła przepływa u jej stóp."
+  }
+},
+{
+  /* przesunięte o 1–2% w stronę Purdy, żeby pin nie zachodził na Patrycki Młyn */
+  id:'smutna-gora', x:48, y:28, nazwa:"Smutna Góra",
+  ciekawostka:"Tuż obok, w Pajtuńskim Młynie, stoi figura z piaskowca przedstawiająca Chrystusa Sędziego — najstarszy tego typu zabytek na Warmii, ustawiony na jeszcze starszym postumencie.",
+  pytanie:"Gdzie znajduje się wzgórze zwane Smutną Górą albo Górą Żal?",
+  odp:["między Klebarkiem Wlk. a Mł.","między Purdą a Pajtuńskim Młynem","między Nową Wsią a Butrynami"], dobra:1,
+  wyj:"Leży między Purdą a Pajtuńskim Młynem — dawniej miejscem przepraw i postojów.",
+  zobacz:"Spacer na wzniesienie najlepiej połączyć z wizytą w Pajtuńskim Młynie nad rzeką Kośną — dziś to gospodarstwo agroturystyczne ze stadniną koni.",
+  foto:"media/smutna-gora.jpg", podpis:"Warmińska kapliczka przydrożna", autor:"Fot. J. Laskowski",
+  lore:{
+    typ:"bestia", szkic:"poludnica",
+    nazwa:"Południca ze Smutnej Góry",
+    rodzaj:"Zmora · zjawa południa",
+    cytat:"W samo południe, gdy cień znika, nie stój w polu sam. Ona nie znosi, gdy ktoś próżnuje.",
+    opis:"Gdy słońce stoi w zenicie nad Smutną Górą, a żar drży nad polami, pojawia się ona — wysoka, biała, z sierpem w dłoni i twarzą skrytą pod welonem. Zadaje wędrowcom zagadki i pyta o żniwa. Kto odpowie źle albo zamilknie, temu zetnie głowę sierpem lub porazi udarem. Najgroźniejsza w najgorętsze dni lata.",
+    statystyki:[["Siła",2],["Spryt",5],["Groza",3]],
+    wrazliwosci:["Trafna odpowiedź na zagadkę","Cień i zmierzch","Nadejście chmury"],
+    odpornosci:["Stal","Ogień","Strach"],
+    groznaBo:"Nie pokonasz jej mieczem — poraża żarem i obłędem. Trzeba przetrwać jej zagadki do zmierzchu albo skryć się w cieniu.",
+    demonologia:"Demon z wierzeń słowiańskich, personifikujący zjawisko udaru słonecznego. Południce rodziły się z dusz kobiet zmarłych w okolicach ślubu. Ukazywały się w samo południe jako blade kobiety w białych szatach. Atakowały chłopów pracujących w polu, zsyłając omdlenia i bóle. Zabezpieczało przed nimi odpoczywanie w cieniu podczas największego skwaru.",
+    wideo:"media/poludnica.mp4", poster:"media/poludnica-poster.jpg",
+    wideoOpis:"Animacja: wysoka kobieca postać w bieli stoi w rozgrzanym zbożu w pełnym słońcu, powietrze drga od żaru, w dłoni trzyma sierp."
+  }
+},
+{
+  id:'nowa-wies', x:35, y:48, nazwa:"Nowa Wieś / jeziora",
+  ciekawostka:"Na dawnym rozlewisku młyńskim powstał użytek ekologiczny Dzika Korsakówka — wspaniałe miejsce lęgowe ptaków wodnych. Najstarsze ślady ludzi sięgają tu aż VII tysiąclecia p.n.e.",
+  pytanie:"Na terenie gminy Purda znajdują się jeziora:",
+  odp:["Kośno, Mamry, Serwent","Gim, Kośno, Serwent","Serwent, Skanda, Gim"], dobra:1,
+  wyj:"Gim, Kośno i Serwent. Mamry leżą na Mazurach, a Skanda w Olsztynie.",
+  zobacz:"Dzika Korsakówka — cicha ostoja ptactwa wodno-błotnego, rzadko odwiedzana przez ludzi ze względu na odległość od dróg. Najlepiej z lornetką.",
+  foto:"media/nowa-wies.jpg", podpis:"Krzyżówki na rozlewisku Dzika Korsakówka", autor:"Fot. P. Czułowski",
+  lore:{
+    typ:"miejsce", szkic:"bagna", dobra:2,
+    nazwa:"Szare Bagna — Dzika Korsakówka",
+    cytat:"Ludzie tu nie zachodzą. Najstarsze kości w tym mule liczą dziewięć tysięcy lat.",
+    opis:"Dawne rozlewisko młyńskie, dziś dzikie mokradło, gdzie lęgną się ptaki, a człowiek bywa rzadko. Sucha trzcina szeleści bez wiatru, opar snuje się nad czarną wodą. Gdzieś w błocie bieleje czaszka. Ścieżka rozwidla się na trzy strony.",
+    wideo:"media/bagna.mp4", poster:"media/bagna-poster.jpg",
+    wideoOpis:"Animacja: szare mokradło o świcie, sucha trzcina, opar snujący się nad czarną wodą, w błocie bieleje czaszka.",
+    wybory:[
+      { etykieta:"Idź po pewnym gruncie wzdłuż trzcin",
+        wynik:"Wybierasz dłuższą, lecz twardszą drogę po skraju grzęzawiska. Zajmuje pół dnia, ale grunt trzyma. Mijasz gniazda ptactwa i nietknięte ślady łosia. Wychodzisz na drugą stronę zmęczony, ubłocony — i cały. Mokradło nie lubi pośpiechu, lecz cierpliwych przepuszcza." },
+      { etykieta:"Skróć drogę przez środek mokradła",
+        wynik:"Pierwsze kroki są pewne. Potem grunt zaczyna ssać. Z każdym ruchem grzęźniesz głębiej, a czaszka w mule zdaje się szczerzyć. W ostatniej chwili łapiesz wystającą kłodę i wyrywasz się z błota, tracąc but i resztki dumy. Środka bagien się nie przechodzi — środek bagien się ciebie spodziewał." },
+      { etykieta:"Nasłuchuj i podążaj za głosem ptaków",
+        wynik:"Zamiast patrzeć pod nogi, słuchasz. Ptactwo zrywa się tam, gdzie grunt pewny, milknie tam, gdzie topiel. Idziesz za ich mową jak za mapą i bagno prowadzi cię bezpiecznie na drugą stronę. Czasem trzeba zaufać dzikości, nie własnemu pośpiechowi." }
+    ]
+  }
+},
+{
+  /* Butryny i Bałdy stały w źródłach 3% od siebie — na mapie piny zachodziły
+     na siebie i dolny był nie do trafienia. Rozsunięte wzdłuż tej samej osi,
+     więc wzajemne położenie wsi zostaje zachowane. */
+  id:'butryny', x:28, y:59, nazwa:"Butryny",
+  ciekawostka:"Ks. Barczewski określił parafię butryńską jako najrozleglejszą na całej Warmii. Najstarszy dokument poświadczający kościół pochodzi z 1516 roku, a po pożarze w 1886 roku świątynię odbudowano w zaledwie kilka miesięcy.",
+  pytanie:"Gdzie znajduje się największy w gminie park rozrywki?",
+  odp:["Butryny","Klewki","Prejłowo"], dobra:0,
+  wyj:"W Butrynach — wsi z jedną z najstarszych parafii w regionie.",
+  zobacz:"Neogotycki kościół św. Jakuba Apostoła z wieżą ukończoną w 1934 roku oraz dwie zabytkowe kapliczki przydrożne.",
+  foto:"media/butryny.jpg", podpis:"Dawny budynek GRN w Butrynach", autor:"Fot. J. Laskowski",
+  lore:{
+    typ:"bestia", szkic:"wilkolak",
+    nazwa:"Wilkołak z butryńskiej parafii",
+    rodzaj:"Bestia · człowiek przeklęty",
+    cytat:"Za dnia twój sąsiad. W pełnię — głód, kły i pamięć, która nie wraca o świcie.",
+    opis:"Najrozleglejsza parafia na Warmii ma swój sekret: ktoś tu nosi klątwę wilkołaka. W noce pełni przemienia się w bestię na dwóch nogach — kłapiące kły, sierść, pazury jak haki. Poluje wśród zagród i lasów, a nad ranem budzi się nagi i przerażony, nie pamiętając nocy. Nikt nie wie, kto kryje się pod klątwą — może sąsiad, może ktoś z rodziny.",
+    statystyki:[["Siła",5],["Spryt",3],["Groza",4]],
+    wrazliwosci:["Srebro","Zdjęcie klątwy","Wyznanie miłości w ludzkiej postaci"],
+    odpornosci:["Zwykła stal","Mróz","Ból"],
+    groznaBo:"W pełni nie zna bólu ani litości — goi rany w mgnieniu oka. Zwykła stal go nie tknie, tylko srebro tnie naprawdę.",
+    demonologia:"W tradycji słowiańskiej (tzw. wilkołactwo) to człowiek potrafiący – na skutek rzuconej klątwy lub z wyboru – przybierać postać wilka. Podczas pełni księżyca tracił ludzkie zmysły, poddając się instynktowi łowcy. Od zwykłego wilka odróżniały go jednak ludzkie, smutne oczy i brak ogona.",
+    wideo:"media/wilkolak.mp4", poster:"media/wilkolak-poster.jpg",
+    wideoOpis:"Animacja: wilcza sylwetka na dwóch nogach przemieszcza się skrajem lasu w świetle pełni, sierść porusza się od wiatru."
+  }
+},
+{
+  id:'baldy', x:33, y:66, nazwa:"Bałdy",
+  ciekawostka:"Bałdy lokowano w 1418 roku — to zamknęło 70-letni okres zakładania wsi w okolicy. Tędy biegł stary Trakt Biskupi, którym podróżował m.in. biskup Jan Stefan Wydżga w drodze z Lidzbarka do Warszawy.",
+  pytanie:"Gdzie znajduje się Trakt Biskupi?",
+  odp:["Nowa Kaletka","Bałdy","Trękusek"], dobra:1,
+  wyj:"Przez Bałdy — jednym z trzech traktów warszawskich przecinających Warmię.",
+  zobacz:"Zachowany fragment dawnego traktu — dziś niepozorna, leśna droga gruntowa, którą wieki temu przemierzali biskupi i kupcy.",
+  foto:"media/baldy.jpg", podpis:"Leśna droga w okolicy", autor:"Fot. J. Laskowski",
+  lore:{
+    typ:"miejsce", szkic:"trakt", dobra:1,
+    nazwa:"Zarosły Trakt Biskupi",
+    cytat:"Jechali tędy biskupi w złocie i kupcy z workami. Dziś trakt zarósł, lecz pamięta wszystkich.",
+    opis:"Dawny Trakt Biskupi, którym wędrowali możni z Lidzbarka do Warszawy. Lokowano tu Bałdy w 1418 roku. Dziś koleiny zarosły trawą, a przegniły drogowskaz przechyla się nad gęstwiną. Las po obu stronach milczy zbyt głośno.",
+    wideo:"media/trakt.mp4", poster:"media/trakt-poster.jpg",
+    wideoOpis:"Animacja: zarośnięte trawą koleiny dawnego traktu prowadzą w głąb gęstego lasu, przechylony drewniany drogowskaz na pierwszym planie.",
+    wybory:[
+      { etykieta:"Idź traktem prosto, nie schodząc z drogi",
+        wynik:"Trzymasz się dawnej drogi, choć ledwo ją widać pod trawą. Mijasz kamienie milowe z zatartymi herbami i resztki karczmy. Trakt, choć zarosły, prowadzi pewnie — wieki kół i kopyt wydeptały go zbyt głęboko, by zniknął. Przed zmierzchem docierasz do Bałd." },
+      { etykieta:"Odczytaj napis na przegniłym drogowskazie",
+        wynik:"Pod warstwą mchu odkrywasz wyryte litery i dłoń wskazującą kierunek. To stary znak biskupiego traktu — a strzałka wskazuje drogę, której byś sam nie wybrał. Idziesz za nią i trafiasz na bród przez rzekę, suchą przeprawę i schronienie. Dawni wędrowcy zostawili ci wskazówkę." },
+      { etykieta:"Rozbij obóz i przeczekaj noc w lesie",
+        wynik:"Postanawiasz nie iść po ciemku. Rozpalasz ognisko przy trakcie. W nocy słyszysz turkot kół i parskanie koni — lecz droga jest pusta. To echo dawnych podróżnych przejeżdża traktem, jak co noc od wieków. Nad ranem ruszasz wypoczęty, a las już nie milczy tak złowrogo." }
+    ]
+  }
+},
+{
+  id:'zgnilocha', x:17, y:77, nazwa:"Zgniłocha",
+  ciekawostka:"Zgniłocha to najdalej na południe wysunięty kraniec gminy, leżący na historycznej granicy Warmii i Mazur — dwóch krain o odmiennej tradycji i wyznaniu.",
+  pytanie:"Która miejscowość jest najbardziej wysunięta na południe?",
+  odp:["Marcinkowo","Zgniłocha","Giławy"], dobra:1,
+  wyj:"Zgniłocha — gdzie kończy się gmina i zaczynają Mazury.",
+  zobacz:"Cicha wieś na pograniczu kulturowym. Stąd blisko do rezerwatów i lasów Nadleśnictwa Nowe Ramuki.",
+  foto:"media/zgnilocha.jpg", podpis:"Mapa Hennenberga (XVII w.)", autor:"domena publiczna",
+  lore:{
+    typ:"miejsce", szkic:"rozdroze", dobra:0,
+    nazwa:"Rozdroże na Pograniczu",
+    cytat:"Tu kończy się Warmia, a zaczyna Mazury. Na rozstajach najlepiej nie stawać o zmierzchu.",
+    opis:"Najdalej na południe wysunięty kraniec — rozstaje na historycznej granicy dwóch krain o odmiennej wierze i mowie. Omszały kamień graniczny pamięta dawne podziały. Na przegniłym słupie siedzi kruk i patrzy na ciebie jednym okiem. Trzy drogi rozchodzą się w mgłę.",
+    wideo:"media/rozdroze.mp4", poster:"media/rozdroze-poster.jpg",
+    wideoOpis:"Animacja: rozstaje trzech dróg tonące we mgle o zmierzchu, omszały kamień graniczny i kruk siedzący na przegniłym słupie.",
+    wybory:[
+      { etykieta:"Złóż monetę na kamieniu granicznym",
+        wynik:"Kładziesz grosz na omszałym kamieniu — dawny zwyczaj dla bezpiecznej przeprawy przez granicę. Kruk kracze raz i odlatuje na zachód. Ruszasz za nim i droga prowadzi cię prosto do ludzkich sadyb. Stare obyczaje pogranicza wciąż mają moc — kto je uszanuje, ten przejdzie." },
+      { etykieta:"Zapytaj kruka o drogę",
+        wynik:"Czujesz się głupio, mówiąc do ptaka — ale kruk przekręca łeb, jakby słuchał. Po chwili zrywa się i leci środkową drogą, raz po raz oglądając się, czy idziesz. Prowadzi cię przez mgłę aż do rozstaju z drogowskazem. Na pograniczu, powiadają, kruki pamiętają więcej niż ludzie." },
+      { etykieta:"Wybierz drogę na zachód, ku Warmii",
+        wynik:"Nie ufasz wróżbom ani ptakom. Wybierasz drogę na zachód — z powrotem ku znajomej Warmii. Decyzja okazuje się słuszna: wkrótce mijasz przydrożną kapliczkę i dym z komina. Czasem najlepszą magią jest trzymać się tego, co znane, i nie kusić pogranicznego losu o zmierzchu." }
+    ]
+  }
+}
+];
+
+/* ============================================================
+   STAN — jeden obiekt, jeden klucz w localStorage
+   ============================================================ */
+const KLUCZ = 'purda-glosariusz-v1';
+const XP_ZA_PIN = 100;
+const SUMA = MIEJSCA.length;
+
+const stan = {
+  xp:0,
+  seria:0,
+  tryb:'wedrowka',          // 'wedrowka' | 'bestiariusz'
+  zaliczone:new Set(),      // id miejsc z poprawną odpowiedzią
+  poznane:new Set(),        // id miejsc z odsłuchanym lore
+  dzwiek:true,
+};
+
+function zapisz(){
+  try{
+    localStorage.setItem(KLUCZ, JSON.stringify({
+      xp:stan.xp,
+      zaliczone:[...stan.zaliczone],
+      poznane:[...stan.poznane],
+      tryb:stan.tryb,
+      // `dzwiek` celowo NIE trafia do zapisu — patrz wczytaj()
+    }));
+  }catch(e){ /* tryb prywatny lub brak miejsca — gra działa dalej */ }
+}
+
+function wczytaj(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KLUCZ) || '{}');
+    stan.xp = Number(s.xp) || 0;
+    stan.zaliczone = new Set(Array.isArray(s.zaliczone) ? s.zaliczone : []);
+    stan.poznane   = new Set(Array.isArray(s.poznane)   ? s.poznane   : []);
+    stan.tryb      = s.tryb === 'bestiariusz' ? 'bestiariusz' : 'wedrowka';
+    /* Wyciszenie NIE jest pamiętane między wizytami. Zapisane raz `false`
+       sprawiało, że przy każdym kolejnym wejściu intro startowało nieme
+       i trzeba je było odciszać ręcznie. Każde wejście zaczyna z dźwiękiem. */
+    stan.dzwiek = true;
+  }catch(e){ /* uszkodzony wpis — startujemy od zera */ }
+}
+
+/* ============================================================
+   DŹWIĘK — WebAudio, bez plików, działa offline
+   (przeniesione ze strony A)
+   ============================================================ */
+let audioCtx = null;
+function ctx(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ /* brak WebAudio — gra działa bez dźwięku */ }
+  }
+  return audioCtx;
+}
+function ton(czest, dlugosc, typ='sine', glos=0.18, opoznienie=0){
+  const a = ctx();
+  if(!a || !stan.dzwiek) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = typ; o.frequency.value = czest;
+  o.connect(g); g.connect(a.destination);
+  const t = a.currentTime + opoznienie;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(glos, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dlugosc);
+  o.start(t); o.stop(t + dlugosc);
+}
+function dzwiekOk(n){
+  const baza = 520 + Math.min(n, 6) * 60;
+  ton(baza, 0.12, 'triangle', 0.16, 0);
+  ton(baza * 1.5, 0.14, 'triangle', 0.13, 0.08);
+}
+function dzwiekBlad(){ ton(180, 0.22, 'sawtooth', 0.12, 0); }
+function dzwiekOtwarcie(){ ton(320, 0.09, 'sine', 0.10, 0); }
+
+/* ============================================================
+   NARZĘDZIA
+   ============================================================ */
+const $  = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+/** Bezpieczne wstawianie tekstu — chroni przed HTML w danych. */
+function txt(s){
+  const d = document.createElement('div');
+  d.textContent = s == null ? '' : String(s);
+  return d.innerHTML;
+}
+
+function gwiazdki(n, max=5){
+  let out = '';
+  for(let i=1;i<=max;i++) out += i<=n ? '★' : '<span class="pusta">★</span>';
+  return `<span class="gwiazdki" role="img" aria-label="${n} na ${max}">${out}</span>`;
+}
+
+/* ============================================================
+   MUZYKA — ścieżka z intro, grana w pętli także na mapie.
+   Jeden przełącznik (`stan.dzwiek`) rządzi muzyką, efektami i filmem intro.
+   ============================================================ */
+const muzyka = $('#muzyka');
+// 1.0 = ten sam poziom, na którym ścieżka gra w intro; ciszej brzmiałaby jak inny utwór
+const GLOSNOSC_MUZYKI = 1;
+
+/* Ścieżka mapy to ten sam nagranie, które leci w intro. Dopóki intro jest na
+   ekranie, gra je film — puszczenie tu drugiej kopii dawało dwa nałożone na
+   siebie strumienie. Dlatego muzyka tła rusza dopiero po zejściu intro. */
+let mapaAktywna = false;
+
+function wlaczMuzyke(){
+  if(!muzyka || !stan.dzwiek || !mapaAktywna) return;
+  muzyka.volume = GLOSNOSC_MUZYKI;
+  const p = muzyka.play();
+  // Odmowa jest normalna, dopóki użytkownik w nic nie kliknął — wtedy po prostu cisza.
+  if(p && p.catch) p.catch(()=>{});
+}
+
+function zatrzymajMuzyke(){ if(muzyka) muzyka.pause(); }
+
+/** Jedyne miejsce, które zmienia ustawienie dźwięku — stąd spójne przyciski. */
+function ustawDzwiek(wl){
+  stan.dzwiek = wl;
+  zapisz();
+  if(wl){ ctx(); wlaczMuzyke(); } else { zatrzymajMuzyke(); }
+  odswiezPrzyciskiDzwieku();
+}
+
+function odswiezPrzyciskiDzwieku(){
+  const wl = stan.dzwiek;
+
+  const hud = $('#btn-dzwiek');
+  if(hud){
+    hud.setAttribute('aria-pressed', String(wl));
+    hud.setAttribute('aria-label', wl ? 'Wycisz muzykę i dźwięki' : 'Włącz muzykę i dźwięki');
+    hud.innerHTML = `<span aria-hidden="true">${wl ? '🔊' : '🔇'}</span>`;
+  }
+
+  const intro = $('#intro-dzwiek');
+  if(intro){
+    intro.setAttribute('aria-pressed', String(wl));
+    intro.setAttribute('aria-label', wl ? 'Wycisz muzykę' : 'Włącz muzykę');
+    intro.innerHTML = wl
+      ? '<span aria-hidden="true">🔊</span> Wycisz muzykę'
+      : '<span aria-hidden="true">🔇</span> Włącz muzykę';
+  }
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+function odswiezHud(){
+  const maks = SUMA * XP_ZA_PIN * 2;   // teoretyczne maksimum z serią
+  const proc = Math.min(100, Math.round(stan.xp / maks * 100));
+  $('#xp-liczba').textContent = stan.xp;
+  $('#xp-wypelnienie').style.width = proc + '%';
+  $('#xp-tor').setAttribute('aria-valuenow', String(proc));
+
+  const combo = $('#combo');
+  if(stan.seria >= 2){
+    $('#combo-mnoznik').textContent = String(stan.seria);
+    combo.classList.remove('is-hidden');
+  } else {
+    combo.classList.add('is-hidden');
+  }
+}
+
+function odswiezPiny(){
+  $$('.pin').forEach(p=>{
+    const id = p.dataset.id;
+    const gotowe = stan.tryb === 'wedrowka' ? stan.zaliczone.has(id) : stan.poznane.has(id);
+    p.classList.toggle('zaliczony', gotowe);
+  });
+}
+
+/* ============================================================
+   MAPA
+   ============================================================ */
+function zbudujMape(){
+  const warstwa = $('#piny');
+  warstwa.innerHTML = '';
+
+  MIEJSCA.forEach((m, i)=>{
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pin';
+    b.dataset.id = m.id;
+    b.style.left = m.x + '%';
+    b.style.top  = m.y + '%';
+    b.setAttribute('aria-label', `${m.nazwa} — otwórz kartę miejsca`);
+    b.innerHTML =
+      `<span class="pin__znak"><span class="pin__puls" aria-hidden="true"></span>${i+1}</span>` +
+      `<span class="pin__etykieta">${txt(m.nazwa)}</span>`;
+    b.addEventListener('click', ()=> otworzKarte(m));
+    warstwa.appendChild(b);
+  });
+
+  // trasa łącząca miejscowości w kolejności wędrówki
+  const wg = new Map(MIEJSCA.map(m=>[m.id, m]));
+  const punkty = TRASA.map(id=>wg.get(id)).filter(Boolean)
+                      .map(m=>`${m.x},${m.y}`).join(' ');
+  $('#trasa-linia').setAttribute('points', punkty);
+
+  odswiezPiny();
+  dopasujMape();
+}
+
+/* Największy kwadrat, jaki mieści się w wolnym miejscu obok panelu postaci.
+   Liczone z rzeczywistych wymiarów, więc odporne na powiększenie strony,
+   skalowanie systemu i dowolną wysokość paska przeglądarki. */
+const mqPoziom = window.matchMedia('(min-width:760px) and (min-aspect-ratio:1/1)');
+const SZER_PANELU = 260;   // musi się zgadzać z grid-template-columns w CSS
+const MIN_BOK_MAPY = 220;
+
+function dopasujMape(){
+  const obud = $('.mapa-obudowa');
+  const scena = $('.scena');
+  if(!obud || !scena) return;
+
+  // w układzie pionowym/telefonowym mapa wraca do sterowania samym CSS-em
+  if(!mqPoziom.matches){ obud.style.width = ''; return; }
+
+  const cs = getComputedStyle(scena);
+  const wolnaSzer = scena.clientWidth
+    - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+    - (parseFloat(cs.columnGap) || 0) - SZER_PANELU;
+
+  const legenda = $('.mapa-legenda');
+  const co = getComputedStyle(obud);
+  const wolnaWys = obud.clientHeight
+    - (legenda ? legenda.offsetHeight : 0)
+    - (parseFloat(co.rowGap) || 0);
+
+  const bok = Math.floor(Math.min(wolnaSzer, wolnaWys));
+  obud.style.width = Math.max(MIN_BOK_MAPY, bok) + 'px';
+}
+
+/* ============================================================
+   PANEL POSTACI
+   ============================================================ */
+function zbudujPostac(){
+  $('#staty-postaci').innerHTML = HERO.staty.map(([nazwa, wart])=>
+    `<div class="stat"><span>${txt(nazwa)}</span>
+       <span class="stat__tor"><i style="width:${wart}%"></i></span>
+       <span class="sr-only">${wart} na 100</span></div>`
+  ).join('');
+}
+
+/* ============================================================
+   MODAL — jeden komponent, wiele treści
+   ============================================================ */
+const modal      = $('#modal');
+const modalMedia = $('#modal-media');
+const modalTresc = $('#modal-tresc');
+let ostatniFokus = null;
+
+function otworzModal(mediaHtml, trescHtml){
+  // Karta bywa przerysowywana przy otwartym oknie (np. po „zapisz w glosariuszu").
+  // Punkt powrotu fokusa zapamiętujemy tylko przy pierwszym otwarciu — inaczej
+  // zapisalibyśmy przycisk, który za chwilę zniknie, i fokus nie wróciłby na pin.
+  const bylZamkniety = modal.classList.contains('is-hidden');
+  if(bylZamkniety) ostatniFokus = document.activeElement;
+  modalMedia.innerHTML = mediaHtml;
+  // karty bez grafiki (finisz) mają w układzie poziomym jedną kolumnę zamiast dwóch
+  $('#modal-panel').classList.toggle('bez-media', !mediaHtml);
+  modalTresc.innerHTML = trescHtml;
+  modal.classList.remove('is-hidden');
+  document.body.style.overflow = 'hidden';
+  const v = modalMedia.querySelector('video');
+  if(v){
+    // autoodtwarzanie WYŁĄCZNIE bez dźwięku — nigdy z dźwiękiem
+    v.muted = true;
+    const p = v.play();
+    if(p && p.catch) p.catch(()=>{ /* przeglądarka wstrzymała — zostaje poster */ });
+  }
+  // Fokus na kontener okna, nie na pierwszy przycisk treści:
+  // przy długich kartach (bestiariusz) fokus na przycisku przewijał panel
+  // na sam dół i użytkownik nie widział ani tytułu, ani filmu.
+  const panel = $('#modal-panel');
+  panel.scrollTop = 0;
+  panel.focus();
+  if(bylZamkniety) dzwiekOtwarcie();
+}
+
+function zamknijModal(){
+  const v = modalMedia.querySelector('video');
+  if(v){ v.pause(); v.removeAttribute('src'); v.load(); }
+  wlaczMuzyke();   // film ucichł, muzyka wraca (bez efektu, jeśli już gra)
+  modal.classList.add('is-hidden');
+  modalMedia.innerHTML = '';
+  modalTresc.innerHTML = '';
+  document.body.style.overflow = '';
+  if(ostatniFokus && ostatniFokus.isConnected) ostatniFokus.focus();
+  ostatniFokus = null;
+}
+
+/** Blok <video> zgodny z wymogami: wyciszony, playsinline, poster, metadata. */
+function blokWideo(zrodlo, poster, opis, idOpisu){
+  return `
+    <div class="media">
+      <video src="${txt(zrodlo)}" poster="${txt(poster)}"
+             muted loop playsinline preload="metadata"
+             aria-describedby="${idOpisu}"></video>
+      <button class="media__dzwiek" type="button" data-dzwiek-wideo
+              aria-pressed="false" aria-label="Włącz dźwięk filmu">
+        <span aria-hidden="true">🔇</span>
+      </button>
+      <p id="${idOpisu}" class="sr-only">${txt(opis)}</p>
+    </div>`;
+}
+
+function blokObraz(zrodlo, alt, podpis){
+  return `
+    <div class="media">
+      <img src="${txt(zrodlo)}" alt="${txt(alt)}" loading="lazy">
+      ${podpis ? `<p class="media__podpis">${txt(podpis)}</p>` : ''}
+    </div>`;
+}
+
+/* ============================================================
+   KARTA MIEJSCA — tryb WĘDRÓWKA (quiz, dane z A/B)
+   ============================================================ */
+function kartaWedrowka(m){
+  const juz = stan.zaliczone.has(m.id);
+
+  const media = blokObraz(m.foto, `${m.podpis}.`, `${m.podpis} · ${m.autor}`);
+
+  let html = `
+    <p class="modal__nadtytul">Miejscowość</p>
+    <h2 class="modal__tytul" id="modal-tytul">${txt(m.nazwa)}</h2>
+    <p class="tresc-tekst">${txt(m.ciekawostka)}</p>
+    <div class="blok"><strong>Warto zobaczyć:</strong> ${txt(m.zobacz)}</div>
+  `;
+
+  if(juz){
+    html += `<div class="reakcja reakcja--ok"><strong>Odkryte.</strong> ${txt(m.wyj)}</div>`;
+  } else {
+    html += `
+      <div class="quiz">
+        <p class="quiz__pytanie">${txt(m.pytanie)}</p>
+        <div class="quiz__opcje" id="quiz-opcje" role="group" aria-label="Odpowiedzi">
+          ${m.odp.map((o,i)=>`<button class="btn" type="button" data-odp="${i}">${txt(o)}</button>`).join('')}
+        </div>
+        <div id="reakcja" aria-live="polite"></div>
+      </div>`;
+  }
+
+  html += `<div class="modal__stopka"><button class="btn" type="button" data-zamknij>Wróć na mapę</button></div>`;
+  return { media, html };
+}
+
+function obsluzOdpowiedz(m, wybor, przycisk){
+  const opcje = $('#quiz-opcje');
+  const reakcja = $('#reakcja');
+  if(!opcje || !reakcja) return;
+
+  if(wybor === m.dobra){
+    stan.seria += 1;
+    const mnoznik = stan.seria >= 2 ? 2 : 1;
+    stan.xp += XP_ZA_PIN * mnoznik;
+    stan.zaliczone.add(m.id);
+    zapisz();
+    dzwiekOk(stan.seria);
+
+    $$('button', opcje).forEach((b,i)=>{
+      b.disabled = true;
+      if(i === m.dobra) b.classList.add('dobra');
+    });
+    reakcja.className = 'reakcja reakcja--ok';
+    reakcja.innerHTML = `<strong>Dobrze! +${XP_ZA_PIN * mnoznik} XP</strong><br>${txt(m.wyj)}`;
+
+    odswiezHud();
+    odswiezPiny();
+
+    if(stan.zaliczone.size === SUMA) setTimeout(pokazFinisz, 900);
+  } else {
+    stan.seria = 0;
+    zapisz();
+    dzwiekBlad();
+    przycisk.classList.add('zla');
+    przycisk.disabled = true;
+    reakcja.className = 'reakcja reakcja--zle';
+    reakcja.textContent = 'Nie tym razem. Spróbuj jeszcze raz.';
+    odswiezHud();
+  }
+}
+
+/* ============================================================
+   KARTA LORE — tryb BESTIARIUSZ (dane z A, filmy z B)
+   ============================================================ */
+function kartaLore(m){
+  const l = m.lore;
+  const idOpisu = `wideo-opis-${m.id}`;
+  let akcje = '';   // przyciski akcji lądują we wspólnej stopce na końcu karty
+
+  const media = l.wideo
+    ? blokWideo(l.wideo, l.poster, l.wideoOpis, idOpisu)
+    : blokObraz(l.obraz, l.obrazAlt, l.nazwa);
+
+  let html = `
+    <div class="naglowek-lore">
+      <div class="szkic" aria-hidden="true">${SZKICE[l.szkic] || ''}</div>
+      <div>
+        <p class="modal__nadtytul">${l.typ === 'bestia' ? 'Bestiariusz' : 'Opowieść z drogi'}</p>
+        <h2 class="modal__tytul" id="modal-tytul">${txt(l.nazwa)}</h2>
+        ${l.rodzaj ? `<p class="tresc-tekst" style="margin:0;color:var(--ink-mut);font-size:.82rem">${txt(l.rodzaj)}</p>` : ''}
+      </div>
+    </div>
+    <p class="cytat">„${txt(l.cytat)}”</p>
+    <p class="tresc-tekst">${txt(l.opis)}</p>
+  `;
+
+  if(l.demonologia){
+    html += `<div class="blok"><strong>W wierzeniach słowiańskich:</strong> ${txt(l.demonologia)}</div>`;
+  }
+
+  if(l.typ === 'bestia'){
+    // Trzy bloki cech w jednym pojemniku — na szerokim ekranie stają obok siebie.
+    // Ustawione jeden pod drugim wydłużały kartę bestii o kilkaset pikseli i to
+    // ona (nie karta miejsca) nie mieściła się w oknie.
+    html += `
+      <div class="bloki-cech">
+        <div class="blok">
+          <strong>Statystyki</strong>
+          <ul class="lista-cech">
+            ${l.statystyki.map(([n,w])=>`<li>${txt(n)} — ${gwiazdki(w)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="blok">
+          <strong>Wrażliwości</strong>
+          <ul class="lista-cech">${l.wrazliwosci.map(w=>`<li>${txt(w)}</li>`).join('')}</ul>
+        </div>
+        <div class="blok">
+          <strong>Odporności</strong>
+          <ul class="lista-cech">${l.odpornosci.map(w=>`<li>${txt(w)}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div class="blok blok--ostrzezenie"><strong>Czym groźna:</strong> ${txt(l.groznaBo)}</div>
+    `;
+    if(!stan.poznane.has(m.id)){
+      // Trafia do WSPÓLNEJ stopki niżej. Osobna stopka na ten przycisk dokładała
+      // kartom bestii cały dodatkowy rząd i to przez nią najdłuższe wpisy
+      // (te z blokiem o wierzeniach) nie mieściły się w oknie.
+      akcje = `<button class="btn btn--primary" type="button" data-zbadaj>Zapisz w glosariuszu (+${XP_ZA_PIN} XP)</button>`;
+    } else {
+      html += `<div class="reakcja reakcja--ok"><strong>Wpis zapisany w glosariuszu.</strong></div>`;
+    }
+  } else {
+    // miejsce — scenariusz z trzema wyborami
+    const juz = stan.poznane.has(m.id);
+    if(juz){
+      html += `<div class="reakcja reakcja--ok"><strong>Ta droga jest już przebyta.</strong><br>${txt(l.wybory[l.dobra].wynik)}</div>`;
+    } else {
+      html += `
+        <div class="quiz">
+          <p class="quiz__pytanie">Co robisz?</p>
+          <div class="quiz__opcje" id="lore-opcje" role="group" aria-label="Możliwe decyzje">
+            ${l.wybory.map((w,i)=>`<button class="btn" type="button" data-wybor="${i}">${txt(w.etykieta)}</button>`).join('')}
+          </div>
+          <div id="lore-wynik" aria-live="polite"></div>
+        </div>`;
+    }
+  }
+
+  html += `<div class="modal__stopka">${akcje}<button class="btn" type="button" data-zamknij>Wróć na mapę</button></div>`;
+  return { media, html };
+}
+
+function obsluzWybor(m, i){
+  const l = m.lore;
+  const opcje = $('#lore-opcje');
+  const wynik = $('#lore-wynik');
+  if(!opcje || !wynik) return;
+
+  const trafne = (i === l.dobra);
+  $$('button', opcje).forEach((b,j)=>{
+    b.disabled = true;
+    if(j === l.dobra) b.classList.add('dobra');
+    else if(j === i)  b.classList.add('zla');
+  });
+
+  if(trafne){
+    stan.xp += XP_ZA_PIN;
+    dzwiekOk(1);
+  } else {
+    dzwiekBlad();
+  }
+  stan.poznane.add(m.id);
+  zapisz();
+
+  wynik.className = trafne ? 'reakcja reakcja--ok' : 'reakcja reakcja--zle';
+  wynik.innerHTML = (trafne ? `<strong>Najlepsze wyjście. +${XP_ZA_PIN} XP</strong><br>` : '') + txt(l.wybory[i].wynik);
+
+  odswiezHud();
+  odswiezPiny();
+}
+
+function zbadajBestie(m){
+  stan.xp += XP_ZA_PIN;
+  stan.poznane.add(m.id);
+  zapisz();
+  dzwiekOk(1);
+  odswiezHud();
+  odswiezPiny();
+  otworzKarte(m);   // przerysuj kartę w stanie „zapisane"
+}
+
+/* ============================================================
+   OTWIERANIE KART
+   ============================================================ */
+function otworzKarte(m){
+  const { media, html } = (stan.tryb === 'wedrowka') ? kartaWedrowka(m) : kartaLore(m);
+  otworzModal(media, html);
+
+  // podpięcie akcji wewnątrz świeżo wygenerowanej treści
+  const opcje = $('#quiz-opcje');
+  if(opcje){
+    opcje.addEventListener('click', e=>{
+      const b = e.target.closest('[data-odp]');
+      if(b && !b.disabled) obsluzOdpowiedz(m, Number(b.dataset.odp), b);
+    });
+  }
+  const loreOpcje = $('#lore-opcje');
+  if(loreOpcje){
+    loreOpcje.addEventListener('click', e=>{
+      const b = e.target.closest('[data-wybor]');
+      if(b && !b.disabled) obsluzWybor(m, Number(b.dataset.wybor));
+    });
+  }
+  const zbadaj = modalTresc.querySelector('[data-zbadaj]');
+  if(zbadaj) zbadaj.addEventListener('click', ()=> zbadajBestie(m));
+}
+
+function otworzPostac(){
+  const media = blokObraz('media/borzyslaw.jpg',
+    'Pełna sylwetka Borzysława — brodaty łowca w skórzanym kaftanie, z toporem i tarczą.', '');
+  const html = `
+    <p class="modal__nadtytul">Twoja postać</p>
+    <h2 class="modal__tytul" id="modal-tytul">${txt(HERO.imie)}</h2>
+    <p class="tresc-tekst" style="color:var(--gold)">${txt(HERO.tytul)} · pogromca bestii</p>
+    <div class="blok">
+      <strong>Statystyki</strong>
+      <ul class="lista-cech">
+        ${HERO.staty.map(([n,w])=>`<li>${txt(n)} — ${w}/100</li>`).join('')}
+      </ul>
+    </div>
+    <div class="blok">${txt(HERO.ekwipunek)}</div>
+    <div class="modal__stopka"><button class="btn" type="button" data-zamknij>Zamknij</button></div>`;
+  otworzModal(media, html);
+}
+
+function pokazFinisz(){
+  const proc = stan.zaliczone.size / SUMA;
+  let tytul, opis;
+  if(proc === 1){ tytul = 'Cała gmina odkryta!'; opis = 'Przeszedłeś wszystkie dziesięć przystanków. Warmia nie ma już przed tobą tajemnic.'; }
+  else if(proc >= .6){ tytul = 'Dobra wędrówka'; opis = 'Sporo już wiesz, ale kilka miejsc wciąż czeka.'; }
+  else { tytul = 'Droga dopiero się zaczyna'; opis = 'Wróć na mapę i odkryj resztę przystanków.'; }
+
+  const html = `
+    <div class="finisz">
+      <p class="finisz__wynik">${stan.zaliczone.size}<small> / ${SUMA}</small></p>
+      <h2 id="modal-tytul">${txt(tytul)}</h2>
+      <p>${txt(opis)}</p>
+      <p style="color:var(--gold);font-weight:600;margin-bottom:var(--sp-5)">Wynik: ${stan.xp} XP</p>
+      <div class="modal__stopka" style="justify-content:center">
+        <button class="btn" type="button" data-zamknij>Zostań na mapie</button>
+        <button class="btn btn--primary" type="button" data-restart>Wędruj jeszcze raz</button>
+      </div>
+    </div>`;
+  otworzModal('', html);
+  const r = modalTresc.querySelector('[data-restart]');
+  if(r) r.addEventListener('click', restart);
+}
+
+function restart(){
+  stan.xp = 0;
+  stan.seria = 0;
+  stan.zaliczone.clear();
+  stan.poznane.clear();
+  zapisz();
+  odswiezHud();
+  odswiezPiny();
+  zamknijModal();
+}
+
+/* ============================================================
+   TRYBY
+   ============================================================ */
+function ustawTryb(tryb){
+  stan.tryb = tryb;
+  zapisz();
+  $('#tryb-wedrowka').setAttribute('aria-pressed', String(tryb === 'wedrowka'));
+  $('#tryb-bestiariusz').setAttribute('aria-pressed', String(tryb === 'bestiariusz'));
+  $$('.pin').forEach(p=>{
+    const m = MIEJSCA.find(x=>x.id === p.dataset.id);
+    if(m) p.setAttribute('aria-label',
+      `${m.nazwa} — ${tryb === 'wedrowka' ? 'otwórz kartę miejsca' : 'otwórz wpis bestiariusza'}`);
+  });
+  odswiezPiny();
+}
+
+/* ============================================================
+   INTRO
+   ============================================================ */
+function startIntro(gotowe){
+  const sekcja = $('#intro');
+  const video  = $('#intro-video');
+  const start  = $('#intro-start');
+  const skip   = $('#intro-skip');
+  const snd    = $('#intro-dzwiek');
+  const tytul  = $('#intro-title');
+  const sub    = $('#intro-sub');
+  const overlay = $('#intro-overlay');
+  const sterow  = $('#intro-sterowanie');
+
+  let zakonczone = false;
+  let timerKoniec = null;
+
+  const koniec = ()=>{
+    if(zakonczone) return;
+    zakonczone = true;
+    if(timerKoniec) clearTimeout(timerKoniec);
+    sekcja.classList.add('zanika');
+    setTimeout(()=>{
+      sekcja.classList.add('is-hidden');
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+      gotowe();
+    }, 1200);
+  };
+
+  skip.addEventListener('click', koniec);
+  video.addEventListener('ended', koniec);
+
+  snd.addEventListener('click', ()=>{
+    ustawDzwiek(!stan.dzwiek);
+    video.muted = !stan.dzwiek;
+  });
+
+  start.addEventListener('click', ()=>{
+    start.classList.add('is-hidden');
+    overlay.classList.add('film');
+    sterow.classList.remove('is-hidden');
+
+    // Kliknięcie „Rozpocznij podróż" to gest użytkownika, więc przeglądarka
+    // pozwala puścić film od razu z dźwiękiem. Jedyne, co go blokuje, to
+    // wcześniejsze wyciszenie gry przez samego użytkownika.
+    video.muted = !stan.dzwiek;
+    video.src = 'media/intro.mp4';
+    const p = video.play();
+    if(p && p.catch) p.catch(err=>{
+      // Wyciszamy TYLKO gdy przeglądarka odmówiła zgody na dźwięk. Inne odrzucenia
+      // (przerwane ładowanie, zmiana źródła) nie mają z dźwiękiem nic wspólnego,
+      // a wyciszanie filmu przy każdym z nich gasiło muzykę bez powodu.
+      if(!err || err.name !== 'NotAllowedError') return;
+      stan.dzwiek = false;
+      odswiezPrzyciskiDzwieku();
+      video.muted = true;
+      const p2 = video.play();
+      if(p2 && p2.catch) p2.catch(()=> koniec());
+    });
+
+    setTimeout(()=> tytul.classList.add('widoczny'), 600);
+    setTimeout(()=> sub.classList.add('widoczny'), 2200);
+    setTimeout(()=>{
+      tytul.classList.remove('widoczny');
+      sub.classList.remove('widoczny');
+    }, 9000);
+
+    timerKoniec = setTimeout(koniec, 32000);
+  });
+
+  // tytuł i podtytuł widoczne od razu na ekranie startowym
+  tytul.classList.add('widoczny');
+  sub.classList.add('widoczny');
+}
+
+/* ============================================================
+   START — jeden punkt wejścia
+   ============================================================ */
+function startGry(){
+  $('#gra').classList.remove('is-hidden');
+  zbudujMape();
+  zbudujPostac();
+  ustawTryb(stan.tryb);
+  odswiezHud();
+  // muzyka gra dalej po zejściu intro — do mapy wchodzi się bez ciszy
+  mapaAktywna = true;
+  wlaczMuzyke();
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  wczytaj();
+
+  odswiezPrzyciskiDzwieku();
+
+  startIntro(startGry);
+
+  /* --- JEDEN nasłuchiwacz klawiatury na cały serwis --- */
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && !modal.classList.contains('is-hidden')) zamknijModal();
+  });
+
+  /* --- JEDNA delegacja kliknięć dla zamykania --- */
+  modal.addEventListener('click', e=>{
+    if(e.target.closest('[data-zamknij]')) zamknijModal();
+    const d = e.target.closest('[data-dzwiek-wideo]');
+    if(d){
+      const v = modalMedia.querySelector('video');
+      if(v){
+        v.muted = !v.muted;
+        d.setAttribute('aria-pressed', String(!v.muted));
+        d.innerHTML = `<span aria-hidden="true">${v.muted ? '🔇' : '🔊'}</span>`;
+        d.setAttribute('aria-label', v.muted ? 'Włącz dźwięk filmu' : 'Wycisz film');
+        // dwie ścieżki naraz robią kakofonię — muzyka ustępuje filmowi
+        if(v.muted) wlaczMuzyke(); else zatrzymajMuzyke();
+      }
+    }
+  });
+
+  /* --- HUD --- */
+  $('#tryb-wedrowka').addEventListener('click', ()=> ustawTryb('wedrowka'));
+  $('#tryb-bestiariusz').addEventListener('click', ()=> ustawTryb('bestiariusz'));
+
+  $('#btn-dzwiek').addEventListener('click', ()=>{
+    ustawDzwiek(!stan.dzwiek);
+    if(stan.dzwiek) ton(660, 0.1, 'triangle', 0.14);
+  });
+
+  $('#btn-reset').addEventListener('click', ()=>{
+    if(stan.xp === 0 && stan.zaliczone.size === 0){ restart(); return; }
+    pokazFinisz();
+  });
+
+  $('#postac-avatar').addEventListener('click', otworzPostac);
+
+  /* --- mapa przelicza swój bok przy każdej zmianie warunków --- */
+  let ramka = null;
+  const przelicz = ()=>{
+    if(ramka) cancelAnimationFrame(ramka);
+    ramka = requestAnimationFrame(dopasujMape);
+  };
+  window.addEventListener('resize', przelicz);
+  window.addEventListener('orientationchange', przelicz);
+  if(mqPoziom.addEventListener) mqPoziom.addEventListener('change', przelicz);
+  // gotowe fonty zmieniają wysokość legendy, więc bok mapy trzeba policzyć raz jeszcze
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(przelicz);
+  /* Scena zmienia rozmiar także wtedy, gdy HUD przełamie się na dwa rzędy albo
+     stopka zmieni liczbę wierszy. Jej wymiary nie zależą od szerokości mapy,
+     więc obserwowanie jej nie tworzy pętli. */
+  if(window.ResizeObserver) new ResizeObserver(przelicz).observe($('.scena'));
+});
+</script>
+</body>
+</html>

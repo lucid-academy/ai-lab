@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Szczeciński Dziennik Sezonu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@400;500&family=Alegreya:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: jedna kolumna „dziennika pokładowego” (maks. 1080px); każdy wpis = sekcja z wykresem na jasnej tablicy, jak mapa morska z pergaminu; nocą ta sama mapa w granacie */
+:root {
+  --page: #ebdfc3;
+  --plate: #f4ead3;
+  --ink: #2a2216;
+  --ink-2: #5a4c36;
+  --muted: #6f6045;
+  --hair: #dccfae;
+  --rule: #b8a57e;
+  --sea: #1b64a6;
+  --sea-wash: rgba(27, 100, 166, .12);
+  --sea-soft: #a9c3de;
+  --verd: #23906a;
+  --brass: #b27a0c;
+  --rust: #b8452b;
+  --sepia: #8c7a58;
+  --sepia-soft: #d3c4a0;
+  --on-K: #ffffff;
+  --on-R: #ffffff;
+  --on-Z: #1c160c;
+  --fog: rgba(235, 223, 195, .78);
+  --grain: .10;
+  --shadow: 0 1px 0 rgba(42, 34, 22, .05), 0 10px 28px -16px rgba(42, 34, 22, .35);
+  --f-display: "Alegreya SC", "Alegreya", Georgia, "Times New Roman", serif;
+  --f-italic: "Alegreya", Georgia, "Times New Roman", serif;
+  --f-body: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0e1920; --plate: #13202a; --ink: #ecdfc3; --ink-2: #c4b393; --muted: #9d8e76;
+    --hair: #22323d; --rule: #3a4b57; --sea: #4a8fdc; --sea-wash: rgba(74, 143, 220, .14); --sea-soft: #2b4d72;
+    --verd: #3aa37a; --brass: #b8862a; --rust: #d9674c; --sepia: #7d705c; --sepia-soft: #3c3a33;
+    --on-K: #0b141a; --on-R: #0b141a; --on-Z: #0b141a; --fog: rgba(14, 25, 32, .80); --grain: .05;
+    --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 30px -18px rgba(0, 0, 0, .8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0e1920; --plate: #13202a; --ink: #ecdfc3; --ink-2: #c4b393; --muted: #9d8e76;
+  --hair: #22323d; --rule: #3a4b57; --sea: #4a8fdc; --sea-wash: rgba(74, 143, 220, .14); --sea-soft: #2b4d72;
+  --verd: #3aa37a; --brass: #b8862a; --rust: #d9674c; --sepia: #7d705c; --sepia-soft: #3c3a33;
+  --on-K: #0b141a; --on-R: #0b141a; --on-Z: #0b141a; --fog: rgba(14, 25, 32, .80); --grain: .05;
+  --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 30px -18px rgba(0, 0, 0, .8);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font: 400 15px/1.6 var(--f-body);
+  padding-inline: clamp(16px, 4vw, 40px);
+  padding-block: 0 48px;
+  position: relative;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .25 0 0 0 0 .18 0 0 0 0 .08 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.wrap { max-width: 1080px; margin: 0 auto; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 72px; }
+
+/* pasek demo */
+.demo-strip {
+  display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between; align-items: center;
+  padding-block: 12px; border-bottom: 1px solid var(--rule);
+  font: 500 11px/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2);
+}
+.demo-strip b { color: var(--rust); font-weight: 500; }
+
+/* typografia */
+h1, h2, h3 { margin: 0; font-weight: 400; text-wrap: balance; }
+h1 { font: 400 clamp(34px, 5.4vw, 60px)/1.06 var(--f-display); letter-spacing: 0; }
+h2 { font: 400 clamp(26px, 3.6vw, 36px)/1.12 var(--f-display); }
+h3 { font: 600 14px/1.3 var(--f-body); }
+p { margin: 0; max-width: 66ch; }
+.eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  font: 500 11px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2);
+}
+.eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--rule); max-width: 220px; }
+.lede { font-size: 17px; line-height: 1.6; color: var(--ink); }
+.muted { color: var(--muted); }
+.fine { font-size: 12.5px; color: var(--muted); }
+a { color: var(--sea); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--sea); outline-offset: 3px; border-radius: 2px; }
+
+/* hero */
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: center; padding-top: 40px; }
+.hero-text { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.coords { font: 400 12px/1 var(--f-mono); color: var(--muted); letter-spacing: .04em; }
+.rhumb { position: absolute; left: 0; top: 0; width: 100%; height: 760px; pointer-events: none; z-index: 0; color: var(--hair); overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent); mask-image: linear-gradient(180deg, #000 55%, transparent); }
+.deltas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hair); }
+.deltas div { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--ink-2); min-width: 0; }
+.deltas strong { font: 600 16px/1.2 var(--f-body); color: var(--ink); }
+.deltas span { display: inline-flex; align-items: center; gap: 6px; }
+.cartouche { position: relative; width: clamp(200px, 26vw, 290px); }
+.cartouche img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); box-shadow: var(--shadow); }
+.stamp {
+  position: absolute; left: -30px; bottom: -18px; transform: rotate(-6deg);
+  border: 2px solid var(--rust); color: var(--rust); background: color-mix(in srgb, var(--plate) 70%, transparent);
+  font: 500 15px/1 var(--f-mono); letter-spacing: .32em; text-transform: uppercase; padding: 9px 10px 9px 16px; text-align: center;
+}
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 8px; }
+.tile { background: var(--plate); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tile .lbl { font: 500 12px/1.3 var(--f-body); color: var(--ink-2); }
+.tile .val { font: 600 30px/1.1 var(--f-body); letter-spacing: -.01em; }
+.tile .delta { font: 500 12.5px/1.3 var(--f-body); color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+.tri { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid var(--sea); }
+.tile.hi .val { color: var(--ink); }
+
+/* sekcje */
+section.entry { display: flex; flex-direction: column; gap: 20px; }
+.head { display: flex; flex-direction: column; gap: 14px; }
+.plate { background: var(--plate); border: 1px solid var(--rule); box-shadow: var(--shadow); padding: 20px clamp(14px, 2.5vw, 26px) 16px; min-width: 0; }
+.plate-title { font: 600 13px/1.35 var(--f-body); color: var(--ink); margin-bottom: 2px; }
+.plate-sub { font: 400 12.5px/1.4 var(--f-body); color: var(--muted); margin-bottom: 12px; }
+.chart { width: 100%; min-width: 0; position: relative; }
+.chart svg { display: block; overflow: visible; }
+.note {
+  font: italic 400 17.5px/1.5 var(--f-italic); color: var(--ink-2); max-width: 70ch;
+  padding-left: 16px; border-left: 1px solid var(--rule);
+}
+.note b { font: 600 11px/1 var(--f-mono); font-style: normal; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); margin-right: 6px; }
+.two { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; }
+
+/* kontrolki */
+.controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-bottom: 14px; }
+.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--rule); background: var(--page); }
+.seg button {
+  font: 500 12.5px/1 var(--f-body); color: var(--ink-2); background: transparent; border: 0; padding: 9px 12px; cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button:hover { background: var(--sea-wash); }
+.seg button[aria-checked="true"] { background: var(--ink); color: var(--plate); }
+.ctl-label { font: 500 10.5px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 8px; }
+.readout { display: flex; flex-wrap: wrap; gap: 4px 22px; align-items: baseline; font-size: 13px; color: var(--ink-2); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+.readout strong { font: 600 20px/1.2 var(--f-body); color: var(--ink); }
+.warn-line { font-size: 12.5px; color: var(--rust); margin-top: 6px; }
+
+/* legenda */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); margin-bottom: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+.lk { width: 16px; height: 0; border-top: 2px solid; display: inline-block; }
+.dotk { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.bg-sea { background: var(--sea); } .bg-verd { background: var(--verd); } .bg-brass { background: var(--brass); }
+.bg-rust { background: var(--rust); } .bg-sepia { background: var(--sepia); }
+.bc-sea { border-color: var(--sea); } .bc-sepia { border-color: var(--sepia); }
+
+/* small multiples */
+.multiples { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.panel { background: var(--plate); border: 1px solid var(--rule); padding: 14px 12px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.panel h3 { font: 400 20px/1.1 var(--f-display); }
+.panel .split { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--hair); padding-top: 8px; }
+.panel .split b { font-weight: 600; color: var(--ink); }
+
+/* fakty Żagli */
+.facts { display: flex; flex-direction: column; gap: 14px; }
+.fact { display: flex; flex-direction: column; gap: 2px; padding-bottom: 12px; border-bottom: 1px solid var(--hair); }
+.fact:last-child { border-bottom: 0; padding-bottom: 0; }
+.fact .v { font: 600 26px/1.15 var(--f-body); }
+.fact .t { font-size: 13px; color: var(--ink-2); }
+
+/* ostrzeżenia */
+.notices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.notice { background: var(--plate); border: 1px solid var(--rule); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.notice .no { font: 500 10.5px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--rust); }
+.notice h3 { font-size: 14.5px; }
+.notice p { font-size: 13.5px; color: var(--ink-2); }
+.notice.wide { grid-column: 1 / -1; }
+
+/* niezbadane wody */
+.fogs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.fogcard { background: var(--plate); border: 1px solid var(--rule); display: flex; flex-direction: column; min-width: 0; }
+.fogviz { position: relative; height: 150px; overflow: hidden; border-bottom: 1px solid var(--hair); color: var(--ink-2); }
+.fogviz svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: blur(2.6px); opacity: .55; }
+.fogviz::after {
+  content: ""; position: absolute; inset: -20px;
+  background:
+    radial-gradient(60% 55% at 30% 40%, var(--fog), transparent 70%),
+    radial-gradient(55% 60% at 75% 65%, var(--fog), transparent 70%),
+    linear-gradient(180deg, transparent, var(--fog) 95%);
+  background-size: 140% 100%, 150% 100%, 100% 100%;
+  animation: drift 26s ease-in-out infinite alternate;
+}
+.fogviz .tag {
+  position: absolute; left: 12px; top: 12px; z-index: 2;
+  font: italic 400 15px/1 var(--f-italic); color: var(--ink-2);
+}
+@keyframes drift { from { background-position: 0% 0, 100% 0, 0 0; } to { background-position: 100% 0, 0% 0, 0 0; } }
+.fogbody { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.fogbody h3 { font: 400 20px/1.15 var(--f-display); }
+.fogbody p { font-size: 13.5px; color: var(--ink-2); }
+.need { margin-top: auto; padding-top: 6px; font: 400 11.5px/1.45 var(--f-mono); color: var(--muted); }
+.need span { color: var(--ink); }
+
+/* oferta */
+.offer { display: flex; flex-direction: column; border-top: 1px solid var(--ink); }
+.offer-row { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.6fr); gap: 6px 36px; padding: 20px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.offer-row h3 { font: 400 23px/1.2 var(--f-display); }
+.offer-row p { font-size: 14.5px; color: var(--ink-2); }
+.cta { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: baseline; justify-content: space-between; background: var(--plate); border: 1px solid var(--rule); box-shadow: var(--shadow); padding: 18px 22px; }
+.cta p { font: italic 400 18px/1.45 var(--f-italic); color: var(--ink); max-width: 56ch; }
+.cta .who { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--ink-2); }
+.cta .who b { font-weight: 600; color: var(--ink); }
+
+/* tabela */
+details.data { background: var(--plate); border: 1px solid var(--rule); }
+details.data summary { cursor: pointer; padding: 14px 18px; font: 600 13.5px/1.3 var(--f-body); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+details.data summary::-webkit-details-marker { display: none; }
+details.data summary::after { content: "+"; font: 400 18px/1 var(--f-mono); color: var(--muted); }
+details.data[open] summary::after { content: "−"; }
+.tablewrap { overflow-x: auto; padding: 0 18px 18px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; min-width: 760px; }
+th, td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+th { font: 600 11px/1.3 var(--f-body); color: var(--ink-2); text-align: right; border-bottom: 1px solid var(--rule); }
+th:first-child, th:nth-child(2), td:first-child, td:nth-child(2) { text-align: left; }
+td.flag { color: var(--rust); }
+
+/* stopka */
+footer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 24px; align-items: center; border-top: 1px solid var(--rule); padding-top: 28px; }
+footer img { width: 128px; height: auto; border: 1px solid var(--rule); display: block; }
+footer .ft { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); min-width: 0; }
+footer .ft strong { font: 400 22px/1.1 var(--f-display); color: var(--ink); }
+.mail { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); user-select: all; }
+.sources { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+
+/* dymek */
+#tip {
+  position: fixed; z-index: 50; pointer-events: none; min-width: 150px; max-width: 260px;
+  background: var(--plate); border: 1px solid var(--rule); box-shadow: var(--shadow);
+  padding: 10px 12px; font-size: 12.5px; color: var(--ink-2); display: flex; flex-direction: column; gap: 5px;
+}
+#tip .tt { font: 600 12px/1.2 var(--f-body); color: var(--ink); margin-bottom: 2px; }
+#tip .row { display: flex; align-items: center; gap: 8px; }
+#tip .row strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+#tip .row .rl { margin-left: auto; padding-left: 10px; }
+
+/* elementy SVG */
+.ax { fill: var(--muted); font: 400 11px var(--f-body); font-variant-numeric: tabular-nums; }
+.ax-l { fill: var(--ink-2); font: 500 12px var(--f-body); }
+.gl { stroke: var(--hair); stroke-width: 1; shape-rendering: crispEdges; }
+.bl { stroke: var(--rule); stroke-width: 1; shape-rendering: crispEdges; }
+.refl { stroke: var(--ink-2); stroke-width: 1; }
+.l26 { fill: none; stroke: var(--sea); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.l25 { fill: none; stroke: var(--sepia); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.a26 { fill: var(--sea-wash); stroke: none; }
+.d26 { fill: var(--sea); stroke: var(--plate); stroke-width: 2; }
+.d25 { fill: var(--sepia); stroke: var(--plate); stroke-width: 2; }
+.f-sea { fill: var(--sea); } .f-rust { fill: var(--rust); } .f-verd { fill: var(--verd); } .f-brass { fill: var(--brass); }
+.f-sepia { fill: var(--sepia); } .f-sea-soft { fill: var(--sea-soft); } .f-sepia-soft { fill: var(--sepia-soft); }
+.on-K { fill: var(--on-K); font: 600 12px var(--f-body); } .on-R { fill: var(--on-R); font: 600 12px var(--f-body); } .on-Z { fill: var(--on-Z); font: 600 12px var(--f-body); }
+.vlab { fill: var(--ink); font: 600 12px var(--f-body); font-variant-numeric: tabular-nums; }
+.vlab-2 { fill: var(--ink-2); font: 500 11.5px var(--f-body); font-variant-numeric: tabular-nums; }
+.anno { fill: var(--ink-2); font: italic 400 15px var(--f-italic); }
+.anno-l { stroke: var(--ink-2); stroke-width: 1; }
+.xh { stroke: var(--ink-2); stroke-width: 1; }
+.hit { fill: transparent; cursor: crosshair; }
+.bar { transition: opacity .12s; cursor: default; }
+.bar:hover, .bar:focus { opacity: .78; outline: none; }
+.conn { stroke: var(--rule); stroke-width: 2; }
+.hatch-line { stroke: var(--sea); stroke-width: 1.5; }
+
+@media (max-width: 860px) {
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .multiples { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two { grid-template-columns: minmax(0, 1fr); }
+  .fogs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-top: 28px; }
+  .cartouche { justify-self: center; width: min(240px, 70vw); }
+  .stamp { left: -14px; }
+  .tiles { margin-top: -20px !important; }
+  .notices { grid-template-columns: minmax(0, 1fr); }
+  .fogs { grid-template-columns: minmax(0, 1fr); }
+  .tile .val { font-size: 25px; }
+  footer { grid-template-columns: minmax(0, 1fr); }
+  .offer-row { grid-template-columns: minmax(0, 1fr); }
+  .wrap { gap: 56px; }
+}
+@media (max-width: 420px) {
+  .multiples { grid-template-columns: minmax(0, 1fr); }
+  .seg button { padding: 8px 8px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fogviz::after { animation: none; }
+  .bar { transition: none; }
+}
+</style>
+</head>
+<body>
+
+
+<svg class="rhumb" id="rhumb" aria-hidden="true"></svg>
+<div class="wrap">
+
+  <div class="demo-strip">
+    <span><b>Demo</b> · analiza przygotowana dla Żeglugi Szczecińskiej</span>
+    <span>Lucid Academy · wrzesień 2026</span>
+  </div>
+
+  <header class="hero" id="hero">
+    <div class="hero-text">
+      <div class="eyebrow">Dziennik sezonu · styczeń–sierpień 2026</div>
+      <h1>Liczba turystów w&nbsp;Szczecinie wzrosła o&nbsp;7,9%</h1>
+      <p class="lede">W okresie styczeń–sierpień 2026 roku Szczecin odwiedziło 947,6&nbsp;tys. turystów, o&nbsp;69&nbsp;tys. więcej niż przed rokiem. Najwyższą dynamikę odnotowano w&nbsp;ruchu zagranicznym (+20,6%). Od maja każdy miesiąc zamyka się wynikiem wyższym niż w&nbsp;2025&nbsp;roku.</p>
+      <div class="coords">53°25′N · 14°33′E · źródło danych: Selectivv</div>
+    </div>
+    <div class="cartouche" id="cartouche">
+      <img src="logo.jpg" alt="Logo Lucid Academy w stylu dawnej mapy morskiej, z napisem Powered by" width="640" height="640">
+      <div class="stamp">Demo</div>
+    </div>
+  </header>
+
+  <div class="tiles" id="tiles" style="margin-top:-28px"></div>
+
+  <section class="entry" id="przyplyw">
+    <div class="head">
+      <div class="eyebrow">Przypływ</div>
+      <h2>Sezon miesiąc po miesiącu</h2>
+      <p>Wykres przedstawia wartości miesięczne dla wybranej grupy turystów i miary. Kolor niebieski oznacza rok 2026, sepia rok 2025. Najwyższe wartości przypadają na sierpień, w którym odbywają się Żagle i trwa szczyt sezonu wakacyjnego.</p>
+    </div>
+    <div class="plate">
+      <div class="controls">
+        <div><span class="ctl-label">Grupa</span>
+          <div class="seg" role="radiogroup" aria-label="Grupa turystów" id="seg-cat">
+            <button type="button" role="radio" id="cat-all" data-v="all" aria-checked="true">Wszyscy</button>
+            <button type="button" role="radio" id="cat-K" data-v="K" aria-checked="false">Krajowi</button>
+            <button type="button" role="radio" id="cat-R" data-v="R" aria-checked="false">Regionalni</button>
+            <button type="button" role="radio" id="cat-Z" data-v="Z" aria-checked="false">Zagraniczni</button>
+          </div>
+        </div>
+        <div><span class="ctl-label">Miara</span>
+          <div class="seg" role="radiogroup" aria-label="Miara" id="seg-met">
+            <button type="button" role="radio" id="met-u" data-v="u" aria-checked="true">Turyści</button>
+            <button type="button" role="radio" id="met-p" data-v="p" aria-checked="false">Przyjazdy</button>
+            <button type="button" role="radio" id="met-n" data-v="n" aria-checked="false">Noclegi</button>
+          </div>
+        </div>
+      </div>
+      <div class="readout" id="tide-readout"></div>
+      <div class="legend">
+        <span><i class="lk bc-sea"></i>2026</span>
+        <span><i class="lk bc-sepia"></i>2025</span>
+      </div>
+      <div class="chart" id="tide" aria-label="Wykres liniowy: wartości miesięczne 2025 i 2026"></div>
+      <div class="warn-line" id="tide-warn" hidden>Miesięczne dane o noclegach wykazują dużą zmienność (zob. kwestie do weryfikacji). Do porównań zalecamy sumy za cały okres.</div>
+    </div>
+    <p class="note"><b>Rekomendacja</b>W lipcu i sierpniu 2026 roku liczba turystów była o 15% wyższa niż przed rokiem. Rosnący popyt w szczycie sezonu przemawia za zwiększeniem liczby kursów oraz za analizą możliwości wydłużenia sezonu rejsowego.</p>
+  </section>
+
+  <section class="entry" id="dwa-tempa">
+    <div class="head">
+      <div class="eyebrow">Mielizna</div>
+      <h2>Słabszy początek roku, silniejszy sezon letni</h2>
+      <p>Wykresy pokazują zmianę liczby turystów względem analogicznego miesiąca 2025 roku. W okresie styczeń–kwiecień liczba turystów krajowych była niższa o 9,7%, natomiast w okresie maj–sierpień wyższa o 13,5%. Ruch zagraniczny wzrósł w każdym z ośmiu miesięcy.</p>
+    </div>
+    <div class="legend">
+      <span><i class="sw bg-sea"></i>wzrost r/r</span>
+      <span><i class="sw bg-rust"></i>spadek r/r</span>
+    </div>
+    <div class="multiples" id="multiples"></div>
+    <p class="note"><b>Komunikacja</b>W komunikacji zewnętrznej rekomendujemy oparcie przekazu na wynikach sezonu letniego i dynamice ruchu zagranicznego. Przyczynę spadku w pierwszych miesiącach roku należy wcześniej wyjaśnić z dostawcą danych, ponieważ może on wynikać ze zmiany metodologii.</p>
+  </section>
+
+  <section class="entry" id="bandera">
+    <div class="head">
+      <div class="eyebrow">Pod obcą banderą</div>
+      <h2>Turyści zagraniczni odpowiadają za 37% wzrostu</h2>
+      <p>Turyści zagraniczni stanowią 16% ogółu turystów, a zarazem odpowiadają za 25,6 tys. z 69,2 tys. przyrostu liczby turystów. W sierpniu ich udział wzrósł do 24%.</p>
+    </div>
+    <div class="two">
+      <div class="plate">
+        <div class="plate-title">Udział grup w ruchu i we wzroście</div>
+        <div class="plate-sub">I–VIII 2026; wzrost liczony względem I–VIII 2025</div>
+        <div class="legend">
+          <span><i class="sw bg-sea"></i>krajowi</span>
+          <span><i class="sw bg-verd"></i>regionalni</span>
+          <span><i class="sw bg-brass"></i>zagraniczni</span>
+        </div>
+        <div class="chart" id="share"></div>
+        <div class="deltas">
+          <div><span><i class="sw bg-sea"></i>krajowi</span><strong>+37 218</strong>+5,5% r/r</div>
+          <div><span><i class="sw bg-verd"></i>regionalni</span><strong>+6330</strong>+8,6% r/r</div>
+          <div><span><i class="sw bg-brass"></i>zagraniczni</span><strong>+25 604</strong>+20,6% r/r</div>
+        </div>
+      </div>
+      <div class="plate">
+        <div class="plate-title">Udział turystów zagranicznych w miesiącu</div>
+        <div class="plate-sub">odsetek wszystkich turystów w danym miesiącu</div>
+        <div class="legend">
+          <span><i class="lk bc-sea"></i>2026</span>
+          <span><i class="lk bc-sepia"></i>2025</span>
+        </div>
+        <div class="chart" id="fshare"></div>
+      </div>
+    </div>
+    <p class="note"><b>Kolejny etap</b>Obecne zestawienie nie obejmuje krajów pochodzenia. Dane te umożliwią precyzyjne kierowanie kampanii promocyjnych i dobór języków obsługi na statkach.</p>
+  </section>
+
+  <section class="entry" id="zagle">
+    <div class="head">
+      <div class="eyebrow">Efekt Żagli</div>
+      <h2>Na sierpień przypada 29% turystów z okresu styczeń–sierpień</h2>
+      <p>Wykres przedstawia stosunek liczby turystów w sierpniu do liczby lipcowej. W grupie zagranicznej wynosi on 3,3 zarówno w 2025, jak i w 2026 roku. Ponieważ w sierpniu nakładają się Żagle i szczyt wakacyjny, oddzielenie wpływu wydarzenia wymaga danych dziennych.</p>
+    </div>
+    <div class="two">
+      <div class="plate">
+        <div class="plate-title">Sierpień względem lipca</div>
+        <div class="plate-sub">iloraz liczby turystów w sierpniu i w lipcu</div>
+        <div class="legend">
+          <span><i class="sw bg-sea"></i>2026</span>
+          <span><i class="sw bg-sepia"></i>2025</span>
+        </div>
+        <div class="chart" id="sails"></div>
+      </div>
+      <div class="plate">
+        <div class="plate-title">Żagle 2026 · 14–16 sierpnia</div>
+        <div class="plate-sub">dane organizatora, spoza zestawienia Selectivv</div>
+        <div class="facts">
+          <div class="fact"><span class="v">ponad 450 tys.</span><span class="t">uczestników, o 10,5% więcej niż w 2025</span></div>
+          <div class="fact"><span class="v">96 263</span><span class="t">gości z zagranicy, głównie z Niemiec, Czech i Wielkiej Brytanii</span></div>
+          <div class="fact"><span class="v">ok. 95%</span><span class="t">obłożenia hoteli w piątek i sobotę</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><b>Propozycja</b>Na podstawie danych dziennych Lucid Academy oszacuje liczbę turystów i noclegów generowanych przez Żagle ponad typowy poziom sierpnia. Wynik może stanowić podstawę planowania budżetu kolejnych edycji.</p>
+  </section>
+
+  <section class="entry" id="postoj">
+    <div class="head">
+      <div class="eyebrow">Długość postoju</div>
+      <h2>Średnio 1,8 nocy na przyjazd</h2>
+      <p>Średnia długość pobytu pozostała niemal bez zmian. Wyjątek stanowią turyści zagraniczni, których pobyt skrócił się z 1,83 do 1,71 nocy.</p>
+    </div>
+    <div class="plate">
+      <div class="plate-title">Noclegi na jeden przyjazd, I–VIII</div>
+      <div class="plate-sub">suma noclegów podzielona przez sumę przyjazdów</div>
+      <div class="legend">
+        <span><i class="dotk bg-sepia"></i>2025</span>
+        <span><i class="dotk bg-sea"></i>2026</span>
+      </div>
+      <div class="chart" id="stay"></div>
+    </div>
+    <p class="note"><b>Rekomendacja</b>Wydłużeniu pobytu gości zagranicznych mogłaby sprzyjać oferta pakietowa łącząca rejs ze Szczecińską Kartą Turystyczną.</p>
+  </section>
+
+  <section class="entry" id="kurs">
+    <div class="head">
+      <div class="eyebrow">Wynik roczny</div>
+      <h2>Rok 2026 może zamknąć się wynikiem 1,37–1,40 mln</h2>
+      <p>Według komunikatu miasta w 2025 roku Szczecin odwiedziło około 1,3&nbsp;mln turystów. Do końca sierpnia 2026 roku osiągnięto 73% tego wyniku. Jeżeli okres wrzesień–grudzień utrzyma poziom z 2025 roku, wynik roczny wyniesie około 1,37&nbsp;mln; przy utrzymaniu obecnej dynamiki około 1,40&nbsp;mln.</p>
+    </div>
+    <div class="plate">
+      <div class="legend">
+        <span><i class="sw bg-sea"></i>I–VIII 2026</span>
+        <span><i class="sw" style="background:var(--sea-soft)"></i>IX–XII na poziomie 2025</span>
+        <span><i class="sw" style="background:repeating-linear-gradient(45deg,var(--sea) 0 2px,transparent 2px 5px);border:1px solid var(--sea)"></i>zakres przy utrzymaniu wzrostu +7,9%</span>
+        <span><i class="sw bg-sepia"></i>I–VIII 2025</span>
+        <span><i class="sw" style="background:var(--sepia-soft)"></i>IX–XII 2025</span>
+      </div>
+      <div class="chart" id="course"></div>
+      <p class="fine" style="margin-top:10px">Wartości szacunkowe. Wynik za wrzesień–grudzień 2025 roku (ok. 422 tys.) obliczono jako różnicę między zaokrąglonym wynikiem rocznym podanym przez miasto a sumą za styczeń–sierpień z zestawienia Selectivv.</p>
+    </div>
+  </section>
+
+  <section class="entry" id="ostrzezenia">
+    <div class="head">
+      <div class="eyebrow">Ostrzeżenia nawigacyjne</div>
+      <h2>Kwestie do weryfikacji przed publikacją</h2>
+      <p>Przed wykorzystaniem danych w komunikacji zewnętrznej rekomendujemy wyjaśnienie z dostawcą danych pięciu kwestii.</p>
+    </div>
+    <div class="notices">
+      <div class="notice">
+        <span class="no">Komunikat 1</span>
+        <h3>Luty 2025: prawdopodobny błąd eksportu</h3>
+        <p>Liczba przyjazdów jest identyczna z liczbą odwiedzających we wszystkich trzech grupach. W pozostałych miesiącach przyjazdów jest o 0,4–7,7% więcej niż odwiedzających.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 2</span>
+        <h3>Równomierny spadek ruchu krajowego w I–IV 2026</h3>
+        <p>Spadek wynosi od 8,9% do 11,4% w każdym z czterech miesięcy, po czym od maja następuje wzrost o 11–16%. Należy potwierdzić, czy w tym okresie nie zmieniła się metodologia lub próba badawcza.</p>
+      </div>
+      <div class="notice wide">
+        <span class="no">Komunikat 3</span>
+        <h3>Duża zmienność miesięcznych danych o noclegach</h3>
+        <p>Liczba noclegów na jeden przyjazd waha się od 1,30 do 2,67, podczas gdy w ujęciu całego okresu pozostaje stabilna (ok. 1,84). Każdy punkt oznacza jeden miesiąc. W komunikacji zalecamy posługiwanie się sumami za okres.</p>
+        <div class="legend" style="margin:6px 0 0">
+          <span><i class="dotk bg-sepia"></i>miesiąc 2025</span>
+          <span><i class="dotk bg-sea"></i>miesiąc 2026</span>
+        </div>
+        <div class="chart" id="strip"></div>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 4</span>
+        <h3>Suma miesięczna nie odpowiada liczbie osób</h3>
+        <p>Osoba obecna w Szczecinie w maju i w sierpniu jest liczona dwukrotnie. Miasto stosowało tę samą metodę w 2025 roku, dlatego porównanie rok do roku jest spójne. Określenie „unikalni turyści” nie jest jednak w tym kontekście precyzyjne.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 5</span>
+        <h3>Trzy wskaźniki opisujące różne grupy</h3>
+        <p>W publikowanych danych funkcjonują trzy wskaźniki: turyści (niniejsze zestawienie), odwiedzający łącznie z jednodniowymi (4,7 mln w okresie I–X 2025) oraz uczestnicy wydarzeń (96 tys. gości zagranicznych podczas Żagli 2026). Każdy z nich wymaga jednoznacznego opisu.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="entry" id="niezbadane">
+    <div class="head">
+      <div class="eyebrow">Niezbadane wody</div>
+      <h2>Zakres pełnej analizy Lucid Academy</h2>
+      <p>Poniżej przedstawiamy analizy, które Lucid Academy przygotuje dla Żeglugi Szczecińskiej po udostępnieniu szerszego zakresu danych. Grafiki mają charakter poglądowy i nie zawierają rzeczywistych wartości. Przy każdej analizie wskazano wymagane źródła danych.</p>
+    </div>
+    <div class="fogs" id="fogs"></div>
+  </section>
+
+  <section class="entry" id="oferta">
+    <div class="head">
+      <div class="eyebrow">Oferta</div>
+      <h2>Proponowany zakres współpracy</h2>
+      <p>Poniższe moduły mogą być realizowane łącznie lub niezależnie.</p>
+    </div>
+    <div class="offer">
+      <div class="offer-row"><h3>Pakiet komunikacyjny „Sezon 2026”</h3><p>Podsumowanie sezonu uzupełnione o dane za wrzesień i wyniki ankiet Szczecińskiej Karty Turystycznej, przygotowane w formie interaktywnej strony, infografik do mediów społecznościowych i materiałów prasowych.</p></div>
+      <div class="offer-row"><h3>Raport „Efekt Żagli”</h3><p>Ocena wpływu wydarzenia na ruch turystyczny, liczbę noclegów i obłożenie hoteli, stanowiąca podstawę planowania kolejnych edycji.</p></div>
+      <div class="offer-row"><h3>Barometr turystyczny</h3><p>Panel wskaźników aktualizowany co miesiąc przez Lucid Academy na podstawie danych Selectivv oraz danych Żeglugi Szczecińskiej dotyczących rejsów, mariny i Centrum Informacji Turystycznej.</p></div>
+      <div class="offer-row"><h3>Analiza ankiet z wykorzystaniem AI</h3><p>Opracowanie odpowiedzi otwartych w wielu językach wraz z kategoryzacją tematyczną, oceną poziomu zadowolenia i rekomendacjami.</p></div>
+    </div>
+    <div class="cta">
+      <p>Chętnie przedstawimy szczegóły współpracy. Pełną analizę przygotujemy po udostępnieniu danych.</p>
+      <div class="who"><b>Piotr Jarczyk</b><span>prezes Lucid Academy</span><span class="mail">piotr.jarczyk.ai@gmail.com</span></div>
+    </div>
+  </section>
+
+  <section class="entry" id="dane">
+    <details class="data">
+      <summary>Tabela danych źródłowych (24 wiersze)</summary>
+      <div class="tablewrap"><table id="datatable"></table></div>
+    </details>
+    <div class="sources">
+      <span><b style="color:var(--ink)">Źródła.</b> Selectivv: turyści krajowi, regionalni i zagraniczni w Szczecinie, I–VIII 2025 i 2026 (tabela przekazana przez Żeglugę Szczecińską).</span>
+      <span>Żagle 2026: <a href="https://www.eswinoujscie.pl/zagle-2026-szczecin-podsumowanie/" target="_blank" rel="noopener">podsumowanie wydarzenia, eSwinoujscie.pl</a>. Wynik 2025 i dane o odwiedzających: <a href="https://visitszczecin.eu/en/news/1362-szczecin-leads-tourism-growth-poland" target="_blank" rel="noopener">Visit Szczecin</a>, <a href="https://visitszczecin.eu/pl/aktualnosci/1350-szczecin-przyciaga-coraz-wiecej-turystow" target="_blank" rel="noopener">Visit Szczecin, grudzień 2025</a>.</span>
+    </div>
+  </section>
+
+  <footer>
+    <img src="logo.jpg" alt="" width="640" height="640">
+    <div class="ft">
+      <strong>Lucid Academy</strong>
+      <span>Toruń</span>
+      <span>Demo, wrzesień 2026. Kontakt: Piotr Jarczyk · <span class="mail">piotr.jarczyk.ai@gmail.com</span></span>
+    </div>
+  </footer>
+</div>
+
+<div id="tip" hidden></div>
+
+<script>
+(() => {
+  // ---------- dane (Selectivv) ----------
+  // [rok, miesiąc, grupa, unikalni, przyjazdy, noclegi]
+  const RAW = [
+    [2026,8,'K',185971,187835,352585],[2026,8,'R',23358,24154,39346],[2026,8,'Z',66150,66934,108288],
+    [2026,7,'K',124425,132455,249867],[2026,7,'R',11834,12618,27957],[2026,7,'Z',19924,20890,34282],
+    [2026,6,'K',108590,113018,194444],[2026,6,'R',8767,8817,14703],[2026,6,'Z',15360,16538,29802],
+    [2026,5,'K',85995,87934,147486],[2026,5,'R',9226,9272,17822],[2026,5,'Z',10791,11253,21304],
+    [2026,4,'K',52131,52449,123108],[2026,4,'R',8123,8243,12538],[2026,4,'Z',10149,10328,17366],
+    [2026,3,'K',53686,53900,95052],[2026,3,'R',8069,8392,16645],[2026,3,'Z',9776,9946,15992],
+    [2026,2,'K',60325,62672,136227],[2026,2,'R',7484,7810,18673],[2026,2,'Z',9589,9740,16589],
+    [2026,1,'K',46516,46972,73895],[2026,1,'R',3082,3203,4760],[2026,1,'Z',8237,8471,19947],
+    [2025,8,'K',165696,171260,360579],[2025,8,'R',20614,20704,38659],[2025,8,'Z',53573,55563,93254],
+    [2025,7,'K',107343,111782,163340],[2025,7,'R',11028,11127,20085],[2025,7,'Z',16251,16921,33152],
+    [2025,6,'K',94530,98418,177489],[2025,6,'R',8541,8609,15079],[2025,6,'Z',14180,14280,32641],
+    [2025,5,'K',77343,79952,153499],[2025,5,'R',7750,7811,20851],[2025,5,'Z',9626,9749,15486],
+    [2025,4,'K',57224,58928,76449],[2025,4,'R',7761,7847,17248],[2025,4,'Z',8894,9037,14273],
+    [2025,3,'K',59030,60099,78261],[2025,3,'R',7521,7604,10183],[2025,3,'Z',7554,7780,12303],
+    [2025,2,'K',68059,68059,150288],[2025,2,'R',7176,7176,11342],[2025,2,'Z',8179,8179,19214],
+    [2025,1,'K',51196,52486,130832],[2025,1,'R',3222,3381,4483],[2025,1,'Z',6115,6510,14109]
+  ];
+  const D = RAW.map(([y,m,c,u,p,n]) => ({y,m,c,u,p,n}));
+  const CATS = ['K','R','Z'];
+  const CAT_NAME = {all:'Wszyscy', K:'Krajowi', R:'Regionalni', Z:'Zagraniczni'};
+  const CAT_LOW = {K:'krajowi', R:'regionalni', Z:'zagraniczni'};
+  const CAT_CLS = {K:'f-sea', R:'f-verd', Z:'f-brass'};
+  const MET_NAME = {u:'Turyści', p:'Przyjazdy', n:'Noclegi'};
+  const MONTHS = ['I','II','III','IV','V','VI','VII','VIII'];
+  const MONTH_FULL = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień'];
+  const ANNUAL_2025 = 1300000; // komunikat miasta: „ok. 1,3 mln turystów” w 2025
+
+  const val = (y, m, cat, met) => D.filter(r => r.y === y && r.m === m && (cat === 'all' || r.c === cat)).reduce((a, r) => a + r[met], 0);
+  const tot = (y, cat, met, months) => (months || [1,2,3,4,5,6,7,8]).reduce((a, m) => a + val(y, m, cat, met), 0);
+
+  // ---------- formatowanie ----------
+  const nf = new Intl.NumberFormat('pl-PL');
+  const nf1 = new Intl.NumberFormat('pl-PL', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const nf2 = new Intl.NumberFormat('pl-PL', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const MINUS = '−';
+  const signed = (x, f = nf1) => (x > 0 ? '+' : x < 0 ? MINUS : '') + f.format(Math.abs(x));
+  const pct = (x) => signed(x) + '%';
+  const tys = (v) => v >= 1e6 ? nf2.format(v / 1e6) + ' mln' : nf1.format(v / 1e3) + ' tys.';
+  const tick = (v) => v === 0 ? '0' : v >= 1e6 ? nf1.format(v / 1e6).replace(/,0$/, '') + ' mln' : v >= 1e3 ? nf.format(v / 1e3) + ' tys.' : nf.format(v);
+
+  // ---------- SVG ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const text = (parent, x, y, str, cls, anchor = 'start', extra = {}) => { const t = el('text', Object.assign({x, y, class: cls, 'text-anchor': anchor}, extra), parent); t.textContent = str; return t; };
+  const svgFor = (host, W, H, label) => { host.replaceChildren(); const s = el('svg', {width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: 'group', 'aria-label': label || ''}, host); return s; };
+  const niceStep = (max, n = 4) => { const raw = max / n; const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 2.5, 5, 10].find(m => m * p >= raw) * p; };
+  const vbar = (x, w, yb, ye, r = 4) => {
+    const h = Math.abs(yb - ye); if (h < .5) return ''; r = Math.min(r, h, w / 2);
+    return ye < yb
+      ? `M${x},${yb}V${ye + r}Q${x},${ye} ${x + r},${ye}H${x + w - r}Q${x + w},${ye} ${x + w},${ye + r}V${yb}Z`
+      : `M${x},${yb}V${ye - r}Q${x},${ye} ${x + r},${ye}H${x + w - r}Q${x + w},${ye} ${x + w},${ye - r}V${yb}Z`;
+  };
+  const hbar = (x0, x1, y, h, r = 4) => { const w = x1 - x0; if (w < .5) return ''; r = Math.min(r, w, h / 2); return `M${x0},${y}H${x1 - r}Q${x1},${y} ${x1},${y + r}V${y + h - r}Q${x1},${y + h} ${x1 - r},${y + h}H${x0}Z`; };
+  const rect = (x0, x1, y, h) => (x1 - x0 < .5) ? '' : `M${x0},${y}H${x1}V${y + h}H${x0}Z`;
+
+  // ---------- dymek ----------
+  const tip = document.getElementById('tip');
+  function showTip(pos, title, rows) {
+    tip.replaceChildren();
+    const t = document.createElement('div'); t.className = 'tt'; t.textContent = title; tip.appendChild(t);
+    rows.forEach(r => {
+      const row = document.createElement('div'); row.className = 'row';
+      if (r.key) { const k = document.createElement('i'); k.className = r.shape === 'sw' ? 'sw ' + r.key : 'lk ' + r.key; if (r.shape === 'sw') { k.style.width = '10px'; k.style.height = '10px'; } row.appendChild(k); }
+      const s = document.createElement('strong'); s.textContent = r.value; row.appendChild(s);
+      if (r.label) { const l = document.createElement('span'); l.className = 'rl'; l.textContent = r.label; row.appendChild(l); }
+      tip.appendChild(row);
+    });
+    tip.hidden = false;
+    const bw = tip.offsetWidth, bh = tip.offsetHeight;
+    let x = pos.x + 16, y = pos.y + 16;
+    if (x + bw > window.innerWidth - 8) x = pos.x - bw - 16;
+    if (y + bh > window.innerHeight - 8) y = pos.y - bh - 16;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const hideTip = () => { tip.hidden = true; };
+  const centerOf = (node) => { const b = node.getBoundingClientRect(); return {x: b.left + b.width / 2, y: b.top + b.height / 2}; };
+  function bindTip(node, getContent, focusable = true) {
+    if (focusable) node.setAttribute('tabindex', '0');
+    node.addEventListener('pointermove', e => { const [t, r] = getContent(); showTip({x: e.clientX, y: e.clientY}, t, r); });
+    node.addEventListener('pointerleave', hideTip);
+    node.addEventListener('focus', () => { const [t, r] = getContent(); showTip(centerOf(node), t, r); });
+    node.addEventListener('blur', hideTip);
+  }
+
+  // ---------- kafelki ----------
+  function renderTiles() {
+    const host = document.getElementById('tiles');
+    const items = [
+      ['Turyści', 'all', 'u'], ['Przyjazdy', 'all', 'p'], ['Noclegi', 'all', 'n'], ['Turyści zagraniczni', 'Z', 'u']
+    ];
+    host.replaceChildren();
+    items.forEach(([lbl, cat, met], i) => {
+      const a = tot(2026, cat, met), b = tot(2025, cat, met);
+      const d = document.createElement('div'); d.className = 'tile' + (i === 3 ? ' hi' : '');
+      const l = document.createElement('span'); l.className = 'lbl'; l.textContent = lbl + ', I–VIII 2026';
+      const v = document.createElement('span'); v.className = 'val'; v.textContent = tys(a);
+      const dl = document.createElement('span'); dl.className = 'delta';
+      const tri = document.createElement('i'); tri.className = 'tri';
+      const dt = document.createElement('span'); dt.textContent = pct((a / b - 1) * 100) + ' r/r';
+      dl.append(tri, dt); d.append(l, v, dl); host.appendChild(d);
+    });
+  }
+
+  // ---------- 1. przypływ ----------
+  const state = {cat: 'all', met: 'u', idx: 7};
+  function renderTide() {
+    const host = document.getElementById('tide');
+    const W = host.clientWidth; const H = W < 520 ? 260 : 320;
+    const m = {l: W < 520 ? 50 : 62, r: W < 520 ? 58 : 78, t: 34, b: 30};
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const s25 = MONTHS.map((_, i) => val(2025, i + 1, state.cat, state.met));
+    const s26 = MONTHS.map((_, i) => val(2026, i + 1, state.cat, state.met));
+    const mx = Math.max(...s25, ...s26);
+    const step = niceStep(mx, 4); const yMax = Math.ceil(mx * 1.04 / step) * step;
+    const x = i => m.l + i * iw / 7, y = v => m.t + ih - v / yMax * ih;
+    const svg = svgFor(host, W, H, `${MET_NAME[state.met]}, ${CAT_NAME[state.cat]}: 2025 i 2026 w miesiącach I–VIII`);
+    for (let v = 0; v <= yMax + 1e-6; v += step) { el('line', {x1: m.l, x2: W - m.r + 8, y1: y(v), y2: y(v), class: v === 0 ? 'bl' : 'gl'}, svg); text(svg, m.l - 10, y(v) + 4, tick(v), 'ax', 'end'); }
+    MONTHS.forEach((mo, i) => text(svg, x(i), H - 8, mo, 'ax', 'middle'));
+    const line = s => s.map((v, i) => `${i ? 'L' : 'M'}${x(i)},${y(v)}`).join('');
+    el('path', {d: line(s26) + `L${x(7)},${y(0)}L${x(0)},${y(0)}Z`, class: 'a26'}, svg);
+    el('path', {d: line(s25), class: 'l25'}, svg);
+    el('path', {d: line(s26), class: 'l26'}, svg);
+    // adnotacja: Żagle
+    const ax = x(7), ay = y(s26[7]);
+    el('line', {x1: ax - 6, y1: ay - 6, x2: ax - 30, y2: ay - 22, class: 'anno-l'}, svg);
+    text(svg, ax - 34, ay - 22, 'Żagle, 14–16 VIII', 'anno', 'end');
+    // kropki
+    const g25 = el('g', {}, svg), g26 = el('g', {}, svg);
+    s25.forEach((v, i) => el('circle', {cx: x(i), cy: y(v), r: 3.5, class: 'd25'}, g25));
+    s26.forEach((v, i) => el('circle', {cx: x(i), cy: y(v), r: 4, class: 'd26'}, g26));
+    // etykiety końcowe
+    let e26 = y(s26[7]), e25 = y(s25[7]);
+    if (Math.abs(e26 - e25) < 30) { const mid = (e26 + e25) / 2; if (e26 <= e25) { e26 = mid - 15; e25 = mid + 15; } else { e26 = mid + 15; e25 = mid - 15; } }
+    text(svg, x(7) + 12, e26 - 2, '2026', 'vlab'); text(svg, x(7) + 12, e26 + 12, tys(s26[7]), 'vlab-2');
+    text(svg, x(7) + 12, e25 - 2, '2025', 'vlab-2'); text(svg, x(7) + 12, e25 + 12, tys(s25[7]), 'vlab-2');
+    // warstwa kursora
+    const xh = el('line', {x1: 0, x2: 0, y1: m.t - 6, y2: m.t + ih, class: 'xh', visibility: 'hidden'}, svg);
+    const hi26 = el('circle', {r: 6, class: 'd26', visibility: 'hidden'}, svg);
+    const hi25 = el('circle', {r: 5, class: 'd25', visibility: 'hidden'}, svg);
+    const hit = el('rect', {x: m.l - iw / 14, y: m.t - 10, width: iw + iw / 7, height: ih + 10, class: 'hit'}, svg);
+    const show = (i, pos) => {
+      state.idx = i;
+      xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('visibility', 'visible');
+      hi26.setAttribute('cx', x(i)); hi26.setAttribute('cy', y(s26[i])); hi26.setAttribute('visibility', 'visible');
+      hi25.setAttribute('cx', x(i)); hi25.setAttribute('cy', y(s25[i])); hi25.setAttribute('visibility', 'visible');
+      showTip(pos, `${MONTH_FULL[i]} · ${MET_NAME[state.met].toLowerCase()}, ${CAT_NAME[state.cat].toLowerCase()}`, [
+        {key: 'bc-sea', value: nf.format(s26[i]), label: '2026'},
+        {key: 'bc-sepia', value: nf.format(s25[i]), label: '2025'},
+        {value: pct((s26[i] / s25[i] - 1) * 100), label: 'zmiana r/r'}
+      ]);
+    };
+    const hide = () => { [xh, hi26, hi25].forEach(n => n.setAttribute('visibility', 'hidden')); hideTip(); };
+    hit.addEventListener('pointermove', e => { const b = svg.getBoundingClientRect(); const i = Math.max(0, Math.min(7, Math.round((e.clientX - b.left - m.l) / (iw / 7)))); show(i, {x: e.clientX, y: e.clientY}); });
+    hit.addEventListener('pointerleave', hide);
+    svg.setAttribute('tabindex', '0');
+    const posOf = i => { const b = svg.getBoundingClientRect(); return {x: b.left + x(i), y: b.top + y(s26[i])}; };
+    svg.addEventListener('focus', () => show(state.idx, posOf(state.idx)));
+    svg.addEventListener('blur', hide);
+    svg.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const i = Math.max(0, Math.min(7, state.idx + (e.key === 'ArrowRight' ? 1 : -1))); show(i, posOf(i)); }
+    });
+    // odczyt sumy
+    const a = tot(2026, state.cat, state.met), b = tot(2025, state.cat, state.met);
+    const ro = document.getElementById('tide-readout'); ro.replaceChildren();
+    const s1 = document.createElement('span'); const st = document.createElement('strong'); st.textContent = nf.format(a); s1.append(st, document.createTextNode(' suma I–VIII 2026'));
+    const s2 = document.createElement('span'); s2.textContent = `${nf.format(b)} w I–VIII 2025`;
+    const s3 = document.createElement('span'); const st3 = document.createElement('strong'); st3.textContent = pct((a / b - 1) * 100); s3.append(st3, document.createTextNode(' r/r'));
+    ro.append(s1, s2, s3);
+    document.getElementById('tide-warn').hidden = state.met !== 'n';
+  }
+  function bindSeg(id, key) {
+    const seg = document.getElementById(id);
+    const btns = [...seg.querySelectorAll('button')];
+    const pick = (b) => { btns.forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); state[key] = b.dataset.v; renderTide(); };
+    btns.forEach((b, i) => {
+      b.addEventListener('click', () => pick(b));
+      b.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const n = btns[(i + (e.key === 'ArrowRight' ? 1 : btns.length - 1)) % btns.length]; n.focus(); pick(n); } });
+    });
+  }
+
+  // ---------- 2. dwa tempa (small multiples) ----------
+  function renderMultiples() {
+    const host = document.getElementById('multiples');
+    host.replaceChildren();
+    ['all', 'K', 'R', 'Z'].forEach(cat => {
+      const p = document.createElement('div'); p.className = 'panel';
+      const h = document.createElement('h3'); h.textContent = CAT_NAME[cat];
+      const c = document.createElement('div'); c.className = 'chart';
+      const sp = document.createElement('div'); sp.className = 'split';
+      const q1 = (tot(2026, cat, 'u', [1,2,3,4]) / tot(2025, cat, 'u', [1,2,3,4]) - 1) * 100;
+      const q2 = (tot(2026, cat, 'u', [5,6,7,8]) / tot(2025, cat, 'u', [5,6,7,8]) - 1) * 100;
+      const a = document.createElement('span'); a.append('I–IV '); const ab = document.createElement('b'); ab.textContent = pct(q1); a.appendChild(ab);
+      const b = document.createElement('span'); b.append('V–VIII '); const bb = document.createElement('b'); bb.textContent = pct(q2); b.appendChild(bb);
+      sp.append(a, b); p.append(h, c, sp); host.appendChild(p);
+      requestAnimationFrame(() => drawYoY(c, cat));
+    });
+  }
+  function drawYoY(host, cat) {
+    const W = host.clientWidth, H = 168, m = {l: 34, r: 4, t: 16, b: 22};
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const lo = -15, hi = 38;
+    const y = v => m.t + (hi - v) / (hi - lo) * ih;
+    const yoy = MONTHS.map((_, i) => (val(2026, i + 1, cat, 'u') / val(2025, i + 1, cat, 'u') - 1) * 100);
+    const svg = svgFor(host, W, H, `Zmiana r/r, ${CAT_NAME[cat]}`);
+    [-10, 0, 10, 20, 30].forEach(v => { if (v !== 0) el('line', {x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), class: 'gl'}, svg); text(svg, m.l - 6, y(v) + 4, v === 0 ? '0' : (v > 0 ? '+' : MINUS) + Math.abs(v) + '%', 'ax', 'end'); });
+    const band = iw / 8, bw = Math.min(18, band * .62);
+    let iMax = yoy.indexOf(Math.max(...yoy)), iMin = yoy.indexOf(Math.min(...yoy));
+    yoy.forEach((v, i) => {
+      const bx = m.l + i * band + (band - bw) / 2;
+      const path = el('path', {d: vbar(bx, bw, y(0), y(v)), class: 'bar ' + (v >= 0 ? 'f-sea' : 'f-rust'), 'aria-label': `${MONTH_FULL[i]}: ${pct(v)}`}, svg);
+      bindTip(path, () => [`${MONTH_FULL[i]} · ${CAT_NAME[cat].toLowerCase()}`, [
+        {value: pct(v), label: 'zmiana r/r'},
+        {key: 'bc-sea', value: nf.format(val(2026, i + 1, cat, 'u')), label: '2026'},
+        {key: 'bc-sepia', value: nf.format(val(2025, i + 1, cat, 'u')), label: '2025'}]]);
+      text(svg, bx + bw / 2, H - 6, MONTHS[i], 'ax', 'middle');
+      if (i === iMax || (i === iMin && v < 0)) text(svg, bx + bw / 2, v >= 0 ? y(v) - 5 : y(v) + 13, (v > 0 ? '+' : MINUS) + Math.round(Math.abs(v)), 'vlab-2', 'middle');
+    });
+    el('line', {x1: m.l, x2: W - m.r, y1: y(0), y2: y(0), class: 'bl'}, svg);
+  }
+
+  // ---------- 3a. udziały ----------
+  function renderShare() {
+    const host = document.getElementById('share');
+    const W = host.clientWidth, bh = 30, H = 150;
+    const vol = CATS.map(c => tot(2026, c, 'u')); const vsum = vol.reduce((a, b) => a + b, 0);
+    const gr = CATS.map(c => tot(2026, c, 'u') - tot(2025, c, 'u')); const gsum = gr.reduce((a, b) => a + b, 0);
+    const rows = [
+      {label: `Udział w ruchu · ${nf.format(vsum)} turystów`, vals: vol, sum: vsum, y: 22},
+      {label: `Udział we wzroście · +${nf.format(gsum)} turystów`, vals: gr, sum: gsum, y: 96}
+    ];
+    const svg = svgFor(host, W, H, 'Udział grup w ruchu i we wzroście');
+    rows.forEach(row => {
+      text(svg, 0, row.y - 8, row.label, 'ax-l');
+      let x0 = 0;
+      row.vals.forEach((v, i) => {
+        const w = v / row.sum * W; const c = CATS[i];
+        const gap = i < 2 ? 2 : 0;
+        const p = el('path', {d: rect(x0, x0 + w - gap, row.y, bh), class: 'bar ' + CAT_CLS[c]}, svg);
+        const share = v / row.sum * 100;
+        bindTip(p, () => [`${CAT_NAME[c]} · ${row === rows[0] ? 'udział w ruchu' : 'udział we wzroście'}`, [
+          {key: 'bg-' + ({K:'sea',R:'verd',Z:'brass'})[c], shape: 'sw', value: nf1.format(share) + '%', label: 'udział'},
+          {value: (row === rows[0] ? '' : '+') + nf.format(v), label: 'turystów'}]]);
+        const t = text(svg, x0 + 8, row.y + bh / 2 + 4, nf1.format(share) + '%', 'on-' + c);
+        if (t.getComputedTextLength() + 14 > w - gap) t.remove();
+        x0 += w;
+      });
+    });
+  }
+
+  // ---------- 3b. udział zagranicznych ----------
+  function renderFShare() {
+    const host = document.getElementById('fshare');
+    const W = host.clientWidth, H = 210, m = {l: 38, r: 44, t: 16, b: 26};
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const sh = y => MONTHS.map((_, i) => val(y, i + 1, 'Z', 'u') / val(y, i + 1, 'all', 'u') * 100);
+    const a = sh(2026), b = sh(2025);
+    const yMax = 30; const x = i => m.l + i * iw / 7, y = v => m.t + ih - v / yMax * ih;
+    const svg = svgFor(host, W, H, 'Udział turystów zagranicznych w miesiącach');
+    [0, 10, 20, 30].forEach(v => { el('line', {x1: m.l, x2: W - m.r + 6, y1: y(v), y2: y(v), class: v ? 'gl' : 'bl'}, svg); text(svg, m.l - 8, y(v) + 4, v + '%', 'ax', 'end'); });
+    MONTHS.forEach((mo, i) => text(svg, x(i), H - 6, mo, 'ax', 'middle'));
+    const line = s => s.map((v, i) => `${i ? 'L' : 'M'}${x(i)},${y(v)}`).join('');
+    el('path', {d: line(b), class: 'l25'}, svg); el('path', {d: line(a), class: 'l26'}, svg);
+    b.forEach((v, i) => el('circle', {cx: x(i), cy: y(v), r: 3.5, class: 'd25'}, svg));
+    a.forEach((v, i) => el('circle', {cx: x(i), cy: y(v), r: 4, class: 'd26'}, svg));
+    text(svg, x(7) + 10, y(a[7]) + 4, nf.format(Math.round(a[7])) + '%', 'vlab');
+    text(svg, x(0) + 8, y(a[0]) - 10, nf.format(Math.round(a[0])) + '%', 'vlab-2');
+    const xh = el('line', {y1: m.t, y2: m.t + ih, class: 'xh', visibility: 'hidden'}, svg);
+    const hit = el('rect', {x: m.l - iw / 14, y: m.t, width: iw + iw / 7, height: ih, class: 'hit'}, svg);
+    hit.addEventListener('pointermove', e => {
+      const bb = svg.getBoundingClientRect(); const i = Math.max(0, Math.min(7, Math.round((e.clientX - bb.left - m.l) / (iw / 7))));
+      xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('visibility', 'visible');
+      showTip({x: e.clientX, y: e.clientY}, `${MONTH_FULL[i]} · udział zagranicznych`, [
+        {key: 'bc-sea', value: nf1.format(a[i]) + '%', label: '2026'}, {key: 'bc-sepia', value: nf1.format(b[i]) + '%', label: '2025'}]);
+    });
+    hit.addEventListener('pointerleave', () => { xh.setAttribute('visibility', 'hidden'); hideTip(); });
+  }
+
+  // ---------- 4. Żagle ----------
+  function renderSails() {
+    const host = document.getElementById('sails');
+    const W = host.clientWidth, lab = 92, rp = 46, bh = 14, rowH = 50, top = 6;
+    const H = top + CATS.length * rowH + 28;
+    const iw = W - lab - rp, xMax = 3.5, x = v => lab + v / xMax * iw;
+    const svg = svgFor(host, W, H, 'Sierpień względem lipca, według grup');
+    [0, 1, 2, 3].forEach(v => { el('line', {x1: x(v), x2: x(v), y1: top, y2: H - 22, class: v ? 'gl' : 'bl'}, svg); text(svg, x(v), H - 6, '×' + v, 'ax', 'middle'); });
+    el('line', {x1: x(1), x2: x(1), y1: top, y2: H - 22, class: 'refl'}, svg);
+    CATS.forEach((c, i) => {
+      const y0 = top + i * rowH + 6;
+      text(svg, 0, y0 + bh + 5, CAT_NAME[c], 'ax-l');
+      [[2026, 'f-sea', 0], [2025, 'f-sepia', bh + 2]].forEach(([yr, cls, off]) => {
+        const r = val(yr, 8, c, 'u') / val(yr, 7, c, 'u');
+        const p = el('path', {d: hbar(x(0), x(r), y0 + off, bh), class: 'bar ' + cls}, svg);
+        bindTip(p, () => [`${CAT_NAME[c]} · ${yr}`, [
+          {key: yr === 2026 ? 'bg-sea' : 'bg-sepia', shape: 'sw', value: '×' + nf2.format(r), label: 'sierpień / lipiec'},
+          {value: nf.format(val(yr, 8, c, 'u')), label: 'sierpień'}, {value: nf.format(val(yr, 7, c, 'u')), label: 'lipiec'}]]);
+        text(svg, x(r) + 6, y0 + off + bh - 3, '×' + nf2.format(r), yr === 2026 ? 'vlab' : 'vlab-2');
+      });
+    });
+  }
+
+  // ---------- 5. długość postoju ----------
+  function renderStay() {
+    const host = document.getElementById('stay');
+    const W = host.clientWidth, lab = W < 480 ? 88 : 110, rp = 24, rowH = 38, top = 8;
+    const rows = ['all', 'K', 'R', 'Z'];
+    const H = top + rows.length * rowH + 26;
+    const lo = 1.6, hi = 2.0, x = v => lab + (v - lo) / (hi - lo) * (W - lab - rp);
+    const svg = svgFor(host, W, H, 'Noclegi na przyjazd, 2025 i 2026');
+    [1.6, 1.7, 1.8, 1.9, 2.0].forEach(v => { el('line', {x1: x(v), x2: x(v), y1: top, y2: H - 22, class: 'gl'}, svg); text(svg, x(v), H - 6, nf1.format(v), 'ax', 'middle'); });
+    rows.forEach((c, i) => {
+      const cy = top + i * rowH + rowH / 2;
+      const v25 = tot(2025, c, 'n') / tot(2025, c, 'p'), v26 = tot(2026, c, 'n') / tot(2026, c, 'p');
+      text(svg, 0, cy + 4, CAT_NAME[c], 'ax-l');
+      el('line', {x1: x(v25), x2: x(v26), y1: cy, y2: cy, class: 'conn'}, svg);
+      const d25 = el('circle', {cx: x(v25), cy, r: 6, class: 'd25 bar'}, svg);
+      const d26 = el('circle', {cx: x(v26), cy, r: 6, class: 'd26 bar'}, svg);
+      const content = () => [`${CAT_NAME[c]} · noclegi na przyjazd`, [
+        {key: 'bc-sea', value: nf2.format(v26), label: '2026'}, {key: 'bc-sepia', value: nf2.format(v25), label: '2025'}]];
+      bindTip(d25, content); bindTip(d26, content);
+      const right26 = v26 >= v25;
+      text(svg, x(v26) + (right26 ? 11 : -11), cy + 4, nf2.format(v26), 'vlab', right26 ? 'start' : 'end');
+      text(svg, x(v25) + (right26 ? -11 : 11), cy + 4, nf2.format(v25), 'vlab-2', right26 ? 'end' : 'start');
+    });
+  }
+
+  // ---------- 6. kurs na rekord ----------
+  function renderCourse() {
+    const host = document.getElementById('course');
+    const W = host.clientWidth, lab = 0, rp = W < 520 ? 8 : 150, bh = 28, H = 170;
+    const iw = W - lab - rp, xMax = 1500000, x = v => lab + v / xMax * iw;
+    const a25 = tot(2025, 'all', 'u'), a26 = tot(2026, 'all', 'u');
+    const rest25 = ANNUAL_2025 - a25; const low = a26 + rest25; const growth = a26 / a25; const high = a26 + rest25 * growth;
+    const svg = svgFor(host, W, H, 'Wynik roczny 2025 i scenariusz 2026');
+    const defs = el('defs', {}, svg);
+    const pat = el('pattern', {id: 'hatch-sea', width: 5, height: 5, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'}, defs);
+    el('line', {x1: 0, y1: 0, x2: 0, y2: 5, class: 'hatch-line'}, pat);
+    [0, 500000, 1000000, 1500000].forEach(v => { el('line', {x1: x(v), x2: x(v), y1: 10, y2: H - 22, class: v ? 'gl' : 'bl'}, svg); text(svg, x(v), H - 6, tick(v), 'ax', v === 0 ? 'start' : v === xMax ? 'end' : 'middle'); });
+    const r1 = 30, r2 = 98;
+    text(svg, 0, r1 - 9, '2025 · cały rok ≈ 1,30 mln', 'ax-l');
+    const p1 = el('path', {d: rect(x(0), x(a25) - 1, r1, bh), class: 'bar f-sepia'}, svg);
+    const p2 = el('path', {d: rect(x(a25) + 1, x(ANNUAL_2025), r1, bh), class: 'bar f-sepia-soft'}, svg);
+    bindTip(p1, () => ['2025 · I–VIII', [{key: 'bg-sepia', shape: 'sw', value: nf.format(a25), label: 'turystów'}]]);
+    bindTip(p2, () => ['2025 · IX–XII (wyliczone)', [{value: '≈ ' + nf.format(Math.round(rest25 / 1000) * 1000), label: 'turystów'}, {value: '≈ 1,30 mln', label: 'cały rok'}]]);
+    text(svg, 0, r2 - 9, '2026 · szacunek 1,37–1,40 mln', 'ax-l');
+    const q1 = el('path', {d: rect(x(0), x(a26) - 1, r2, bh), class: 'bar f-sea'}, svg);
+    const q2 = el('path', {d: rect(x(a26) + 1, x(low), r2, bh), class: 'bar f-sea-soft'}, svg);
+    const q3 = el('path', {d: rect(x(low), x(high), r2, bh), fill: 'url(#hatch-sea)', class: 'bar'}, svg);
+    bindTip(q1, () => ['2026 · I–VIII', [{key: 'bg-sea', shape: 'sw', value: nf.format(a26), label: 'turystów'}, {value: nf.format(Math.round(a26 / ANNUAL_2025 * 100)) + '%', label: 'wyniku 2025'}]]);
+    bindTip(q2, () => ['2026 · IX–XII jak w 2025', [{value: '≈ ' + tys(Math.round(low / 1e4) * 1e4), label: 'cały rok'}]]);
+    bindTip(q3, () => ['2026 · IX–XII z wzrostem +7,9%', [{value: '≈ ' + tys(Math.round(high / 1e4) * 1e4), label: 'cały rok'}]]);
+    // linia wyniku 2025
+    el('line', {x1: x(ANNUAL_2025), x2: x(ANNUAL_2025), y1: r1 - 4, y2: r2 + bh + 6, class: 'refl'}, svg);
+    if (rp > 60) {
+      text(svg, x(ANNUAL_2025) + 8, r1 + bh / 2 + 4, 'wynik 2025', 'vlab-2');
+      text(svg, x(high) + 8, r2 + bh / 2 + 4, 'szacunek 2026', 'vlab');
+    }
+    text(svg, x(a26) - 8, r2 + bh / 2 + 4, '73%', 'on-K', 'end');
+  }
+
+  // ---------- 7. pasek noclegów (ostrzeżenie) ----------
+  function renderStrip() {
+    const host = document.getElementById('strip');
+    const W = host.clientWidth, lab = 92, rp = 10, rowH = 30, top = 6;
+    const H = top + CATS.length * rowH + 24;
+    const lo = 1.2, hi = 2.8, x = v => lab + (v - lo) / (hi - lo) * (W - lab - rp);
+    const svg = svgFor(host, W, H, 'Noclegi na przyjazd w pojedynczych miesiącach');
+    [1.2, 1.6, 2.0, 2.4, 2.8].forEach(v => { el('line', {x1: x(v), x2: x(v), y1: top, y2: H - 20, class: 'gl'}, svg); text(svg, x(v), H - 5, nf1.format(v), 'ax', 'middle'); });
+    CATS.forEach((c, i) => {
+      const cy = top + i * rowH + rowH / 2;
+      text(svg, 0, cy + 4, CAT_NAME[c], 'ax-l');
+      [2025, 2026].forEach(yr => MONTHS.forEach((_, mi) => {
+        const r = D.find(d => d.y === yr && d.m === mi + 1 && d.c === c); const v = r.n / r.p;
+        const dot = el('circle', {cx: x(v), cy: cy + (yr === 2025 ? -3 : 3), r: 4.5, class: (yr === 2025 ? 'd25' : 'd26') + ' bar'}, svg);
+        bindTip(dot, () => [`${CAT_NAME[c]} · ${MONTH_FULL[mi]} ${yr}`, [
+          {key: yr === 2026 ? 'bc-sea' : 'bc-sepia', value: nf2.format(v), label: 'nocy na przyjazd'},
+          {value: nf.format(r.n), label: 'noclegów'}, {value: nf.format(r.p), label: 'przyjazdów'}]], false);
+      }));
+    });
+  }
+
+  // ---------- 8. niezbadane wody ----------
+  const FOGS = [
+    {t: 'Skąd przypływają turyści', d: 'Struktura pochodzenia turystów według krajów i województw w podziale miesięcznym, jako podstawa planowania kampanii i doboru języków obsługi.', n: 'pochodzenie turystów (Selectivv)', k: 'bars'},
+    {t: 'Żagle dzień po dniu', d: 'Oszacowanie liczby turystów i noclegów generowanych przez wydarzenie ponad typowy poziom sierpnia, z uwzględnieniem obłożenia hoteli.', n: 'dane dzienne (Selectivv), obłożenie hoteli (STR)', k: 'spike'},
+    {t: 'Bulwary godzina po godzinie', d: 'Godzinowy rozkład natężenia ruchu na Wałach Chrobrego, Bulwarach i Łasztowni, wykorzystywany przy planowaniu rozkładu rejsów i obsady.', n: 'ruch w konkretnych miejscach (Selectivv)', k: 'heat'},
+    {t: 'Rejsy a pogoda', d: 'Model wpływu temperatury, opadów i kalendarza ferii na sprzedaż biletów, pozwalający prognozować popyt i planować dodatkowe kursy.', n: 'sprzedaż biletów na rejsy, dane IMGW', k: 'scatter'},
+    {t: 'Głos turystów', d: 'Analiza odpowiedzi otwartych z ankiet Szczecińskiej Karty Turystycznej prowadzona z wykorzystaniem modeli językowych, również w języku niemieckim i angielskim. Obejmuje kategorie tematyczne, poziom zadowolenia i reprezentatywne wypowiedzi.', n: 'surowe wyniki ankiet SKT', k: 'bubbles'},
+    {t: 'Jednodniowi i nocujący', d: 'Skala ruchu jednodniowego, w szczególności z Niemiec, oraz identyfikacja grup gości o największym potencjale przedłużenia wizyty o nocleg.', n: 'odwiedzający jednodniowi (Selectivv)', k: 'area'}
+  ];
+  function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+  function sketch(svg, kind, seed) {
+    const r = rng(seed * 997 + 13), W = 300, H = 150;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none');
+    const ink = {fill: 'currentColor'};
+    if (kind === 'bars') for (let i = 0; i < 7; i++) el('rect', Object.assign({x: 24, y: 26 + i * 16, width: 240 * Math.pow(.72, i) * (.8 + r() * .3), height: 9, rx: 3}, ink), svg);
+    if (kind === 'spike') { let d = 'M10,120'; for (let i = 0; i <= 31; i++) { const bump = (i >= 13 && i <= 16) ? 80 - Math.abs(i - 14.5) * 14 : 0; d += `L${10 + i * 9},${118 - 18 - r() * 16 - bump}`; } el('path', {d, fill: 'none', stroke: 'currentColor', 'stroke-width': 3}, svg); }
+    if (kind === 'heat') for (let rr = 0; rr < 5; rr++) for (let c = 0; c < 14; c++) { const peak = Math.exp(-Math.pow((c - 9) / 3, 2)) * (1 - rr * .12); el('rect', {x: 20 + c * 19, y: 22 + rr * 22, width: 17, height: 20, fill: 'currentColor', 'fill-opacity': (.12 + peak * .85 * (.7 + r() * .3)).toFixed(2)}, svg); }
+    if (kind === 'scatter') for (let i = 0; i < 38; i++) { const t = r(); el('circle', {cx: 20 + t * 260, cy: 130 - t * 90 - r() * 30, r: 4 + r() * 3, fill: 'currentColor'}, svg); }
+    if (kind === 'bubbles') for (let i = 0; i < 11; i++) el('circle', {cx: 30 + r() * 240, cy: 25 + r() * 100, r: 8 + r() * 22, fill: 'currentColor', 'fill-opacity': (.3 + r() * .5).toFixed(2)}, svg);
+    if (kind === 'area') { let a = 'M10,140', b = 'M10,140'; const pts = []; for (let i = 0; i <= 12; i++) { const base = 70 + Math.sin(i / 2) * 20 + r() * 10; pts.push([10 + i * 23.3, base]); } pts.forEach(([px, py]) => { a += `L${px},${140 - py}`; b += `L${px},${140 - py * .45}`; }); el('path', {d: a + 'L290,140Z', fill: 'currentColor', 'fill-opacity': .35}, svg); el('path', {d: b + 'L290,140Z', fill: 'currentColor', 'fill-opacity': .8}, svg); }
+  }
+  function renderFogs() {
+    const host = document.getElementById('fogs'); host.replaceChildren();
+    FOGS.forEach((f, i) => {
+      const card = document.createElement('article'); card.className = 'fogcard';
+      const viz = document.createElement('div'); viz.className = 'fogviz'; viz.setAttribute('aria-hidden', 'true');
+      const svg = el('svg', {}, viz); sketch(svg, f.k, i + 1);
+      const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'poglądowo'; viz.appendChild(tag);
+      const body = document.createElement('div'); body.className = 'fogbody';
+      const h = document.createElement('h3'); h.textContent = f.t;
+      const p = document.createElement('p'); p.textContent = f.d;
+      const need = document.createElement('div'); need.className = 'need'; need.append('Wymagane dane: '); const sp = document.createElement('span'); sp.textContent = f.n; need.appendChild(sp);
+      body.append(h, p, need); card.append(viz, body); host.appendChild(card);
+    });
+  }
+
+  // ---------- tabela ----------
+  function renderTable() {
+    const t = document.getElementById('datatable'); t.replaceChildren();
+    const head = ['Miesiąc', 'Grupa', 'Turyści 2025', 'Turyści 2026', 'Zmiana', 'Przyjazdy 2025', 'Przyjazdy 2026', 'Noclegi 2025', 'Noclegi 2026'];
+    const thead = document.createElement('thead'); const tr = document.createElement('tr');
+    head.forEach(h => { const th = document.createElement('th'); th.textContent = h; th.scope = 'col'; tr.appendChild(th); }); thead.appendChild(tr); t.appendChild(thead);
+    const tb = document.createElement('tbody');
+    for (let mi = 1; mi <= 8; mi++) CATS.forEach(c => {
+      const a = D.find(d => d.y === 2025 && d.m === mi && d.c === c), b = D.find(d => d.y === 2026 && d.m === mi && d.c === c);
+      const cells = [MONTH_FULL[mi - 1], CAT_LOW[c], nf.format(a.u), nf.format(b.u), pct((b.u / a.u - 1) * 100), nf.format(a.p) + (a.p === a.u ? ' !' : ''), nf.format(b.p), nf.format(a.n), nf.format(b.n)];
+      const row = document.createElement('tr');
+      cells.forEach((v, k) => { const td = document.createElement('td'); td.textContent = v; if (k === 5 && a.p === a.u) { td.className = 'flag'; td.title = 'Przyjazdy równe liczbie odwiedzających – prawdopodobny błąd eksportu'; } row.appendChild(td); });
+      tb.appendChild(row);
+    });
+    t.appendChild(tb);
+  }
+
+  // ---------- loksodromy w nagłówku ----------
+  function renderRhumb() {
+    const svg = document.getElementById('rhumb'), hero = document.getElementById('hero'), cart = document.getElementById('cartouche');
+    const bodyTop = document.body.getBoundingClientRect().top;
+    svg.style.height = Math.round(hero.getBoundingClientRect().bottom - bodyTop + 40) + 'px';
+    const hb = svg.getBoundingClientRect(), cb = cart.getBoundingClientRect();
+    svg.replaceChildren();
+    const cx = cb.left + cb.width / 2 - hb.left, cy = cb.top + cb.height / 2 - hb.top;
+    svg.setAttribute('viewBox', `0 0 ${hb.width} ${hb.height}`);
+    for (let i = 0; i < 32; i++) {
+      const a = i / 32 * Math.PI * 2, L = 3000;
+      el('line', {x1: cx, y1: cy, x2: cx + Math.cos(a) * L, y2: cy + Math.sin(a) * L, stroke: 'currentColor', 'stroke-width': i % 4 === 0 ? 1.2 : .7, 'stroke-opacity': i % 4 === 0 ? 1 : .8}, svg);
+    }
+    el('circle', {cx, cy, r: Math.max(cb.width, cb.height) * .78, fill: 'none', stroke: 'currentColor', 'stroke-width': 1}, svg);
+  }
+
+  // ---------- start ----------
+  function renderAll() {
+    renderTide(); renderMultiples(); renderShare(); renderFShare(); renderSails(); renderStay(); renderCourse(); renderStrip(); renderRhumb();
+  }
+  renderTiles(); renderFogs(); renderTable();
+  bindSeg('seg-cat', 'cat'); bindSeg('seg-met', 'met');
+  renderAll();
+  let lastW = document.documentElement.clientWidth, raf = 0;
+  window.addEventListener('resize', () => { const w = document.documentElement.clientWidth; if (w === lastW) return; lastW = w; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { hideTip(); renderAll(); }); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => renderAll());
+  window.addEventListener('scroll', hideTip, {passive: true});
+})();
+</script>
+
+</body>
+</html>

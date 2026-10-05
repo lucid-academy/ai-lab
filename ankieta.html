@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ankieta warsztatów AI</title>
+<meta name="description" content="Krótka, anonimowa ankieta po warsztatach „AI w procesach twórczych” — Fundacja Lucid Academy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Archivo:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --ink:#F4F0FF; --muted:#B3A7DE; --dim:#8A7CB8;
+  --violet:#A855F7; --cyan:#3DE3F0; --magenta:#F0369F;
+  --line:rgba(168,85,247,.34);
+  --display:"Bricolage Grotesque","Archivo",system-ui,sans-serif;
+  --body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background-color:#0C0720;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5;
+  padding:env(safe-area-inset-top,0px) 16px calc(40px + env(safe-area-inset-bottom,0px));
+  background-image:radial-gradient(700px 520px at 0% -10%, rgba(124,58,237,.42), transparent 62%),radial-gradient(600px 460px at 100% 40%, rgba(61,227,240,.12), transparent 60%);
+  background-attachment:fixed;}
+.wrap{max-width:640px;margin-inline:auto}
+header{padding-block:32px 20px;display:flex;flex-direction:column;gap:8px}
+.eyebrow{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin:0}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(40px,11vw,60px);line-height:1.02;letter-spacing:-.03em;margin:0;
+  background:linear-gradient(104deg,#FFFFFF 6%,#C9A6FF 45%,#6FE9F3 96%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin:0;color:var(--muted)}
+.rule{height:3px;width:110px;border-radius:3px;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:0 0 18px rgba(168,85,247,.8);margin-top:4px}
+form{display:flex;flex-direction:column;gap:16px}
+.field{border:1px solid var(--line);border-radius:16px;padding:16px 16px 18px;background:linear-gradient(160deg,rgba(124,58,237,.16),rgba(124,58,237,.04));display:flex;flex-direction:column;gap:8px}
+.field.hi{border-color:rgba(61,227,240,.55);background:linear-gradient(160deg,rgba(61,227,240,.14),rgba(124,58,237,.05))}
+label,.lbl{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--ink)}
+.hint{font-size:15px;color:var(--muted);margin:0}
+input[type=text],textarea{width:100%;font:inherit;font-size:18px;color:var(--ink);background:rgba(3,2,12,.55);border:1px solid rgba(168,85,247,.5);border-radius:10px;padding:12px 14px}
+textarea{resize:vertical;line-height:1.5}
+input:focus,textarea:focus{outline:2px solid var(--cyan);outline-offset:1px;border-color:transparent}
+.scale{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale label{display:flex;align-items:center;justify-content:center;height:46px;border-radius:10px;border:1px solid rgba(168,85,247,.5);background:rgba(3,2,12,.45);font-size:17px;cursor:pointer;letter-spacing:0}
+.scale input:checked + label{background:linear-gradient(135deg,var(--violet),#6B8BF5);border-color:transparent;color:#fff;box-shadow:0 0 18px rgba(168,85,247,.7)}
+.scale input:focus-visible + label{outline:2px solid var(--cyan);outline-offset:2px}
+.scale-ends{display:flex;justify-content:space-between;font-size:13px;color:var(--dim)}
+.count{font-family:var(--mono);font-size:13px;color:var(--cyan)}
+.tag{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;padding:2px 8px;border-radius:999px;background:var(--cyan);color:#0C0720;margin-left:6px;vertical-align:1px}
+.btn{font:inherit;font-family:var(--mono);font-weight:700;font-size:16px;letter-spacing:.04em;color:var(--ink);border:1px solid rgba(168,85,247,.6);background:rgba(124,58,237,.25);border-radius:12px;padding:14px 18px;cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.pri{background:linear-gradient(90deg,rgba(168,85,247,.9),rgba(61,227,240,.65));border-color:transparent;font-size:18px;padding:16px 20px;color:#fff}
+.btn:disabled{opacity:.6;cursor:progress}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.msg{border-radius:14px;padding:14px 16px;font-size:16px}
+.msg.ok{border:1px solid rgba(61,227,240,.6);background:rgba(61,227,240,.1)}
+.msg.err{border:1px solid rgba(240,54,159,.6);background:rgba(240,54,159,.12)}
+.msg.step{border:1px solid rgba(61,227,240,.6);background:linear-gradient(160deg,rgba(61,227,240,.14),rgba(124,58,237,.10))}
+.dbg{margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--dim);overflow-wrap:anywhere}
+.msg b{display:block;font-family:var(--display);font-size:22px;margin-bottom:4px}
+.err-field{color:var(--magenta);font-size:14px;margin:0}
+pre{margin:8px 0 0;font-family:var(--mono);font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;color:#E6E0FF;background:rgba(3,2,12,.55);border-radius:10px;padding:12px}
+footer{margin-top:28px;color:var(--dim);font-size:14px;text-align:center}
+@media (max-width:420px){.scale{grid-template-columns:repeat(5,1fr)}}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips label{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid rgba(168,85,247,.5);background:rgba(3,2,12,.45);font-family:var(--body);font-weight:400;font-size:16px;letter-spacing:0;cursor:pointer;line-height:1.3}
+.chips input:checked + label{background:linear-gradient(135deg,var(--violet),#6B8BF5);border-color:transparent;color:#fff;box-shadow:0 0 14px rgba(168,85,247,.6)}
+.chips input:focus-visible + label{outline:2px solid var(--cyan);outline-offset:2px}
+.scale5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.scale5 input{position:absolute;opacity:0;pointer-events:none}
+.scale5 label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:64px;border-radius:12px;border:1px solid rgba(168,85,247,.5);background:rgba(3,2,12,.45);font-size:22px;cursor:pointer;letter-spacing:0}
+.scale5 label small{font-family:var(--body);font-weight:400;font-size:11px;color:var(--muted)}
+.scale5 input:checked + label{background:linear-gradient(135deg,var(--violet),#6B8BF5);border-color:transparent;color:#fff;box-shadow:0 0 18px rgba(168,85,247,.7)}
+.scale5 input:checked + label small{color:#fff}
+.scale5 input:focus-visible + label{outline:2px solid var(--cyan);outline-offset:2px}
+.opt{font-family:var(--body);font-weight:400;font-size:13px;color:var(--dim);letter-spacing:0;margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Warsztaty AI · Fundacja Lucid Academy</p>
+  <h1>Jak było?</h1>
+  <p class="lead">„AI w procesach twórczych” · ankieta jest anonimowa i zajmie ok. 2 minut</p>
+  <div class="rule"></div>
+</header>
+
+<form id="f" novalidate>
+  <div class="field">
+    <span class="lbl" id="q1">JAK OCENIASZ WARSZTATY?</span>
+    <div class="scale5" role="radiogroup" aria-labelledby="q1">
+      <input type="radio" name="ocena" id="o1" value="1"><label for="o1">1<small>słabo</small></label>
+      <input type="radio" name="ocena" id="o2" value="2"><label for="o2">2</label>
+      <input type="radio" name="ocena" id="o3" value="3"><label for="o3">3</label>
+      <input type="radio" name="ocena" id="o4" value="4"><label for="o4">4</label>
+      <input type="radio" name="ocena" id="o5" value="5"><label for="o5">5<small>świetnie</small></label>
+    </div>
+    <p class="err-field" id="ocena-err" hidden>Wybierz ocenę od 1 do 5.</p>
+  </div>
+
+  <div class="field">
+    <span class="lbl" id="q2">CO BYŁO NAJBARDZIEJ PRZYDATNE?<span class="opt">możesz zaznaczyć kilka</span></span>
+    <div class="chips" role="group" aria-labelledby="q2" id="useful"></div>
+  </div>
+
+  <div class="field">
+    <label for="surprise">CO CIĘ NAJBARDZIEJ ZASKOCZYŁO?</label>
+    <textarea id="surprise" rows="3"></textarea>
+  </div>
+
+  <div class="field">
+    <label for="change">CO ZMIENIĆ ALBO DODAĆ?</label>
+    <textarea id="change" rows="3"></textarea>
+  </div>
+
+  <div class="field">
+    <span class="lbl" id="q5">TEMPO ZAJĘĆ</span>
+    <div class="chips" role="radiogroup" aria-labelledby="q5">
+      <input type="radio" name="tempo" id="t1" value="za wolne"><label for="t1">za wolne</label>
+      <input type="radio" name="tempo" id="t2" value="w sam raz"><label for="t2">w sam raz</label>
+      <input type="radio" name="tempo" id="t3" value="za szybkie"><label for="t3">za szybkie</label>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="lbl" id="q6">CZY POLECIŁBYŚ / POLECIŁABYŚ TE WARSZTATY ZNAJOMYM?</span>
+    <div class="chips" role="radiogroup" aria-labelledby="q6">
+      <input type="radio" name="polecenie" id="p1" value="tak"><label for="p1">tak</label>
+      <input type="radio" name="polecenie" id="p2" value="raczej tak"><label for="p2">raczej tak</label>
+      <input type="radio" name="polecenie" id="p3" value="raczej nie"><label for="p3">raczej nie</label>
+      <input type="radio" name="polecenie" id="p4" value="nie"><label for="p4">nie</label>
+    </div>
+  </div>
+
+  <div class="field hi">
+    <label for="next">DO CZEGO BĘDZIESZ TERAZ UŻYWAĆ AI?<span class="opt">opcjonalnie</span></label>
+    <textarea id="next" rows="3"></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn pri" type="submit" id="send">Wyślij ankietę</button>
+  </div>
+  <div id="result" aria-live="polite"></div>
+</form>
+
+<footer>Dziękujemy! Fundacja Lucid Academy · Piotr Jarczyk, Piotr Humin, Maciej Piotrowski</footer>
+</div>
+
+<script>
+(function () {
+  var TO = 'piotr.jarczyk.ai@gmail.com';
+  // Klucz z web3forms.com (Access Key). Gdy jest wpisany, ankieta wysyła przez Web3Forms. Gdy pusty — przez FormSubmit.
+  var WEB3FORMS_KEY = '';
+  var DEBUG = new URLSearchParams(location.search).get('debug') === '1';
+  var USEFUL = ['dyskusje o AI i przyszłości', 'grafika i obrazy', 'NotebookLM i Perplexity', 'muzyka: Suno i Lyria', 'vibe coding i własny projekt', 'film i transkrypcja', 'ćwiczenie „Pięć minut z AI”'];
+  var box = document.getElementById('useful');
+  USEFUL.forEach(function (u, i) { box.insertAdjacentHTML('beforeend', '<input type="checkbox" id="u' + i + '" value="' + u + '"><label for="u' + i + '">' + u + '</label>'); });
+
+  var f = document.getElementById('f'), result = document.getElementById('result'), sendBtn = document.getElementById('send');
+  var KEY = 'ankieta-ai-draft';
+  function val(name) { var c = f.querySelector('input[name="' + name + '"]:checked'); return c ? c.value : ''; }
+  function txt(id) { return document.getElementById(id).value.trim(); }
+  function useful() { return Array.prototype.map.call(box.querySelectorAll('input:checked'), function (c) { return c.value; }); }
+  function data() { return { ocena: val('ocena'), useful: useful(), surprise: txt('surprise'), change: txt('change'), tempo: val('tempo'), polecenie: val('polecenie'), next: txt('next') }; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(data())); } catch (e) {} }
+  try {
+    var d = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (d) {
+      ['ocena', 'tempo', 'polecenie'].forEach(function (n) { if (d[n]) { var r = f.querySelector('input[name="' + n + '"][value="' + d[n] + '"]'); if (r) r.checked = true; } });
+      (d.useful || []).forEach(function (u) { var c = box.querySelector('input[value="' + u + '"]'); if (c) c.checked = true; });
+      ['surprise', 'change', 'next'].forEach(function (id) { document.getElementById(id).value = d[id] || ''; });
+    }
+  } catch (e) {}
+  f.addEventListener('input', save); f.addEventListener('change', save);
+
+  function plain() {
+    var x = data();
+    return 'OCENA (1-5): ' + x.ocena + '\nNAJBARDZIEJ PRZYDATNE: ' + (x.useful.join(', ') || '—') + '\nZASKOCZYŁO: ' + (x.surprise || '—') +
+      '\nDO ZMIANY: ' + (x.change || '—') + '\nTEMPO: ' + (x.tempo || '—') + '\nPOLECENIE: ' + (x.polecenie || '—') + '\nDALEJ Z AI: ' + (x.next || '—');
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function mailtoHref() { return 'mailto:' + TO + '?subject=' + encodeURIComponent('Ankieta — warsztaty AI') + '&body=' + encodeURIComponent(plain()); }
+  function fallbackUI(detail) {
+    sendBtn.hidden = true;
+    result.innerHTML = '<div class="msg step"><b>Jeszcze jedno stuknięcie</b>Twoje odpowiedzi są już wpisane w wiadomość — wystarczy ją wysłać ze swojej poczty.' +
+      '<div class="actions" style="margin-top:12px;"><a class="btn pri" href="' + mailtoHref() + '">Wyślij z mojej poczty ✉</a></div>' +
+      (DEBUG && detail ? '<p class="dbg">debug: ' + esc(detail) + '</p>' : '') + '</div>';
+  }
+
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = document.getElementById('ocena-err');
+    if (!val('ocena')) { err.hidden = false; err.scrollIntoView({ block: 'center' }); return; }
+    err.hidden = true;
+    sendBtn.disabled = true; sendBtn.textContent = 'Wysyłam…'; result.innerHTML = '';
+    var x = data();
+    var fields = {
+      'Ocena (1-5)': x.ocena,
+      'Najbardziej przydatne': x.useful.join(', ') || '—',
+      'Co zaskoczyło': x.surprise || '—',
+      'Co zmienić / dodać': x.change || '—',
+      'Tempo': x.tempo || '—',
+      'Polecenie znajomym': x.polecenie || '—',
+      'Dalej z AI': x.next || '—'
+    };
+    var url, payload;
+    if (WEB3FORMS_KEY) { url = 'https://api.web3forms.com/submit'; payload = { access_key: WEB3FORMS_KEY, subject: 'Ankieta — warsztaty AI', from_name: 'Ankieta warsztatów AI' }; }
+    else { url = 'https://formsubmit.co/ajax/' + TO; payload = { _subject: 'Ankieta — warsztaty AI', _template: 'table', _captcha: 'false' }; }
+    for (var k in fields) payload[k] = fields[k];
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = setTimeout(function () { ctl && ctl.abort(); }, 15000);
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload), signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        clearTimeout(timer);
+        if (j && (j.success === true || j.success === 'true')) {
+          try { localStorage.removeItem(KEY); } catch (e) {}
+          sendBtn.hidden = true;
+          result.innerHTML = '<div class="msg ok"><b>Dziękujemy! ✓</b>Ankieta wysłana. Twoja opinia naprawdę nam pomoże.</div>';
+        } else { sendBtn.disabled = false; sendBtn.textContent = 'Wyślij ankietę'; fallbackUI(JSON.stringify(j)); }
+      })
+      .catch(function (err) { clearTimeout(timer); sendBtn.disabled = false; sendBtn.textContent = 'Wyślij ankietę'; fallbackUI(String(err && (err.message || err.name) || err)); });
+  });
+})();
+</script>
+</body>
+</html>

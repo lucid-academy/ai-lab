@@ -76,6 +76,7 @@ ol.steps li small{display:block;color:var(--muted);font-size:16px}
 .copy.ok{border-color:var(--cyan);color:var(--cyan)}
 
 .formbtn{display:block;text-align:center;text-decoration:none;font-family:var(--mono);font-weight:700;font-size:17px;color:#fff;border-radius:12px;padding:15px 18px;background:linear-gradient(90deg,rgba(168,85,247,.9),rgba(61,227,240,.6));box-shadow:0 0 24px -6px rgba(168,85,247,.8)}
+.session{font-size:clamp(24px,4.5vw,32px);margin:22px 0 -4px;color:var(--cyan);font-family:var(--display);}
 .send{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;border:1px solid rgba(61,227,240,.4);border-radius:14px;padding:14px 18px;background:rgba(61,227,240,.07)}
 .send .addr{font-family:var(--mono);font-weight:700;font-size:18px;color:var(--cyan);overflow-wrap:anywhere}
 .warn{display:flex;gap:14px;align-items:flex-start;border:1px solid rgba(240,54,159,.55);border-radius:14px;padding:14px 18px;background:linear-gradient(90deg,rgba(240,54,159,.18),rgba(240,54,159,.04))}
@@ -102,7 +103,7 @@ footer b{color:var(--ink)}
 <header>
   <p class="eyebrow">Warsztaty · Fundacja Lucid Academy</p>
   <h1>Ćwiczenia</h1>
-  <p class="sub">AI w procesach twórczych · zajęcia 1 · 28 września 2026</p>
+  <p class="sub">AI w procesach twórczych · zajęcia 1–3 · 28 września – 5 października 2026</p>
   <div class="rule"></div>
   <nav class="toc" aria-label="Ćwiczenia">
     <a href="#piec-minut"><span>1</span>Pięć minut z AI</a>
@@ -110,6 +111,15 @@ footer b{color:var(--ink)}
     <a href="#grafika"><span>3</span>Zmień rzeczywistość</a>
     <a href="#notebooklm"><span>4</span>NotebookLM</a>
     <a href="#projekt"><span>5</span>Twój projekt</a>
+    <a href="#piosenka"><span>6</span>Twoja piosenka</a>
+    <a href="#brief"><span>7</span>Co chcesz zbudować</a>
+    <a href="#start"><span>8</span>Do dzieła</a>
+    <a href="#wyglad"><span>9</span>Referencje</a>
+    <a href="#limity"><span>10</span>Limity</a>
+    <a href="#zwiastun"><span>11</span>Zwiastun</a>
+    <a href="#sasiad"><span>12</span>Pokaż sąsiadowi</a>
+    <a href="#runda-2"><span>13</span>Runda 2</a>
+    <a href="#ankieta"><span>14</span>Ankieta</a>
     <a href="#linki"><span>↗</span>Linki</a>
   </nav>
 </header>
@@ -222,6 +232,176 @@ Potem zaproponuj: cel w jednym zdaniu, 3–5 kroków realizacji, narzędzia AI, 
     <p class="tip">Nie skończysz na zajęciach? Dokończ rozmowę w domu i przynieś plan 1 października.</p>
   </section>
 
+  <h2 class="session" id="zajecia-2">Zajęcia 2 · 1 października</h2>
+
+  <!-- 6 -->
+  <section class="ex" id="piosenka">
+    <div class="ex-head"><span class="num">6</span><div><h2>Twoja piosenka</h2><div class="meta"><span>Suno albo Gemini (od 18 lat)</span><span>czas: <b>12 minut</b></span></div></div></div>
+    <p>Wybierz jedną opcję:</p>
+    <div class="rules">
+      <div><b>A · Piosenka do nauki</b><span>daty, słówka, wzory, przepis — jako rap, disco polo albo szanta</span></div>
+      <div><b>B · Dżingiel projektu</b><span>30 sekund, które zapowiada to, co dziś zbudujesz</span></div>
+      <div><b>C · Trzy gatunki</b><span>ten sam tekst jako jazz, metal i kołysanka</span></div>
+    </div>
+    <div class="box">
+      <div class="box-head"><p class="lbl" style="margin:0;">Prompt</p><button class="copy" data-copy="t-song" type="button">kopiuj</button></div>
+      <pre id="t-song">Piosenka w stylu <span class="ph">[gatunek, np. polski rap, szybkie tempo]</span> o <span class="ph">[temat]</span>.
+Tekst po polsku, prosty i łatwy do zapamiętania, z refrenem powtórzonym dwa razy.
+Nastrój: <span class="ph">[np. energetyczny, z humorem]</span>.</pre>
+    </div>
+    <p class="tip">Tip: najpierw poproś czat (Claude, ChatGPT) o tekst, potem wklej go do Suno w trybie Custom.</p>
+  </section>
+
+  <!-- 7 -->
+  <section class="ex" id="brief">
+    <div class="ex-head"><span class="num">7</span><div><h2>Co chcesz zbudować?</h2><div class="meta"><span>najpierw myślimy, po przerwie budujemy</span><span>czas: <b>10 minut</b></span></div></div></div>
+    <ol class="steps">
+      <li><span><b>Dla kogo?</b><small>dla siebie, dla kogoś, dla społeczności</small></span></li>
+      <li><span><b>Jaki problem rozwiązuje?</b></span></li>
+      <li><span><b>Co ma robić?</b><small>trzy najważniejsze rzeczy — nie więcej</small></span></li>
+      <li><span><b>Jak ma wyglądać?</b><small>styl, kolory, nastrój</small></span></li>
+      <li><span><b>Po czym poznasz, że jest gotowe?</b></span></li>
+    </ol>
+    <div class="box">
+      <div class="box-head"><p class="lbl" style="margin:0;">Brief — uzupełnij i zachowaj</p><button class="copy" data-copy="t-brief" type="button">kopiuj</button></div>
+      <pre id="t-brief">PROJEKT: <span class="ph">[nazwa]</span>
+DLA KOGO: <span class="ph">…</span>
+PROBLEM: <span class="ph">…</span>
+CO MA ROBIĆ:
+1. <span class="ph">…</span>
+2. <span class="ph">…</span>
+3. <span class="ph">…</span>
+WYGLĄD: <span class="ph">…</span>
+GOTOWE, GDY: <span class="ph">…</span></pre>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="ex" id="start">
+    <div class="ex-head"><span class="num">8</span><div><h2>Do dzieła</h2><div class="meta"><span>Claude, ChatGPT albo Gemini z Canvas</span><span>czas: <b>do końca zajęć</b></span></div></div></div>
+    <ol class="steps">
+      <li><span><b>Otwórz Claude</b><small>albo ChatGPT lub Gemini z Canvas</small></span></li>
+      <li><span><b>Wklej prompt i swój brief</b></span></li>
+      <li><span><b>Najpierw najprostsza działająca wersja</b></span></li>
+      <li><span><b>Poprawiaj małymi krokami</b><small>jedna zmiana naraz</small></span></li>
+    </ol>
+    <div class="box">
+      <div class="box-head"><p class="lbl" style="margin:0;">Pierwszy prompt</p><button class="copy" data-copy="t-start" type="button">kopiuj</button></div>
+      <pre id="t-start">Zbuduj prostą aplikację na podstawie tego opisu:
+
+<span class="ph">[wklej swój brief]</span>
+
+Zacznij od najprostszej działającej wersji, w jednym pliku, którą od razu zobaczę w podglądzie. Wszystkie teksty po polsku. Nie dodawaj funkcji, o które nie prosiłem.
+
+Na koniec napisz w trzech punktach, co mogę poprawić w następnym kroku.</pre>
+    </div>
+    <div>
+      <p class="lbl">Pięć zasad mądrego vibe codingu</p>
+      <div class="rules">
+        <div><b>„Gotowe”</b><span>określ, zanim napiszesz pierwszy prompt</span></div>
+        <div><b>Budzik</b><span>przerwa co 45 minut</span></div>
+        <div><b>Jeden projekt</b><span>nowe pomysły na listę „na później”</span></div>
+        <div><b>Działająca wersja</b><span>kończ na niej i zapisz następny krok</span></div>
+        <div><b>Sen</b><span>ważniejszy niż kolejny prompt</span></div>
+      </div>
+    </div>
+    <div class="warn"><span class="i">!</span><p><b>Bezpieczeństwo:</b> nie wklejaj do modelu danych osobowych, haseł ani dokumentów, których nie możesz udostępnić.</p></div>
+  </section>
+
+  <h2 class="session" id="zajecia-3">Zajęcia 3 · 5 października</h2>
+
+  <!-- 9 -->
+  <section class="ex" id="wyglad">
+    <div class="ex-head"><span class="num">9</span><div><h2>Zrzut ekranu jako referencja</h2><div class="meta"><span>lepszy wygląd projektu</span><span>czas: <b>15 minut</b></span></div></div></div>
+    <p>Zamiast opisywać styl słowami, pokaż modelowi zrzut ekranu strony albo aplikacji, która Ci się podoba. Inspiruj się, nie kopiuj: bez cudzych logo, nazw i treści.</p>
+    <div>
+      <p class="lbl">Gdzie szukać inspiracji (za darmo)</p>
+      <div class="links">
+        <a href="https://land-book.com" target="_blank" rel="noopener"><b>Land-book</b><span>strony internetowe</span></a>
+        <a href="https://lapa.ninja" target="_blank" rel="noopener"><b>Lapa Ninja</b><span>strony internetowe</span></a>
+        <a href="https://onepagelove.com" target="_blank" rel="noopener"><b>One Page Love</b><span>strony jednostronicowe</span></a>
+        <a href="https://godly.website" target="_blank" rel="noopener"><b>Godly</b><span>odważne, nowoczesne strony</span></a>
+        <a href="https://mobbin.com" target="_blank" rel="noopener"><b>Mobbin</b><span>aplikacje · darmowe konto z limitem</span></a>
+        <a href="https://dribbble.com" target="_blank" rel="noopener"><b>Dribbble</b><span>projekty graficzne i aplikacje</span></a>
+        <a href="https://www.behance.net" target="_blank" rel="noopener"><b>Behance</b><span>portfolio projektantów</span></a>
+        <a href="https://itch.io/games" target="_blank" rel="noopener"><b>itch.io</b><span>gry niezależne</span></a>
+        <a href="https://coolors.co" target="_blank" rel="noopener"><b>Coolors</b><span>palety kolorów</span></a>
+        <a href="https://www.realtimecolors.com" target="_blank" rel="noopener"><b>Realtime Colors</b><span>paleta na przykładowej stronie</span></a>
+        <a href="https://fonts.google.com" target="_blank" rel="noopener"><b>Google Fonts</b><span>kroje pisma</span></a>
+      </div>
+    </div>
+    <ol class="steps">
+      <li><span><b>Znajdź wygląd, który Ci się podoba</b></span></li>
+      <li><span><b>Zrób zrzut ekranu</b><small>Windows: Win + Shift + S · Mac: Cmd + Shift + 4 · telefon: przyciski zasilania i głośności</small></span></li>
+      <li><span><b>Wklej zrzut do rozmowy z projektem razem z promptem</b></span></li>
+      <li><span><b>Porównaj: przed i po</b></span></li>
+    </ol>
+    <div class="box">
+      <div class="box-head"><p class="lbl" style="margin:0;">Prompt</p><button class="copy" data-copy="t-ref" type="button">kopiuj</button></div>
+      <pre id="t-ref">W załączniku zrzut ekranu strony, której wygląd mi się podoba.
+
+Przebuduj wygląd mojej aplikacji w tym duchu: kolory, kroje pisma, odstępy, kształt przycisków i kart.
+
+Nie kopiuj treści, nazw ani logo z tej strony i nie zmieniaj działania mojej aplikacji.
+
+Zanim zaczniesz, opisz w trzech punktach, co przejmujesz z tego stylu.</pre>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="ex" id="limity">
+    <div class="ex-head"><span class="num">10</span><div><h2>Jak oszczędzać limity</h2></div></div>
+    <ol class="steps">
+      <li><span><b>Przygotuj wszystko w darmowym czacie</b><small>zrzuty, listę zmian, teksty do aplikacji</small></span></li>
+      <li><span><b>Jeden porządny prompt zamiast dziesięciu drobnych</b><small>3–5 zmian naraz, dokładnie opisanych</small></span></li>
+      <li><span><b>Długa rozmowa? Zacznij nową</b><small>wklej aktualną wersję i krótkie podsumowanie — długie rozmowy szybciej zjadają limit</small></span></li>
+      <li><span><b>Limit się skończył? Nie czekaj</b><small>pisz treści, przygotuj grafiki, opowiedz komuś o projekcie</small></span></li>
+    </ol>
+    <p class="tip">Darmowe alternatywy: Gemini z Canvas, Google AI Studio (tryb Build), darmowe wersje ChatGPT i Claude.</p>
+  </section>
+
+  <!-- 11 -->
+  <section class="ex" id="zwiastun">
+    <div class="ex-head"><span class="num">11</span><div><h2>Zwiastun Twojego projektu</h2><div class="meta"><span>Google Vids · Gemini Omni</span><span>czas: <b>10 minut</b></span></div></div></div>
+    <ol class="steps">
+      <li><span><b>Wejdź na <a href="https://vids.new" target="_blank" rel="noopener">vids.new</a></b><small>zaloguj się kontem Google, na komputerze (na telefonie nie da się generować)</small></span></li>
+      <li><span><b>Wybierz „Create AI videos”</b></span></li>
+      <li><span><b>Stwórz scenę, która zapowiada Twój projekt</b><small>bez prawdziwych osób · darmowe konto ma 6 klipów w miesiącu, więc najpierw dopracuj opis</small></span></li>
+    </ol>
+    <div class="box">
+      <div class="box-head"><p class="lbl" style="margin:0;">Prompt</p><button class="copy" data-copy="t-film" type="button">kopiuj</button></div>
+      <pre id="t-film">Krótka, dynamiczna scena zapowiadająca aplikację <span class="ph">[nazwa]</span>, która pomaga <span class="ph">[komu i w czym]</span>.
+
+Styl: <span class="ph">[np. ciepły, kolorowy, jak animacja]</span>.
+Bez prawdziwych osób i bez tekstu na ekranie.
+Na końcu kamera powoli się oddala.</pre>
+    </div>
+    <p class="tip">Nie przerabiaj wizerunku innych osób bez ich zgody. Nagrywasz kogoś do transkrypcji? Też zapytaj o zgodę.</p>
+  </section>
+
+  <!-- 12 -->
+  <section class="ex" id="sasiad">
+    <div class="ex-head"><span class="num">12</span><div><h2>Pokaż sąsiadowi</h2><div class="meta"><span>w parach</span><span>czas: <b>3 minuty na osobę</b></span></div></div></div>
+    <ol class="steps">
+      <li><span><b>Pokaż projekt na swoim ekranie</b><small>dla kogo jest, co robi, co było najtrudniejsze</small></span></li>
+      <li><span><b>Słuchacz odpowiada dwoma zdaniami</b><small>„Podoba mi się…” i „A gdyby tak…”</small></span></li>
+      <li><span><b>Zamiana, potem nowa para</b><small>zapisz uwagi — przydadzą się na dzień prezentacji</small></span></li>
+    </ol>
+  </section>
+
+  <!-- 13 -->
+  <section class="ex" id="runda-2">
+    <div class="ex-head"><span class="num">13</span><div><h2>Pięć minut z AI · runda 2</h2><div class="meta"><span>te same pytania co pierwszego dnia</span><span>stoper: <b>5 minut</b></span></div></div></div>
+    <p>Podpisz się tym samym imieniem co za pierwszym razem. Nie zaglądaj do starych odpowiedzi.</p>
+    <a class="formbtn" href="https://lucid-academy.github.io/ai-lab/piec-minut.html?runda=2" target="_blank" rel="noopener">Wypełnij formularz · runda 2 ↗</a>
+  </section>
+
+  <!-- 14 -->
+  <section class="ex" id="ankieta">
+    <div class="ex-head"><span class="num">14</span><div><h2>Ankieta</h2><div class="meta"><span>anonimowo</span><span>czas: <b>2 minuty</b></span></div></div></div>
+    <a class="formbtn" href="https://lucid-academy.github.io/ai-lab/ankieta.html" target="_blank" rel="noopener">Wypełnij ankietę ↗</a>
+  </section>
+
   <!-- linki -->
   <section class="ex" id="linki">
     <div class="ex-head"><span class="num">↗</span><div><h2>Przydatne linki</h2></div></div>
@@ -237,8 +417,8 @@ Potem zaproponuj: cel w jednym zdaniu, 3–5 kroków realizacji, narzędzia AI, 
 </main>
 
 <footer>
-  <p><b>Piotr Jarczyk · Sylwia Kulczyk</b> · Fundacja Lucid Academy</p>
-  <p>Kolejne zajęcia: 1 i 5 października. Nowe ćwiczenia pojawią się na tej stronie.</p>
+  <p><b>Piotr Jarczyk · Sylwia Kulczyk · Piotr Humin · Maciej Piotrowski</b> · Fundacja Lucid Academy</p>
+  <p>Dziękujemy za udział! Do zobaczenia na prezentacjach Waszych projektów.</p>
 </footer>
 </div>
 

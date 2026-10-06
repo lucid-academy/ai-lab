@@ -1,5 +1,5 @@
 /*
- * osmiornica.js: Lucek, a mischievous violet octopus for HTML presentations (Lucid Academy).
+ * osmiornica.js: Luci, a moody neon-violet octopus for HTML presentations (Lucid Academy).
  *
  * Drop-in, no dependencies:
  *   <script src="osmiornica.js" defer></script>
@@ -12,9 +12,9 @@
  *   data-osmiornica="tu"         always shows up on this slide
  *   data-osmiornica="final"      finale: drop + bow
  *   data-osmiornica-cel          preferred heading for pranks
- *   data-osmiornica-podest       something it may sit on (image, card)
+ *   data-osmiornica-podest       something she may sit on (image, card)
  *   data-osmiornica-przeszkoda   keep clear of this (nav bars, logos)
- * API: Osmiornica.summon(name?) .hide() .serious(on?) .reward() .fix() .panel(on?) .slideChanged(el) .mode(m)
+ * API: Osmiornica.summon(name?) .hide() .serious(on?) .reward() .fix() .panel(on?) .slideChanged(el) .mode(m) .temper(t?)
  */
 (() => {
   'use strict';
@@ -23,17 +23,20 @@
   // ---------- config ----------
   const USER = window.OSMIORNICA || {};
   const CFG = Object.assign({
-    name: 'Lucek',
+    name: 'Luci',
     mode: 'lecture',      // 'lecture': rare, controlled appearances · 'demo': on every slide
     size: .105,           // mantle height as a fraction of the viewport height
     firstAfterMin: 3,     // lecture: no appearance before this many minutes
     minGapMin: 9,         // lecture: minimum gap between appearances
     maxAppearances: 6,    // lecture: per session
-    stayMin: 1.2,         // leaves on its own after this long on one slide
-    delayAfterSlide: 1.1, // seconds between a slide change and its move
-    memory: true,         // localStorage: sessions, clicks, which pranks worked
-    skin: '#8B5CF6',      // Lucid violet
-    glow: '#3DE3F0',      // Lucid cyan: rim light, eyes, star
+    stayMin: 1.2,         // leaves on her own after this long on one slide
+    delayAfterSlide: 1.1, // seconds between a slide change and her move
+    memory: true,         // localStorage: sessions, clicks, mood of the day, which pranks worked
+    thoughts: true,       // a thought cloud now and then, dreams while she sleeps
+    skin: '#8B3DF5',      // electric violet
+    belly: '#F0369F',     // Lucid magenta: undersides, suckers, web
+    glow: '#3DE3F0',      // Lucid cyan: rim light and eyes
+    neon: '#B44CFF',      // the glow around her
   }, USER);
   CFG.keys = Object.assign({ summon: 'o', hide: 'h', serious: '0', blame: 'w', reward: '+', fix: 'r', panel: 'd' }, USER.keys);
   const me = document.currentScript;
@@ -51,12 +54,14 @@
   const smooth = t => t * t * (3 - 2 * t);
   const easeOut = t => 1 - Math.pow(1 - t, 3);
   const easeIn = t => t * t * t;
+  const easeOutBack = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
   const hex = h => { h = h.replace('#', ''); if (h.length === 3) h = h.replace(/./g, c => c + c); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
   const mix = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
   const rgba = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const WHITE = [255, 255, 255], DEEP = [16, 6, 40];
   const shade = (c, f) => (f < 0 ? mix(c, DEEP, -f) : mix(c, WHITE, f));
-  const GLOW = hex(CFG.glow);
+  const SKIN0 = hex(CFG.skin), PINK = hex(CFG.belly), GLOW = hex(CFG.glow), NEON = hex(CFG.neon);
+  const BELLY = mix(SKIN0, PINK, .5), GOLD = [255, 211, 110], RED = hex('#FF4D8D');
   const RM = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const mScale = () => (RM.matches ? .35 : 1);
   const CANCEL = Symbol('cancel');
@@ -78,40 +83,60 @@
   let host, root, cv, ctx, hitEl, dimEl, bubbleEl, toastEl, panelEl;
   let bubbleUntil = 0, toastUntil = 0;
 
+  // ---------- memory ----------
+  const MEM_KEY = 'osmiornica.pamiec.v1';
+  const mem = { sessions: 0, clicks: 0, throws: 0, last: 0, first: Date.now(), stats: {}, temper: '', temperDay: '' };
+  function memLoad() { if (!CFG.memory) return; try { Object.assign(mem, JSON.parse(localStorage.getItem(MEM_KEY) || '{}')); } catch (e) { /* storage blocked */ } }
+  function memSave() { if (!CFG.memory) return; try { localStorage.setItem(MEM_KEY, JSON.stringify(mem)); } catch (e) { /* storage blocked */ } }
+  const stat = n => mem.stats[n] || (mem.stats[n] = { n: 0, s: 0 });
+
   // ---------- mood: functional emotions, visible on the skin ----------
   const EMO = ['curiosity', 'annoyance', 'boredom', 'joy', 'fear']; // fixed order = chart slots
   const EMO_PL = { curiosity: 'ciekawość', annoyance: 'irytacja', boredom: 'nuda', joy: 'radość', fear: 'strach' };
   const SERIES = { curiosity: '#3987e5', annoyance: '#d95926', boredom: '#199e70', joy: '#c98500', fear: '#d55181' };
-  const BASE = { curiosity: .35, annoyance: .05, boredom: .15, joy: .3, fear: .05 };
   const DECAY = { curiosity: .05, annoyance: .04, boredom: .015, joy: .035, fear: .12 };
-  const TINT = { curiosity: hex('#6366F1'), annoyance: hex('#9F1239'), boredom: hex('#6B6394'), joy: hex('#D946EF'), fear: hex('#EDE9FE') };
-  const TINT_MAX = { curiosity: .5, annoyance: .55, boredom: .6, joy: .6, fear: .7 }; // it stays recognisably violet
+  const TINT = { curiosity: hex('#5B6CFF'), annoyance: hex('#B0124F'), boredom: hex('#6E6699'), joy: hex('#FF4FD8'), fear: hex('#F0E9FF') };
+  const TINT_MAX = { curiosity: .45, annoyance: .55, boredom: .55, joy: .55, fear: .7 }; // she stays recognisably violet
+  // mood of the day: it sets where her feelings drift back to
+  const TEMPERS = {
+    pogodna:   { curiosity: .4,  annoyance: .03, boredom: .12, joy: .45, fear: .05 },
+    ciekawska: { curiosity: .6,  annoyance: .05, boredom: .1,  joy: .3,  fear: .05 },
+    marudna:   { curiosity: .3,  annoyance: .24, boredom: .2,  joy: .14, fear: .05 },
+    zaspana:   { curiosity: .25, annoyance: .06, boredom: .36, joy: .25, fear: .05 },
+  };
+  const BASE = Object.assign({}, TEMPERS.pogodna);
+  let temper = 'pogodna';
+  function setTemper(t) {
+    temper = TEMPERS[t] ? t : 'pogodna';
+    Object.assign(BASE, TEMPERS[temper]);
+    mem.temper = temper; mem.temperDay = new Date().toDateString(); memSave();
+  }
+  function rollTemper(except) {
+    const w = [['pogodna', .35], ['ciekawska', .25], ['marudna', .22], ['zaspana', .18]].filter(x => x[0] !== except);
+    let r = Math.random() * w.reduce((s, x) => s + x[1], 0);
+    for (const [k, p] of w) if ((r -= p) <= 0) return k;
+    return w[0][0];
+  }
   const mood = Object.assign({}, BASE);
   const moodLog = [];
   const feel = (k, d) => { mood[k] = clamp(mood[k] + d, 0, 1); };
   function moodTick(dt) {
     for (const k of EMO) mood[k] = approach(mood[k], BASE[k], DECAY[k], dt);
-    // ignored: boredom builds up, faster while on stage
+    // ignored: boredom builds up, faster while she is on stage
     feel('boredom', dt * (oct.on ? (clock - lastTouch > 10 ? .012 : 0) : .004));
     const last = moodLog.length ? moodLog[moodLog.length - 1].t : -9;
     if (clock - last >= 2) moodLog.push({ t: clock, v: EMO.map(k => mood[k]) });
     if (moodLog.length > 5400) moodLog.splice(0, moodLog.length - 5400);
   }
   function skinTarget() {
-    let c = hex(CFG.skin);
+    let c = SKIN0;
     for (const k of EMO) { const w = clamp((mood[k] - BASE[k]) * 1.5, 0, TINT_MAX[k]); if (w > .01) c = mix(c, TINT[k], w); }
     return c;
   }
 
-  // ---------- memory ----------
-  const MEM_KEY = 'osmiornica.pamiec.v1';
-  const mem = { sessions: 0, clicks: 0, throws: 0, last: 0, first: Date.now(), stats: {} };
-  function memLoad() { if (!CFG.memory) return; try { Object.assign(mem, JSON.parse(localStorage.getItem(MEM_KEY) || '{}')); } catch (e) { /* storage blocked */ } }
-  function memSave() { if (!CFG.memory) return; try { localStorage.setItem(MEM_KEY, JSON.stringify(mem)); } catch (e) { /* storage blocked */ } }
-  const stat = n => mem.stats[n] || (mem.stats[n] = { n: 0, s: 0 });
-
   // ---------- octopus ----------
   const N = 14; // points per arm
+  const WEB = 3; // the web between the arms reaches this far down each arm
   const POSES = {
     sit:    { up: 0, s0: .18, sk: .33, curl: 1.35, wave: .45, wk: 2.6, ww: 1.4, droop: .3,  stiff: .2,   tip: .05,  damp: .9,  g: .4, follow: .35 },
     lie:    { up: 0, s0: .42, sk: .3,  curl: .95,  wave: .25, wk: 2.2, ww: .8,  droop: .5,  stiff: .15,  tip: .04,  damp: .9,  g: .5, follow: .15 },
@@ -124,31 +149,33 @@
     smug:     { open: .6,   low: .3,  tilt: .18,  dil: .12 },
     focus:    { open: .72,  low: .32, tilt: .22,  dil: .2 },
     surprise: { open: 1.14, low: 0,   tilt: -.1,  dil: 1, mouth: 1 },
-    angry:    { open: .66,  low: .14, tilt: .85,  dil: .1 },
+    angry:    { open: .62,  low: .16, tilt: .9,   dil: .1 },
     innocent: { open: 1.06, low: .05, tilt: -.45, dil: .9 },
     guilty:   { open: .8,   low: .12, tilt: -.55, dil: .7 },
     happy:    { open: .8,   low: .5,  tilt: -.15, dil: .55 },
+    yawn:     { open: .28,  low: .22, tilt: -.25, dil: .3, mouth: 1.6 },
     closed:   { open: 0,    low: 0,   tilt: 0,    dil: .3 },
   };
   const oct = {
     on: false, x: 0, y: 0, vx: 0, vy: 0, physics: false, skipV: false, motion: null,
     ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, tiltUntil: 0,
-    face: 0, faceT: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0,
+    face: 0, faceT: 0, turn: 0, turnT: 0, turnDir: 1,
+    q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0,
     scale: 1, alpha: 1, camo: 0, camoT: 0, camoC: [12, 7, 32], eyeCamo: false,
-    skin: hex(CFG.skin), skinNow: hex(CFG.skin), flash: 0, flashC: WHITE,
-    clouds: 0, flare: 0, starFlare: 0, glowS: 0, breathe: 0, nextFidget: 2,
+    skin: SKIN0.slice(), skinNow: SKIN0.slice(), flash: 0, flashC: WHITE,
+    clouds: 0, flare: 0, glowPulse: 0, glowS: 0, breathe: 0, nextFidget: 2,
     pose: 'sit', poseP: POSES.sit, ride: .3, ground: null, spot: null,
     exprName: null, exprUntil: 0, props: [], arms: [],
     look: { mode: 'idle', until: 0, x: 0, y: 0 },
-    eyes: { open: 1, low: 0, tilt: 0, dil: .2, mouth: 0, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
+    eyes: { open: 1, low: 0, tilt: 0, dil: .3, mouth: 0, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
   };
   function makeArms() {
-    // [side, k (0 inner … 3 outer), back]
+    // [side, k (0 inner … 3 outer), back]; the roots sit up under the mantle and the web hides them
     const order = [[-1, 1, 1], [1, 1, 1], [-1, 3, 1], [1, 3, 1], [-1, 0, 0], [1, 0, 0], [-1, 2, 0], [1, 2, 0]];
     oct.arms = order.map(([side, k, back], i) => ({
       i, side, k, back: !!back,
-      len: back ? 1.12 : 1.24, w0: back ? .16 : .19, phase: rand(0, TAU),
-      rx: side * (back ? .1 + .065 * k : .05 + .065 * k), ry: back ? -.04 : .01,
+      len: back ? 1.14 : 1.26, w0: back ? .19 : .21, phase: rand(0, TAU),
+      rx: side * (back ? .06 + .065 * k : .07 + .065 * k), ry: back ? -.09 : -.05,
       p: Array.from({ length: N }, () => ({ x: 0, y: 0, px: 0, py: 0 })),
       t: Array.from({ length: N }, () => ({ x: 0, y: 0 })),
       P: Object.assign({}, POSES.sit), reach: null, fidget: 0, ft: 0, fd: 1, fa: 0,
@@ -158,6 +185,14 @@
   const expr = (name, sec = 1.5) => { oct.exprName = name; oct.exprUntil = name ? clock + sec : 0; };
   function look(mode, sec = 0, x, y) { oct.look.mode = mode; oct.look.until = sec ? clock + sec : 0; if (x != null) { oct.look.x = x; oct.look.y = y; } }
   const lookAt = (x, y, sec) => look('point', sec, x, y);
+  // two front arms folded across her front, the way someone crosses their arms
+  function crossArms(on) {
+    for (const a of oct.arms) {
+      if (a.back || a.k !== 0) continue;
+      if (on) a.reach = { rel: [-a.side * .36 * S, -.16 * S], w: a.reach ? a.reach.w : 0, wT: 1, rate: 7, stiff: .55, front: true, idx: 8 };
+      else if (a.reach) a.reach.wT = 0;
+    }
+  }
 
   // head lag, lean and breathing bend the mantle; eyes and spots follow the same warp
   const WP = { lx: 0, ly: 0, br: 0 };
@@ -205,16 +240,20 @@
     }
     const r = a.reach;
     if (!r || r.w < .002) return;
-    // FABRIK from the current pose toward the goal keeps the arm's curl while it reaches
-    const gx = r.rel ? oct.x + r.rel[0] : r.x, gy = r.rel ? oct.y + r.rel[1] : r.y;
-    for (let i = 0; i < N; i++) { FAB[i].x = t[i].x; FAB[i].y = t[i].y; }
+    // FABRIK from the current pose keeps the arm's curl; point idx goes to the goal and the rest trails past it
+    const gx = r.rel ? oct.x + r.rel[0] * oct.scale : r.x, gy = r.rel ? oct.y + r.rel[1] * oct.scale : r.y, m = r.idx || N - 1;
+    for (let i = 0; i <= m; i++) { FAB[i].x = t[i].x; FAB[i].y = t[i].y; }
     for (let it = 0; it < 3; it++) {
-      FAB[N - 1].x = gx; FAB[N - 1].y = gy;
-      for (let i = N - 2; i >= 0; i--) { const dx = FAB[i].x - FAB[i + 1].x, dy = FAB[i].y - FAB[i + 1].y, d = Math.hypot(dx, dy) || 1; FAB[i].x = FAB[i + 1].x + dx / d * seg; FAB[i].y = FAB[i + 1].y + dy / d * seg; }
+      FAB[m].x = gx; FAB[m].y = gy;
+      for (let i = m - 1; i >= 0; i--) { const dx = FAB[i].x - FAB[i + 1].x, dy = FAB[i].y - FAB[i + 1].y, d = Math.hypot(dx, dy) || 1; FAB[i].x = FAB[i + 1].x + dx / d * seg; FAB[i].y = FAB[i + 1].y + dy / d * seg; }
       FAB[0].x = t[0].x; FAB[0].y = t[0].y;
-      for (let i = 1; i < N; i++) { const dx = FAB[i].x - FAB[i - 1].x, dy = FAB[i].y - FAB[i - 1].y, d = Math.hypot(dx, dy) || 1; FAB[i].x = FAB[i - 1].x + dx / d * seg; FAB[i].y = FAB[i - 1].y + dy / d * seg; }
+      for (let i = 1; i <= m; i++) { const dx = FAB[i].x - FAB[i - 1].x, dy = FAB[i].y - FAB[i - 1].y, d = Math.hypot(dx, dy) || 1; FAB[i].x = FAB[i - 1].x + dx / d * seg; FAB[i].y = FAB[i - 1].y + dy / d * seg; }
     }
-    for (let i = 1; i < N; i++) { t[i].x = lerp(t[i].x, FAB[i].x, r.w); t[i].y = lerp(t[i].y, FAB[i].y, r.w); }
+    const ox = FAB[m].x - t[m].x, oy = FAB[m].y - t[m].y;
+    for (let i = 1; i < N; i++) {
+      const fx = i <= m ? FAB[i].x : t[i].x + ox, fy = i <= m ? FAB[i].y : t[i].y + oy;
+      t[i].x = lerp(t[i].x, fx, r.w); t[i].y = lerp(t[i].y, fy, r.w);
+    }
   }
   function armSim(a, dt) {
     armTargets(a);
@@ -226,7 +265,9 @@
       const s = i / (N - 1), q = p[i];
       const vx = (q.x - q.px) * damp, vy = (q.y - q.py) * damp;
       q.px = q.x; q.py = q.y; q.x += vx; q.y += vy + g;
-      const k = 1 - Math.pow(1 - clamp(lerp(P.stiff, P.tip, s) + rb * s, 0, .95), f);
+      // a muscular base and a loose tip: the root holds its line, the tip flows
+      const base = s < .25 ? Math.max(P.stiff, .38) : lerp(P.stiff, P.tip, (s - .25) / .75);
+      const k = 1 - Math.pow(1 - clamp(base + rb * s, 0, .95), f);
       q.x += (t[i].x - q.x) * k; q.y += (t[i].y - q.y) * k;
     }
     const gr = oct.ground;
@@ -244,8 +285,8 @@
   }
 
   function spawn(x, y, pose = 'sit') {
-    Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, props: [], ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
-    oct.skin = skinTarget(); setPose(pose); look('idle'); expr(null);
+    Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, turn: 0, turnT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, glowPulse: 0, props: [], ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
+    oct.skin = skinTarget(); setPose(pose); look('idle'); expr(null); unthink();
     oct.eyes.dizzy = 0; oct.eyes.open = 1;
     makeWarp();
     for (const a of oct.arms) {
@@ -258,9 +299,9 @@
   }
   function hide() {
     oct.on = false; oct.motion = null; oct.props = []; oct.physics = false;
-    Letters.releaseAll(); say(null);
+    Letters.releaseAll(); say(null); unthink();
     hitEl.classList.remove('on', 'drag'); hitEl.style.width = hitEl.style.height = '0px';
-    state = 'hidden'; interruptible = false;
+    state = 'hidden'; interruptible = false; D.inFoch = false;
   }
 
   function gazeUpdate(dt) {
@@ -286,7 +327,7 @@
     e.low = approach(e.low, x ? x.low : clamp(mood.joy * .3 - .05, 0, .3), 10, dt);
     e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .9 - mood.fear * .3, -.5, .8), 8, dt);
     e.dil = approach(e.dil, x ? x.dil : clamp(.28 + mood.fear * .7 + mood.curiosity * .3, 0, 1), 6, dt);
-    e.mouth = approach(e.mouth, x && x.mouth ? 1 : 0, 12, dt);
+    e.mouth = approach(e.mouth, x && x.mouth ? x.mouth : 0, 12, dt);
     if (e.dizzy > 0) e.dizzy -= dt;
     if ((e.next -= dt) <= 0) { e.blink = .17; e.next = chance(.2) ? .3 : rand(2, 5.5); }
     if (e.blink > 0) e.blink = Math.max(0, e.blink - dt);
@@ -308,9 +349,10 @@
     if (oct.spin) oct.ang += oct.angV * dt;
     else oct.ang += angDiff(oct.ang, oct.angT + oct.tilt) * (1 - Math.exp(-8 * dt));
     oct.face = approach(oct.face, oct.faceT, 5, dt);
+    oct.turn = approach(oct.turn, oct.turnT, 5, dt);
     oct.camo = approach(oct.camo, oct.camoT, 3, dt);
     oct.clouds = approach(oct.clouds, 0, .6, dt);
-    oct.starFlare = approach(oct.starFlare, 0, 2, dt);
+    oct.glowPulse = approach(oct.glowPulse, 0, 2, dt);
     oct.glowS = approach(oct.glowS, state === 'sleep' ? 1 : 0, 1.5, dt);
     oct.skin = mix(oct.skin, skinTarget(), 1 - Math.exp(-3.5 * dt));
     let sk = mix(oct.skin, oct.camoC, clamp(oct.camo, 0, 1) * .92);
@@ -344,10 +386,11 @@
     c.arc(x + w / 2 - r, y, r, -Math.PI / 2, Math.PI / 2); c.lineTo(x - w / 2 + r, y + h / 2);
     c.arc(x - w / 2 + r, y, r, Math.PI / 2, Math.PI * 1.5); c.closePath();
   }
+  function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
   const SPOTS = (() => {
     let seed = 7; const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     const out = [];
-    while (out.length < 20) {
+    while (out.length < 18) {
       const v = .1 + r() * .85, u = r() * 2 - 1;
       const half = v < .5 ? .44 : .44 * Math.sqrt(Math.max(0, 1 - Math.pow((v - .48) / .55, 2)));
       const x = u * half * .9, y = -v;
@@ -357,9 +400,9 @@
     return out;
   })();
   function bodyXform(c) { c.translate(oct.x, oct.y); c.rotate(oct.ang); c.scale((1 - .5 * oct.q) * oct.scale, (1 + oct.q) * oct.scale); }
-  function mantlePath(c) {
+  function mantlePath(c, fresh = true) {
     const w = .47 * S, P = warp;
-    c.beginPath();
+    if (fresh) c.beginPath();
     const s = P(-.29 * S, 0); c.moveTo(s[0], s[1]);
     bz(c, P(-.4 * S, -.05 * S), P(-w * 1.05, -.24 * S), P(-w, -.48 * S));
     bz(c, P(-w * .96, -.82 * S), P(-.3 * S, -1.01 * S), P(-.02 * S, -S));
@@ -371,70 +414,49 @@
   function drawSiphon(c, skin) {
     const s = siphonLocal(), p = warp(s.x, s.y);
     c.save(); c.translate(p[0], p[1]); c.rotate(s.d * .95);
-    c.fillStyle = rgba(shade(skin, -.18)); pill(c, 0, .02 * S, .085 * S, .15 * S); c.fill();
+    c.fillStyle = rgba(shade(skin, -.2)); pill(c, 0, .02 * S, .085 * S, .15 * S); c.fill();
     c.fillStyle = rgba(shade(skin, -.6)); c.beginPath(); c.ellipse(0, .085 * S, .026 * S, .014 * S, 0, 0, TAU); c.fill();
-    c.restore();
-  }
-  function drawStar(c) {
-    const p = warp(.03 * S, -.8 * S);
-    const k = clamp((.42 + mood.joy * .6) * (.86 + .14 * Math.sin(clock * 2.4)) + oct.starFlare, 0, 2) * (1 - oct.camo);
-    if (k < .02) return;
-    const k1 = Math.min(1, k);
-    c.save(); c.globalCompositeOperation = 'lighter';
-    const R = .2 * S * (1 + oct.starFlare * .8);
-    const g = c.createRadialGradient(p[0], p[1], 0, p[0], p[1], R);
-    g.addColorStop(0, `rgba(255,250,255,${.9 * k1})`); g.addColorStop(.25, `rgba(200,160,255,${.42 * k})`);
-    g.addColorStop(.6, rgba(GLOW, .12 * k)); g.addColorStop(1, rgba(GLOW, 0));
-    c.fillStyle = g; c.beginPath(); c.arc(p[0], p[1], R, 0, TAU); c.fill();
-    // four-point flare, the same star as on lucida.html
-    const fl = .24 * S * (1 + oct.starFlare * 1.5) * Math.min(1.3, k);
-    for (const [dx, dy, w] of [[1, 0, 1.6], [0, 1, 1.3]]) {
-      const lg = c.createLinearGradient(p[0] - dx * fl, p[1] - dy * fl, p[0] + dx * fl, p[1] + dy * fl);
-      lg.addColorStop(0, 'rgba(170,110,255,0)'); lg.addColorStop(.5, `rgba(255,240,255,${.8 * k1})`); lg.addColorStop(1, 'rgba(170,110,255,0)');
-      c.strokeStyle = lg; c.lineWidth = w * S * .012;
-      c.beginPath(); c.moveTo(p[0] - dx * fl, p[1] - dy * fl); c.lineTo(p[0] + dx * fl, p[1] + dy * fl); c.stroke();
-    }
-    c.fillStyle = `rgba(255,255,255,${k1})`; c.beginPath(); c.arc(p[0], p[1], .022 * S, 0, TAU); c.fill();
     c.restore();
   }
   function drawMantle(c, skin) {
     drawSiphon(c, skin);
     mantlePath(c);
-    const hl = warp(-.17 * S, -.74 * S);
-    const g = c.createRadialGradient(hl[0], hl[1], S * .03, hl[0] + .1 * S, hl[1] + .25 * S, S * 1.05);
-    g.addColorStop(0, rgba(shade(skin, .36))); g.addColorStop(.42, rgba(skin)); g.addColorStop(1, rgba(shade(skin, -.5)));
+    const hl = warp(-.17 * S, -.74 * S), k = 1 - oct.camo;
+    const g = c.createRadialGradient(hl[0], hl[1], S * .03, hl[0] + .1 * S, hl[1] + .25 * S, S * 1.08);
+    g.addColorStop(0, rgba(mix(shade(skin, .4), PINK, .12))); g.addColorStop(.4, rgba(skin)); g.addColorStop(1, rgba(shade(skin, -.58)));
     c.fillStyle = g; c.fill();
     c.save(); c.clip();
+    // magenta bounce light from below, as if the slide glowed under her
+    const bl = c.createRadialGradient(0, .08 * S, 0, 0, .08 * S, .75 * S);
+    bl.addColorStop(0, rgba(PINK, .34 * k)); bl.addColorStop(1, rgba(PINK, 0));
+    c.fillStyle = bl; c.fillRect(-S, -1.2 * S, 2 * S, 1.4 * S);
     if (oct.clouds > .02) { // "passing clouds": dark bands sweeping down, a real cephalopod display
       const ph = (clock * 1.3) % 1;
-      for (let k = 0; k < 2; k++) {
-        const yy = -S * 1.1 + ((ph + k * .5) % 1) * S * 1.3;
+      for (let j = 0; j < 2; j++) {
+        const yy = -S * 1.1 + ((ph + j * .5) % 1) * S * 1.3;
         const lg = c.createLinearGradient(0, yy - .18 * S, 0, yy + .18 * S);
         lg.addColorStop(0, 'rgba(20,6,46,0)'); lg.addColorStop(.5, `rgba(20,6,46,${.45 * Math.min(1, oct.clouds)})`); lg.addColorStop(1, 'rgba(20,6,46,0)');
         c.fillStyle = lg; c.fillRect(-S, yy - .2 * S, 2 * S, .4 * S);
       }
     }
-    const spotC = shade(mix(skin, hex('#4C1D95'), .6), -.15), grow = clamp(1 + mood.annoyance * .7 - mood.fear * .55, .4, 1.8);
+    const spotC = mix(shade(skin, -.35), PINK, .25), grow = clamp(1 + mood.annoyance * .7 - mood.fear * .55, .4, 1.8);
     for (const s of SPOTS) {
       const p = warp(s.x * S, s.y * S), tw = .65 + .35 * Math.sin(clock * .9 + s.ph);
       c.fillStyle = rgba(spotC, .3 * tw + mood.annoyance * .15);
       c.beginPath(); c.arc(p[0], p[1], s.r * S * grow, 0, TAU); c.fill();
     }
-    const ao = c.createLinearGradient(0, -.22 * S, 0, .06 * S);
-    ao.addColorStop(0, 'rgba(14,4,36,0)'); ao.addColorStop(1, 'rgba(14,4,36,.38)');
-    c.fillStyle = ao; c.fillRect(-S, -.22 * S, 2 * S, .3 * S);
     c.restore();
+    // two-tone neon rim: magenta on one side, Lucid cyan on the other
     const rim = c.createLinearGradient(-.5 * S, 0, .5 * S, 0);
-    rim.addColorStop(0, rgba(GLOW, 0)); rim.addColorStop(.62, rgba(GLOW, 0)); rim.addColorStop(1, rgba(GLOW, .55 * (1 - oct.camo)));
-    c.strokeStyle = rim; c.lineWidth = .028 * S; mantlePath(c); c.stroke();
+    rim.addColorStop(0, rgba(PINK, .5 * k)); rim.addColorStop(.3, rgba(PINK, 0)); rim.addColorStop(.64, rgba(GLOW, 0)); rim.addColorStop(1, rgba(GLOW, .8 * k));
+    c.strokeStyle = rim; c.lineWidth = .034 * S; mantlePath(c); c.stroke();
     c.save(); c.translate(hl[0], hl[1]); c.rotate(-.55); c.scale(1, .52);
     const sp = c.createRadialGradient(0, 0, 0, 0, 0, .14 * S);
-    sp.addColorStop(0, `rgba(255,255,255,${.55 * (1 - oct.camo * .8)})`); sp.addColorStop(1, 'rgba(255,255,255,0)');
+    sp.addColorStop(0, `rgba(255,255,255,${.6 * (1 - oct.camo * .8)})`); sp.addColorStop(1, 'rgba(255,255,255,0)');
     c.fillStyle = sp; c.beginPath(); c.arc(0, 0, .14 * S, 0, TAU); c.fill();
     c.restore();
     const dot = warp(-.25 * S, -.66 * S);
-    c.fillStyle = `rgba(255,255,255,${.7 * (1 - oct.camo * .8)})`; c.beginPath(); c.arc(dot[0], dot[1], .022 * S, 0, TAU); c.fill();
-    drawStar(c);
+    c.fillStyle = `rgba(255,255,255,${.75 * (1 - oct.camo * .8)})`; c.beginPath(); c.arc(dot[0], dot[1], .022 * S, 0, TAU); c.fill();
   }
   function spiral(c, x, y, R) {
     c.strokeStyle = '#2A1650'; c.lineWidth = R * .14; c.lineCap = 'round'; c.beginPath();
@@ -479,62 +501,121 @@
     c.strokeStyle = rgba(shade(skin, -.5), .6 * sk); c.lineWidth = r * .07; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.stroke();
   }
   function drawEyes(c) {
-    const e = oct.eyes, f = oct.face, skin = oct.skinNow;
+    const e = oct.eyes, f = oct.face, skin = oct.skinNow, tr = oct.turn;
+    if (tr > .97) return; // back to the audience
     const shut = e.blink > 0 ? Math.sin(Math.PI * (1 - e.blink / .17)) : 0, open = e.open * (1 - shut);
     const r = .158 * S * (1 + Math.max(0, e.open - 1) * 1.4);
+    // turning away: the face slides round the side of the head and narrows
+    const dir = oct.turnDir, squeeze = Math.max(.12, Math.cos(tr * Math.PI / 2)), shift = Math.sin(tr * Math.PI / 2) * .42 * S * dir;
     for (const side of [-1, 1]) {
-      const far = side * f < 0 ? 1 - Math.abs(f) * .12 : 1, p = warp(side * .205 * S + f * .07 * S, -.43 * S);
-      eye(c, p[0], p[1], r * far, side, open, e, skin);
+      const far = side * f < 0 ? 1 - Math.abs(f) * .12 : 1;
+      const fade = clamp(1.7 - tr * 1.9 - (side === -dir ? tr * .9 : 0), 0, 1);
+      if (fade < .02) continue;
+      const p = warp(side * .205 * S * squeeze + f * .07 * S + shift, -.43 * S);
+      c.save(); c.globalAlpha *= fade; c.translate(p[0], p[1]); c.scale(squeeze, 1);
+      eye(c, 0, 0, r * far, side, open, e, skin);
+      c.restore();
     }
-    if (e.mouth > .05) {
-      const m = warp(f * .06 * S, -.19 * S);
-      c.fillStyle = rgba(shade(skin, -.7)); c.beginPath(); c.ellipse(m[0], m[1], .036 * S * e.mouth, .05 * S * e.mouth, 0, 0, TAU); c.fill();
+    if (e.mouth > .05 && tr < .5) {
+      const m = warp(f * .06 * S + shift, -.19 * S);
+      c.fillStyle = rgba(shade(skin, -.7)); c.beginPath(); c.ellipse(m[0], m[1], .036 * S * e.mouth * squeeze, .05 * S * e.mouth, 0, 0, TAU); c.fill();
     }
   }
+  // arm geometry: a frame (normals and half-widths) and a smooth tapered outline around it
   const AL = Array.from({ length: N }, () => [0, 0]), AR = Array.from({ length: N }, () => [0, 0]);
-  const NX = new Float32Array(N), NY = new Float32Array(N), WW = new Float32Array(N);
-  function armOutline(c, pts, w0, wt) {
+  const NX = new Float32Array(N), NY = new Float32Array(N), WW = new Float32Array(N), WH = new Float32Array(N);
+  const SH = Array.from({ length: N }, () => ({ x: 0, y: 0 }));
+  function armFrame(pts, w0, wt) {
     for (let i = 0; i < N; i++) {
       const A = pts[Math.max(0, i - 1)], B2 = pts[Math.min(N - 1, i + 1)];
       let tx = B2.x - A.x, ty = B2.y - A.y; const d = Math.hypot(tx, ty) || 1; tx /= d; ty /= d;
-      const w = (wt + (w0 - wt) * Math.pow(1 - i / (N - 1), .75)) / 2;
-      NX[i] = -ty; NY[i] = tx; WW[i] = w;
-      AL[i][0] = pts[i].x + NX[i] * w; AL[i][1] = pts[i].y + NY[i] * w;
-      AR[i][0] = pts[i].x - NX[i] * w; AR[i][1] = pts[i].y - NY[i] * w;
+      NX[i] = -ty; NY[i] = tx; WW[i] = (wt + (w0 - wt) * Math.pow(1 - i / (N - 1), .75)) / 2;
     }
-    c.beginPath(); c.moveTo(AL[0][0], AL[0][1]);
+  }
+  function armPath(c, pts, ww, fresh = true) {
+    for (let i = 0; i < N; i++) {
+      AL[i][0] = pts[i].x + NX[i] * ww[i]; AL[i][1] = pts[i].y + NY[i] * ww[i];
+      AR[i][0] = pts[i].x - NX[i] * ww[i]; AR[i][1] = pts[i].y - NY[i] * ww[i];
+    }
+    if (fresh) c.beginPath();
+    c.moveTo(AL[0][0], AL[0][1]);
     for (let i = 1; i < N - 1; i++) c.quadraticCurveTo(AL[i][0], AL[i][1], (AL[i][0] + AL[i + 1][0]) / 2, (AL[i][1] + AL[i + 1][1]) / 2);
     c.lineTo(AL[N - 1][0], AL[N - 1][1]);
     const tp = pts[N - 1], an = Math.atan2(NY[N - 1], NX[N - 1]);
-    c.arc(tp.x, tp.y, WW[N - 1], an, an - Math.PI, true);
+    c.arc(tp.x, tp.y, ww[N - 1], an, an - Math.PI, true);
     for (let i = N - 2; i > 0; i--) c.quadraticCurveTo(AR[i][0], AR[i][1], (AR[i][0] + AR[i - 1][0]) / 2, (AR[i][1] + AR[i - 1][1]) / 2);
     c.lineTo(AR[0][0], AR[0][1]); c.closePath();
   }
+  function armOutline(c, pts, w0, wt, fresh = true) { armFrame(pts, w0, wt); armPath(c, pts, WW, fresh); }
   function drawArm(c, a, col, detail) {
-    const p = a.p;
+    const p = a.p, k = 1 - oct.camo;
     armOutline(c, p, a.w0 * S * oct.scale, .016 * S * oct.scale);
     c.fillStyle = rgba(col); c.fill();
-    if (!detail) return;
     const sg = (2 * a.P.up - 1) * a.side >= 0 ? 1 : -1; // suckers sit on the inner side of the curl
-    c.strokeStyle = rgba(shade(col, .38), .35); c.lineWidth = Math.max(1, .022 * S * oct.scale); c.lineCap = 'round';
+    // magenta underside: a narrower ribbon shifted toward the sucker side
+    for (let i = 0; i < N; i++) { SH[i].x = p[i].x + NX[i] * WW[i] * .45 * sg; SH[i].y = p[i].y + NY[i] * WW[i] * .45 * sg; WH[i] = WW[i] * .55; }
+    c.fillStyle = rgba(mix(col, BELLY, .75), .6); armPath(c, SH, WH); c.fill();
+    armFrame(p, a.w0 * S * oct.scale, .016 * S * oct.scale);
+    if (!detail) return;
+    // a thin neon line along the top of the arm
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.strokeStyle = rgba(GLOW, .3 * k); c.lineWidth = Math.max(1, .016 * S * oct.scale); c.lineCap = 'round';
     c.beginPath();
-    for (let i = 1; i < N - 3; i++) { const x = p[i].x - NX[i] * WW[i] * .45 * sg, y = p[i].y - NY[i] * WW[i] * .45 * sg; i === 1 ? c.moveTo(x, y) : c.lineTo(x, y); }
-    c.stroke();
-    const sc = mix(col, [240, 228, 255], .62), cup = shade(col, -.3);
-    for (let i = 2; i < N - 1; i++) {
-      const w = WW[i], r = w * .42; if (r < .7) continue;
+    for (let i = 2; i < N - 3; i++) { const x = p[i].x - NX[i] * WW[i] * .62 * sg, y = p[i].y - NY[i] * WW[i] * .62 * sg; i === 2 ? c.moveTo(x, y) : c.lineTo(x, y); }
+    c.stroke(); c.restore();
+    const sc = mix(BELLY, [255, 236, 250], .55), cup = mix(col, PINK, .3);
+    for (let i = 3; i < N - 1; i++) {
+      const w = WW[i], r = w * .4; if (r < .7) continue;
       const x = p[i].x + NX[i] * w * .55 * sg, y = p[i].y + NY[i] * w * .55 * sg;
-      c.fillStyle = rgba(sc, .9); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
-      c.fillStyle = rgba(cup, .45); c.beginPath(); c.arc(x, y, r * .45, 0, TAU); c.fill();
-      if (oct.glowS > .02) { // bioluminescent suckers while it sleeps
+      c.fillStyle = rgba(sc, .92); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+      c.fillStyle = rgba(shade(cup, -.25), .5); c.beginPath(); c.arc(x, y, r * .45, 0, TAU); c.fill();
+      if (oct.glowS > .02) { // bioluminescent suckers while she sleeps
         c.save(); c.globalCompositeOperation = 'lighter';
-        const g = c.createRadialGradient(x, y, 0, x, y, r * 3);
-        g.addColorStop(0, rgba(GLOW, .5 * oct.glowS)); g.addColorStop(1, rgba(GLOW, 0));
-        c.fillStyle = g; c.beginPath(); c.arc(x, y, r * 3, 0, TAU); c.fill(); c.restore();
+        const gg = c.createRadialGradient(x, y, 0, x, y, r * 3);
+        gg.addColorStop(0, rgba(GLOW, .5 * oct.glowS)); gg.addColorStop(1, rgba(GLOW, 0));
+        c.fillStyle = gg; c.beginPath(); c.arc(x, y, r * 3, 0, TAU); c.fill(); c.restore();
       }
     }
   }
-  function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  // the web between the arms: a scalloped skirt that hides where the arms start
+  const WEBPTS = [];
+  function drawWeb(c, skin) {
+    WEBPTS.length = 0;
+    const down = oct.ang + Math.PI / 2;
+    for (const a of oct.arms) {
+      if (a.reach && a.reach.w > .3) continue;
+      const q = a.p[WEB];
+      WEBPTS.push({ x: q.x, y: q.y, k: angDiff(down, Math.atan2(q.y - oct.y, q.x - oct.x)) });
+    }
+    if (WEBPTS.length < 2) return;
+    WEBPTS.sort((a, b) => b.k - a.k); // around the crown, from her left to her right
+    const L = toWorld(-.31 * S, -.05 * S), R = toWorld(.31 * S, -.05 * S), C = toWorld(0, -.02 * S);
+    c.beginPath(); c.moveTo(L.x, L.y);
+    let prev = L;
+    for (const q of [...WEBPTS, R]) {
+      const mx = (prev.x + q.x) / 2, my = (prev.y + q.y) / 2;
+      c.quadraticCurveTo(lerp(mx, C.x, .32), lerp(my, C.y, .32), q.x, q.y);
+      prev = q;
+    }
+    c.closePath();
+    const g = c.createLinearGradient(C.x, C.y - .1 * S, C.x, C.y + .45 * S * oct.scale);
+    g.addColorStop(0, rgba(shade(skin, -.12))); g.addColorStop(1, rgba(mix(shade(skin, -.1), BELLY, .35)));
+    c.fillStyle = g; c.fill();
+  }
+  function drawGlow(c) {
+    // neon halo around the whole silhouette: one blurred pass behind the body
+    const k = clamp((.55 + mood.joy * .35 + oct.glowPulse) * (1 - oct.camo) * oct.alpha, 0, 1.3);
+    if (k < .03 || oct.scale < .2) return;
+    const col = mix(NEON, oct.skinNow, .25);
+    c.save();
+    c.shadowColor = rgba(col, Math.min(1, .7 * k)); c.shadowBlur = S * .36 * oct.scale * DPR * Math.min(1.3, .7 + k * .4);
+    c.fillStyle = rgba(col, Math.min(1, k));
+    c.beginPath();
+    for (const a of oct.arms) armOutline(c, a.p, a.w0 * S * oct.scale, .016 * S * oct.scale, false);
+    c.save(); bodyXform(c); mantlePath(c, false); c.restore();
+    c.fill();
+    c.restore();
+  }
   function drawPlug(c, a) {
     const t = a.p[N - 2], x = t.x, y = t.y - S * .1, w = S * .17, h = S * .2;
     c.strokeStyle = '#1E1633'; c.lineWidth = S * .045; c.lineCap = 'round';
@@ -556,22 +637,196 @@
     gr.addColorStop(0, `rgba(6,2,18,${a})`); gr.addColorStop(1, 'rgba(6,2,18,0)');
     c.fillStyle = gr; c.beginPath(); c.arc(0, 0, R, 0, TAU); c.fill(); c.restore();
   }
+  const inFront = a => a.reach && a.reach.front && a.reach.w > .15;
   function drawOcto(c) {
     const skin = oct.skinNow, bodyA = oct.alpha * (1 - oct.camo * (oct.eyeCamo ? 1 : .96));
     drawShadow(c);
+    c.save(); c.globalAlpha = bodyA; drawGlow(c); c.restore();
     c.save(); c.globalAlpha = bodyA;
-    for (const a of oct.arms) if (a.back) drawArm(c, a, shade(skin, -.28), false);
+    for (const a of oct.arms) if (a.back && !inFront(a)) drawArm(c, a, shade(skin, -.32), false);
+    for (const a of oct.arms) if (!a.back && !inFront(a)) drawArm(c, a, shade(skin, -.1), true);
+    drawWeb(c, skin);
+    c.save(); bodyXform(c); drawMantle(c, skin); c.restore();
     c.restore();
-    c.save(); c.globalAlpha = bodyA; bodyXform(c); drawMantle(c, skin); c.restore();
     if (oct.camo > .5 && !oct.eyeCamo) { c.save(); c.globalAlpha = (oct.camo - .5) * .14 * oct.alpha; bodyXform(c); mantlePath(c); c.strokeStyle = '#fff'; c.lineWidth = 1; c.stroke(); c.restore(); }
-    // eyes don't camouflage, so open eyes give it away; closed ones vanish with the skin
+    // eyes don't camouflage, so open eyes give her away; closed ones vanish with the skin
     const e = oct.eyes, open = e.open * (1 - (e.blink > 0 ? Math.sin(Math.PI * (1 - e.blink / .17)) : 0));
     const eyeA = oct.alpha * (oct.eyeCamo ? 1 - oct.camo : 1 - oct.camo * clamp(1 - open, 0, 1));
     if (eyeA > .01) { c.save(); c.globalAlpha = eyeA; bodyXform(c); drawEyes(c); c.restore(); }
     c.save(); c.globalAlpha = bodyA;
-    for (const a of oct.arms) if (!a.back) drawArm(c, a, shade(skin, -.07), true);
+    for (const a of oct.arms) if (inFront(a)) drawArm(c, a, shade(skin, -.06), true);
     c.restore();
     for (const pr of oct.props) if (pr.type === 'plug') drawPlug(c, oct.arms[pr.arm]);
+  }
+
+  // ---------- thoughts and dreams ----------
+  const thought = { on: false, t: 0, max: 0, icon: '', text: '', dream: '', next: 0, dir: 1 };
+  function think(o, sec = 3.2) {
+    if (!CFG.thoughts || !oct.on) return;
+    Object.assign(thought, { on: true, t: 0, max: sec, icon: o.icon || '', text: o.text || '', dream: o.dream ? pickDream() : '', next: clock + 4.5, dir: oct.x > VW * .62 ? -1 : 1 });
+  }
+  function unthink() { thought.on = false; thought.dream = ''; }
+  function thoughtTick(dt) {
+    if (!thought.on) return;
+    thought.t += dt;
+    if (thought.dream) {
+      if (state !== 'sleep') { thought.dream = ''; thought.icon = 'zzz'; thought.max = thought.t + .35; }
+      else if (clock > thought.next) { thought.dream = pickDream(thought.dream); thought.next = clock + 4.5; }
+    }
+    if (!thought.dream && thought.t > thought.max) thought.on = false;
+  }
+  function slideWord() {
+    const ws = [];
+    for (const L of world.lines) for (const w of (L.el.textContent || '').match(/\p{L}{5,}/gu) || []) ws.push(w.toLowerCase());
+    return ws.length ? pick(ws) : '';
+  }
+  function pickThought() {
+    const minutes = (clock - D.start) / 60;
+    if (mood.annoyance > .45) return { icon: 'burza' };
+    if (mood.boredom > .45 || (CFG.mode === 'lecture' && minutes > 45 && chance(.4))) return { icon: pick(['kawa', 'zegar', 'bateria']) };
+    if (mood.joy > .55) return { icon: pick(['serce', 'nuta', 'ryba']) };
+    const pool = {
+      pogodna: ['ryba', 'nuta', 'serce', 'krab', 'slowo'],
+      ciekawska: ['slowo', 'zarowka', 'pytanie', 'slowo', 'ryba'],
+      marudna: ['burza', 'kawa', 'nie', 'slowo'],
+      zaspana: ['kawa', 'zzz', 'bateria', 'ryba'],
+    }[temper];
+    const k = pick(pool);
+    if (k === 'slowo') { const w = slideWord(); return w ? { text: `${w}?` } : { icon: 'pytanie' }; }
+    return { icon: k };
+  }
+  function pickDream(not) {
+    const pool = { pogodna: ['rybki', 'korona', 'krab', 'morze'], ciekawska: ['litery', 'rybki', 'morze'], marudna: ['morze', 'krab', 'litery'], zaspana: ['morze', 'rybki', 'korona'] }[temper];
+    const ok = pool.filter(d => d !== not);
+    return pick(ok.length ? ok : pool);
+  }
+  function neon(c, col, w) {
+    c.strokeStyle = rgba(col); c.fillStyle = rgba(col); c.lineWidth = w; c.lineCap = 'round'; c.lineJoin = 'round';
+    c.shadowColor = rgba(col, .85); c.shadowBlur = w * 2.6 * DPR;
+  }
+  function neonText(c, text, size, col) {
+    neon(c, col, size * .08);
+    c.font = `700 ${size}px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(text, 0, size * .04);
+  }
+  const ICONS = {
+    ryba(c, u) {
+      neon(c, GLOW, u * .06);
+      c.beginPath(); c.ellipse(-.06 * u, 0, .34 * u, .21 * u, 0, 0, TAU); c.stroke();
+      c.beginPath(); c.moveTo(.27 * u, 0); c.lineTo(.48 * u, -.16 * u); c.lineTo(.48 * u, .16 * u); c.closePath(); c.stroke();
+      c.beginPath(); c.arc(-.22 * u, -.05 * u, .035 * u, 0, TAU); c.fill();
+    },
+    krab(c, u) {
+      neon(c, PINK, u * .055);
+      c.beginPath(); c.ellipse(0, .08 * u, .25 * u, .16 * u, 0, Math.PI, TAU); c.closePath(); c.stroke();
+      for (const s of [-1, 1]) {
+        c.beginPath(); c.arc(s * .36 * u, -.14 * u, .085 * u, 0, TAU); c.stroke();
+        c.beginPath(); c.moveTo(s * .22 * u, 0); c.lineTo(s * .31 * u, -.08 * u); c.stroke();
+        for (let k = 0; k < 3; k++) { c.beginPath(); c.moveTo(s * (.08 + .07 * k) * u, .08 * u); c.lineTo(s * (.16 + .08 * k) * u, .2 * u); c.stroke(); }
+        c.beginPath(); c.moveTo(s * .07 * u, -.07 * u); c.lineTo(s * .07 * u, -.17 * u); c.stroke();
+      }
+    },
+    serce(c, u, t) { neon(c, PINK, u * .05); heart(c, 0, .14 * u, .56 * u * (1 + .06 * Math.sin(t * 6))); c.fill(); },
+    zarowka(c, u) {
+      neon(c, GOLD, u * .055);
+      c.beginPath(); c.arc(0, -.08 * u, .2 * u, Math.PI * .8, Math.PI * 2.2); c.lineTo(.08 * u, .16 * u); c.lineTo(-.08 * u, .16 * u); c.closePath(); c.stroke();
+      c.beginPath(); c.moveTo(-.07 * u, .23 * u); c.lineTo(.07 * u, .23 * u); c.stroke();
+      for (const a of [-2.6, -2.1, -1.57, -1.04, -.54]) { c.beginPath(); c.moveTo(Math.cos(a) * .28 * u, -.08 * u + Math.sin(a) * .28 * u); c.lineTo(Math.cos(a) * .37 * u, -.08 * u + Math.sin(a) * .37 * u); c.stroke(); }
+    },
+    kawa(c, u, t) {
+      neon(c, GLOW, u * .055);
+      roundRect(c, -.24 * u, -.02 * u, .38 * u, .3 * u, .06 * u); c.stroke();
+      c.beginPath(); c.arc(.17 * u, .12 * u, .08 * u, -Math.PI / 2, Math.PI / 2); c.stroke();
+      for (const k of [-1, 1]) { c.beginPath(); for (let i = 0; i <= 7; i++) { const y = -.08 * u - i * .035 * u, x = k * .06 * u - .05 * u + Math.sin(t * 4 + i * .8 + k) * .03 * u; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); }
+    },
+    zegar(c, u, t) {
+      neon(c, GLOW, u * .055);
+      c.beginPath(); c.arc(0, 0, .28 * u, 0, TAU); c.stroke();
+      c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -.16 * u); c.stroke();
+      c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(t * 2) * .22 * u, Math.sin(t * 2) * .22 * u); c.stroke();
+    },
+    burza(c, u, t) {
+      neon(c, [168, 140, 230], u * .05);
+      c.beginPath(); c.arc(-.14 * u, -.04 * u, .13 * u, Math.PI * .5, Math.PI * 1.6); c.arc(.02 * u, -.12 * u, .16 * u, Math.PI * 1.1, Math.PI * 1.95); c.arc(.17 * u, -.02 * u, .12 * u, Math.PI * 1.5, Math.PI * .5); c.closePath(); c.stroke();
+      if (Math.sin(t * 9) > -.35) { neon(c, GOLD, u * .06); c.beginPath(); c.moveTo(.03 * u, .12 * u); c.lineTo(-.06 * u, .26 * u); c.lineTo(.05 * u, .26 * u); c.lineTo(-.05 * u, .4 * u); c.stroke(); }
+    },
+    nie(c, u) { neon(c, RED, u * .06); c.beginPath(); c.arc(0, 0, .26 * u, 0, TAU); c.stroke(); c.beginPath(); c.moveTo(-.18 * u, .18 * u); c.lineTo(.18 * u, -.18 * u); c.stroke(); },
+    bateria(c, u, t) {
+      neon(c, GLOW, u * .05);
+      roundRect(c, -.28 * u, -.14 * u, .5 * u, .28 * u, .05 * u); c.stroke(); c.fillRect(.23 * u, -.06 * u, .05 * u, .12 * u);
+      if (Math.sin(t * 5) > 0) { neon(c, RED, u * .05); c.fillRect(-.22 * u, -.08 * u, .08 * u, .16 * u); }
+    },
+    korona(c, u) {
+      neon(c, GOLD, u * .055);
+      c.beginPath(); c.moveTo(-.28 * u, .16 * u); c.lineTo(-.28 * u, -.12 * u); c.lineTo(-.14 * u, .02 * u); c.lineTo(0, -.2 * u); c.lineTo(.14 * u, .02 * u); c.lineTo(.28 * u, -.12 * u); c.lineTo(.28 * u, .16 * u); c.closePath(); c.stroke();
+    },
+    nuta(c, u, t) {
+      neon(c, PINK, u * .055); c.save(); c.rotate(Math.sin(t * 3) * .15);
+      c.beginPath(); c.ellipse(-.08 * u, .16 * u, .1 * u, .075 * u, -.4, 0, TAU); c.fill();
+      c.beginPath(); c.moveTo(.01 * u, .14 * u); c.lineTo(.01 * u, -.22 * u); c.quadraticCurveTo(.2 * u, -.16 * u, .18 * u, -.02 * u); c.stroke();
+      c.restore();
+    },
+    pytanie(c, u) { neonText(c, '?', u * .62, GLOW); },
+    zzz(c, u) { neonText(c, 'z Z z', u * .3, GLOW); },
+  };
+  const DREAMS = {
+    rybki(c, u, t) {
+      c.save(); c.translate((((t * .2) % 1) * 1.7 - .85) * u, Math.sin(t * 2) * .05 * u); c.scale(-.75, .75); ICONS.ryba(c, u); c.restore();
+      neon(c, GLOW, u * .03);
+      for (let k = 0; k < 3; k++) { const b = (t * .45 + k * .33) % 1; c.beginPath(); c.arc((-.32 + k * .3) * u, (.38 - b * .8) * u, (.03 + .015 * k) * u, 0, TAU); c.stroke(); }
+    },
+    morze(c, u, t) {
+      neon(c, GOLD, u * .04); c.beginPath(); c.arc(.24 * u, -.22 * u, .12 * u, 0, TAU); c.fill();
+      c.shadowBlur = 0; c.fillStyle = 'rgb(22,10,50)'; c.beginPath(); c.arc(.3 * u, -.27 * u, .11 * u, 0, TAU); c.fill();
+      neon(c, GLOW, u * .045);
+      for (let k = 0; k < 2; k++) { c.beginPath(); for (let i = 0; i <= 20; i++) { const x = (-.6 + i * .06) * u, y = (.1 + k * .16) * u + Math.sin(i * .9 + t * 2.4 + k) * .045 * u; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); }
+    },
+    krab(c, u, t) {
+      c.save(); c.translate(0, -Math.abs(Math.sin(t * 6)) * .05 * u); c.rotate(Math.sin(t * 6) * .22); ICONS.krab(c, u * .85); c.restore();
+      c.save(); c.translate(.36 * u, (-.25 - ((t * .4) % 1) * .2) * u); c.scale(.45, .45); ICONS.nuta(c, u, t); c.restore();
+    },
+    korona(c, u, t) {
+      c.save(); c.translate(0, Math.sin(t * 2) * .05 * u); ICONS.korona(c, u); c.restore();
+      for (let k = 0; k < 4; k++) { const a = .5 + .5 * Math.sin(t * 4 + k * 1.7); neon(c, GOLD, 1); star4(c, (-.36 + k * .24) * u, (k % 2 ? -.3 : .3) * u, .06 * u * a, t); c.fill(); }
+    },
+    litery(c, u, t) {
+      ['A', 'I', '?'].forEach((ch, k) => {
+        const f = (t * .32 + k * .33) % 1;
+        c.save(); c.translate((-.3 + k * .3) * u, (-.42 + f * .84) * u); c.rotate(f * 3 * (k % 2 ? 1 : -1)); neonText(c, ch, u * .3, k === 2 ? PINK : GLOW); c.restore();
+      });
+    },
+  };
+  const CLOUD = [[0, 0, 1], [-.62, .14, .7], [.62, .12, .72], [-.3, -.42, .64], [.32, -.4, .66], [0, .4, .62]];
+  function cloudPath(c, R, grow = 0) { c.beginPath(); for (const [x, y, r] of CLOUD) { c.moveTo(x * R + r * R + grow, y * R); c.arc(x * R, y * R, r * R + grow, 0, TAU); } }
+  function puff(c, x, y, r) {
+    c.save(); c.shadowColor = rgba(NEON, .9); c.shadowBlur = S * .1 * DPR; c.fillStyle = rgba(mix(NEON, GLOW, .35));
+    c.beginPath(); c.arc(x, y, r + 1.5, 0, TAU); c.fill(); c.restore();
+    c.fillStyle = 'rgba(22,10,50,.95)'; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+  }
+  function drawWord(c, text, R) {
+    const size = Math.min(R * .5, R * 2.5 / (text.length * .62));
+    neonText(c, text, size, GLOW);
+  }
+  function drawThought(c) {
+    if (!thought.on || !oct.on || oct.scale < .3) return;
+    const t = thought.t, inn = clamp(t / .32, 0, 1), out = thought.dream ? 1 : clamp((thought.max - t) / .35, 0, 1);
+    const a = Math.min(inn, out) * oct.alpha * (1 - oct.camo * .8);
+    if (a < .01) return;
+    const R = S * .5, dir = thought.dir, head = toWorld(dir * .28 * S, -.98 * S);
+    const cx = clamp(oct.x + dir * 1.15 * S, R * 1.8, VW - R * 1.8);
+    const cy = clamp(oct.y - 1.62 * S * oct.scale, R * 1.4, VH - R * 1.4) + Math.sin(clock * 1.7) * S * .03;
+    c.save(); c.globalAlpha = a;
+    for (const [u, r] of [[.3, .05], [.58, .08]]) if (inn > u * .8 || thought.dream) puff(c, lerp(head.x, cx, u), lerp(head.y, cy + R * .6, u), r * S);
+    c.translate(cx, cy); const sc = .3 + .7 * easeOutBack(inn); c.scale(sc, sc);
+    c.save(); c.shadowColor = rgba(NEON, .9); c.shadowBlur = S * .16 * DPR; c.fillStyle = rgba(mix(NEON, GLOW, .35)); cloudPath(c, R, 2); c.fill(); c.restore();
+    c.fillStyle = 'rgba(22,10,50,.95)'; cloudPath(c, R); c.fill();
+    c.save(); cloudPath(c, R); c.clip();
+    const u = R * (thought.dream ? 1.45 : 1.25);
+    if (thought.dream) DREAMS[thought.dream](c, u, clock);
+    else if (thought.text) drawWord(c, thought.text, R);
+    else if (ICONS[thought.icon]) ICONS[thought.icon](c, u, clock);
+    c.restore();
+    c.restore();
   }
 
   // ---------- effects ----------
@@ -596,7 +851,7 @@
     }
   }
   function sparkle(x, y, n) {
-    for (let i = 0; i < n; i++) fx.p.push({ k: 'spark', x: x + rand(-.6, .6) * S, y: y + rand(-.3, .3) * S, vx: rand(-40, 40), vy: rand(-140, -50), r: rand(.03, .06) * S, life: 0, max: rand(.8, 1.4), drag: 1.5, rot: rand(0, TAU), col: chance(.5) ? [255, 214, 110] : GLOW });
+    for (let i = 0; i < n; i++) fx.p.push({ k: 'spark', x: x + rand(-.6, .6) * S, y: y + rand(-.3, .3) * S, vx: rand(-40, 40), vy: rand(-140, -50), r: rand(.03, .06) * S, life: 0, max: rand(.8, 1.4), drag: 1.5, rot: rand(0, TAU), col: chance(.5) ? PINK : GLOW });
   }
   function ring(x, y) { fx.rings.push({ x, y, t: 0 }); }
   function emote(sym, sec = 1.3) { fx.emotes.push({ sym, t: 0, max: sec, x: oct.x, y: oct.y, dx: sym === 'z' ? rand(-.15, .25) * S : 0 }); }
@@ -624,15 +879,16 @@
     for (let i = fx.rings.length - 1; i >= 0; i--) { fx.rings[i].t += dt; if (fx.rings[i].t > .6) fx.rings.splice(i, 1); }
     if (fx.dim) {
       fx.dim.t += dt;
-      const D = [[0, 0], [.08, .82], [.16, .3], [.24, .9], [.5, .75], [1.1, 0]];
-      let o = 0; for (let k = 1; k < D.length; k++) if (fx.dim.t <= D[k][0]) { o = lerp(D[k - 1][1], D[k][1], (fx.dim.t - D[k - 1][0]) / (D[k][0] - D[k - 1][0])); break; }
+      const D2 = [[0, 0], [.08, .82], [.16, .3], [.24, .9], [.5, .75], [1.1, 0]];
+      let o = 0; for (let k = 1; k < D2.length; k++) if (fx.dim.t <= D2[k][0]) { o = lerp(D2[k - 1][1], D2[k][1], (fx.dim.t - D2[k - 1][0]) / (D2[k][0] - D2[k - 1][0])); break; }
       dimEl.style.opacity = o;
       if (fx.dim.t > 1.1) { fx.dim = null; dimEl.style.opacity = 0; }
     }
+    thoughtTick(dt);
   }
   function drawGhost(c, g) {
     const k = Math.pow(1 - g.t / g.max, 1.3) * .9, grow = 1 + g.t / g.max * .25;
-    c.save(); c.globalAlpha = k; c.fillStyle = rgba(fx.ink); c.shadowColor = fx.inkEdge ? rgba(fx.inkEdge, .55) : 'rgba(10,4,26,.9)'; c.shadowBlur = S * .14 * (1 + g.t);
+    c.save(); c.globalAlpha = k; c.fillStyle = rgba(fx.ink); c.shadowColor = fx.inkEdge ? rgba(fx.inkEdge, .55) : 'rgba(10,4,26,.9)'; c.shadowBlur = S * .14 * (1 + g.t) * DPR;
     c.translate(g.x, g.y - S * .4); c.scale(grow, grow); c.translate(-g.x, -g.y + S * .4);
     for (const a of g.arms) { armOutline(c, a.pts, a.w0 * S * g.scale, .016 * S * g.scale); c.fill(); }
     const saved = Object.assign({}, WP); Object.assign(WP, g.warp);
@@ -686,6 +942,7 @@
     }
     for (const r of fx.rings) { const u = r.t / .6; c.strokeStyle = rgba(GLOW, .8 * (1 - u)); c.lineWidth = 2; c.beginPath(); c.arc(r.x, r.y, S * (.08 + u * .5), 0, TAU); c.stroke(); }
     for (const e of fx.emotes) drawEmote(c, e);
+    drawThought(c);
   }
 
   // ---------- letters ----------
@@ -840,7 +1097,7 @@
     const L = linesOf(el).find(l => mid > l.top && mid < l.bottom);
     return L ? lineSurface(el, m, L) : null;
   }
-  // edge: only words that end or start a line, with room for the octopus beside them
+  // edge: only words that end or start a line, with room for her beside them
   function sideRoom(el, lines, r) {
     const mid = (r.top + r.bottom) / 2, L = lines.find(l => mid > l.top && mid < l.bottom);
     if (!L) return null;
@@ -883,7 +1140,7 @@
     const L = free.length ? pick(free) : letters[1 + ((Math.random() * (letters.length - 2)) | 0)];
     const lr = L.getBoundingClientRect(), surface = lineFor(c.el, lr);
     if (!surface) return null;
-    return { el: c.el, letter: L, letters, x: lr.left + lr.width / 2, surface, fs: surface.fs, room: c.room };
+    return { el: c.el, letter: L, letters, word: letters.map(l => l.textContent).join(''), x: lr.left + lr.width / 2, surface, fs: surface.fs, room: c.room };
   }
   function counterLetter(near) {
     let best = null, bd = 1e9;
@@ -926,13 +1183,14 @@
     if (oct.motion) { const m = oct.motion; oct.motion = null; m.rej(CANCEL); }
     for (const a of oct.arms) if (a.reach) { a.reach.wT = 0; a.reach.follow = false; }
     Letters.releaseAll();
-    Object.assign(oct, { physics: false, spin: false, props: [], eyeCamo: false, camoT: 0, scale: 1, alpha: oct.on ? 1 : oct.alpha });
-    interruptible = false; say(null);
+    Object.assign(oct, { physics: false, spin: false, props: [], eyeCamo: false, camoT: 0, turnT: 0, scale: 1, alpha: oct.on ? 1 : oct.alpha });
+    interruptible = false; say(null); D.inFoch = false;
+    if (thought.dream) unthink();
     if (hitEl) hitEl.classList.remove('drag');
   }
   function land(speed) {
     oct.qv -= clamp(speed / (VH * .32), 1.2, 6) * mScale();
-    setPose('sit'); oct.angT = 0; oct.starFlare = Math.max(oct.starFlare, .35);
+    setPose('sit'); oct.angT = 0; oct.glowPulse = Math.max(oct.glowPulse, .35);
     for (const a of oct.arms) for (let i = 1; i < N; i++) a.p[i].py -= speed * .004 * (i / N) * mScale();
   }
   function fallTo(surf) {
@@ -1024,8 +1282,8 @@
   // ---------- behaviours ----------
   const B = {};
   const ENTRANCES = ['zerkniecie', 'upadek', 'kamuflaz', 'ramie'];
-  const REACTIONS = ['atrament', 'opoznienie', 'kamuflaz', 'kursor', 'woda'];
-  const D = { slide: null, start: 0, appearances: 0, last: -1e9, timer: 0, greeted: false, lastReaction: '', taps: 0 };
+  const REACTIONS = ['atrament', 'opoznienie', 'kamuflaz', 'kursor', 'woda', 'foch'];
+  const D = { slide: null, start: 0, appearances: 0, last: -1e9, timer: 0, greeted: false, lastReaction: '', taps: 0, inFoch: false };
   let lastAct = { name: '', at: -1e9 };
 
   async function perform(name, arg) {
@@ -1043,27 +1301,36 @@
     if (chance(.25)) { oct.tiltT = rand(-.16, .16); oct.tiltUntil = clock + rand(1, 2); }
   }
   const dodgeChance = () => clamp((mem.clicks - 6) / 30, 0, .55) + mood.fear * .3;
-  async function rest(spot) {
+  async function yawn() {
+    unthink(); expr('yawn', 1.3); oct.qT = .14;
+    await wait(1.1);
+    oct.qT = 0; expr('closed', 1e6);
+    await wait(.4);
+  }
+  function fallAsleep() { state = 'sleep'; expr('closed', 1e6); think({ dream: true }); }
+  async function rest(spot, asleep = false) {
     if (!spot || !spot.ground) { refreshWorld(); spot = bestSpot({ x: oct.x, y: oct.y }); await hopTo(spot); }
     oct.spot = spot; oct.ground = spot.ground; state = 'rest'; interruptible = true;
-    const pose = spot.pose || 'lie'; setPose(pose);
+    const pose = asleep ? 'lie' : spot.pose || 'lie'; setPose(pose);
     const side = spot.face || (chance(.5) ? 1 : -1);
     oct.angT = pose === 'lie' ? -side * .5 : 0;
     if (pose === 'lie') { oct.ride = .2; await glideTo(oct.x, spot.ground.y - .2 * S, .45); }
+    if (asleep) fallAsleep();
     const stay = CFG.mode === 'demo' ? 40 : CFG.stayMin * 60, t0 = clock;
-    let nextLook = 0, zz = 0;
-    const sleepAt = clock + (CFG.mode === 'demo' ? 16 : 30);
+    let nextLook = 0, zz = 0, nextThought = clock + (CFG.mode === 'demo' ? rand(4, 8) : rand(15, 35));
+    const sleepAt = clock + (CFG.mode === 'demo' ? 16 : 30) * (temper === 'zaspana' ? .6 : 1);
     while (clock - t0 < stay) {
       await wait(.2);
       const near = Math.hypot(cur.x - oct.x, cur.y - (oct.y - .5 * S)) < S * 1.3 && cur.inside;
       if (state === 'sleep') {
-        if (clock > zz) { zz = clock + 1.5; emote('z', 1.6); }
+        if (clock > zz) { zz = clock + 2.6; emote('z', 1.6); }
         if (near && clock - cur.t < .3) return perform('pobudka');
         continue;
       }
       if (clock > nextLook) { idleLook(); nextLook = clock + rand(1.2, 3.4); }
-      if (clock > sleepAt && mood.fear < .25 && oct.pose === 'lie') { state = 'sleep'; expr('closed', 1e6); }
-      // learned wariness: the more it has been clicked, the more it flinches at a rushing cursor
+      if (CFG.thoughts && clock > nextThought && !thought.on) { think(pickThought(), 3.2); nextThought = clock + (CFG.mode === 'demo' ? rand(8, 14) : rand(20, 45)); }
+      if (clock > sleepAt && mood.fear < .25 && oct.pose === 'lie') { await yawn(); fallAsleep(); continue; }
+      // learned wariness: the more she has been clicked, the more she flinches at a rushing cursor
       if (near && cur.speed > VW * .9 && clock - cur.t < .1 && chance(dodgeChance())) return perform('unik');
     }
     interruptible = false;
@@ -1071,13 +1338,13 @@
   }
   async function leave() {
     if (!oct.on) return;
-    state = 'busy'; interruptible = false; expr(null);
+    state = 'busy'; interruptible = false; expr(null); unthink();
     if (chance(.45)) { refreshWorld(); const L = counterLetter({ x: oct.x, y: oct.y }); if (L && Math.hypot(L.x - oct.x, L.y - oct.y) < VW * .5) return B.wplyw(L); }
     return B._wyjscie();
   }
   B._wyjscie = async () => {
     if (!oct.on) return;
-    state = 'busy';
+    state = 'busy'; unthink();
     if (RM.matches) { await fadeTo(0); return hide(); }
     if (oct.ground && oct.ground.kind === 'floor') { await glideTo(oct.x, VH + S * 1.6, .5, easeIn); return hide(); }
     return B.odrzut();
@@ -1092,12 +1359,14 @@
     hide();
   };
   async function bow() {
+    oct.turnT = 0; unthink();
     look('audience', 2.6); expr('happy', 2.8); emote('♥'); sparkle(oct.x, oct.y - S * .9, 16);
-    oct.starFlare = 1.3; feel('joy', .35);
+    oct.glowPulse = 1.2; feel('joy', .35);
     for (let i = 0; i < 2; i++) { oct.angT = (oct.x < VW / 2 ? 1 : -1) * .36; oct.qT = -.12; await wait(.32); oct.angT = 0; oct.qT = 0; await wait(.28); }
+    // a little round of applause under her chin
     const A = oct.arms.filter(a => !a.back && a.k === 2);
     for (let i = 0; i < 3; i++) {
-      for (const a of A) a.reach = { rel: [a.side * S * .12, -S * .85], w: 0, wT: 1, rate: 14, stiff: .5 };
+      for (const a of A) a.reach = { rel: [a.side * .04 * S, -.2 * S], w: 0, wT: 1, rate: 14, stiff: .5, front: true, idx: 9 };
       await wait(.17);
       for (const a of A) a.reach.wT = 0;
       await wait(.15);
@@ -1110,16 +1379,31 @@
     spawn(x, VH + S * 1.4, 'sit'); state = 'busy';
     if (RM.matches) { oct.y = VH + S * .08; oct.alpha = 0; await fadeTo(1, .4); }
     else await glideTo(x, VH + S * .08, .85, easeOut);
-    if (o.heart) { look('audience', 1.5); expr('happy', 1.6); emote('♥'); oct.starFlare = 1; await wait(1.5); }
+    if (o.heart) { look('audience', 1.5); expr('happy', 1.6); emote('♥'); oct.glowPulse = 1; await wait(1.5); }
+    else if (o.thought) { look('audience', 2.6); think(o.thought, 2.6); await wait(2.8); }
     else {
       lookAt(VW / 2, VH * .4, 1); await wait(.9);
       lookAt(x < VW / 2 ? VW * .9 : VW * .1, VH * .55, .7); await wait(.7);
       look('audience'); oct.eyes.blink = .17;
-      // it remembers the room: from the second session on, the first peek gets a line
+      // she remembers the room: from the second session on, the first peek gets a line
       if (mem.sessions > 1 && D.appearances === 1 && !D.greeted) { D.greeted = true; await wait(.3); say('…znowu wy?', 1.8); await wait(2); }
       else await wait(.7);
     }
     if (RM.matches) await fadeTo(0, .3); else await glideTo(x, VH + S * 1.5, .35, easeIn);
+    hide();
+  };
+  B.odmowa = async () => {
+    // not today: she pops up, shakes her head and goes back down
+    refreshWorld();
+    const x = peekX();
+    spawn(x, VH + S * 1.4, 'sit'); state = 'busy';
+    await glideTo(x, VH + S * .08, .7, easeOut);
+    look('audience', 2.6); expr('angry', 2.6); think({ icon: 'nie' }, 2.2);
+    await wait(.45);
+    for (let i = 0; i < 5; i++) { oct.angT = (i % 2 ? -1 : 1) * .16; await wait(.15); }
+    oct.angT = 0;
+    await wait(1);
+    await glideTo(x, VH + S * 1.5, .35, easeIn);
     hide();
   };
   B.upadek = async () => {
@@ -1135,7 +1419,8 @@
     expr('surprise', .55);
     await wait(.5);
     lookAt(T.x, T.surface.y + T.fs * .5, 1.3); expr('focus', 1.1);
-    await wait(1.1);
+    think({ text: `${T.word.toLowerCase()}?` }, 1.9);
+    await wait(1.2);
     look('audience', 1.4); expr('smug', 1.7); feel('joy', .15); emote('♪');
     await wait(1.2);
     refreshWorld();
@@ -1159,7 +1444,7 @@
   B.kamuflaz = async () => {
     refreshWorld();
     if (!oct.on) {
-      // only a pair of eyes opening on the slide gives it away
+      // only a pair of eyes opening on the slide gives her away
       const spot = bestSpot(null);
       spawn(spot.x, spot.ground.y - .3 * S, 'sit'); oct.ground = spot.ground; oct.spot = spot; state = 'busy';
       sampleBg(); oct.camo = oct.camoT = 1; expr('closed', 1.5);
@@ -1171,7 +1456,7 @@
       await wait(1.9);
       look('cursor', 1.5); await wait(1.6);
     }
-    oct.camoT = 0; oct.clouds = 1; expr('smug', 1.4); oct.starFlare = .6;
+    oct.camoT = 0; oct.clouds = 1; expr('smug', 1.4); oct.glowPulse = .6;
     await wait(1.2);
     await rest(oct.spot);
   };
@@ -1195,7 +1480,7 @@
     arm.reach = { x: lx, y: ly, w: 0, wT: 1, rate: 1.6, stiff: .14 };
     await wait(1.7);
     Letters.carry(L, () => { const q = arm.p[N - 3]; return { x: q.x, y: q.y, r: Math.sin(clock * 3) * 12 }; });
-    Object.assign(arm.reach, { x: oct.x + (right ? -1 : 1) * S * .15, y: oct.y - S * 1.25, rate: 3, stiff: .25 });
+    Object.assign(arm.reach, { x: oct.x + (right ? -1 : 1) * S * .15, y: oct.y - S * 1.25, rate: 3, stiff: .25, front: true });
     await wait(1.5);
     if (sneaky) { oct.camoT = 0; oct.eyeCamo = false; expr('surprise', .9); oct.clouds = .8; await wait(.5); }
     else { lookAt(arm.p[N - 1].x, arm.p[N - 1].y, 1.2); expr('surprise', 1); emote('?'); await wait(.9); }
@@ -1209,7 +1494,7 @@
     if (!oct.on) return B.kamuflaz();
     state = 'busy'; interruptible = false;
     oct.flash = .35; oct.flashC = TINT.fear; expr('surprise', .7); emote('!'); feel('fear', .35);
-    // a pseudomorph: an ink decoy in its own shape, while the real one slips away camouflaged
+    // a pseudomorph: an ink decoy in her own shape, while the real one slips away camouflaged
     sampleBg(); inkFor(oct.camoC);
     ghost();
     const s = siphonWorld(); inkCloud(s.x, s.y, 26);
@@ -1240,7 +1525,7 @@
     state = 'busy'; interruptible = true;
     let a = oct.arms[0], bd = 1e9;
     for (const c of oct.arms) { if (c.back) continue; const t = c.p[N - 1], d = Math.hypot(t.x - cur.x, t.y - cur.y); if (d < bd) { bd = d; a = c; } }
-    a.reach = { x: cur.x, y: cur.y, w: 0, wT: 1, rate: 4, stiff: .3, follow: cur.inside };
+    a.reach = { x: cur.x, y: cur.y, w: 0, wT: 1, rate: 4, stiff: .3, follow: cur.inside, front: cur.y < oct.y - S * .3 };
     if (!cur.inside) Object.assign(a.reach, { x: oct.x + (oct.x < VW / 2 ? 1 : -1) * S * 1.6, y: oct.y - S * 1.2 });
     look('cursor', 3.2); expr('focus', 3); feel('curiosity', .3);
     await wait(3.2);
@@ -1262,6 +1547,41 @@
     await wait(1.6);
     await rest(oct.spot);
   };
+  B.foch = async () => {
+    if (!oct.on) return B.odmowa();
+    // a sulk: arms crossed, back to the room, a glance over the shoulder to check anyone noticed
+    state = 'busy'; interruptible = true; D.inFoch = true;
+    expr('angry', 1.4); emote('anger'); feel('annoyance', .15);
+    crossArms(true);
+    await wait(.7);
+    oct.turnDir = cur.inside && cur.x < oct.x ? 1 : -1;
+    oct.turnT = 1; think({ icon: 'burza' }, 3.4);
+    await wait(rand(3.8, 5.2));
+    oct.turnT = .55; look('cursor', 1.4);
+    await wait(1.4);
+    if (mood.annoyance > .45 && chance(.5)) { oct.turnT = 1; await wait(2.4); }
+    oct.turnT = 0; crossArms(false); expr('smug', 1.2); D.inFoch = false;
+    await wait(.8);
+    await rest(oct.spot);
+  };
+  B.mysl = async () => {
+    if (!oct.on) return B.zerkniecie({ thought: pickThought() });
+    state = 'busy'; refreshWorld();
+    think(pickThought(), 3.4);
+    await wait(3.4);
+    await rest(oct.spot);
+  };
+  B.sen = async () => {
+    refreshWorld();
+    if (!oct.on) {
+      const spot = bestSpot(null);
+      spawn(spot.x, spot.ground.y - .2 * S, 'lie'); oct.ground = spot.ground; oct.spot = Object.assign({}, spot, { pose: 'lie' }); oct.ride = .2;
+      oct.alpha = 0; await fadeTo(1, .5);
+    }
+    state = 'busy'; setPose('lie');
+    await yawn();
+    await rest(Object.assign({}, oct.spot, { pose: 'lie' }), true);
+  };
   B.uklon = async () => {
     if (!oct.on) return B.zerkniecie({ heart: true });
     state = 'busy'; interruptible = false;
@@ -1275,7 +1595,7 @@
     spawn(x, VH + S * 1.4, 'sit'); state = 'busy';
     const arm = oct.arms.find(a => !a.back && a.side === 1 && a.k === 2);
     oct.props = [{ arm: oct.arms.indexOf(arm), type: 'plug' }];
-    arm.reach = { rel: [S * 1.0, -S * 1.15], w: 1, wT: 1, stiff: .45 };
+    arm.reach = { rel: [S * 1.0, -S * 1.15], w: 1, wT: 1, stiff: .45, front: true };
     expr('guilty', 5); lookAt(VW, VH * .7, 5);
     await glideTo(x, VH + S * .02, .8, easeOut);
     say('to nie ja', 2.4);
@@ -1293,7 +1613,7 @@
     }
     L = L && L.el ? L : counterLetter({ x: oct.x, y: oct.y });
     if (!L) return B.odrzut();
-    state = 'busy'; interruptible = false;
+    state = 'busy'; interruptible = false; unthink();
     const sideX = oct.x < L.x ? -1 : 1;
     if (Math.hypot(L.x - oct.x, L.y - oct.y) > S * 1.5) {
       const g = L.line ? { kind: 'line', x1: L.x - S * 2, x2: L.x + S * 2, y: L.line.y } : world.floor;
@@ -1327,25 +1647,29 @@
     await rest(oct.spot);
   };
   B.pobudka = async () => {
-    state = 'busy'; interruptible = false;
+    state = 'busy'; interruptible = false; unthink();
     expr('surprise', .8); oct.flash = .3; oct.flashC = TINT.fear; oct.qv += 4; emote('!');
     feel('fear', .2); feel('annoyance', .2);
     await wait(.9);
     look('cursor', 1.5); expr('angry', 1.6); emote('anger');
     await wait(1.6);
-    await rest(oct.spot);
+    await rest(Object.assign({}, oct.spot, { pose: 'sit' }));
   };
   B._rzut = async ([vx, vy]) => {
     state = 'busy'; interruptible = false; mem.throws++; memSave();
-    feel('fear', .3); feel('annoyance', .3);
+    feel('fear', .2); feel('annoyance', .35);
     refreshWorld();
     await tumble(vx, vy);
     oct.eyes.dizzy = 1.6; emote('?');
     await wait(1.7);
     expr('angry', 1.8); look('cursor', 1.8); emote('anger');
     await wait(1.8);
-    if (chance(.45)) return B.odrzut(); // offended, it leaves
-    await rest({ kind: oct.ground.kind, x: oct.x, ground: oct.ground, pose: 'sit', face: 0 });
+    oct.spot = { kind: oct.ground.kind, x: oct.x, ground: oct.ground, pose: 'sit', face: 0 };
+    // what happens next depends on how cross she is
+    const r = Math.random();
+    if (mood.annoyance > .5 && r < .45) return B.foch();
+    if (r < .7) return B.odrzut();
+    await rest(oct.spot);
   };
 
   // ---------- director: controlled randomness ----------
@@ -1385,19 +1709,31 @@
     const energy = clamp((gap - CFG.minGapMin) / CFG.minGapMin, 0, 1) * .5 + mood.boredom * .5;
     if (chance(.2 + energy * .7)) perform(nextEntrance());
   }
+  function summon() {
+    if (serious) return;
+    if (oct.on) { if (interruptible) perform(pick(['atrament', 'opoznienie', 'kamuflaz', 'kursor', 'mysl'])); return; }
+    // she has her moods: on a grumpy day she may simply refuse
+    if ((temper === 'marudna' || mood.annoyance > .5) && chance(.35)) return perform('odmowa');
+    perform(nextEntrance());
+  }
   function onTap() {
     mem.clicks++; memSave(); lastTouch = clock;
     feel('boredom', -.35); feel('curiosity', .08);
     if (state === 'sleep') return perform('pobudka');
+    if (D.inFoch) { // poking her while she sulks: she may just leave
+      feel('annoyance', .15); emote('anger');
+      if (chance(.5)) perform('odrzut');
+      return;
+    }
     if (!interruptible) { oct.qv += 2.5; oct.flash = .18; oct.flashC = TINT.fear; return; } // busy: just a flinch
     D.taps++;
-    const opts = REACTIONS.filter(n => n !== D.lastReaction && (n !== 'woda' || (mood.annoyance > .45 && D.taps >= 3)));
-    const n = bandit(opts, nm => (nm === 'atrament' ? mood.fear * .6 : nm === 'kursor' ? mood.curiosity * .4 : nm === 'woda' ? mood.annoyance * .6 : 0));
+    const opts = REACTIONS.filter(n => n !== D.lastReaction && (n !== 'woda' || (mood.annoyance > .45 && D.taps >= 3)) && (n !== 'foch' || mood.annoyance > .3 || temper === 'marudna'));
+    const n = bandit(opts, nm => (nm === 'atrament' ? mood.fear * .6 : nm === 'kursor' ? mood.curiosity * .4 + (temper === 'ciekawska' ? .3 : 0) : nm === 'woda' ? mood.annoyance * .6 : nm === 'foch' ? mood.annoyance * .6 + (temper === 'marudna' ? .4 : 0) : 0));
     D.lastReaction = n; feel('fear', .15); feel('annoyance', .1);
     perform(n);
   }
   function reward() {
-    lastTouch = clock; feel('joy', .3); feel('boredom', -.2);
+    lastTouch = clock; feel('joy', .3); feel('boredom', -.2); feel('annoyance', -.2);
     const named = clock - lastAct.at < 30 && lastAct.name;
     if (named) { stat(lastAct.name).s++; memSave(); }
     if (oct.on && !serious) perform('uklon');
@@ -1417,18 +1753,27 @@
   function toast(text) { toastEl.textContent = text; toastEl.hidden = false; toastUntil = clock + 1.6; }
 
   // ---------- input ----------
-  const drag = { on: false, id: null, sx: 0, sy: 0, x: 0, y: 0, gx: 0, gy: 0, hist: [] };
+  const drag = { on: false, id: null, sx: 0, sy: 0, x: 0, y: 0, gx: 0, gy: 0, hist: [], crossAt: 0, thinkAt: 0, tapAt: 0 };
   function startDrag() {
     cancelAll(); drag.on = true; state = 'drag'; hitEl.classList.add('drag');
-    setPose('dangle'); oct.ground = null; oct.angT = 0; expr('surprise', 1e6); emote('!');
-    feel('fear', .25); lastTouch = clock;
+    setPose('dangle'); oct.ground = null; oct.angT = 0; unthink();
+    // picked up by the head: not scared, offended
+    expr('angry', 1e6); emote('anger'); feel('annoyance', .35); lastTouch = clock;
+    drag.crossAt = clock + .25; drag.thinkAt = clock + 1.1; drag.tapAt = clock + .7;
     oct.motion = {
-      step(dt) { oct.x = approach(oct.x, drag.x + drag.gx, 20, dt); oct.y = approach(oct.y, drag.y + drag.gy, 20, dt); oct.angT = clamp(-oct.vx * .0005, -.45, .45); return false; },
+      step(dt) {
+        oct.x = approach(oct.x, drag.x + drag.gx, 20, dt); oct.y = approach(oct.y, drag.y + drag.gy, 20, dt);
+        oct.angT = clamp(-oct.vx * .0005, -.45, .45);
+        if (drag.crossAt && clock > drag.crossAt) { drag.crossAt = 0; crossArms(true); }
+        if (drag.thinkAt && clock > drag.thinkAt) { drag.thinkAt = 0; think({ icon: 'burza' }, 2.8); }
+        if (clock > drag.tapAt) { drag.tapAt = clock + .45; const a = oct.arms.find(x => x.back && x.k === 3 && x.side === 1); if (a) { a.fd = a.ft = .28; a.fa = 1.2; } } // impatient tapping
+        return false;
+      },
       res() {}, rej() {},
     };
   }
   function endDrag() {
-    drag.on = false; hitEl.classList.remove('drag'); oct.motion = null; expr(null);
+    drag.on = false; hitEl.classList.remove('drag'); oct.motion = null; expr(null); crossArms(false); unthink();
     const now = performance.now(), h = drag.hist.filter(p => now - p.t < 110);
     const a = h[0] || { x: drag.x, y: drag.y, t: now - 16 }, b = h[h.length - 1] || a, dt = Math.max(16, b.t - a.t) / 1000;
     perform('_rzut', [(b.x - a.x) / dt, (b.y - a.y) / dt]);
@@ -1471,7 +1816,7 @@
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       const k = e.key.length === 1 ? e.key.toLowerCase() : e.key, K = CFG.keys;
       let used = true;
-      if (k === K.summon) { if (!serious) perform(oct.on ? (interruptible ? pick(REACTIONS.slice(0, 4)) : '') : nextEntrance()); }
+      if (k === K.summon) summon();
       else if (k === K.hide) perform('_wyjscie');
       else if (k === K.serious) setSerious(!serious);
       else if (k === K.blame) { if (!serious) perform('wina'); }
@@ -1488,7 +1833,7 @@
     const fx0 = oct.x / VW;
     resize();
     if (!oct.on || state === 'drag' || oct.physics) return;
-    // re-seat it after a layout change (fullscreen, window resize)
+    // re-seat her after a layout change (fullscreen, window resize)
     refreshWorld();
     const spot = bestSpot({ x: fx0 * VW, y: VH * .5 });
     if (state === 'rest' || state === 'sleep') { oct.x = spot.x; oct.y = spot.ground.y - (oct.pose === 'lie' ? .2 : .3) * S; oct.ground = spot.ground; oct.spot = spot; oct.skipV = true; }
@@ -1499,7 +1844,8 @@
   const ACTS = [
     ['zerkniecie', 'Zerknięcie zza krawędzi'], ['upadek', 'Upadek na literę'], ['kamuflaz', 'Kamuflaż'], ['ramie', 'Ramię z własną wolą'],
     ['atrament', 'Atrament i wabik'], ['opoznienie', 'Opóźniona reakcja'], ['kursor', 'Ramię do kursora'], ['woda', 'Woda w rzutnik'],
-    ['uklon', 'Ukłon („wyszło”)'], ['wina', 'To jego wina'], ['wplyw', 'Wpływa w literę'], ['_wyjscie', 'Odpływa'],
+    ['mysl', 'Myśl'], ['sen', 'Sen'], ['foch', 'Foch'], ['odmowa', 'Odmowa'],
+    ['uklon', 'Ukłon („wyszło”)'], ['wina', 'To jej wina'], ['wplyw', 'Wpływa w literę'], ['_wyjscie', 'Odpływa'],
   ];
   const label = n => (ACTS.find(a => a[0] === n) || [n, n])[1];
   let panelOpen = false, panelTick = 0, chartHover = null;
@@ -1523,6 +1869,7 @@
     .seg{display:inline-flex;background:#1B1236;border-radius:9px;padding:3px;gap:2px}
     .seg button{all:unset;cursor:pointer;padding:5px 12px;border-radius:7px;color:#C9BFEA}
     .seg button[aria-pressed="true"]{background:#3B2A7A;color:#fff}
+    .tv{display:inline-flex;align-items:center;gap:10px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
     .grid button{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 10px;border-radius:9px;background:#1B1236;border:1px solid rgba(168,85,247,.22);color:#EDE7FF;font-size:12.5px;line-height:1.25}
     .grid button:hover{border-color:rgba(61,227,240,.6);background:#21173F}
@@ -1560,6 +1907,7 @@
       <header class="ph"><div><b class="pn"></b><span class="ps">panel prowadzącego</span></div><button class="px" type="button" aria-label="Zamknij panel">×</button></header>
       <section>
         <div class="row"><span>Tryb</span><div class="seg" role="group" aria-label="Tryb"><button type="button" data-mode="demo">Demo</button><button type="button" data-mode="lecture">Wykład</button></div></div>
+        <div class="row"><span>Humor dnia</span><span class="tv"><b class="temper"></b><button type="button" class="link roll">Losuj</button></span></div>
         <label class="row chk"><input type="checkbox" id="osm-serious"><span>Tryb poważny</span><kbd class="k-serious"></kbd></label>
         <p class="hint mode-hint"></p>
       </section>
@@ -1569,7 +1917,7 @@
         <div class="chart"><canvas aria-label="Nastrój w czasie, pięć serii od 0 do 100%"></canvas><div class="tip" hidden></div></div>
         <div class="legend"></div>
         <button type="button" class="link tbl-btn" aria-expanded="false">Pokaż dane</button><div class="tbl" hidden></div></section>
-      <section><h3>Czego się nauczył</h3>
+      <section><h3>Czego się nauczyła</h3>
         <table class="bandit"><thead><tr><th>Psota</th><th class="n">Próby</th><th class="n">„Wyszło”</th></tr></thead><tbody></tbody></table>
         <p class="hint">Naciśnij <kbd>+</kbd>, kiedy psota rozbawi salę. Te, które działają, wybiera częściej.</p></section>
       <section><h3>Pamięć</h3><dl class="mem"></dl><button type="button" class="link wipe">Wyczyść pamięć</button></section>
@@ -1579,6 +1927,7 @@
     $('.k-serious').textContent = CFG.keys.serious;
     $('.px').addEventListener('click', () => togglePanel(false));
     for (const b of panelEl.querySelectorAll('.seg button')) b.addEventListener('click', () => { CFG.mode = b.dataset.mode; panelSync(); });
+    $('.roll').addEventListener('click', () => { setTemper(rollTemper(temper)); panelSync(); });
     $('#osm-serious').addEventListener('change', e => setSerious(e.target.checked));
     const acts = $('.acts');
     for (const [n, t] of ACTS) { const b = el('button', '', t); b.type = 'button'; b.addEventListener('click', () => { if (n === 'uklon') reward(); else perform(n); }); acts.appendChild(b); }
@@ -1600,7 +1949,7 @@
       Object.assign(mem, { sessions: 1, clicks: 0, throws: 0, first: Date.now(), stats: {} }); memSave(); panelSync();
     });
     const keys = $('.keys'), K = CFG.keys;
-    for (const [k, t] of [[K.summon, 'przywołaj albo psota'], [K.hide, 'schowaj'], [K.serious, 'tryb poważny'], [K.blame, '„to jego wina”'], [K.reward, '„wyszło”: ukłon i nagroda'], [K.fix, 'napraw litery'], [K.panel, 'ten panel']]) {
+    for (const [k, t] of [[K.summon, 'przywołaj albo psota'], [K.hide, 'schowaj'], [K.serious, 'tryb poważny'], [K.blame, '„to jej wina”'], [K.reward, '„wyszło”: ukłon i nagroda'], [K.fix, 'napraw litery'], [K.panel, 'ten panel']]) {
       const dt = el('dt'), kb = el('kbd', '', k.toUpperCase()); dt.appendChild(kb); keys.append(dt, el('dd', '', t));
     }
     const cvs = $('.chart canvas'), tip = $('.tip');
@@ -1654,6 +2003,7 @@
     const $ = s => panelEl.querySelector(s);
     for (const b of panelEl.querySelectorAll('.seg button')) b.setAttribute('aria-pressed', String(b.dataset.mode === CFG.mode));
     $('#osm-serious').checked = serious;
+    $('.temper').textContent = temper;
     $('.mode-hint').textContent = CFG.mode === 'demo'
       ? 'Demo: pojawia się na każdym slajdzie, po kolei pokazuje wejścia.'
       : `Wykład: najwcześniej po ${CFG.firstAfterMin} min, co najmniej ${CFG.minGapMin} min przerwy, najwyżej ${CFG.maxAppearances} wejść. Teraz: ${D.appearances}.`;
@@ -1729,7 +2079,9 @@
   function init() {
     memLoad();
     if (Date.now() - (mem.last || 0) > 2 * 3600e3) mem.sessions++;
-    mem.last = Date.now(); memSave();
+    mem.last = Date.now();
+    setTemper(mem.temperDay === new Date().toDateString() && TEMPERS[mem.temper] ? mem.temper : rollTemper());
+    Object.assign(mood, BASE);
     host = document.createElement('div');
     host.setAttribute('data-osmiornica-host', '');
     host.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483000;';
@@ -1759,7 +2111,7 @@
   }
 
   window.Osmiornica = {
-    summon: name => { if (!serious) perform(name || (oct.on ? pick(REACTIONS) : nextEntrance())); },
+    summon: name => { if (name) { if (!serious) perform(name); } else summon(); },
     hide: () => perform('_wyjscie'),
     serious: on => setSerious(on == null ? !serious : !!on),
     reward,
@@ -1767,11 +2119,12 @@
     panel: on => togglePanel(on),
     slideChanged,
     mode: m => { CFG.mode = m; panelSync(); },
+    temper: t => { if (t) { setTemper(t); panelSync(); } return temper; },
     get mood() { return Object.assign({}, mood); },
     get state() { return state; },
     config: CFG,
     actions: ACTS.map(a => a[0]),
-    _dev: { oct, mood, spawn, setPose, expr, look, lookAt, rest, refreshWorld, perform, cancelAll },
+    _dev: { oct, mood, thought, spawn, setPose, expr, look, lookAt, rest, refreshWorld, perform, cancelAll, think, crossArms },
   };
   if (document.body) init(); else document.addEventListener('DOMContentLoaded', init);
 })();

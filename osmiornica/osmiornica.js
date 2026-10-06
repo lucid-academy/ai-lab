@@ -165,18 +165,18 @@
     tumble: { up: 0, s0: .35, sk: .4,  curl: .8,   wave: 1.2, wk: 3,   ww: 7,   droop: .2,  stiff: .05,  tip: .02,  damp: .9,  g: .6, follow: 1 },
     tuck:   { up: 0, s0: .05, sk: .12, curl: 2.2,  wave: .03, wk: 2,   ww: .3,  droop: .2,  stiff: .3,   tip: .1,   damp: .9,  g: .2, follow: .3 },
   };
-  // expressions an octopus can actually make: lids, pupil size, the brow fold (asym raises one side,
-  // raise lifts both), the dark eye bar and the papillae over the eyes; no mouth
+  // expressions an octopus can actually make: lids, pupil size, the brow fold (raise lifts it), the dark
+  // eye bar and the papillae over the eyes; no mouth, and both eyes always do the same thing
   const EXPR = {
-    curious:  { open: .95, low: .08, tilt: -.05, dil: .8,  asym: .3,  raise: .45, pap: .45 },
-    smug:     { open: .55, low: .26, tilt: .15,  dil: .35, asym: .25 },
+    curious:  { open: .95, low: .08, tilt: -.05, dil: .8,  raise: .45, pap: .45 },
+    smug:     { open: .58, low: .24, tilt: .12,  dil: .35 },
     focus:    { open: .66, low: .2,  tilt: .25,  dil: .45, pap: .35 },
     surprise: { open: 1,   low: 0,   tilt: -.2,  dil: .9,  raise: 1,   pap: .8 },
-    skeptic:  { open: .66, low: .2,  tilt: .1,   dil: .4,  asym: .5 },
-    roll:     { open: .62, low: .16, tilt: .15,  dil: .4,  asym: .35 },
+    skeptic:  { open: .62, low: .22, tilt: .2,   dil: .35 },
+    roll:     { open: .62, low: .16, tilt: .15,  dil: .4 },
     angry:    { open: .5,  low: .22, tilt: .9,   dil: .2,  bar: 1,     pap: 1 },
     innocent: { open: .95, low: .08, tilt: -.3,  dil: .7,  raise: .5 },
-    guilty:   { open: .66, low: .14, tilt: -.45, dil: .55, asym: -.2 },
+    guilty:   { open: .66, low: .14, tilt: -.45, dil: .55 },
     happy:    { open: .72, low: .3,  tilt: -.1,  dil: .65, raise: .15 },
     stretch:  { open: .08, low: .25, tilt: -.35, dil: .3 },
     closed:   { open: 0,   low: 0,   tilt: 0,    dil: .3 },
@@ -192,7 +192,7 @@
     pose: 'sit', poseP: POSES.sit, ride: .3, ground: null, spot: null,
     exprName: null, exprUntil: 0, exprNext: null, arms: [], glass: null, mimic: false, undo: [],
     look: { mode: 'idle', until: 0, x: 0, y: 0 },
-    eyes: { open: .82, low: .1, tilt: 0, dil: .5, asym: 0, raise: .1, bar: 0, pap: .2, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
+    eyes: { open: .82, low: .1, tilt: 0, dil: .5, raise: .1, bar: 0, pap: .2, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
   };
   function makeArms() {
     // [side, k (0 inner … 3 outer), back]; the roots sit up under the mantle and the web hides them
@@ -333,7 +333,7 @@
   function spawn(x, y, pose = 'sit') {
     Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, turn: 0, turnT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, glowPulse: 0, pinch: 0, glass: null, mimic: false, ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
     oct.skin = skinTarget(); setPose(pose); look('idle'); expr(null); unthink();
-    Object.assign(oct.eyes, { dizzy: 0, open: .82, asym: 0, bar: 0 });
+    Object.assign(oct.eyes, { dizzy: 0, open: .82, bar: 0 });
     feel('curiosity', .15); feel('boredom', -.3); // a new slide to look at
     makeWarp();
     for (const a of oct.arms) {
@@ -384,7 +384,6 @@
     e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .5 - mood.fear * .2, -.4, .6), 8, dt);
     e.dil = approach(e.dil, x ? x.dil : clamp(.2 + mood.curiosity * .25 + mood.fear * .5 + mood.joy * .05, 0, 1), 6, dt);
     e.raise = approach(e.raise, x ? x.raise || 0 : clamp((mood.curiosity - .35) * .5 + mood.fear * .4, 0, .35), 6, dt);
-    e.asym = approach(e.asym, x ? x.asym || 0 : temper === 'marudna' ? .1 : 0, 7, dt);
     e.bar = approach(e.bar, x ? x.bar || 0 : D.inFoch ? .6 : clamp((mood.annoyance - .35) * 1.6, 0, .6), 5, dt);
     e.pap = approach(e.pap, x ? x.pap || 0 : clamp(mood.annoyance + mood.fear * .8 + (mood.curiosity - .55) * .5, 0, .8), 4, dt);
     if (e.dizzy > 0) e.dizzy -= dt;
@@ -535,7 +534,7 @@
         c.fillStyle = rgba(bc, .4 * k); c.beginPath(); c.arc(p[0], p[1], m.r * S, 0, TAU); c.fill();
       }
     }
-    // the wave of light: a soft band sweeping up across the mantle, lighting the specks as it passes
+    // the wave of light: a soft band sweeping up across the mantle
     const sh = shimEnv();
     if (sh > .01) {
       const d = lerp(-1.25, 1.1, 1 - oct.shimT / SHIM) * S, nx = .41, ny = -.91, cy0 = -.5 * S, w = .3 * S;
@@ -543,13 +542,6 @@
       const sg = c.createLinearGradient(nx * (d - w), cy0 + ny * (d - w), nx * (d + w), cy0 + ny * (d + w));
       sg.addColorStop(0, rgba(NEON, 0)); sg.addColorStop(.5, rgba(mix(NEON, GLOW, .35), .42 * sh * k)); sg.addColorStop(1, rgba(NEON, 0));
       c.fillStyle = sg; c.fillRect(-S, -1.6 * S, 2 * S, 1.8 * S);
-      for (const m of SKINMARKS) {
-        if (m.blot) continue;
-        const q = Math.exp(-Math.pow((m.x * S * nx + (m.y * S - cy0) * ny - d) / (.2 * S), 2)) * sh;
-        if (q < .05) continue;
-        const p = warp(m.x * S, m.y * S);
-        c.fillStyle = rgba(GLOW, .9 * q * k); c.beginPath(); c.arc(p[0], p[1], m.r * S * 1.8, 0, TAU); c.fill();
-      }
       c.restore();
     }
     // held by the top: the skin bunches into folds toward the pinch
@@ -574,11 +566,9 @@
     // wet highlight
     c.save(); c.translate(hl[0], hl[1]); c.rotate(-.55); c.scale(1, .5);
     const sp = c.createRadialGradient(0, 0, 0, 0, 0, .16 * S);
-    sp.addColorStop(0, `rgba(255,255,255,${.55 * (1 - oct.camo * .8)})`); sp.addColorStop(1, 'rgba(255,255,255,0)');
+    sp.addColorStop(0, `rgba(255,255,255,${.35 * (1 - oct.camo * .8)})`); sp.addColorStop(1, 'rgba(255,255,255,0)');
     c.fillStyle = sp; c.beginPath(); c.arc(0, 0, .16 * S, 0, TAU); c.fill();
     c.restore();
-    c.fillStyle = `rgba(255,255,255,${.75 * (1 - oct.camo * .8)})`;
-    for (const [x, y, r] of [[-.28, -.72, .02], [-.19, -.87, .012], [-.34, -.6, .009]]) { const d = warp(x * S, y * S); c.beginPath(); c.arc(d[0], d[1], r * S, 0, TAU); c.fill(); }
   }
   function spiral(c, x, y, R) {
     c.strokeStyle = '#2A1650'; c.lineWidth = R * .14; c.lineCap = 'round'; c.beginPath();
@@ -639,7 +629,7 @@
     }
     c.strokeStyle = rgba(shade(skin, -.5), .55 * sk); c.lineWidth = r * .06; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.stroke();
     // the brow fold over the eye, and the small papillae on it that rise when she is roused
-    const lift = (1 - clamp(open, 0, 1)) * r * .22 - (e.asym || 0) * side * r * .3 - (e.raise || 0) * r * .32;
+    const lift = (1 - clamp(open, 0, 1)) * r * .22 - (e.raise || 0) * r * .32;
     c.save(); c.globalAlpha *= sk; c.translate(cx, cy - r * 1.22 + lift); c.rotate(-side * e.tilt * .62);
     if (e.pap > .05) {
       c.fillStyle = rgba(shade(skin, .12)); c.strokeStyle = rgba(shade(skin, -.4), .55); c.lineWidth = r * .05;
@@ -660,12 +650,11 @@
     // turning away: the face slides round the side of the head and narrows
     const dir = oct.turnDir, squeeze = Math.max(.12, Math.cos(tr * Math.PI / 2)), shift = Math.sin(tr * Math.PI / 2) * .42 * S * dir;
     for (const side of [-1, 1]) {
-      const far = side * f < 0 ? 1 - Math.abs(f) * .12 : 1;
       const fade = clamp(1.7 - tr * 1.9 - (side === -dir ? tr * .9 : 0), 0, 1);
       if (fade < .02) continue;
       const p = warp(side * .235 * S * squeeze + f * .08 * S + shift, -.31 * S);
       c.save(); c.globalAlpha *= fade; c.translate(p[0], p[1]); c.scale(squeeze, 1);
-      eye(c, 0, 0, r * far, side, clamp(open * (1 + e.asym * side * .45), 0, 1), e, skin);
+      eye(c, 0, 0, r, side, clamp(open, 0, 1), e, skin);
       c.restore();
     }
   }

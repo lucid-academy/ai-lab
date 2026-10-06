@@ -1,8 +1,8 @@
 /*
  * osmiornica.js: Luci, a moody neon-violet octopus for HTML presentations (Lucid Academy).
  *
- * Drop-in, no dependencies:
- *   <script src="osmiornica.js" defer></script>
+ * Drop-in, no dependencies (latest version on GitHub Pages):
+ *   <script src="https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js" defer></script>
  * Optional config, before the script:
  *   <script>window.OSMIORNICA = { mode: 'lecture' }</script>
  * Slide changes are picked up from reveal.js, from .active/.present/.current classes, or from:
@@ -76,6 +76,8 @@
 
   // ---------- runtime state ----------
   let clock = 0, RUN = 0, VW = innerWidth, VH = innerHeight, DPR = 1, S = 100;
+  // she reaches about 1.3 S above whatever she sits on: a spot closer to the top would cut off her head
+  const HEAD_ROOM = 1.3;
   let state = 'hidden';      // hidden | busy | rest | sleep | drag
   let interruptible = false; // may a click start a reaction right now?
   let serious = false;
@@ -1517,11 +1519,11 @@
         if (!DOTLESS[w.word[i]]) continue;
         const rg = document.createRange(); rg.setStart(w.node, w.start + i); rg.setEnd(w.node, w.start + i + 1);
         const r = rg.getBoundingClientRect();
-        if (r.width && r.left > S && r.right < VW - S && r.top > S * 1.2) cands.push({ el, w, i, ch: w.word[i], score: rand(0, 1) });
+        if (r.width && r.left > S && r.right < VW - S && r.top > S * HEAD_ROOM) cands.push({ el, w, i, ch: w.word[i], score: rand(0, 1) });
       }
       for (const l of el.querySelectorAll('.osm-l')) {
         const r = l.getBoundingClientRect();
-        if (DOTLESS[l.textContent] && !Letters.crooked(l) && r.left > S && r.right < VW - S && r.top > S * 1.2) cands.push({ el, letter: l, ch: l.textContent, score: rand(0, 1) });
+        if (DOTLESS[l.textContent] && !Letters.crooked(l) && r.left > S && r.right < VW - S && r.top > S * HEAD_ROOM) cands.push({ el, letter: l, ch: l.textContent, score: rand(0, 1) });
       }
     }
     const c = cands.sort((a, b) => a.score - b.score)[0];
@@ -1671,7 +1673,7 @@
     for (const b of world.boxes) add('box', clamp(near ? near.x : (b.x1 + b.x2) / 2, b.x1 + S * .6, b.x2 - S * .6), b, 0, 'lie');
     add('floor', S * 1.4, world.floor, 1, 'lie'); add('floor', VW - S * 1.4, world.floor, -1, 'lie');
     for (const c of C) {
-      const box = { l: c.x - S, r: c.x + S, t: c.ground.y - S * 1.3, b: c.ground.y - 3 };
+      const box = { l: c.x - S, r: c.x + S, t: c.ground.y - S * HEAD_ROOM, b: c.ground.y - 3 };
       if (box.l < 6 || box.r > VW - 6 || box.t < 6 || c.ground.y > VH + 1) { c.score = 1e9; continue; }
       let ov = 0; for (const o of world.obstacles) ov += overlap(box, o);
       c.score = ov / (S * S) * 2 + (near ? Math.hypot(c.x - near.x, c.ground.y - near.y) / Math.max(VW, VH) * 2 : 0) + (c.kind === 'floor' ? .5 : 0) - (c.kind === 'beside' ? .15 : 0) + rand(0, .3);
@@ -1695,12 +1697,12 @@
       for (const w of wordsIn(el)) {
         const rg = document.createRange(); rg.setStart(w.node, w.start); rg.setEnd(w.node, w.end);
         const rs = rg.getClientRects(); if (rs.length !== 1) continue;
-        const r = rs[0]; if (r.left < S * .8 || r.right > VW - S * .8 || r.top < 0 || r.bottom > VH) continue;
+        const r = rs[0]; if (r.left < S * .8 || r.right > VW - S * .8 || r.top < S * HEAD_ROOM || r.bottom > VH) continue;
         cands.push({ el, w, score: (w.word.length >= 5 ? 0 : .4) + bonus + rand(0, .7) });
       }
       for (const wr of el.querySelectorAll('.osm-w')) {
         if ([...wr.children].every(l => Letters.crooked(l))) continue;
-        const r = wr.getBoundingClientRect(); if (r.left < S * .8 || r.right > VW - S * .8) continue;
+        const r = wr.getBoundingClientRect(); if (r.left < S * .8 || r.right > VW - S * .8 || r.top < S * HEAD_ROOM) continue;
         cands.push({ el, wrapped: wr, score: .3 + bonus + rand(0, .7) });
       }
     }
@@ -2004,7 +2006,7 @@
   B.final = async () => {
     refreshWorld();
     const T = dropTarget();
-    if (!T) return B.zerkniecie({ heart: true });
+    if (!T) { const spot = bestSpot(); await arriveAt(spot); expr('happy', 1.5); await wait(.5); await bow(); return rest(spot); }
     spawn(T.x, -S * 1.6, 'fall'); state = 'busy';
     if (RM.matches) { oct.y = T.surface.y - .3 * S; oct.ground = T.surface; oct.alpha = 0; await fadeTo(1, .4); }
     else await fallTo(T.surface);
@@ -2213,10 +2215,10 @@
   // room for her beside a rectangle, at its bottom line: the side with less in the way
   function besideSpot(r, extra = []) {
     const room = x => {
-      const box = { l: x - S, r: x + S, t: r.bottom - S * 1.3, b: r.bottom - 3 };
+      const box = { l: x - S, r: x + S, t: r.bottom - S * HEAD_ROOM, b: r.bottom - 3 };
       let ov = 0; for (const o of world.obstacles) ov += overlap(box, o);
       for (const q of extra) ov += overlap(box, { l: q.left, r: q.right, t: q.top, b: q.bottom }) * 2;
-      return box.l < 6 || box.r > VW - 6 ? 1e9 : ov;
+      return box.l < 6 || box.r > VW - 6 || box.t < 6 ? 1e9 : ov;
     };
     const xr = r.right + S * 1.15, xl = r.left - S * 1.15, side = room(xr) <= room(xl) ? 1 : -1, x = side > 0 ? xr : xl;
     const ground = { kind: 'line', x1: x - S * 1.6, x2: x + S * 1.6, y: r.bottom };
@@ -2238,7 +2240,7 @@
     const out = [];
     for (const el of slideRoot().querySelectorAll('button, [role="button"], .btn, input[type="button"], input[type="submit"]')) {
       if (el.closest('[data-osmiornica-host],[data-osmiornica-przeszkoda],[data-osmiornica="nie"]')) continue;
-      const r = shown(el); if (r && r.width < VW * .5) out.push({ el, r });
+      const r = shown(el); if (r && r.width < VW * .5 && r.bottom > S * HEAD_ROOM) out.push({ el, r });
     }
     return out.length ? pick(out) : null;
   }

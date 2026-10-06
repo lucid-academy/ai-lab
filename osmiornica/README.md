@@ -2,20 +2,51 @@
 
 Ciemnofioletowa, neonowa ośmiornica, która od czasu do czasu wpada na slajd, przekrzywia literę w nagłówku i układa się obok tekstu. Ma swój humor dnia, potrafi strzelić focha, myśli obrazkami i śni o AI, świadomości i kosmosie. Nie mówi: wszystko pokazuje miną, emotkami i chmurkami. Reaguje na kliknięcia, uczy się, co bawi salę, i pamięta poprzednie wykłady. Jest to jeden plik JS bez zależności, rysowany na canvasie nad prezentacją.
 
-Demo: `osmiornica/index.html`. Strzałki zmieniają slajdy, `D` otwiera panel prowadzącego, `O` przywołuje Luci.
+Demo na żywo: https://lucid-academy.github.io/ai-lab/osmiornica/ (plik `osmiornica/index.html`). Strzałki zmieniają slajdy, `D` otwiera panel prowadzącego, `O` przywołuje Luci.
 
 ## Wpięcie we własną prezentację
 
+Najnowsza wersja Luci jest publicznie na GitHub Pages, więc wystarczy dopisać przed `</body>` prezentacji:
+
 ```html
 <script>window.OSMIORNICA = { mode: 'lecture' }</script>  <!-- opcjonalnie -->
-<script src="osmiornica.js" defer></script>
+<script src="https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js" defer></script>
 ```
+
+Każda poprawka Luci w tym repo trafia wtedy sama do wszystkich prezentacji (GitHub Pages odświeża się w kilka minut). Skrypt ładuje się z internetu, więc na salę bez sieci lepiej wziąć kopię: plik `osmiornica.js` obok prezentacji i `src="osmiornica.js"`.
 
 Zmiany slajdów są wykrywane automatycznie w reveal.js oraz w prezentacjach, które przełączają klasę `active`, `present` lub `current` na `section` / `.slide`. W innym przypadku wystarczy po zmianie slajdu wysłać zdarzenie:
 
 ```js
 document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: el } }))
 ```
+
+## Z Claude: „dołącz Luci z GH”
+
+W sesji Claude Code z tym repozytorium wystarczy napisać „dołącz Luci z GH do plik.html”. Claude ma instrukcję w `.claude/skills/luci/SKILL.md`, według której:
+
+- wstawia skrypt;
+- sprawdza, jak prezentacja przełącza slajdy;
+- oznacza atrybutami ostatni slajd, nawigację, karty i slajdy, na których Luci ma się nie pojawiać;
+- sprawdza konflikty klawiszy;
+- testuje całość w przeglądarce.
+
+Życzenia można dopisać w tym samym zdaniu, np. „…w malinowym kolorze i nie na quizie”. W sesji z innym repozytorium wystarczy dodać jego nazwę: „dołącz Luci z GH (lucid-academy/ai-lab)”.
+
+Zwykły czat na claude.ai nie widzi tego repo. Żeby to samo zdanie działało i tam, wklej poniższy tekst w ustawieniach profilu claude.ai (osobiste preferencje) albo w instrukcjach projektu:
+
+```text
+Luci to moja maskotka, neonowa ośmiornica do prezentacji HTML (github.com/lucid-academy/ai-lab, folder osmiornica). Gdy piszę „dołącz Luci z GH”:
+1. Przed </body> wstaw:
+<script>window.OSMIORNICA = { mode: 'lecture' }</script>
+<script src="https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js" defer></script>
+2. Jeśli slajdy nie dostają klasy active/present/current, po każdej zmianie slajdu wywołaj:
+document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: el } }))
+3. Oznacz: ostatni slajd data-osmiornica="final"; slajdy z quizem, ankietą, wideo data-osmiornica="nie"; nawigację, pasek postępu i logo data-osmiornica-przeszkoda; karty i obrazki data-osmiornica-podest.
+Pełna instrukcja: https://github.com/lucid-academy/ai-lab/blob/main/.claude/skills/luci/SKILL.md
+```
+
+Podgląd artefaktu w czacie może blokować skrypty z zewnętrznych adresów. Wtedy Luci pokaże się dopiero w pobranym pliku albo na GitHub Pages.
 
 ## Atrybuty w HTML
 

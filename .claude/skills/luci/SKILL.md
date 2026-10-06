@@ -1,45 +1,64 @@
 ---
 name: luci
-description: Dołącza Luci, neonową ośmiornicę-maskotkę Lucid Academy, do prezentacji HTML. Użyj, gdy użytkownik pisze „dołącz Luci z GH”, „dodaj Luci”, „wstaw Luci”, „prezentacja z Luci” albo chce, żeby ośmiornica pojawiała się na slajdach.
+description: Dołącza Luci, neonową ośmiornicę-maskotkę Lucid Academy, do prezentacji HTML, aktualizuje ją albo usuwa. Użyj, gdy użytkownik pisze „dołącz Luci z GH”, „dodaj Luci”, „wstaw Luci”, „wklej Luci (na stałe)”, „prezentacja z Luci”, „zaktualizuj Luci”, „usuń Luci”, „Luci online” albo chce, żeby ośmiornica pojawiała się na slajdach.
 ---
 
 # Luci w prezentacji
 
-Luci to jeden plik JS bez zależności w repo `lucid-academy/ai-lab`, folder `osmiornica/`: silnik `osmiornica.js`, dokumentacja `README.md`, demo `index.html`. Najnowsza wersja jest publicznie na GitHub Pages:
+Luci to jeden plik JS bez zależności w repo `lucid-academy/ai-lab`, folder `osmiornica/`:
 
-https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js
+- `osmiornica.js`: silnik;
+- `wklej.py`: wkleja go do prezentacji;
+- `README.md`: dokumentacja;
+- `index.html`: demo.
 
-Prezentacje podpinają ten adres, a nie kopię pliku, dzięki czemu każda poprawka Luci sama trafia do wszystkich prezentacji. Dołączając Luci, nie zmieniaj `osmiornica/osmiornica.js`: to wspólny silnik wszystkich prezentacji.
+Domyślnie kod Luci jest wklejany do pliku prezentacji. Prezentacja zostaje wtedy jednym plikiem, który działa bez internetu (+181 KB, tyle co jedno zdjęcie).
 
-## 1. Skrypt
+Dołączając Luci, nie zmieniaj `osmiornica/osmiornica.js`: to wspólny silnik wszystkich prezentacji.
 
-Przed `</body>` prezentacji:
+## 1. Wklej Luci
 
-```html
-<script>window.OSMIORNICA = { mode: 'lecture' }</script>
-<script src="https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js" defer></script>
+Z katalogu głównego repo:
+
+```bash
+python3 osmiornica/wklej.py ścieżka/do/prezentacji.html
 ```
 
-- `mode: 'lecture'` (domyślnie): rzadkie wejścia, najwcześniej po 3 min, co najmniej 9 min przerwy, najwyżej 6 razy. `mode: 'demo'`: wchodzi na każdy slajd (do pokazów i testów).
-- Życzenia użytkownika tłumacz na ustawienia w tym samym obiekcie:
+Skrypt wstawia przed `</body>` jeden blok między znacznikami `<!-- Luci: początek (wersja …) -->` i `<!-- Luci: koniec -->`. Blok zawiera linijkę ustawień `window.OSMIORNICA` i kod silnika. Prezentacja może leżeć gdziekolwiek, wystarczy podać do niej ścieżkę.
+
+| Prośba | Polecenie |
+|---|---|
+| „zaktualizuj Luci” | to samo polecenie jeszcze raz; podmienia kod na bieżący, a ustawienia zostawia |
+| „zaktualizuj Luci wszędzie” | `--aktualizuj` z listą plików; pomija pliki bez Luci |
+| „Luci online”, „niech się sama aktualizuje” | `--online`: zamiast kodu adres z GitHub Pages; wymaga internetu na sali |
+| „usuń Luci” | `--usun` |
+
+Bez Pythona zrób to samo ręcznie: przed `</body>` wstaw `<script>window.OSMIORNICA = { mode: 'lecture' }</script>`, a pod nim `<script>` z całą zawartością `osmiornica/osmiornica.js`. Silnik celowo nie zawiera `</script>` ani `<!--`, więc można go wkleić bez zmian.
+
+**Ustawienia.** Zmieniaj je w linijce `window.OSMIORNICA` wewnątrz bloku. Skrypt zachowuje ją przy aktualizacji i przy zmianie wariantu.
+
+- `mode: 'lecture'` (domyślnie): rzadkie wejścia, najwcześniej po 3 min, co najmniej 9 min przerwy, najwyżej 6 razy.
+- `mode: 'demo'`: wchodzi na każdy slajd (do pokazów i testów).
+- Życzenia użytkownika tłumacz na ustawienia:
   - kolor → `skin`: `#6516D9` fiolet (domyślny), `#A3452B` rdzawy, `#C21B6E` malinowy, `#2D5BDB` błękitny albo dowolny hex;
-  - „częściej” → np. `firstAfterMin: 1, minGapMin: 5, maxAppearances: 10`; „na każdym slajdzie” → `mode: 'demo'`;
-  - „bez chmurek” → `thoughts: false`; „większa / mniejsza” → `size` (domyślnie `0.105` wysokości ekranu);
-  - pełna lista ustawień jest w `osmiornica/README.md`.
-- Wykład bez internetu (tylko gdy użytkownik o tym mówi): skopiuj `osmiornica.js` obok prezentacji i ustaw `src="osmiornica.js"`.
+  - „częściej” → np. `firstAfterMin: 1, minGapMin: 5, maxAppearances: 10`;
+  - „na każdym slajdzie” → `mode: 'demo'`;
+  - „bez chmurek” → `thoughts: false`;
+  - „większa / mniejsza” → `size` (domyślnie `0.105` wysokości ekranu).
+- Pełna lista ustawień jest w `osmiornica/README.md`.
 
 ## 2. Zmiana slajdów
 
 Luci musi wiedzieć, kiedy zmienia się slajd. Sprawdź w kodzie prezentacji funkcję, która pokazuje slajd:
 
-- reveal.js albo klasa `active` / `present` / `current` przełączana na `section`, `.slide` lub `[data-slide]` → nic nie rób, Luci wykrywa to sama;
-- każdy inny mechanizm (klasa na innym elemencie, `display`, `hidden`, `transform`, numer w zmiennej) → po zmianie slajdu dopisz poniższą linijkę, gdzie `el` to element nowego slajdu:
+- reveal.js albo klasa `active` / `present` / `current` przełączana na `section`, `.slide` lub `[data-slide]` → nic nie rób, Luci wykrywa to sama.
+- Każdy inny mechanizm (klasa na innym elemencie, `display`, `hidden`, `transform`, numer w zmiennej) → po zmianie slajdu dopisz poniższą linijkę, gdzie `el` to element nowego slajdu:
 
   ```js
   document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: el } }))
   ```
 
-- strona przewijana zamiast slajdów → `IntersectionObserver` na sekcjach, który wysyła to samo zdarzenie, gdy sekcja zajmie większość ekranu.
+- Strona przewijana zamiast slajdów → `IntersectionObserver` na sekcjach, który wysyła to samo zdarzenie, gdy sekcja zajmie większość ekranu.
 
 ## 3. Atrybuty
 
@@ -73,17 +92,17 @@ Jeśli jest przeglądarka (Playwright z Chromium):
 
 1. Otwórz prezentację. W konsoli nie ma błędów, a `window.Osmiornica` istnieje.
 2. Wywołaj `Osmiornica.mode('demo')` i przejdź przez slajdy. Luci pojawia się na każdym, nie zasłania nawigacji, a przy zmianie slajdu się wycofuje.
-3. Gdy sandbox nie ma dostępu do github.io, podstaw lokalny plik:
+3. Wariant `--online` w sandboxie bez dostępu do github.io testuj z lokalnym plikiem:
 
    ```js
    await page.route('https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js',
      r => r.fulfill({ path: 'osmiornica/osmiornica.js', contentType: 'application/javascript' }))
    ```
 
-Podgląd jako Artifact w Claude Code blokuje skrypty z github.io. Dołącz wtedy plik przez `files` (`{ "osmiornica.js": "osmiornica/osmiornica.js" }`) i tylko w kopii do podglądu ustaw `src="osmiornica.js"`.
+Wklejona Luci działa też w podglądzie jako Artifact. Wariant online jest tam blokowany. Na potrzeby podglądu dołącz wtedy plik przez `files` (`{ "osmiornica.js": "osmiornica/osmiornica.js" }`) i tylko w kopii do podglądu ustaw `src="osmiornica.js"`.
 
 ## 7. Na koniec powiedz użytkownikowi
 
 - co zostało oznaczone i dlaczego (zwłaszcza slajdy z `nie`);
-- że `D` otwiera panel (kolor, tryb, każda akcja na żądanie), `0` wyłącza Luci na czas pytań, a `R` naprawia jej psikusy;
-- że w podglądzie artefaktu w czacie Luci może się nie pokazać, bo czat blokuje skrypty z zewnętrznych adresów; w pobranym pliku i na GitHub Pages działa.
+- że prezentacja działa bez internetu, a „zaktualizuj Luci” podmieni ją na nowszą wersję;
+- że `D` otwiera panel (kolor, tryb, każda akcja na żądanie), `0` wyłącza Luci na czas pytań, a `R` naprawia jej psikusy.

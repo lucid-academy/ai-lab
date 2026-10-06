@@ -1,10 +1,12 @@
 /*
  * osmiornica.js: Luci, a moody neon-violet octopus for HTML presentations (Lucid Academy).
  *
- * Drop-in, no dependencies (latest version on GitHub Pages):
- *   <script src="https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js" defer></script>
- * Optional config, before the script:
- *   <script>window.OSMIORNICA = { mode: 'lecture' }</script>
+ * Drop-in, no dependencies. Paste it into the page inside a script element (osmiornica/wklej.py does
+ * that and keeps it updatable), or load it with a deferred script tag from GitHub Pages:
+ *   https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js
+ * Optional config, set before the engine runs:
+ *   window.OSMIORNICA = { mode: 'lecture' }
+ * Keep this file free of closing script tags and HTML comment openers, so it stays safe to paste inline.
  * Slide changes are picked up from reveal.js, from .active/.present/.current classes, or from:
  *   document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: el } }))
  * Attributes:
@@ -3027,5 +3029,6 @@
     actions: ACTS.map(a => a[0]),
     _dev: { oct, mood, thought, spawn, setPose, expr, startle, look, lookAt, rest, refreshWorld, perform, cancelAll, think, crossArms },
   };
-  if (document.body) init(); else document.addEventListener('DOMContentLoaded', init);
+  // pasted inline or loaded without defer: wait for the whole page, so the deck has built its slides
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

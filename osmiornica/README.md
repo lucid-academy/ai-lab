@@ -6,14 +6,33 @@ Demo na żywo: https://lucid-academy.github.io/ai-lab/osmiornica/ (plik `osmiorn
 
 ## Wpięcie we własną prezentację
 
-Najnowsza wersja Luci jest publicznie na GitHub Pages, więc wystarczy dopisać przed `</body>` prezentacji:
+Są trzy sposoby. Na wykład najlepszy jest pierwszy.
+
+| Sposób | Internet na sali | Aktualizacje Luci |
+|---|---|---|
+| kod wklejony w plik prezentacji | niepotrzebny | „zaktualizuj Luci” podmienia kod na nowszy |
+| adres z GitHub Pages | potrzebny | przychodzą same |
+| plik `osmiornica.js` obok prezentacji | niepotrzebny | trzeba podmienić plik |
+
+**Wklejona w plik** (domyślnie). Prezentacja zostaje jednym plikiem, większym o ok. 181 KB, czyli tyle, co jedno zdjęcie:
+
+```bash
+python3 osmiornica/wklej.py prezentacja.html             # wkleja albo aktualizuje
+python3 osmiornica/wklej.py prezentacja.html --online    # zamienia na adres z GitHub Pages
+python3 osmiornica/wklej.py prezentacja.html --usun      # usuwa
+python3 osmiornica/wklej.py *.html --aktualizuj          # aktualizuje wszystkie prezentacje z Luci
+```
+
+Skrypt wstawia przed `</body>` blok między znacznikami `<!-- Luci: początek … -->` i `<!-- Luci: koniec -->`. Ustawienia (`window.OSMIORNICA`) w bloku zostają przy aktualizacji. Ręcznie robi się to tak: zawartość `osmiornica.js` w `<script>…</script>` przed `</body>`. Silnik nie zawiera `</script>` ani `<!--`, więc można go wkleić bez zmian.
+
+**Z GitHub Pages:**
 
 ```html
 <script>window.OSMIORNICA = { mode: 'lecture' }</script>  <!-- opcjonalnie -->
 <script src="https://lucid-academy.github.io/ai-lab/osmiornica/osmiornica.js" defer></script>
 ```
 
-Każda poprawka Luci w tym repo trafia wtedy sama do wszystkich prezentacji (GitHub Pages odświeża się w kilka minut). Skrypt ładuje się z internetu, więc na salę bez sieci lepiej wziąć kopię: plik `osmiornica.js` obok prezentacji i `src="osmiornica.js"`.
+**Plik obok:** `<script src="osmiornica.js" defer></script>`, jak w demie.
 
 Zmiany slajdów są wykrywane automatycznie w reveal.js oraz w prezentacjach, które przełączają klasę `active`, `present` lub `current` na `section` / `.slide`. W innym przypadku wystarczy po zmianie slajdu wysłać zdarzenie:
 
@@ -25,15 +44,15 @@ document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: el } })
 
 W sesji Claude Code z tym repozytorium wystarczy napisać „dołącz Luci z GH do plik.html”. Claude ma instrukcję w `.claude/skills/luci/SKILL.md`, według której:
 
-- wstawia skrypt;
+- wkleja Luci do pliku skryptem `wklej.py`;
 - sprawdza, jak prezentacja przełącza slajdy;
 - oznacza atrybutami ostatni slajd, nawigację, karty i slajdy, na których Luci ma się nie pojawiać;
 - sprawdza konflikty klawiszy;
 - testuje całość w przeglądarce.
 
-Życzenia można dopisać w tym samym zdaniu, np. „…w malinowym kolorze i nie na quizie”. W sesji z innym repozytorium wystarczy dodać jego nazwę: „dołącz Luci z GH (lucid-academy/ai-lab)”.
+Życzenia można dopisać w tym samym zdaniu, np. „…w malinowym kolorze i nie na quizie”. Działają też „zaktualizuj Luci”, „usuń Luci” i „Luci online”. W sesji z innym repozytorium wystarczy dodać jego nazwę: „dołącz Luci z GH (lucid-academy/ai-lab)”.
 
-Zwykły czat na claude.ai nie widzi tego repo. Żeby to samo zdanie działało i tam, wklej poniższy tekst w ustawieniach profilu claude.ai (osobiste preferencje) albo w instrukcjach projektu:
+Zwykły czat na claude.ai nie widzi tego repo, a 3000 linii silnika to za dużo, żeby przepisać je w odpowiedzi, więc tam zostaje adres z GitHub Pages. Prezentację z czatu można potem wkleić na stałe w sesji Claude Code: „wklej Luci na stałe do plik.html”. Żeby „dołącz Luci z GH” działało w czacie, wklej poniższy tekst w ustawieniach profilu claude.ai (osobiste preferencje) albo w instrukcjach projektu:
 
 ```text
 Luci to moja maskotka, neonowa ośmiornica do prezentacji HTML (github.com/lucid-academy/ai-lab, folder osmiornica). Gdy piszę „dołącz Luci z GH”:
@@ -43,6 +62,7 @@ Luci to moja maskotka, neonowa ośmiornica do prezentacji HTML (github.com/lucid
 2. Jeśli slajdy nie dostają klasy active/present/current, po każdej zmianie slajdu wywołaj:
 document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: el } }))
 3. Oznacz: ostatni slajd data-osmiornica="final"; slajdy z quizem, ankietą, wideo data-osmiornica="nie"; nawigację, pasek postępu i logo data-osmiornica-przeszkoda; karty i obrazki data-osmiornica-podest.
+4. Przypomnij mi, że wersję bez internetu robi się w Claude Code: „wklej Luci na stałe”.
 Pełna instrukcja: https://github.com/lucid-academy/ai-lab/blob/main/.claude/skills/luci/SKILL.md
 ```
 

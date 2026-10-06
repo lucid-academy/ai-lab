@@ -55,13 +55,14 @@
   const easeOut = t => 1 - Math.pow(1 - t, 3);
   const easeIn = t => t * t * t;
   const easeOutBack = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
+  const seeded = seed => { let s = (seed * 48271) % 2147483647 || 1; return () => ((s = (s * 16807) % 2147483647) / 2147483647); };
   const hex = h => { h = h.replace('#', ''); if (h.length === 3) h = h.replace(/./g, c => c + c); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
   const mix = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
   const rgba = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const WHITE = [255, 255, 255], DEEP = [16, 6, 40];
   const shade = (c, f) => (f < 0 ? mix(c, DEEP, -f) : mix(c, WHITE, f));
   const SKIN0 = hex(CFG.skin), PINK = hex(CFG.belly), GLOW = hex(CFG.glow), NEON = hex(CFG.neon);
-  const BELLY = mix(SKIN0, PINK, .5), GOLD = [255, 211, 110], RED = hex('#FF4D8D');
+  const BELLY = mix(SKIN0, PINK, .5), GOLD = [255, 211, 110], RED = hex('#FF4D8D'), DIM = [140, 115, 215];
   const RM = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const mScale = () => (RM.matches ? .35 : 1);
   const CANCEL = Symbol('cancel');
@@ -80,8 +81,8 @@
   let lastTouch = 0;
   const waits = [];
   const cur = { x: -1e4, y: -1e4, t: -9, speed: 0, inside: false };
-  let host, root, cv, ctx, hitEl, dimEl, bubbleEl, toastEl, panelEl;
-  let bubbleUntil = 0, toastUntil = 0;
+  let host, root, cv, ctx, hitEl, dimEl, toastEl, panelEl;
+  let toastUntil = 0;
 
   // ---------- memory ----------
   const MEM_KEY = 'osmiornica.pamiec.v1';
@@ -135,26 +136,29 @@
   }
 
   // ---------- octopus ----------
-  const N = 14; // points per arm
-  const WEB = 3; // the web between the arms reaches this far down each arm
+  const N = 18; // points per arm
+  const WEB = 4; // the web between the arms reaches this far down each arm
+  const AT = f => Math.round((N - 1) * f); // a point a fraction of the way down the arm
   const POSES = {
-    sit:    { up: 0, s0: .18, sk: .33, curl: 1.35, wave: .45, wk: 2.6, ww: 1.4, droop: .3,  stiff: .2,   tip: .05,  damp: .9,  g: .4, follow: .35 },
-    lie:    { up: 0, s0: .42, sk: .3,  curl: .95,  wave: .25, wk: 2.2, ww: .8,  droop: .5,  stiff: .15,  tip: .04,  damp: .9,  g: .5, follow: .15 },
+    sit:    { up: 0, s0: .18, sk: .33, curl: 1.6,  wave: .45, wk: 2.6, ww: 1.4, droop: .3,  stiff: .2,   tip: .05,  damp: .9,  g: .4, follow: .35 },
+    lie:    { up: 0, s0: .42, sk: .3,  curl: 1.15, wave: .25, wk: 2.2, ww: .8,  droop: .5,  stiff: .15,  tip: .04,  damp: .9,  g: .5, follow: .15 },
     fall:   { up: 1, s0: .62, sk: .26, curl: .7,   wave: 1.0, wk: 3.2, ww: 9,   droop: 0,   stiff: .06,  tip: .025, damp: .86, g: 0,  follow: 1 },
     jet:    { up: 0, s0: .03, sk: .05, curl: .15,  wave: .3,  wk: 3,   ww: 8,   droop: 0,   stiff: .24,  tip: .09,  damp: .85, g: 0,  follow: 1 },
-    dangle: { up: 0, s0: .06, sk: .12, curl: .6,   wave: .85, wk: 2.8, ww: 4,   droop: 1.1, stiff: .045, tip: .02,  damp: .93, g: 1,  follow: .6 },
+    dangle: { up: 0, s0: .06, sk: .12, curl: .9,   wave: .85, wk: 2.8, ww: 4,   droop: 1.1, stiff: .045, tip: .02,  damp: .93, g: 1,  follow: .6 },
     tumble: { up: 0, s0: .35, sk: .4,  curl: .8,   wave: 1.2, wk: 3,   ww: 7,   droop: .2,  stiff: .05,  tip: .02,  damp: .9,  g: .6, follow: 1 },
   };
+  // heavy-lidded by default; asym raises one brow, pout pushes out the fold under the eyes
   const EXPR = {
-    smug:     { open: .6,   low: .3,  tilt: .18,  dil: .12 },
-    focus:    { open: .72,  low: .32, tilt: .22,  dil: .2 },
-    surprise: { open: 1.14, low: 0,   tilt: -.1,  dil: 1, mouth: 1 },
-    angry:    { open: .62,  low: .16, tilt: .9,   dil: .1 },
-    innocent: { open: 1.06, low: .05, tilt: -.45, dil: .9 },
-    guilty:   { open: .8,   low: .12, tilt: -.55, dil: .7 },
-    happy:    { open: .8,   low: .5,  tilt: -.15, dil: .55 },
-    yawn:     { open: .28,  low: .22, tilt: -.25, dil: .3, mouth: 1.6 },
-    closed:   { open: 0,    low: 0,   tilt: 0,    dil: .3 },
+    smug:     { open: .55, low: .26, tilt: .15,  dil: .25, asym: .25 },
+    focus:    { open: .58, low: .3,  tilt: .28,  dil: .3 },
+    surprise: { open: 1,   low: 0,   tilt: -.35, dil: .75 },
+    skeptic:  { open: .62, low: .22, tilt: .1,   dil: .35, asym: .5 },
+    angry:    { open: .52, low: .22, tilt: .95,  dil: .2,  pout: 1 },
+    innocent: { open: .86, low: .05, tilt: -.35, dil: .6 },
+    guilty:   { open: .66, low: .14, tilt: -.5,  dil: .55, asym: -.2 },
+    happy:    { open: .68, low: .38, tilt: -.15, dil: .5 },
+    stretch:  { open: .08, low: .25, tilt: -.35, dil: .3 },
+    closed:   { open: 0,   low: 0,   tilt: 0,    dil: .3 },
   };
   const oct = {
     on: false, x: 0, y: 0, vx: 0, vy: 0, physics: false, skipV: false, motion: null,
@@ -163,48 +167,59 @@
     q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0,
     scale: 1, alpha: 1, camo: 0, camoT: 0, camoC: [12, 7, 32], eyeCamo: false,
     skin: SKIN0.slice(), skinNow: SKIN0.slice(), flash: 0, flashC: WHITE,
-    clouds: 0, flare: 0, glowPulse: 0, glowS: 0, breathe: 0, nextFidget: 2,
+    clouds: 0, flare: 0, glowPulse: 0, glowS: 0, breathe: 0, nextFidget: 2, pinch: 0,
     pose: 'sit', poseP: POSES.sit, ride: .3, ground: null, spot: null,
-    exprName: null, exprUntil: 0, props: [], arms: [],
+    exprName: null, exprUntil: 0, exprNext: null, props: [], arms: [],
     look: { mode: 'idle', until: 0, x: 0, y: 0 },
-    eyes: { open: 1, low: 0, tilt: 0, dil: .3, mouth: 0, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
+    eyes: { open: .74, low: .06, tilt: 0, dil: .4, asym: 0, pout: 0, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
   };
   function makeArms() {
     // [side, k (0 inner … 3 outer), back]; the roots sit up under the mantle and the web hides them
     const order = [[-1, 1, 1], [1, 1, 1], [-1, 3, 1], [1, 3, 1], [-1, 0, 0], [1, 0, 0], [-1, 2, 0], [1, 2, 0]];
     oct.arms = order.map(([side, k, back], i) => ({
       i, side, k, back: !!back,
-      len: back ? 1.14 : 1.26, w0: back ? .19 : .21, phase: rand(0, TAU),
-      rx: side * (back ? .06 + .065 * k : .07 + .065 * k), ry: back ? -.09 : -.05,
+      len: back ? 1.36 : 1.5, w0: back ? .22 : .25, phase: rand(0, TAU), ck: rand(.8, 1.2), roll: rand(.35, 1),
+      rx: side * (back ? .06 + .065 * k : .08 + .065 * k), ry: back ? -.1 : -.06,
       p: Array.from({ length: N }, () => ({ x: 0, y: 0, px: 0, py: 0 })),
       t: Array.from({ length: N }, () => ({ x: 0, y: 0 })),
       P: Object.assign({}, POSES.sit), reach: null, fidget: 0, ft: 0, fd: 1, fa: 0,
     }));
   }
   const setPose = name => { oct.pose = name; oct.poseP = POSES[name] || POSES.sit; };
-  const expr = (name, sec = 1.5) => { oct.exprName = name; oct.exprUntil = name ? clock + sec : 0; };
+  // an expression can hand over to the next one, so a startle settles into a reaction
+  const expr = (name, sec = 1.5, then = null, thenSec = 1.3) => { oct.exprName = name; oct.exprUntil = name ? clock + sec : 0; oct.exprNext = then ? [then, thenSec] : null; };
   function look(mode, sec = 0, x, y) { oct.look.mode = mode; oct.look.until = sec ? clock + sec : 0; if (x != null) { oct.look.x = x; oct.look.y = y; } }
   const lookAt = (x, y, sec) => look('point', sec, x, y);
+  // a startle is a flinch, not a cartoon gape: a blanch, a jolt, arms snapping in, then a real reaction
+  function startle(k = 1, then = 'skeptic') {
+    oct.flash = .32; oct.flashC = TINT.fear;
+    oct.qv += 3.2 * k * mScale(); oct.hvy += S * 1.4 * k * mScale();
+    for (const a of oct.arms) { a.fd = a.ft = .4; a.fa = .9 * k * mScale(); }
+    expr('surprise', .45, then, 1.4);
+  }
   // two front arms folded across her front, the way someone crosses their arms
   function crossArms(on) {
     for (const a of oct.arms) {
       if (a.back || a.k !== 0) continue;
-      if (on) a.reach = { rel: [-a.side * .36 * S, -.16 * S], w: a.reach ? a.reach.w : 0, wT: 1, rate: 7, stiff: .55, front: true, idx: 8 };
+      if (on) a.reach = { rel: [-a.side * .36 * S, -.02 * S], w: a.reach ? a.reach.w : 0, wT: 1, rate: 7, stiff: .55, front: true, idx: AT(.38) };
       else if (a.reach) a.reach.wT = 0;
     }
   }
 
-  // head lag, lean and breathing bend the mantle; eyes and spots follow the same warp
-  const WP = { lx: 0, ly: 0, br: 0 };
+  // head lag, lean, breathing and a pinch (held by the top) bend the mantle; eyes and marks follow the same warp
+  const WP = { lx: 0, ly: 0, br: 0, pinch: 0 };
   function makeWarp() {
     const ca = Math.cos(-oct.ang), sa = Math.sin(-oct.ang), sc = oct.scale || 1;
-    WP.lx = (oct.hx * ca - oct.hy * sa) / sc - oct.face * .07 * S;
+    WP.lx = (oct.hx * ca - oct.hy * sa) / sc - oct.face * .12 * S;
     WP.ly = (oct.hx * sa + oct.hy * ca) / sc;
     WP.br = Math.sin(oct.breathe) * .022 * mScale();
+    WP.pinch = oct.pinch;
   }
   function warp(x, y) {
-    const f = Math.pow(clamp(-y / S, 0, 1.2), 1.5);
-    return [x * (1 + WP.br * .6 * f) + WP.lx * f, y * (1 + WP.br) + WP.ly * f];
+    const v = clamp(-y / S, 0, 1.2), f = Math.pow(v, 1.5);
+    let X = x * (1 + WP.br * .6 * f), Y = y * (1 + WP.br);
+    if (WP.pinch > .01 && v > .45) { const k = (v - .45) / .55; Y -= WP.pinch * .4 * S * k * k; X *= 1 - WP.pinch * .55 * Math.pow(k, 1.4); }
+    return [X + WP.lx * f, Y + WP.ly * f];
   }
   function toWorld(lx, ly) {
     const [wx, wy] = warp(lx, ly);
@@ -212,7 +227,7 @@
     const c = Math.cos(oct.ang), s = Math.sin(oct.ang);
     return { x: oct.x + x * c - y * s, y: oct.y + x * s + y * c };
   }
-  const siphonLocal = () => { const d = -(Math.sign(oct.face) || 1); return { x: d * .43 * S, y: -.16 * S, d }; };
+  const siphonLocal = () => { const d = -(Math.sign(oct.face) || 1); return { x: d * .4 * S, y: -.12 * S, d }; };
   const siphonWorld = () => { const s = siphonLocal(); return toWorld(s.x + s.d * .06 * S, s.y + .03 * S); };
 
   function armRoot(a) {
@@ -228,13 +243,18 @@
     const spread = P.s0 + P.sk * a.k + oct.flare * .9;
     const outward = a.side > 0 ? 0 : Math.PI;
     let th = oct.ang * P.follow + outward + a.side * (Math.PI / 2 - spread) * (1 - 2 * P.up);
-    const sg = (2 * P.up - 1) * a.side, curl = P.curl + a.fidget, wv = P.wave * mScale();
+    const sg = (2 * P.up - 1) * a.side, curl = (P.curl + a.fidget) * a.ck, wv = P.wave * mScale();
+    // resting on something: an arm that meets the surface runs along it and its tip rolls up off it;
+    // past the edge it drapes over
+    const gr = !oct.physics && P.up < .5 ? oct.ground : null, floorY = gr ? gr.y - a.w0 * S * oct.scale * .3 : 0;
     t[0].x = x; t[0].y = y;
     for (let i = 1; i < N; i++) {
       const s = i / (N - 1);
-      const kap = sg * curl * 6 * s * s * s + wv * 1.2 * Math.sin(a.phase + s * P.wk - clock * P.ww);
+      let kap = sg * curl * 6 * s * s * s + wv * 1.2 * Math.sin(a.phase + s * P.wk - clock * P.ww);
+      if (gr) kap += sg * a.roll * 9 * s * s * s * s;
       th += kap / (N - 1);
       th += angDiff(th, Math.PI / 2) * P.droop * s * 2 / (N - 1);
+      if (gr && Math.sin(th) > 0 && y + Math.sin(th) * seg > floorY && x > gr.x1 && x < gr.x2) th = Math.cos(th) < 0 ? Math.PI : 0;
       x += Math.cos(th) * seg; y += Math.sin(th) * seg;
       t[i].x = x; t[i].y = y;
     }
@@ -285,9 +305,9 @@
   }
 
   function spawn(x, y, pose = 'sit') {
-    Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, turn: 0, turnT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, glowPulse: 0, props: [], ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
+    Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, turn: 0, turnT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, glowPulse: 0, pinch: 0, props: [], ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
     oct.skin = skinTarget(); setPose(pose); look('idle'); expr(null); unthink();
-    oct.eyes.dizzy = 0; oct.eyes.open = 1;
+    Object.assign(oct.eyes, { dizzy: 0, open: .74, asym: 0, pout: 0 });
     makeWarp();
     for (const a of oct.arms) {
       Object.assign(a.P, oct.poseP); a.reach = null; a.fidget = 0; a.ft = 0;
@@ -299,7 +319,7 @@
   }
   function hide() {
     oct.on = false; oct.motion = null; oct.props = []; oct.physics = false;
-    Letters.releaseAll(); say(null); unthink();
+    Letters.releaseAll(); unthink();
     hitEl.classList.remove('on', 'drag'); hitEl.style.width = hitEl.style.height = '0px';
     state = 'hidden'; interruptible = false; D.inFoch = false;
   }
@@ -312,7 +332,7 @@
     else if ((L.mode === 'cursor' || L.mode === 'idle') && cur.inside && clock - cur.t < (L.mode === 'cursor' ? 30 : 2.5)) { tx = cur.x; ty = cur.y; }
     if (tx == null) { e.gxT = 0; e.gyT = .12; oct.faceT = 0; }
     else {
-      const ey = oct.y - .42 * S * oct.scale, dx = tx - oct.x, dy = ty - ey, k = 1.15 / (Math.hypot(dx, dy) + S * 1.1);
+      const ey = oct.y - .31 * S * oct.scale, dx = tx - oct.x, dy = ty - ey, k = 1.15 / (Math.hypot(dx, dy) + S * 1.1);
       e.gxT = dx * k; e.gyT = dy * k;
       oct.faceT = clamp(dx / (S * 3), -1, 1);
     }
@@ -321,13 +341,16 @@
     const m = Math.hypot(e.gx, e.gy); if (m > 1) { e.gx /= m; e.gy /= m; }
   }
   function eyesUpdate(dt) {
+    if (oct.exprName && clock >= oct.exprUntil && oct.exprNext) { const [n, s] = oct.exprNext; expr(n, s); }
     const e = oct.eyes, x = oct.exprName && clock < oct.exprUntil ? EXPR[oct.exprName] : null;
-    const openT = x ? x.open : clamp(1 - mood.boredom * .45 + mood.fear * .12 - (oct.pose === 'lie' ? .12 : 0), .3, 1.1);
+    // resting face: heavy lids that lift with curiosity or fear and sink with boredom
+    const openT = x ? x.open : clamp(.74 - mood.boredom * .25 + mood.curiosity * .18 + mood.fear * .2 - (oct.pose === 'lie' ? .1 : 0), .3, 1);
     e.open = approach(e.open, openT, 14, dt);
-    e.low = approach(e.low, x ? x.low : clamp(mood.joy * .3 - .05, 0, .3), 10, dt);
-    e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .9 - mood.fear * .3, -.5, .8), 8, dt);
-    e.dil = approach(e.dil, x ? x.dil : clamp(.28 + mood.fear * .7 + mood.curiosity * .3, 0, 1), 6, dt);
-    e.mouth = approach(e.mouth, x && x.mouth ? x.mouth : 0, 12, dt);
+    e.low = approach(e.low, x ? x.low : clamp(.06 + mood.joy * .3, 0, .36), 10, dt);
+    e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .9 - mood.fear * .35 - mood.curiosity * .1, -.5, .8), 8, dt);
+    e.dil = approach(e.dil, x ? x.dil : clamp(.4 + mood.fear * .5 + mood.curiosity * .2, 0, 1), 6, dt);
+    e.asym = approach(e.asym, x ? x.asym || 0 : temper === 'marudna' ? .15 : 0, 7, dt);
+    e.pout = approach(e.pout, (x && x.pout) || D.inFoch ? 1 : mood.annoyance > .55 ? .6 : 0, 8, dt);
     if (e.dizzy > 0) e.dizzy -= dt;
     if ((e.next -= dt) <= 0) { e.blink = .17; e.next = chance(.2) ? .3 : rand(2, 5.5); }
     if (e.blink > 0) e.blink = Math.max(0, e.blink - dt);
@@ -351,6 +374,7 @@
     oct.face = approach(oct.face, oct.faceT, 5, dt);
     oct.turn = approach(oct.turn, oct.turnT, 5, dt);
     oct.camo = approach(oct.camo, oct.camoT, 3, dt);
+    oct.pinch = approach(oct.pinch, state === 'drag' ? 1 : 0, state === 'drag' ? 9 : 4, dt);
     oct.clouds = approach(oct.clouds, 0, .6, dt);
     oct.glowPulse = approach(oct.glowPulse, 0, 2, dt);
     oct.glowS = approach(oct.glowS, state === 'sleep' ? 1 : 0, 1.5, dt);
@@ -387,28 +411,37 @@
     c.arc(x - w / 2 + r, y, r, Math.PI / 2, Math.PI * 1.5); c.closePath();
   }
   function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
-  const SPOTS = (() => {
-    let seed = 7; const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    const out = [];
-    while (out.length < 18) {
-      const v = .1 + r() * .85, u = r() * 2 - 1;
-      const half = v < .5 ? .44 : .44 * Math.sqrt(Math.max(0, 1 - Math.pow((v - .48) / .55, 2)));
-      const x = u * half * .9, y = -v;
-      if (v > .26 && v < .58 && Math.abs(x) > .06 && Math.abs(x) < .4) continue; // keep the eyes clear
-      out.push({ x, y, r: .012 + r() * .02, ph: r() * TAU });
+  // mottling: clusters of dark blotches over the sac, fine specks lower down
+  const SKINMARKS = (() => {
+    const r = seeded(11), out = [];
+    const halfW = v => (v < .4 ? .3 + v * .25 : v < .64 ? lerp(.4, .53, (v - .4) / .24) : .53 * Math.sqrt(Math.max(0, 1 - Math.pow((v - .64) / .42, 2))));
+    for (let i = 0; i < 9; i++) {
+      const v = .5 + r() * .46, x = (r() * 2 - 1) * halfW(v) * .78;
+      for (let j = 0; j < 3; j++) {
+        const vv = clamp(v + (r() - .5) * .12, .46, 1), xx = clamp(x + (r() - .5) * .14, -halfW(vv) * .9, halfW(vv) * .9);
+        out.push({ x: xx, y: -vv, r: .03 + r() * .045, ph: r() * TAU, rot: r() * Math.PI, blot: true });
+      }
+    }
+    while (out.length < 57) {
+      const v = .08 + r() * .9, x = (r() * 2 - 1) * halfW(v) * .9;
+      if (v > .14 && v < .5 && Math.abs(x) > .04 && Math.abs(x) < .43) continue; // keep the eyes clear
+      out.push({ x, y: -v, r: .006 + r() * .01, ph: r() * TAU, rot: 0, blot: false });
     }
     return out;
   })();
   function bodyXform(c) { c.translate(oct.x, oct.y); c.rotate(oct.ang); c.scale((1 - .5 * oct.q) * oct.scale, (1 + oct.q) * oct.scale); }
   function mantlePath(c, fresh = true) {
-    const w = .47 * S, P = warp;
+    const P = (x, y) => warp(x * S, y * S);
     if (fresh) c.beginPath();
-    const s = P(-.29 * S, 0); c.moveTo(s[0], s[1]);
-    bz(c, P(-.4 * S, -.05 * S), P(-w * 1.05, -.24 * S), P(-w, -.48 * S));
-    bz(c, P(-w * .96, -.82 * S), P(-.3 * S, -1.01 * S), P(-.02 * S, -S));
-    bz(c, P(.28 * S, -S), P(w * .97, -.8 * S), P(w, -.48 * S));
-    bz(c, P(w * 1.05, -.24 * S), P(.4 * S, -.05 * S), P(.29 * S, 0));
-    const u = P(0, .07 * S); c.quadraticCurveTo(u[0], u[1], s[0], s[1]);
+    // a narrow face carrying the eyes, and a big soft sac rising behind it
+    const s = P(-.3, 0); c.moveTo(s[0], s[1]);
+    bz(c, P(-.36, -.06), P(-.4, -.17), P(-.39, -.27));
+    bz(c, P(-.38, -.4), P(-.54, -.46), P(-.53, -.64));
+    bz(c, P(-.52, -.9), P(-.28, -1.04), P(0, -1.03));
+    bz(c, P(.28, -1.04), P(.52, -.9), P(.53, -.64));
+    bz(c, P(.54, -.46), P(.38, -.4), P(.39, -.27));
+    bz(c, P(.4, -.17), P(.36, -.06), P(.3, 0));
+    const u = P(0, .07); c.quadraticCurveTo(u[0], u[1], s[0], s[1]);
     c.closePath();
   }
   function drawSiphon(c, skin) {
@@ -421,15 +454,15 @@
   function drawMantle(c, skin) {
     drawSiphon(c, skin);
     mantlePath(c);
-    const hl = warp(-.17 * S, -.74 * S), k = 1 - oct.camo;
-    const g = c.createRadialGradient(hl[0], hl[1], S * .03, hl[0] + .1 * S, hl[1] + .25 * S, S * 1.08);
-    g.addColorStop(0, rgba(mix(shade(skin, .4), PINK, .12))); g.addColorStop(.4, rgba(skin)); g.addColorStop(1, rgba(shade(skin, -.58)));
+    const k = 1 - oct.camo, hl = warp(-.2 * S, -.8 * S);
+    const g = c.createRadialGradient(hl[0], hl[1], S * .04, hl[0] + .12 * S, hl[1] + .3 * S, S * 1.1);
+    g.addColorStop(0, rgba(mix(shade(skin, .38), PINK, .1))); g.addColorStop(.42, rgba(skin)); g.addColorStop(1, rgba(shade(skin, -.6)));
     c.fillStyle = g; c.fill();
     c.save(); c.clip();
     // magenta bounce light from below, as if the slide glowed under her
-    const bl = c.createRadialGradient(0, .08 * S, 0, 0, .08 * S, .75 * S);
-    bl.addColorStop(0, rgba(PINK, .34 * k)); bl.addColorStop(1, rgba(PINK, 0));
-    c.fillStyle = bl; c.fillRect(-S, -1.2 * S, 2 * S, 1.4 * S);
+    const bl = c.createRadialGradient(0, .08 * S, 0, 0, .08 * S, .8 * S);
+    bl.addColorStop(0, rgba(PINK, .36 * k)); bl.addColorStop(1, rgba(PINK, 0));
+    c.fillStyle = bl; c.fillRect(-S, -1.6 * S, 2 * S, 1.8 * S);
     if (oct.clouds > .02) { // "passing clouds": dark bands sweeping down, a real cephalopod display
       const ph = (clock * 1.3) % 1;
       for (let j = 0; j < 2; j++) {
@@ -439,24 +472,43 @@
         c.fillStyle = lg; c.fillRect(-S, yy - .2 * S, 2 * S, .4 * S);
       }
     }
-    const spotC = mix(shade(skin, -.35), PINK, .25), grow = clamp(1 + mood.annoyance * .7 - mood.fear * .55, .4, 1.8);
-    for (const s of SPOTS) {
-      const p = warp(s.x * S, s.y * S), tw = .65 + .35 * Math.sin(clock * .9 + s.ph);
-      c.fillStyle = rgba(spotC, .3 * tw + mood.annoyance * .15);
-      c.beginPath(); c.arc(p[0], p[1], s.r * S * grow, 0, TAU); c.fill();
+    // mottling: the blotches darken when she is irritated
+    const bc = mix(shade(skin, -.42), [110, 20, 60], .35);
+    for (const m of SKINMARKS) {
+      const p = warp(m.x * S, m.y * S);
+      if (m.blot) {
+        c.fillStyle = rgba(bc, (.2 + .08 * Math.sin(clock * .8 + m.ph) + mood.annoyance * .12) * k);
+        c.beginPath(); c.ellipse(p[0], p[1], m.r * S, m.r * S * .72, m.rot, 0, TAU); c.fill();
+      } else {
+        c.fillStyle = rgba(bc, .4 * k); c.beginPath(); c.arc(p[0], p[1], m.r * S, 0, TAU); c.fill();
+      }
+    }
+    // held by the top: the skin bunches into folds toward the pinch
+    if (oct.pinch > .25) {
+      const pa = (oct.pinch - .25) / .75 * k;
+      c.strokeStyle = rgba(shade(skin, -.5), .55 * pa); c.lineWidth = .02 * S; c.lineCap = 'round';
+      for (const x of [-.16, -.05, .07, .17]) {
+        const a = warp(x * S, -.78 * S), m = warp(x * .62 * S, -.92 * S), b = warp(x * .3 * S, -1.02 * S);
+        c.beginPath(); c.moveTo(a[0], a[1]); c.quadraticCurveTo(m[0], m[1], b[0], b[1]); c.stroke();
+      }
     }
     c.restore();
     // two-tone neon rim: magenta on one side, Lucid cyan on the other
-    const rim = c.createLinearGradient(-.5 * S, 0, .5 * S, 0);
+    const rim = c.createLinearGradient(-.55 * S, 0, .55 * S, 0);
     rim.addColorStop(0, rgba(PINK, .5 * k)); rim.addColorStop(.3, rgba(PINK, 0)); rim.addColorStop(.64, rgba(GLOW, 0)); rim.addColorStop(1, rgba(GLOW, .8 * k));
     c.strokeStyle = rim; c.lineWidth = .034 * S; mantlePath(c); c.stroke();
-    c.save(); c.translate(hl[0], hl[1]); c.rotate(-.55); c.scale(1, .52);
-    const sp = c.createRadialGradient(0, 0, 0, 0, 0, .14 * S);
-    sp.addColorStop(0, `rgba(255,255,255,${.6 * (1 - oct.camo * .8)})`); sp.addColorStop(1, 'rgba(255,255,255,0)');
-    c.fillStyle = sp; c.beginPath(); c.arc(0, 0, .14 * S, 0, TAU); c.fill();
+    // a cool sheen along the upper right of the sac
+    const s0 = warp(.12 * S, -.97 * S), s1 = warp(.44 * S, -.8 * S), s2 = warp(.49 * S, -.57 * S);
+    c.strokeStyle = rgba([140, 165, 255], .35 * k); c.lineWidth = .045 * S; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(s0[0], s0[1]); c.quadraticCurveTo(s1[0], s1[1], s2[0], s2[1]); c.stroke();
+    // wet highlight
+    c.save(); c.translate(hl[0], hl[1]); c.rotate(-.55); c.scale(1, .5);
+    const sp = c.createRadialGradient(0, 0, 0, 0, 0, .16 * S);
+    sp.addColorStop(0, `rgba(255,255,255,${.55 * (1 - oct.camo * .8)})`); sp.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = sp; c.beginPath(); c.arc(0, 0, .16 * S, 0, TAU); c.fill();
     c.restore();
-    const dot = warp(-.25 * S, -.66 * S);
-    c.fillStyle = `rgba(255,255,255,${.75 * (1 - oct.camo * .8)})`; c.beginPath(); c.arc(dot[0], dot[1], .022 * S, 0, TAU); c.fill();
+    c.fillStyle = `rgba(255,255,255,${.75 * (1 - oct.camo * .8)})`;
+    for (const [x, y, r] of [[-.28, -.72, .02], [-.19, -.87, .012], [-.34, -.6, .009]]) { const d = warp(x * S, y * S); c.beginPath(); c.arc(d[0], d[1], r * S, 0, TAU); c.fill(); }
   }
   function spiral(c, x, y, R) {
     c.strokeStyle = '#2A1650'; c.lineWidth = R * .14; c.lineCap = 'round'; c.beginPath();
@@ -464,61 +516,90 @@
     c.stroke();
   }
   function eye(c, cx, cy, r, side, open, e, skin) {
-    const sk = 1 - oct.camo * .95; // sockets and rims fade with the skin; only the eyeballs stay
-    c.fillStyle = rgba(shade(skin, .1), sk); c.beginPath(); c.arc(cx, cy - r * .05, r * 1.2, 0, TAU); c.fill();
-    c.fillStyle = `rgba(16,6,40,${.28 * sk})`; c.beginPath(); c.arc(cx, cy + r * .1, r * 1.06, 0, TAU); c.fill();
+    const sk = 1 - oct.camo * .95; // mound, lids and brow fade with the skin; only the eyeballs stay
+    // the eye sits on a raised mound, as on a real octopus: lit on top, shadowed below, no hard edge
+    const md = c.createRadialGradient(cx, cy + r * .4, r * .4, cx, cy + r * .4, r * 1.55);
+    md.addColorStop(0, `rgba(16,6,40,${.34 * sk})`); md.addColorStop(1, 'rgba(16,6,40,0)');
+    c.fillStyle = md; c.beginPath(); c.arc(cx, cy + r * .4, r * 1.55, 0, TAU); c.fill();
+    const mg = c.createRadialGradient(cx - side * r * .15, cy - r * .55, r * .1, cx, cy - r * .04, r * 1.55);
+    mg.addColorStop(0, rgba(shade(skin, .24), sk)); mg.addColorStop(.62, rgba(shade(skin, .05), sk)); mg.addColorStop(1, rgba(skin, 0));
+    c.fillStyle = mg; c.beginPath(); c.arc(cx, cy - r * .04, r * 1.55, 0, TAU); c.fill();
     c.save(); c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.clip();
-    c.fillStyle = '#F7F3FF'; c.fillRect(cx - r, cy - r, 2 * r, 2 * r);
+    c.fillStyle = '#E9E1F2'; c.fillRect(cx - r, cy - r, 2 * r, 2 * r);
     const sh = c.createLinearGradient(cx, cy - r, cx, cy + r);
-    sh.addColorStop(0, 'rgba(60,30,110,.3)'); sh.addColorStop(.45, 'rgba(60,30,110,0)');
+    sh.addColorStop(0, 'rgba(60,30,110,.35)'); sh.addColorStop(.5, 'rgba(60,30,110,0)'); sh.addColorStop(1, 'rgba(60,30,110,.18)');
     c.fillStyle = sh; c.fillRect(cx - r, cy - r, 2 * r, 2 * r);
-    const ir = r * .64, ix = cx + e.gx * (r - ir * .9), iy = cy + e.gy * (r - ir * .9);
-    if (e.dizzy > 0) spiral(c, cx, cy, r * .78);
+    const ir = r * .72, ix = cx + e.gx * (r - ir * .75), iy = cy + e.gy * (r - ir * .75);
+    if (e.dizzy > 0) spiral(c, cx, cy, r * .8);
     else {
-      const ig = c.createRadialGradient(ix - ir * .3, iy - ir * .35, ir * .1, ix, iy, ir);
-      ig.addColorStop(0, '#C8FCFF'); ig.addColorStop(.5, rgba(GLOW)); ig.addColorStop(1, '#0B6E8C');
+      const ig = c.createRadialGradient(ix - ir * .25, iy - ir * .3, ir * .08, ix, iy, ir);
+      ig.addColorStop(0, '#A8F6F8'); ig.addColorStop(.48, rgba(GLOW)); ig.addColorStop(1, '#09566E');
       c.fillStyle = ig; c.beginPath(); c.arc(ix, iy, ir, 0, TAU); c.fill();
-      c.strokeStyle = 'rgba(6,40,60,.55)'; c.lineWidth = ir * .1; c.stroke();
-      // octopus pupil: a horizontal slit that dilates into a circle
-      c.fillStyle = '#12082A'; pill(c, ix, iy, ir * lerp(1.18, .9, e.dil), ir * lerp(.36, .9, e.dil)); c.fill();
-      c.fillStyle = 'rgba(255,255,255,.95)'; c.beginPath(); c.arc(ix - ir * .36, iy - ir * .4, ir * .27, 0, TAU); c.fill();
-      c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.arc(ix + ir * .34, iy + ir * .3, ir * .11, 0, TAU); c.fill();
+      c.strokeStyle = 'rgba(4,34,52,.6)'; c.lineWidth = ir * .1; c.stroke();
+      // octopus pupil: a horizontal bar that rounds out as it dilates
+      c.fillStyle = '#0E0622'; pill(c, ix, iy, ir * lerp(1.05, .86, e.dil), ir * lerp(.58, .86, e.dil)); c.fill();
+      c.fillStyle = 'rgba(255,255,255,.9)'; c.beginPath(); c.arc(ix - ir * .34, iy - ir * .36, ir * .2, 0, TAU); c.fill();
+      c.fillStyle = 'rgba(255,255,255,.6)'; c.beginPath(); c.arc(ix + ir * .3, iy + ir * .28, ir * .08, 0, TAU); c.fill();
     }
-    const lidC = rgba(shade(skin, .06)), edge = rgba(shade(skin, -.45)), tilt = -side * e.tilt * .5;
-    const uy = cy - r * 1.06 + 2.12 * r * (1 - clamp(open, 0, 1));
+    // heavy upper lid: a thick fold of skin with a soft shadow under it
+    const tilt = -side * e.tilt * .5, uy = cy - r * 1.06 + 2.12 * r * (1 - clamp(open, 0, 1));
     c.save(); c.translate(cx, uy); c.rotate(tilt);
-    c.fillStyle = lidC; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .22, r * 1.4, 0); c.lineTo(r * 1.4, -r * 3); c.lineTo(-r * 1.4, -r * 3); c.closePath(); c.fill();
-    c.strokeStyle = edge; c.lineWidth = r * .1; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .22, r * 1.4, 0); c.stroke();
+    const ls = c.createLinearGradient(0, 0, 0, r * .5);
+    ls.addColorStop(0, 'rgba(26,8,56,.5)'); ls.addColorStop(1, 'rgba(26,8,56,0)');
+    c.fillStyle = ls; c.fillRect(-r * 1.4, 0, r * 2.8, r * .5);
+    const lg = c.createLinearGradient(0, -r * 1.2, 0, r * .2);
+    lg.addColorStop(0, rgba(shade(skin, .16))); lg.addColorStop(1, rgba(shade(skin, -.08)));
+    c.fillStyle = lg; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .3, r * 1.4, 0); c.lineTo(r * 1.4, -r * 3); c.lineTo(-r * 1.4, -r * 3); c.closePath(); c.fill();
+    c.strokeStyle = rgba(shade(skin, -.55)); c.lineWidth = r * .12; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .3, r * 1.4, 0); c.stroke();
+    c.strokeStyle = rgba(shade(skin, .4), .6); c.lineWidth = r * .07; c.beginPath(); c.moveTo(-r * 1.2, -r * .14); c.quadraticCurveTo(0, r * .12, r * 1.2, -r * .14); c.stroke();
     c.restore();
     if (e.low > .02) {
       const ly = cy + r * 1.06 - 2.12 * r * e.low;
-      c.save(); c.translate(cx, ly); c.rotate(-tilt * .4);
-      c.fillStyle = lidC; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -r * .2, r * 1.4, 0); c.lineTo(r * 1.4, r * 3); c.lineTo(-r * 1.4, r * 3); c.closePath(); c.fill();
-      c.strokeStyle = edge; c.lineWidth = r * .07; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -r * .2, r * 1.4, 0); c.stroke();
+      const arch = r * (.22 + e.low * .8); // a raised lower lid arches up, the way a smile pushes the cheeks
+      c.save(); c.translate(cx, ly + arch * .3); c.rotate(-tilt * .4);
+      c.fillStyle = rgba(shade(skin, .04)); c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -arch, r * 1.4, 0); c.lineTo(r * 1.4, r * 3); c.lineTo(-r * 1.4, r * 3); c.closePath(); c.fill();
+      c.strokeStyle = rgba(shade(skin, -.45)); c.lineWidth = r * .08; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -arch, r * 1.4, 0); c.stroke();
       c.restore();
     }
     c.restore();
-    c.strokeStyle = rgba(shade(skin, -.5), .6 * sk); c.lineWidth = r * .07; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.stroke();
+    if (open < .15) { // shut: the lids meet in a soft crease
+      c.strokeStyle = rgba(shade(skin, -.55), (1 - open / .15) * .8); c.lineWidth = r * .1; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(cx - r * .85, cy + r * .05); c.quadraticCurveTo(cx, cy + r * .4, cx + r * .85, cy + r * .05); c.stroke();
+    }
+    c.strokeStyle = rgba(shade(skin, -.5), .55 * sk); c.lineWidth = r * .06; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.stroke();
+    // brow fold: it carries most of the expression
+    const lift = (1 - clamp(open, 0, 1)) * r * .22 - (e.asym || 0) * side * r * .3;
+    c.save(); c.globalAlpha *= sk; c.translate(cx, cy - r * 1.22 + lift); c.rotate(-side * e.tilt * .62);
+    c.fillStyle = rgba(shade(skin, .2)); c.beginPath(); c.moveTo(-r * 1.3, r * .22); c.quadraticCurveTo(0, -r * .5, r * 1.3, r * .22); c.quadraticCurveTo(0, -r * .1, -r * 1.3, r * .22); c.fill();
+    c.strokeStyle = rgba(shade(skin, -.45), .65); c.lineWidth = r * .09; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-r * 1.1, r * .26); c.quadraticCurveTo(0, -r * .06, r * 1.1, r * .26); c.stroke();
+    c.restore();
   }
-  function drawEyes(c) {
+  function drawFace(c) {
     const e = oct.eyes, f = oct.face, skin = oct.skinNow, tr = oct.turn;
     if (tr > .97) return; // back to the audience
-    const shut = e.blink > 0 ? Math.sin(Math.PI * (1 - e.blink / .17)) : 0, open = e.open * (1 - shut);
-    const r = .158 * S * (1 + Math.max(0, e.open - 1) * 1.4);
+    const shut = e.blink > 0 ? Math.sin(Math.PI * (1 - e.blink / .17)) : 0, open = e.open * (1 - shut), r = .118 * S;
     // turning away: the face slides round the side of the head and narrows
     const dir = oct.turnDir, squeeze = Math.max(.12, Math.cos(tr * Math.PI / 2)), shift = Math.sin(tr * Math.PI / 2) * .42 * S * dir;
     for (const side of [-1, 1]) {
       const far = side * f < 0 ? 1 - Math.abs(f) * .12 : 1;
       const fade = clamp(1.7 - tr * 1.9 - (side === -dir ? tr * .9 : 0), 0, 1);
       if (fade < .02) continue;
-      const p = warp(side * .205 * S * squeeze + f * .07 * S + shift, -.43 * S);
+      const p = warp(side * .235 * S * squeeze + f * .08 * S + shift, -.31 * S);
       c.save(); c.globalAlpha *= fade; c.translate(p[0], p[1]); c.scale(squeeze, 1);
-      eye(c, 0, 0, r * far, side, open, e, skin);
+      eye(c, 0, 0, r * far, side, clamp(open * (1 + e.asym * side * .45), 0, 1), e, skin);
       c.restore();
     }
-    if (e.mouth > .05 && tr < .5) {
-      const m = warp(f * .06 * S + shift, -.19 * S);
-      c.fillStyle = rgba(shade(skin, -.7)); c.beginPath(); c.ellipse(m[0], m[1], .036 * S * e.mouth * squeeze, .05 * S * e.mouth, 0, 0, TAU); c.fill();
+    // a pout: the fold of skin under the eyes pushes out when she sulks or is held up
+    if (e.pout > .03 && tr < .5) {
+      const m = warp(f * .06 * S + shift, -.13 * S), w = .085 * S * squeeze;
+      c.save(); c.globalAlpha *= e.pout * (1 - oct.camo);
+      const pg = c.createRadialGradient(m[0], m[1] - w * .3, 0, m[0], m[1], w * 1.1);
+      pg.addColorStop(0, rgba(shade(skin, .12))); pg.addColorStop(1, rgba(shade(skin, -.2)));
+      c.fillStyle = pg; c.beginPath(); c.ellipse(m[0], m[1], w, w * .6, 0, 0, TAU); c.fill();
+      c.strokeStyle = rgba(shade(skin, -.6), .8); c.lineWidth = .016 * S; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(m[0] - w * .62, m[1] + w * .3); c.quadraticCurveTo(m[0], m[1] - w * .12, m[0] + w * .62, m[1] + w * .3); c.stroke();
+      c.restore();
     }
   }
   // arm geometry: a frame (normals and half-widths) and a smooth tapered outline around it
@@ -529,7 +610,7 @@
     for (let i = 0; i < N; i++) {
       const A = pts[Math.max(0, i - 1)], B2 = pts[Math.min(N - 1, i + 1)];
       let tx = B2.x - A.x, ty = B2.y - A.y; const d = Math.hypot(tx, ty) || 1; tx /= d; ty /= d;
-      NX[i] = -ty; NY[i] = tx; WW[i] = (wt + (w0 - wt) * Math.pow(1 - i / (N - 1), .75)) / 2;
+      NX[i] = -ty; NY[i] = tx; WW[i] = (wt + (w0 - wt) * Math.pow(1 - i / (N - 1), .7)) / 2;
     }
   }
   function armPath(c, pts, ww, fresh = true) {
@@ -548,28 +629,35 @@
   }
   function armOutline(c, pts, w0, wt, fresh = true) { armFrame(pts, w0, wt); armPath(c, pts, WW, fresh); }
   function drawArm(c, a, col, detail) {
-    const p = a.p, k = 1 - oct.camo;
-    armOutline(c, p, a.w0 * S * oct.scale, .016 * S * oct.scale);
+    const p = a.p, k = 1 - oct.camo, w0 = a.w0 * S * oct.scale, wt = .018 * S * oct.scale;
+    armOutline(c, p, w0, wt);
     c.fillStyle = rgba(col); c.fill();
     const sg = (2 * a.P.up - 1) * a.side >= 0 ? 1 : -1; // suckers sit on the inner side of the curl
-    // magenta underside: a narrower ribbon shifted toward the sucker side
-    for (let i = 0; i < N; i++) { SH[i].x = p[i].x + NX[i] * WW[i] * .45 * sg; SH[i].y = p[i].y + NY[i] * WW[i] * .45 * sg; WH[i] = WW[i] * .55; }
-    c.fillStyle = rgba(mix(col, BELLY, .75), .6); armPath(c, SH, WH); c.fill();
-    armFrame(p, a.w0 * S * oct.scale, .016 * S * oct.scale);
+    // pink underside: a ribbon shifted toward the sucker side
+    for (let i = 0; i < N; i++) { SH[i].x = p[i].x + NX[i] * WW[i] * .42 * sg; SH[i].y = p[i].y + NY[i] * WW[i] * .42 * sg; WH[i] = WW[i] * .6; }
+    c.fillStyle = rgba(mix(col, BELLY, .8), .75); armPath(c, SH, WH); c.fill();
+    armFrame(p, w0, wt);
     if (!detail) return;
-    // a thin neon line along the top of the arm
-    c.save(); c.globalCompositeOperation = 'lighter';
-    c.strokeStyle = rgba(GLOW, .3 * k); c.lineWidth = Math.max(1, .016 * S * oct.scale); c.lineCap = 'round';
+    // a wet lilac sheen along the top, and a few dark speckles
+    c.strokeStyle = rgba(mix(col, [222, 200, 255], .5), .3 * k); c.lineWidth = Math.max(1, WW[1] * .26); c.lineCap = 'round';
     c.beginPath();
-    for (let i = 2; i < N - 3; i++) { const x = p[i].x - NX[i] * WW[i] * .62 * sg, y = p[i].y - NY[i] * WW[i] * .62 * sg; i === 2 ? c.moveTo(x, y) : c.lineTo(x, y); }
-    c.stroke(); c.restore();
-    const sc = mix(BELLY, [255, 236, 250], .55), cup = mix(col, PINK, .3);
-    for (let i = 3; i < N - 1; i++) {
-      const w = WW[i], r = w * .4; if (r < .7) continue;
-      const x = p[i].x + NX[i] * w * .55 * sg, y = p[i].y + NY[i] * w * .55 * sg;
-      c.fillStyle = rgba(sc, .92); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
-      c.fillStyle = rgba(shade(cup, -.25), .5); c.beginPath(); c.arc(x, y, r * .45, 0, TAU); c.fill();
-      if (oct.glowS > .02) { // bioluminescent suckers while she sleeps
+    for (let i = 1; i < N - 2; i++) { const x = p[i].x - NX[i] * WW[i] * .5 * sg, y = p[i].y - NY[i] * WW[i] * .5 * sg; i === 1 ? c.moveTo(x, y) : c.lineTo(x, y); }
+    c.stroke();
+    c.fillStyle = rgba(shade(col, -.5), .35 * k);
+    for (let i = 1; i < N - 2; i += 2) {
+      const o = .1 + .35 * Math.sin(a.phase * 7 + i * 2.3), x = p[i].x - NX[i] * WW[i] * o * sg, y = p[i].y - NY[i] * WW[i] * o * sg;
+      c.beginPath(); c.arc(x, y, Math.max(.6, WW[i] * .12), 0, TAU); c.fill();
+    }
+    // suckers: pale discs with a darker rim and cup, two per segment, poking out along the underside
+    const rim = mix(BELLY, [110, 25, 75], .35), disc = mix(BELLY, [255, 236, 248], .62), cup = mix(BELLY, [90, 20, 60], .45);
+    for (let i = 2; i < N - 1; i++) for (const h of [0, .5]) {
+      const i1 = i + 1, w = lerp(WW[i], WW[i1], h), r = w * .5;
+      if (r < .8) continue;
+      const x = lerp(p[i].x, p[i1].x, h) + lerp(NX[i], NX[i1], h) * w * .62 * sg, y = lerp(p[i].y, p[i1].y, h) + lerp(NY[i], NY[i1], h) * w * .62 * sg;
+      c.fillStyle = rgba(rim, .95); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+      c.fillStyle = rgba(disc); c.beginPath(); c.arc(x, y, r * .76, 0, TAU); c.fill();
+      c.fillStyle = rgba(cup, .7); c.beginPath(); c.arc(x, y, r * .34, 0, TAU); c.fill();
+      if (oct.glowS > .02 && !h) { // bioluminescent suckers while she sleeps (every other one is plenty)
         c.save(); c.globalCompositeOperation = 'lighter';
         const gg = c.createRadialGradient(x, y, 0, x, y, r * 3);
         gg.addColorStop(0, rgba(GLOW, .5 * oct.glowS)); gg.addColorStop(1, rgba(GLOW, 0));
@@ -611,7 +699,7 @@
     c.shadowColor = rgba(col, Math.min(1, .7 * k)); c.shadowBlur = S * .36 * oct.scale * DPR * Math.min(1.3, .7 + k * .4);
     c.fillStyle = rgba(col, Math.min(1, k));
     c.beginPath();
-    for (const a of oct.arms) armOutline(c, a.p, a.w0 * S * oct.scale, .016 * S * oct.scale, false);
+    for (const a of oct.arms) armOutline(c, a.p, a.w0 * S * oct.scale, .018 * S * oct.scale, false);
     c.save(); bodyXform(c); mantlePath(c, false); c.restore();
     c.fill();
     c.restore();
@@ -643,8 +731,8 @@
     drawShadow(c);
     c.save(); c.globalAlpha = bodyA; drawGlow(c); c.restore();
     c.save(); c.globalAlpha = bodyA;
-    for (const a of oct.arms) if (a.back && !inFront(a)) drawArm(c, a, shade(skin, -.32), false);
-    for (const a of oct.arms) if (!a.back && !inFront(a)) drawArm(c, a, shade(skin, -.1), true);
+    for (const a of oct.arms) if (a.back && !inFront(a)) drawArm(c, a, shade(skin, -.34), false);
+    for (const a of oct.arms) if (!a.back && !inFront(a)) drawArm(c, a, shade(skin, -.12), true);
     drawWeb(c, skin);
     c.save(); bodyXform(c); drawMantle(c, skin); c.restore();
     c.restore();
@@ -652,62 +740,74 @@
     // eyes don't camouflage, so open eyes give her away; closed ones vanish with the skin
     const e = oct.eyes, open = e.open * (1 - (e.blink > 0 ? Math.sin(Math.PI * (1 - e.blink / .17)) : 0));
     const eyeA = oct.alpha * (oct.eyeCamo ? 1 - oct.camo : 1 - oct.camo * clamp(1 - open, 0, 1));
-    if (eyeA > .01) { c.save(); c.globalAlpha = eyeA; bodyXform(c); drawEyes(c); c.restore(); }
+    if (eyeA > .01) { c.save(); c.globalAlpha = eyeA; bodyXform(c); drawFace(c); c.restore(); }
     c.save(); c.globalAlpha = bodyA;
-    for (const a of oct.arms) if (inFront(a)) drawArm(c, a, shade(skin, -.06), true);
+    for (const a of oct.arms) if (inFront(a)) drawArm(c, a, shade(skin, -.08), true);
     c.restore();
     for (const pr of oct.props) if (pr.type === 'plug') drawPlug(c, oct.arms[pr.arm]);
   }
 
-  // ---------- thoughts and dreams ----------
-  const thought = { on: false, t: 0, max: 0, icon: '', text: '', dream: '', next: 0, dir: 1 };
+  // ---------- thoughts and dreams: pictures only, she never talks ----------
+  const thought = { on: false, t: 0, max: 0, icon: '', dream: '', fading: false, next: 0, swap: 0, dir: 1 };
+  const DREAM_SEC = 6;
   function think(o, sec = 3.2) {
     if (!CFG.thoughts || !oct.on) return;
-    Object.assign(thought, { on: true, t: 0, max: sec, icon: o.icon || '', text: o.text || '', dream: o.dream ? pickDream() : '', next: clock + 4.5, dir: oct.x > VW * .62 ? -1 : 1 });
+    Object.assign(thought, { on: true, t: 0, max: sec, icon: o.icon || '', dream: o.dream ? pickDream() : '', fading: false, next: clock + DREAM_SEC, swap: clock, dir: oct.x > VW * .62 ? -1 : 1 });
   }
-  function unthink() { thought.on = false; thought.dream = ''; }
+  // soft: the cloud fades out instead of popping
+  function unthink(soft) {
+    if (soft && thought.on) { if (!thought.fading) { thought.fading = true; thought.max = thought.dream ? thought.t + .4 : Math.min(thought.max, thought.t + .4); } return; }
+    thought.on = false; thought.dream = ''; thought.fading = false;
+  }
   function thoughtTick(dt) {
     if (!thought.on) return;
     thought.t += dt;
-    if (thought.dream) {
-      if (state !== 'sleep') { thought.dream = ''; thought.icon = 'zzz'; thought.max = thought.t + .35; }
-      else if (clock > thought.next) { thought.dream = pickDream(thought.dream); thought.next = clock + 4.5; }
+    if (thought.dream && !thought.fading) {
+      if (state !== 'sleep') unthink(true);
+      else if (clock > thought.next) { thought.dream = pickDream(thought.dream); thought.next = clock + DREAM_SEC; thought.swap = clock; }
     }
-    if (!thought.dream && thought.t > thought.max) thought.on = false;
+    if ((!thought.dream || thought.fading) && thought.t > thought.max) unthink();
   }
-  function slideWord() {
-    const ws = [];
-    for (const L of world.lines) for (const w of (L.el.textContent || '').match(/\p{L}{5,}/gu) || []) ws.push(w.toLowerCase());
-    return ws.length ? pick(ws) : '';
-  }
+  const THINK = {
+    pogodna: ['planeta', 'galaktyka', 'nuta', 'serce', 'atom', 'ryba'],
+    ciekawska: ['siec', 'atom', 'zarowka', 'pytanie', 'planeta', 'galaktyka'],
+    marudna: ['burza', 'kawa', 'nie', 'zegar', 'siec'],
+    zaspana: ['kawa', 'bateria', 'planeta', 'galaktyka', 'ryba'],
+  };
+  // what she dreams about is what she is into: minds, machines that learn, the universe
+  const DREAM = {
+    pogodna: ['galaktyka', 'konstelacja', 'orbity', 'lustro', 'siec'],
+    ciekawska: ['siec', 'uwaga', 'lustro', 'czarna', 'galaktyka'],
+    marudna: ['czarna', 'orbity', 'siec', 'uwaga'],
+    zaspana: ['galaktyka', 'orbity', 'konstelacja', 'lustro'],
+  };
   function pickThought() {
     const minutes = (clock - D.start) / 60;
     if (mood.annoyance > .45) return { icon: 'burza' };
     if (mood.boredom > .45 || (CFG.mode === 'lecture' && minutes > 45 && chance(.4))) return { icon: pick(['kawa', 'zegar', 'bateria']) };
-    if (mood.joy > .55) return { icon: pick(['serce', 'nuta', 'ryba']) };
-    const pool = {
-      pogodna: ['ryba', 'nuta', 'serce', 'krab', 'slowo'],
-      ciekawska: ['slowo', 'zarowka', 'pytanie', 'slowo', 'ryba'],
-      marudna: ['burza', 'kawa', 'nie', 'slowo'],
-      zaspana: ['kawa', 'zzz', 'bateria', 'ryba'],
-    }[temper];
-    const k = pick(pool);
-    if (k === 'slowo') { const w = slideWord(); return w ? { text: `${w}?` } : { icon: 'pytanie' }; }
-    return { icon: k };
+    if (mood.joy > .55) return { icon: pick(['serce', 'nuta', 'galaktyka']) };
+    const pool = THINK[temper].filter(i => i !== thought.icon);
+    return { icon: pick(pool.length ? pool : THINK[temper]) };
   }
   function pickDream(not) {
-    const pool = { pogodna: ['rybki', 'korona', 'krab', 'morze'], ciekawska: ['litery', 'rybki', 'morze'], marudna: ['morze', 'krab', 'litery'], zaspana: ['morze', 'rybki', 'korona'] }[temper];
-    const ok = pool.filter(d => d !== not);
+    const pool = DREAM[temper], ok = pool.filter(d => d !== not);
     return pick(ok.length ? ok : pool);
   }
-  function neon(c, col, w) {
-    c.strokeStyle = rgba(col); c.fillStyle = rgba(col); c.lineWidth = w; c.lineCap = 'round'; c.lineJoin = 'round';
-    c.shadowColor = rgba(col, .85); c.shadowBlur = w * 2.6 * DPR;
+  function neon(c, col, w, a = 1) {
+    c.strokeStyle = rgba(col, a); c.fillStyle = rgba(col, a); c.lineWidth = w; c.lineCap = 'round'; c.lineJoin = 'round';
+    c.shadowColor = rgba(col, .85 * a); c.shadowBlur = w * 2.6 * DPR;
   }
-  function neonText(c, text, size, col) {
-    neon(c, col, size * .08);
-    c.font = `700 ${size}px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace`; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText(text, 0, size * .04);
+  // a tiny line-art octopus for the dreams: head, an eye, four wavy arms
+  function miniOcto(c, x, y, s, dir, t, col) {
+    neon(c, col, s * .09);
+    c.beginPath(); c.ellipse(x, y - s * .35, s * .32, s * .38, 0, 0, TAU); c.stroke();
+    c.beginPath(); c.arc(x + dir * s * .12, y - s * .3, s * .055, 0, TAU); c.fill();
+    for (let k = 0; k < 4; k++) {
+      const x0 = x + (k - 1.5) * s * .15;
+      c.beginPath(); c.moveTo(x0, y);
+      for (let i = 1; i <= 6; i++) { const v = i / 6; c.lineTo(x0 + (k - 1.5) * s * .12 * v + Math.sin(t * 3 + k + v * 4) * s * .06, y + v * s * .55); }
+      c.stroke();
+    }
   }
   const ICONS = {
     ryba(c, u) {
@@ -716,17 +816,7 @@
       c.beginPath(); c.moveTo(.27 * u, 0); c.lineTo(.48 * u, -.16 * u); c.lineTo(.48 * u, .16 * u); c.closePath(); c.stroke();
       c.beginPath(); c.arc(-.22 * u, -.05 * u, .035 * u, 0, TAU); c.fill();
     },
-    krab(c, u) {
-      neon(c, PINK, u * .055);
-      c.beginPath(); c.ellipse(0, .08 * u, .25 * u, .16 * u, 0, Math.PI, TAU); c.closePath(); c.stroke();
-      for (const s of [-1, 1]) {
-        c.beginPath(); c.arc(s * .36 * u, -.14 * u, .085 * u, 0, TAU); c.stroke();
-        c.beginPath(); c.moveTo(s * .22 * u, 0); c.lineTo(s * .31 * u, -.08 * u); c.stroke();
-        for (let k = 0; k < 3; k++) { c.beginPath(); c.moveTo(s * (.08 + .07 * k) * u, .08 * u); c.lineTo(s * (.16 + .08 * k) * u, .2 * u); c.stroke(); }
-        c.beginPath(); c.moveTo(s * .07 * u, -.07 * u); c.lineTo(s * .07 * u, -.17 * u); c.stroke();
-      }
-    },
-    serce(c, u, t) { neon(c, PINK, u * .05); heart(c, 0, .14 * u, .56 * u * (1 + .06 * Math.sin(t * 6))); c.fill(); },
+    serce(c, u, t) { neon(c, PINK, u * .05); heart(c, 0, .16 * u, .68 * u * (1 + .06 * Math.sin(t * 6))); c.fill(); },
     zarowka(c, u) {
       neon(c, GOLD, u * .055);
       c.beginPath(); c.arc(0, -.08 * u, .2 * u, Math.PI * .8, Math.PI * 2.2); c.lineTo(.08 * u, .16 * u); c.lineTo(-.08 * u, .16 * u); c.closePath(); c.stroke();
@@ -746,7 +836,7 @@
       c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(t * 2) * .22 * u, Math.sin(t * 2) * .22 * u); c.stroke();
     },
     burza(c, u, t) {
-      neon(c, [168, 140, 230], u * .05);
+      neon(c, DIM, u * .05);
       c.beginPath(); c.arc(-.14 * u, -.04 * u, .13 * u, Math.PI * .5, Math.PI * 1.6); c.arc(.02 * u, -.12 * u, .16 * u, Math.PI * 1.1, Math.PI * 1.95); c.arc(.17 * u, -.02 * u, .12 * u, Math.PI * 1.5, Math.PI * .5); c.closePath(); c.stroke();
       if (Math.sin(t * 9) > -.35) { neon(c, GOLD, u * .06); c.beginPath(); c.moveTo(.03 * u, .12 * u); c.lineTo(-.06 * u, .26 * u); c.lineTo(.05 * u, .26 * u); c.lineTo(-.05 * u, .4 * u); c.stroke(); }
     },
@@ -756,76 +846,254 @@
       roundRect(c, -.28 * u, -.14 * u, .5 * u, .28 * u, .05 * u); c.stroke(); c.fillRect(.23 * u, -.06 * u, .05 * u, .12 * u);
       if (Math.sin(t * 5) > 0) { neon(c, RED, u * .05); c.fillRect(-.22 * u, -.08 * u, .08 * u, .16 * u); }
     },
-    korona(c, u) {
-      neon(c, GOLD, u * .055);
-      c.beginPath(); c.moveTo(-.28 * u, .16 * u); c.lineTo(-.28 * u, -.12 * u); c.lineTo(-.14 * u, .02 * u); c.lineTo(0, -.2 * u); c.lineTo(.14 * u, .02 * u); c.lineTo(.28 * u, -.12 * u); c.lineTo(.28 * u, .16 * u); c.closePath(); c.stroke();
-    },
     nuta(c, u, t) {
       neon(c, PINK, u * .055); c.save(); c.rotate(Math.sin(t * 3) * .15);
       c.beginPath(); c.ellipse(-.08 * u, .16 * u, .1 * u, .075 * u, -.4, 0, TAU); c.fill();
       c.beginPath(); c.moveTo(.01 * u, .14 * u); c.lineTo(.01 * u, -.22 * u); c.quadraticCurveTo(.2 * u, -.16 * u, .18 * u, -.02 * u); c.stroke();
       c.restore();
     },
-    pytanie(c, u) { neonText(c, '?', u * .62, GLOW); },
-    zzz(c, u) { neonText(c, 'z Z z', u * .3, GLOW); },
+    pytanie(c, u, t) {
+      neon(c, GLOW, u * .07); c.save(); c.rotate(Math.sin(t * 2) * .08);
+      c.beginPath(); c.arc(0, -.13 * u, .15 * u, Math.PI * 1.08, Math.PI * 2.35); c.quadraticCurveTo(0, .02 * u, 0, .1 * u); c.stroke();
+      c.beginPath(); c.arc(0, .25 * u, .045 * u, 0, TAU); c.fill();
+      c.restore();
+    },
+    planeta(c, u) {
+      const tilt = -.35;
+      neon(c, GOLD, u * .045); c.beginPath(); c.ellipse(0, 0, .42 * u, .12 * u, tilt, Math.PI, TAU); c.stroke();
+      neon(c, GLOW, u * .05); c.fillStyle = 'rgb(22,10,50)'; c.beginPath(); c.arc(0, 0, .21 * u, 0, TAU); c.fill(); c.stroke();
+      c.save(); c.clip(); c.shadowBlur = 0; c.strokeStyle = rgba(GLOW, .45); c.lineWidth = u * .03;
+      for (const y of [-.08, .06]) { c.beginPath(); c.moveTo(-.25 * u, (y + .06) * u); c.lineTo(.25 * u, (y - .06) * u); c.stroke(); }
+      c.restore();
+      neon(c, GOLD, u * .045); c.beginPath(); c.ellipse(0, 0, .42 * u, .12 * u, tilt, 0, Math.PI); c.stroke();
+    },
+    atom(c, u, t) {
+      neon(c, GLOW, u * .035);
+      for (let k = 0; k < 3; k++) { c.beginPath(); c.ellipse(0, 0, .4 * u, .14 * u, k * Math.PI / 3, 0, TAU); c.stroke(); }
+      neon(c, PINK, u * .04); c.beginPath(); c.arc(0, 0, .07 * u, 0, TAU); c.fill();
+      neon(c, [235, 250, 255], u * .03);
+      for (let k = 0; k < 3; k++) {
+        const a = t * (2.2 + k * .4) + k * 2, rot = k * Math.PI / 3, ex = Math.cos(a) * .4 * u, ey = Math.sin(a) * .14 * u;
+        c.beginPath(); c.arc(ex * Math.cos(rot) - ey * Math.sin(rot), ex * Math.sin(rot) + ey * Math.cos(rot), .035 * u, 0, TAU); c.fill();
+      }
+    },
+    siec(c, u, t) {
+      const L = [[-.32, 3], [0, 2], [.32, 3]], lit = Math.floor(t * 1.5) % 3;
+      const P = (l, j) => [L[l][0] * u, (j - (L[l][1] - 1) / 2) * .22 * u];
+      neon(c, DIM, u * .025);
+      for (let l = 0; l < 2; l++) for (let i = 0; i < L[l][1]; i++) for (let j = 0; j < L[l + 1][1]; j++) { const a = P(l, i), b = P(l + 1, j); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); }
+      for (let l = 0; l < 3; l++) for (let i = 0; i < L[l][1]; i++) {
+        const p = P(l, i), on = l === lit;
+        c.shadowBlur = 0; c.fillStyle = 'rgb(22,10,50)'; c.beginPath(); c.arc(p[0], p[1], .06 * u, 0, TAU); c.fill();
+        neon(c, on ? GLOW : DIM, u * .035); c.stroke(); if (on) c.fill();
+      }
+    },
+    galaktyka(c, u, t) {
+      const ct = Math.cos(-.35), st = Math.sin(-.35);
+      for (let arm = 0; arm < 2; arm++) {
+        neon(c, arm ? PINK : GLOW, u * .045); c.beginPath();
+        for (let i = 0; i <= 24; i++) {
+          const s = i / 24, a = t * .6 + arm * Math.PI + s * 3.4, rr = (.05 + s * .36) * u, x = Math.cos(a) * rr, y = Math.sin(a) * rr * .55;
+          i ? c.lineTo(x * ct - y * st, x * st + y * ct) : c.moveTo(x * ct - y * st, x * st + y * ct);
+        }
+        c.stroke();
+      }
+      neon(c, GOLD, u * .05); c.beginPath(); c.arc(0, 0, .065 * u, 0, TAU); c.fill();
+    },
+    // "you again": the same faces, coming round again
+    znowu(c, u, t) {
+      neon(c, GLOW, u * .055);
+      c.save(); c.rotate(t * 1.2);
+      const R0 = .27 * u, a = Math.PI * 1.25, ex = Math.cos(a) * R0, ey = Math.sin(a) * R0, tx = -Math.sin(a), ty = Math.cos(a), nx = Math.cos(a), ny = Math.sin(a), h = .13 * u;
+      c.beginPath(); c.arc(0, 0, R0, -Math.PI * .35, a); c.stroke();
+      c.beginPath(); c.moveTo(ex + tx * h * .6, ey + ty * h * .6); c.lineTo(ex - tx * h * .5 + nx * h * .55, ey - ty * h * .5 + ny * h * .55); c.lineTo(ex - tx * h * .5 - nx * h * .55, ey - ty * h * .5 - ny * h * .55); c.closePath(); c.fill();
+      c.restore();
+      neon(c, PINK, u * .03);
+      for (const [x, y] of [[-.1, .04], [0, -.02], [.1, .04]]) {
+        c.beginPath(); c.arc(x * u, (y - .04) * u, .035 * u, 0, TAU); c.stroke();
+        c.beginPath(); c.arc(x * u, (y + .07) * u, .06 * u, Math.PI * 1.1, Math.PI * 1.9); c.stroke();
+      }
+    },
   };
+  // dreams get their own scene each; t is the time since the scene started
   const DREAMS = {
-    rybki(c, u, t) {
-      c.save(); c.translate((((t * .2) % 1) * 1.7 - .85) * u, Math.sin(t * 2) * .05 * u); c.scale(-.75, .75); ICONS.ryba(c, u); c.restore();
-      neon(c, GLOW, u * .03);
-      for (let k = 0; k < 3; k++) { const b = (t * .45 + k * .33) % 1; c.beginPath(); c.arc((-.32 + k * .3) * u, (.38 - b * .8) * u, (.03 + .015 * k) * u, 0, TAU); c.stroke(); }
+    siec(c, u, t) {
+      // a small neural network with activity rippling from input to output
+      const L = [3, 4, 4, 2], X = [-.6, -.2, .2, .6], act = ((t * .6) % 1) * 4.6 - .3;
+      const P = (l, j) => [X[l] * u, (j - (L[l] - 1) / 2) * .22 * u];
+      for (let l = 0; l < 3; l++) {
+        const b = Math.exp(-Math.pow(l + .5 - act, 2) * 5);
+        neon(c, mix(DIM, PINK, b), u * (.012 + .016 * b), .45 + .55 * b);
+        for (let i = 0; i < L[l]; i++) for (let j = 0; j < L[l + 1]; j++) { const a = P(l, i), q = P(l + 1, j); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(q[0], q[1]); c.stroke(); }
+      }
+      for (let l = 0; l < 4; l++) {
+        const b = Math.exp(-Math.pow(l - act, 2) * 5);
+        for (let j = 0; j < L[l]; j++) {
+          const p = P(l, j);
+          c.shadowBlur = 0; c.fillStyle = '#0D0828'; c.beginPath(); c.arc(p[0], p[1], .055 * u, 0, TAU); c.fill();
+          neon(c, mix(DIM, GLOW, b), u * .025); c.stroke();
+          if (b > .05) { neon(c, GLOW, u * .02, b); c.beginPath(); c.arc(p[0], p[1], .035 * u, 0, TAU); c.fill(); }
+        }
+      }
     },
-    morze(c, u, t) {
-      neon(c, GOLD, u * .04); c.beginPath(); c.arc(.24 * u, -.22 * u, .12 * u, 0, TAU); c.fill();
-      c.shadowBlur = 0; c.fillStyle = 'rgb(22,10,50)'; c.beginPath(); c.arc(.3 * u, -.27 * u, .11 * u, 0, TAU); c.fill();
-      neon(c, GLOW, u * .045);
-      for (let k = 0; k < 2; k++) { c.beginPath(); for (let i = 0; i <= 20; i++) { const x = (-.6 + i * .06) * u, y = (.1 + k * .16) * u + Math.sin(i * .9 + t * 2.4 + k) * .045 * u; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); }
+    galaktyka(c, u, t) {
+      // a spiral galaxy seen at an angle, turning slowly
+      c.shadowBlur = 0;
+      const core = c.createRadialGradient(0, 0, 0, 0, 0, .3 * u);
+      core.addColorStop(0, 'rgba(255,246,220,.95)'); core.addColorStop(.25, rgba(GOLD, .55)); core.addColorStop(1, rgba(PINK, 0));
+      c.fillStyle = core; c.beginPath(); c.arc(0, 0, .3 * u, 0, TAU); c.fill();
+      const ct = Math.cos(-.35), st = Math.sin(-.35);
+      for (let arm = 0; arm < 2; arm++) for (let i = 0; i < 64; i++) {
+        const s = i / 63, a = t * .35 + arm * Math.PI + s * 3.6 + Math.sin(i * 7.3 + arm) * .14, rr = (.06 + s * .62 + Math.sin(i * 3.7) * .02) * u;
+        const x = Math.cos(a) * rr, y = Math.sin(a) * rr * .5;
+        c.fillStyle = rgba(mix(GLOW, PINK, s), (1 - s * .5) * .95);
+        c.beginPath(); c.arc(x * ct - y * st, x * st + y * ct, (1 - s * .5) * .032 * u, 0, TAU); c.fill();
+      }
     },
-    krab(c, u, t) {
-      c.save(); c.translate(0, -Math.abs(Math.sin(t * 6)) * .05 * u); c.rotate(Math.sin(t * 6) * .22); ICONS.krab(c, u * .85); c.restore();
-      c.save(); c.translate(.36 * u, (-.25 - ((t * .4) % 1) * .2) * u); c.scale(.45, .45); ICONS.nuta(c, u, t); c.restore();
+    orbity(c, u, t) {
+      // a ringed planet with two moons on tilted orbits
+      const ct = Math.cos(-.12), st = Math.sin(-.12);
+      neon(c, DIM, u * .012, .7); c.setLineDash([u * .03, u * .04]);
+      for (const [a, b] of [[.62, .2], [.42, .13]]) { c.beginPath(); c.ellipse(0, 0, a * u, b * u, -.12, 0, TAU); c.stroke(); }
+      c.setLineDash([]);
+      const ms = [[.62, .2, .5, 0, GLOW, .045], [.42, .13, .9, 2, PINK, .032]].map(([R1, R2, sp, ph, col, r]) => {
+        const a = t * sp + ph, x = Math.cos(a) * R1 * u, y = Math.sin(a) * R2 * u;
+        return { x: x * ct - y * st, y: x * st + y * ct, front: Math.sin(a) > 0, col, r };
+      });
+      const moon = m => { neon(c, m.col, u * .02); c.beginPath(); c.arc(m.x, m.y, m.r * u, 0, TAU); c.fill(); };
+      for (const m of ms) if (!m.front) moon(m);
+      neon(c, GOLD, u * .03); c.beginPath(); c.ellipse(0, 0, .3 * u, .08 * u, -.3, Math.PI, TAU); c.stroke();
+      c.shadowBlur = 0;
+      const pg = c.createRadialGradient(-.06 * u, -.07 * u, .02 * u, 0, 0, .17 * u);
+      pg.addColorStop(0, '#C9B6FF'); pg.addColorStop(.55, rgba(SKIN0)); pg.addColorStop(1, '#2A1260');
+      c.fillStyle = pg; c.beginPath(); c.arc(0, 0, .17 * u, 0, TAU); c.fill();
+      neon(c, GOLD, u * .03); c.beginPath(); c.ellipse(0, 0, .3 * u, .08 * u, -.3, 0, Math.PI); c.stroke();
+      for (const m of ms) if (m.front) moon(m);
     },
-    korona(c, u, t) {
-      c.save(); c.translate(0, Math.sin(t * 2) * .05 * u); ICONS.korona(c, u); c.restore();
-      for (let k = 0; k < 4; k++) { const a = .5 + .5 * Math.sin(t * 4 + k * 1.7); neon(c, GOLD, 1); star4(c, (-.36 + k * .24) * u, (k % 2 ? -.3 : .3) * u, .06 * u * a, t); c.fill(); }
+    lustro(c, u, t) {
+      // the mirror test, the classic check for self-awareness: she looks in and knows who it is
+      const fx = .06 * u, fy = -.36 * u, fw = .36 * u, fh = .66 * u, bob = Math.sin(t * 1.6) * .03 * u, tl = Math.sin(t * 1.1) * .12;
+      c.save(); c.translate(-.32 * u, .14 * u + bob); c.rotate(tl); miniOcto(c, 0, 0, .34 * u, 1, t, GLOW); c.restore();
+      c.save(); c.shadowBlur = 0;
+      const gl = c.createLinearGradient(fx, fy, fx + fw, fy + fh);
+      gl.addColorStop(0, 'rgba(150,180,255,.22)'); gl.addColorStop(1, 'rgba(60,40,140,.12)');
+      c.fillStyle = gl; roundRect(c, fx, fy, fw, fh, .05 * u); c.fill(); c.clip();
+      c.globalAlpha *= .65; c.translate(fx + fw / 2, .14 * u + bob); c.scale(-1, 1); c.rotate(tl); miniOcto(c, 0, 0, .3 * u, 1, t, [170, 200, 255]);
+      c.restore();
+      neon(c, GOLD, u * .025); roundRect(c, fx, fy, fw, fh, .05 * u); c.stroke();
+      const k = t % 4;
+      if (k > 2.6) { const s = Math.sin((k - 2.6) / 1.4 * Math.PI); neon(c, GOLD, 1); star4(c, -.2 * u, -.36 * u, .09 * u * s, t); c.fill(); star4(c, -.06 * u, -.48 * u, .05 * u * s, -t); c.fill(); }
     },
-    litery(c, u, t) {
-      ['A', 'I', '?'].forEach((ch, k) => {
-        const f = (t * .32 + k * .33) % 1;
-        c.save(); c.translate((-.3 + k * .3) * u, (-.42 + f * .84) * u); c.rotate(f * 3 * (k % 2 ? 1 : -1)); neonText(c, ch, u * .3, k === 2 ? PINK : GLOW); c.restore();
+    konstelacja(c, u, t) {
+      // her own constellation, joined star by star
+      const P = [[0, -.42], [-.2, -.3], [.2, -.3], [-.15, -.08], [.15, -.08], [-.38, .1], [-.52, .32], [-.13, .26], [.13, .26], [.38, .1], [.5, .33], [-.24, .44], [.25, .45]];
+      const E = [[1, 0], [0, 2], [1, 3], [2, 4], [3, 4], [3, 5], [5, 6], [3, 7], [7, 11], [4, 8], [8, 12], [4, 9], [9, 10]];
+      const n = Math.min(E.length, t * 3);
+      neon(c, [200, 215, 255], u * .014, .75);
+      for (let i = 0; i < Math.ceil(n); i++) {
+        const [a, b] = E[i], f = Math.min(1, n - i), A = P[a], Bp = P[b];
+        c.beginPath(); c.moveTo(A[0] * u, A[1] * u); c.lineTo(lerp(A[0], Bp[0], f) * u, lerp(A[1], Bp[1], f) * u); c.stroke();
+      }
+      P.forEach(([x, y], i) => {
+        const tw = .6 + .4 * Math.sin(t * 3 + i * 1.7);
+        neon(c, i < 5 ? GOLD : [235, 240, 255], u * .02, tw);
+        star4(c, x * u, y * u, (.045 + (i === 0 ? .02 : 0)) * u * tw, t * .3 + i); c.fill();
       });
     },
+    uwaga(c, u, t) {
+      // attention: one token looks back at the others; the thicker the arc, the more it attends
+      const n = 5, q = Math.floor(t * .6) % n, X = j => (-.5 + j * .25) * u, y = .18 * u, ph = clamp((t * .6 % 1) * 2.5, 0, 1);
+      const r = seeded(q * 7919 + 104729), w = Array.from({ length: n }, (_, j) => (j === q ? 0 : .15 + r()));
+      const sum = w.reduce((s, x) => s + x, 0);
+      for (let j = 0; j < n; j++) {
+        if (j === q) continue;
+        const k = w[j] / sum, x0 = X(q), x1 = X(j), h = (.14 + Math.abs(j - q) * .1) * u;
+        neon(c, PINK, u * (.008 + k * .07), Math.min(1, (.25 + k * 1.5) * ph));
+        c.beginPath(); c.moveTo(x0, y - .06 * u); c.quadraticCurveTo((x0 + x1) / 2, y - .06 * u - h * 2, x1, y - .06 * u); c.stroke();
+      }
+      for (let j = 0; j < n; j++) {
+        const on = j === q;
+        c.shadowBlur = 0; c.fillStyle = '#0D0828'; roundRect(c, X(j) - .09 * u, y - .055 * u, .18 * u, .12 * u, .03 * u); c.fill();
+        neon(c, on ? GLOW : DIM, u * .022); c.stroke();
+        neon(c, on ? GLOW : DIM, u * .016, on ? 1 : .7);
+        c.beginPath(); c.moveTo(X(j) - .045 * u, y - .01 * u); c.lineTo(X(j) + .045 * u, y - .01 * u);
+        c.moveTo(X(j) - .045 * u, y + .025 * u); c.lineTo(X(j) + (.01 + (j * 37 % 3) * .015) * u, y + .025 * u); c.stroke();
+      }
+    },
+    czarna(c, u, t) {
+      // a black hole: the far side of the disc bends up over the shadow, the near side passes in front
+      const rot = -.12, disk = front => {
+        for (let k = 0; k < 4; k++) {
+          const rx = (.36 + k * .09) * u;
+          neon(c, mix(GOLD, PINK, k / 3), u * (.03 - k * .005), .9 - k * .15);
+          c.setLineDash([u * (.06 + k * .02), u * .035]); c.lineDashOffset = -t * u * (.5 - k * .08);
+          c.beginPath(); c.ellipse(0, 0, rx, rx * .26, rot, front ? 0 : Math.PI, front ? Math.PI : TAU); c.stroke();
+        }
+        c.setLineDash([]);
+      };
+      disk(false);
+      neon(c, GOLD, u * .025, .8); c.beginPath(); c.ellipse(0, -.02 * u, .25 * u, .2 * u, rot, Math.PI * 1.05, Math.PI * 1.95); c.stroke();
+      c.shadowBlur = 0; c.fillStyle = '#000'; c.beginPath(); c.arc(0, 0, .17 * u, 0, TAU); c.fill();
+      neon(c, [235, 245, 255], u * .014); c.beginPath(); c.arc(0, 0, .185 * u, 0, TAU); c.stroke();
+      disk(true);
+    },
   };
+  const DSTARS = (() => { const r = seeded(5), out = []; while (out.length < 36) { const x = r() * 2 - 1, y = r() * 2 - 1; if (x * x + y * y < .92) out.push({ x, y, s: .4 + r() * .8, ph: r() * TAU }); } return out; })();
   const CLOUD = [[0, 0, 1], [-.62, .14, .7], [.62, .12, .72], [-.3, -.42, .64], [.32, -.4, .66], [0, .4, .62]];
   function cloudPath(c, R, grow = 0) { c.beginPath(); for (const [x, y, r] of CLOUD) { c.moveTo(x * R + r * R + grow, y * R); c.arc(x * R, y * R, r * R + grow, 0, TAU); } }
-  function puff(c, x, y, r) {
+  // trail bubbles: a thought gets small neon puffs, a dream hollow bubbles that wobble
+  function puff(c, x, y, r, dream, ph = 0) {
+    if (dream) {
+      const w = 1 + .1 * Math.sin(clock * 2.6 + ph * 7);
+      c.save(); c.shadowColor = 'rgba(110,150,255,.9)'; c.shadowBlur = S * .08 * DPR;
+      c.fillStyle = 'rgba(16,12,52,.55)'; c.beginPath(); c.ellipse(x, y, r * w, r / w, 0, 0, TAU); c.fill();
+      c.strokeStyle = 'rgba(175,195,255,.9)'; c.lineWidth = Math.max(1, r * .2); c.stroke();
+      c.restore();
+      c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.arc(x - r * .35, y - r * .35, r * .18, 0, TAU); c.fill();
+      return;
+    }
     c.save(); c.shadowColor = rgba(NEON, .9); c.shadowBlur = S * .1 * DPR; c.fillStyle = rgba(mix(NEON, GLOW, .35));
     c.beginPath(); c.arc(x, y, r + 1.5, 0, TAU); c.fill(); c.restore();
     c.fillStyle = 'rgba(22,10,50,.95)'; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
   }
-  function drawWord(c, text, R) {
-    const size = Math.min(R * .5, R * 2.5 / (text.length * .62));
-    neonText(c, text, size, GLOW);
-  }
   function drawThought(c) {
     if (!thought.on || !oct.on || oct.scale < .3) return;
-    const t = thought.t, inn = clamp(t / .32, 0, 1), out = thought.dream ? 1 : clamp((thought.max - t) / .35, 0, 1);
+    const t = thought.t, dream = !!thought.dream, inn = clamp(t / (dream ? .6 : .32), 0, 1);
+    const out = dream && !thought.fading ? 1 : clamp((thought.max - t) / .35, 0, 1);
     const a = Math.min(inn, out) * oct.alpha * (1 - oct.camo * .8);
     if (a < .01) return;
     const R = S * .5, dir = thought.dir, head = toWorld(dir * .28 * S, -.98 * S);
-    const cx = clamp(oct.x + dir * 1.15 * S, R * 1.8, VW - R * 1.8);
-    const cy = clamp(oct.y - 1.62 * S * oct.scale, R * 1.4, VH - R * 1.4) + Math.sin(clock * 1.7) * S * .03;
+    const cx = clamp(oct.x + dir * (dream ? 1.25 : 1.15) * S, R * 1.9, VW - R * 1.9);
+    const cy = clamp(oct.y - (dream ? 1.72 : 1.62) * S * oct.scale, R * 1.5, VH - R * 1.4) + Math.sin(clock * (dream ? 1.1 : 1.7)) * S * .03;
     c.save(); c.globalAlpha = a;
-    for (const [u, r] of [[.3, .05], [.58, .08]]) if (inn > u * .8 || thought.dream) puff(c, lerp(head.x, cx, u), lerp(head.y, cy + R * .6, u), r * S);
-    c.translate(cx, cy); const sc = .3 + .7 * easeOutBack(inn); c.scale(sc, sc);
-    c.save(); c.shadowColor = rgba(NEON, .9); c.shadowBlur = S * .16 * DPR; c.fillStyle = rgba(mix(NEON, GLOW, .35)); cloudPath(c, R, 2); c.fill(); c.restore();
-    c.fillStyle = 'rgba(22,10,50,.95)'; cloudPath(c, R); c.fill();
-    c.save(); cloudPath(c, R); c.clip();
-    const u = R * (thought.dream ? 1.45 : 1.25);
-    if (thought.dream) DREAMS[thought.dream](c, u, clock);
-    else if (thought.text) drawWord(c, thought.text, R);
-    else if (ICONS[thought.icon]) ICONS[thought.icon](c, u, clock);
-    c.restore();
+    for (const [u, r] of [[.3, .05], [.58, .08]]) if (inn > u * .8 || dream) puff(c, lerp(head.x, cx, u), lerp(head.y, cy + R * .6, u), r * S, dream, u);
+    c.translate(cx, cy);
+    if (dream) {
+      // a dream looks nothing like a thought: a smooth oval of night sky, stars and a slow dashed halo
+      const sc = (.4 + .6 * smooth(inn)) * (1 + .025 * Math.sin(clock * 1.6)), rx = R * 1.32, ry = R * 1.04;
+      c.scale(sc, sc);
+      c.save(); c.shadowColor = 'rgba(110,150,255,.9)'; c.shadowBlur = S * .22 * DPR; c.fillStyle = 'rgba(110,150,255,.5)';
+      c.beginPath(); c.ellipse(0, 0, rx + 2, ry + 2, 0, 0, TAU); c.fill(); c.restore();
+      const sky = c.createRadialGradient(-rx * .25, -ry * .35, 0, 0, 0, rx * 1.05);
+      sky.addColorStop(0, '#2A1B6B'); sky.addColorStop(1, '#0B0724');
+      c.fillStyle = sky; c.beginPath(); c.ellipse(0, 0, rx, ry, 0, 0, TAU); c.fill();
+      c.save(); c.clip();
+      for (const s of DSTARS) { c.fillStyle = `rgba(225,232,255,${.28 + .36 * Math.sin(clock * 2 + s.ph)})`; c.beginPath(); c.arc(s.x * rx, s.y * ry, s.s * S * .012, 0, TAU); c.fill(); }
+      const dt0 = clock - thought.swap;
+      c.globalAlpha = a * Math.min(clamp(dt0 / .6, 0, 1), thought.fading ? 1 : clamp((thought.next - clock) / .5, 0, 1));
+      DREAMS[thought.dream](c, R * 1.4, dt0);
+      c.restore();
+      c.save(); c.setLineDash([S * .03, S * .05]); c.lineDashOffset = -clock * S * .06;
+      c.strokeStyle = 'rgba(175,195,255,.85)'; c.lineWidth = Math.max(1, S * .014);
+      c.beginPath(); c.ellipse(0, 0, rx + S * .05, ry + S * .05, 0, 0, TAU); c.stroke(); c.restore();
+    } else {
+      const sc = .3 + .7 * easeOutBack(inn); c.scale(sc, sc);
+      c.save(); c.shadowColor = rgba(NEON, .9); c.shadowBlur = S * .16 * DPR; c.fillStyle = rgba(mix(NEON, GLOW, .35)); cloudPath(c, R, 2); c.fill(); c.restore();
+      c.fillStyle = 'rgba(22,10,50,.95)'; cloudPath(c, R); c.fill();
+      c.save(); cloudPath(c, R); c.clip();
+      if (ICONS[thought.icon]) ICONS[thought.icon](c, R * 1.45, clock);
+      c.restore();
+    }
     c.restore();
   }
 
@@ -890,7 +1158,7 @@
     const k = Math.pow(1 - g.t / g.max, 1.3) * .9, grow = 1 + g.t / g.max * .25;
     c.save(); c.globalAlpha = k; c.fillStyle = rgba(fx.ink); c.shadowColor = fx.inkEdge ? rgba(fx.inkEdge, .55) : 'rgba(10,4,26,.9)'; c.shadowBlur = S * .14 * (1 + g.t) * DPR;
     c.translate(g.x, g.y - S * .4); c.scale(grow, grow); c.translate(-g.x, -g.y + S * .4);
-    for (const a of g.arms) { armOutline(c, a.pts, a.w0 * S * g.scale, .016 * S * g.scale); c.fill(); }
+    for (const a of g.arms) { armOutline(c, a.pts, a.w0 * S * g.scale, .018 * S * g.scale); c.fill(); }
     const saved = Object.assign({}, WP); Object.assign(WP, g.warp);
     c.translate(g.x, g.y); c.rotate(g.ang); c.scale((1 - .5 * g.q) * g.scale, (1 + g.q) * g.scale);
     mantlePath(c); c.fill();
@@ -910,6 +1178,13 @@
   }
   function drawEmote(c, e) {
     const u = e.t / e.max, pop = u < .12 ? u / .12 * 1.15 : u < .2 ? 1.15 - (u - .12) / .08 * .15 : 1;
+    if (e.sym === 'halo') { // "who, me?": a halo settles over her head and stays put
+      const sc = oct.on ? oct.scale : 1, hy = e.y - S * 1.15 * sc + Math.sin(e.t * 3) * S * .02;
+      c.save(); c.globalAlpha = Math.min(1, u / .15) * (u > .8 ? (1 - u) / .2 : 1);
+      neon(c, GOLD, S * .03); c.beginPath(); c.ellipse(e.x + (oct.face || 0) * .1 * S, hy, S * .27 * sc, S * .07 * sc, 0, 0, TAU); c.stroke();
+      c.restore();
+      return;
+    }
     const a = u > .7 ? 1 - (u - .7) / .3 : 1, s = S * .32 * pop;
     const x = e.x + (oct.face || 0) * .3 * S + e.dx + (e.sym === 'z' ? u * S * .3 : 0), y = e.y - S * 1.3 * (oct.on ? oct.scale : 1) - u * S * .3;
     c.save(); c.globalAlpha = a;
@@ -1184,7 +1459,7 @@
     for (const a of oct.arms) if (a.reach) { a.reach.wT = 0; a.reach.follow = false; }
     Letters.releaseAll();
     Object.assign(oct, { physics: false, spin: false, props: [], eyeCamo: false, camoT: 0, turnT: 0, scale: 1, alpha: oct.on ? 1 : oct.alpha });
-    interruptible = false; say(null); D.inFoch = false;
+    interruptible = false; D.inFoch = false;
     if (thought.dream) unthink();
     if (hitEl) hitEl.classList.remove('drag');
   }
@@ -1301,15 +1576,19 @@
     if (chance(.25)) { oct.tiltT = rand(-.16, .16); oct.tiltUntil = clock + rand(1, 2); }
   }
   const dodgeChance = () => clamp((mem.clicks - 6) / 30, 0, .55) + mood.fear * .3;
-  async function yawn() {
-    unthink(); expr('yawn', 1.3); oct.qT = .14;
+  // no yawn (she has no mouth to show): a long stretch of all eight arms, then the lids sink
+  async function stretchOut() {
+    unthink(); expr('stretch', 1.3); oct.qT = .14;
+    for (const a of oct.arms) { a.fd = a.ft = 1.1; a.fa = -1.2 * mScale(); }
     await wait(1.1);
     oct.qT = 0; expr('closed', 1e6);
     await wait(.4);
   }
   function fallAsleep() { state = 'sleep'; expr('closed', 1e6); think({ dream: true }); }
   async function rest(spot, asleep = false) {
-    if (!spot || !spot.ground) { refreshWorld(); spot = bestSpot({ x: oct.x, y: oct.y }); await hopTo(spot); }
+    // no spot, or she is nowhere near it (an exit cut short leaves her below the screen): find one and hop there
+    const far = spot && spot.ground && (Math.hypot(oct.x - spot.x, oct.y - (spot.ground.y - .3 * S)) > S * 1.2 || oct.y > VH + S * .2);
+    if (!spot || !spot.ground || far) { refreshWorld(); spot = bestSpot({ x: clamp(oct.x, S, VW - S), y: clamp(oct.y, 0, VH) }); await hopTo(spot); }
     oct.spot = spot; oct.ground = spot.ground; state = 'rest'; interruptible = true;
     const pose = asleep ? 'lie' : spot.pose || 'lie'; setPose(pose);
     const side = spot.face || (chance(.5) ? 1 : -1);
@@ -1329,7 +1608,7 @@
       }
       if (clock > nextLook) { idleLook(); nextLook = clock + rand(1.2, 3.4); }
       if (CFG.thoughts && clock > nextThought && !thought.on) { think(pickThought(), 3.2); nextThought = clock + (CFG.mode === 'demo' ? rand(8, 14) : rand(20, 45)); }
-      if (clock > sleepAt && mood.fear < .25 && oct.pose === 'lie') { await yawn(); fallAsleep(); continue; }
+      if (clock > sleepAt && mood.fear < .25 && oct.pose === 'lie') { await stretchOut(); fallAsleep(); continue; }
       // learned wariness: the more she has been clicked, the more she flinches at a rushing cursor
       if (near && cur.speed > VW * .9 && clock - cur.t < .1 && chance(dodgeChance())) return perform('unik');
     }
@@ -1366,7 +1645,7 @@
     // a little round of applause under her chin
     const A = oct.arms.filter(a => !a.back && a.k === 2);
     for (let i = 0; i < 3; i++) {
-      for (const a of A) a.reach = { rel: [a.side * .04 * S, -.2 * S], w: 0, wT: 1, rate: 14, stiff: .5, front: true, idx: 9 };
+      for (const a of A) a.reach = { rel: [a.side * .04 * S, -.16 * S], w: 0, wT: 1, rate: 14, stiff: .5, front: true, idx: AT(.7) };
       await wait(.17);
       for (const a of A) a.reach.wT = 0;
       await wait(.15);
@@ -1386,7 +1665,7 @@
       lookAt(x < VW / 2 ? VW * .9 : VW * .1, VH * .55, .7); await wait(.7);
       look('audience'); oct.eyes.blink = .17;
       // she remembers the room: from the second session on, the first peek gets a line
-      if (mem.sessions > 1 && D.appearances === 1 && !D.greeted) { D.greeted = true; await wait(.3); say('…znowu wy?', 1.8); await wait(2); }
+      if (mem.sessions > 1 && D.appearances === 1 && !D.greeted) { D.greeted = true; await wait(.3); expr('skeptic', 2.4); think({ icon: 'znowu' }, 2.2); await wait(2.4); }
       else await wait(.7);
     }
     if (RM.matches) await fadeTo(0, .3); else await glideTo(x, VH + S * 1.5, .35, easeIn);
@@ -1416,10 +1695,10 @@
     if (RM.matches) { oct.y = T.surface.y - .3 * S; oct.ground = T.surface; setPose('sit'); oct.alpha = 0; await fadeTo(1, .4); }
     else await fallTo(T.surface);
     knock(T, side);
-    expr('surprise', .55);
+    startle(.6, 'focus');
     await wait(.5);
-    lookAt(T.x, T.surface.y + T.fs * .5, 1.3); expr('focus', 1.1);
-    think({ text: `${T.word.toLowerCase()}?` }, 1.9);
+    lookAt(T.x, T.surface.y + T.fs * .5, 1.3);
+    think({ icon: 'pytanie' }, 1.9);
     await wait(1.2);
     look('audience', 1.4); expr('smug', 1.7); feel('joy', .15); emote('♪');
     await wait(1.2);
@@ -1436,7 +1715,7 @@
     if (RM.matches) { oct.y = T.surface.y - .3 * S; oct.ground = T.surface; oct.alpha = 0; await fadeTo(1, .4); }
     else await fallTo(T.surface);
     knock(T, chance(.5) ? 1 : -1);
-    expr('surprise', .4); await wait(.7);
+    startle(.5, 'happy'); await wait(.7);
     await bow();
     oct.spot = { kind: 'top', x: oct.x, ground: T.surface, face: 0, pose: 'sit' };
     await rest(oct.spot);
@@ -1482,8 +1761,8 @@
     Letters.carry(L, () => { const q = arm.p[N - 3]; return { x: q.x, y: q.y, r: Math.sin(clock * 3) * 12 }; });
     Object.assign(arm.reach, { x: oct.x + (right ? -1 : 1) * S * .15, y: oct.y - S * 1.25, rate: 3, stiff: .25, front: true });
     await wait(1.5);
-    if (sneaky) { oct.camoT = 0; oct.eyeCamo = false; expr('surprise', .9); oct.clouds = .8; await wait(.5); }
-    else { lookAt(arm.p[N - 1].x, arm.p[N - 1].y, 1.2); expr('surprise', 1); emote('?'); await wait(.9); }
+    if (sneaky) { oct.camoT = 0; oct.eyeCamo = false; expr('skeptic', .9); oct.clouds = .8; await wait(.5); }
+    else { lookAt(arm.p[N - 1].x, arm.p[N - 1].y, 1.2); startle(.5, 'guilty'); emote('?'); await wait(.9); }
     Letters.drop(L, chance(.5));
     arm.reach.wT = 0;
     look('audience', 1.8); expr('guilty', 1.8); oct.flash = .5; oct.flashC = TINT.joy; feel('joy', .1);
@@ -1493,7 +1772,7 @@
   B.atrament = async () => {
     if (!oct.on) return B.kamuflaz();
     state = 'busy'; interruptible = false;
-    oct.flash = .35; oct.flashC = TINT.fear; expr('surprise', .7); emote('!'); feel('fear', .35);
+    startle(1, null); emote('!'); feel('fear', .35);
     // a pseudomorph: an ink decoy in her own shape, while the real one slips away camouflaged
     sampleBg(); inkFor(oct.camoC);
     ghost();
@@ -1514,7 +1793,7 @@
     if (!oct.on) return B.zerkniecie();
     state = 'busy'; interruptible = false;
     await wait(rand(1.3, 2.1)); // ...processing
-    oct.flash = .3; oct.flashC = TINT.fear; expr('surprise', 1); emote('!');
+    startle(1.3, 'angry'); emote('!');
     await hopTo({ x: oct.x, ground: oct.ground || world.floor }, { h: S * .55, dur: .32, crouch: .02 });
     look('cursor', 1.6); expr('angry', 1.7); emote('anger'); feel('annoyance', .25);
     await wait(1.7);
@@ -1579,7 +1858,7 @@
       oct.alpha = 0; await fadeTo(1, .5);
     }
     state = 'busy'; setPose('lie');
-    await yawn();
+    await stretchOut();
     await rest(Object.assign({}, oct.spot, { pose: 'lie' }), true);
   };
   B.uklon = async () => {
@@ -1596,10 +1875,10 @@
     const arm = oct.arms.find(a => !a.back && a.side === 1 && a.k === 2);
     oct.props = [{ arm: oct.arms.indexOf(arm), type: 'plug' }];
     arm.reach = { rel: [S * 1.0, -S * 1.15], w: 1, wT: 1, stiff: .45, front: true };
-    expr('guilty', 5); lookAt(VW, VH * .7, 5);
+    expr('innocent', 5); look('audience', 5);
     await glideTo(x, VH + S * .02, .8, easeOut);
-    say('to nie ja', 2.4);
-    await wait(2.5);
+    emote('halo', 2.6);
+    await wait(2.7);
     await glideTo(x, VH + S * 1.6, .45, easeIn);
     hide();
   };
@@ -1619,7 +1898,7 @@
       const g = L.line ? { kind: 'line', x1: L.x - S * 2, x2: L.x + S * 2, y: L.line.y } : world.floor;
       await hopTo({ x: L.x + sideX * S * .95, ground: g });
     }
-    lookAt(L.x, L.y, 2.5); expr('focus', 1.2); emote('!');
+    lookAt(L.x, L.y, 2.5); expr('focus', 1.2);
     await wait(.75);
     // an octopus fits through any gap bigger than its beak, so a letter's counter will do
     for (const a of oct.arms) a.reach = { x: L.x, y: L.y, w: 0, wT: 1, rate: 3 + rand(0, 3), stiff: .3 };
@@ -1637,7 +1916,7 @@
   };
   B.unik = async () => {
     state = 'busy'; interruptible = false;
-    oct.flash = .25; oct.flashC = TINT.fear; expr('surprise', .7); emote('!'); feel('fear', .2);
+    startle(.8, 'angry'); feel('fear', .2);
     const dir = Math.sign(oct.x - cur.x) || 1, g = oct.ground || world.floor;
     const nx = clamp(clamp(oct.x + dir * S * 1.3, S, VW - S), g.x1 + S * .3, g.x2 - S * .3);
     await hopTo({ x: nx, ground: g }, { h: S * .5, dur: .35, crouch: .02 });
@@ -1648,7 +1927,8 @@
   };
   B.pobudka = async () => {
     state = 'busy'; interruptible = false; unthink();
-    expr('surprise', .8); oct.flash = .3; oct.flashC = TINT.fear; oct.qv += 4; emote('!');
+    fx.emotes = fx.emotes.filter(e => e.sym !== 'z');
+    startle(1, 'angry'); emote('!');
     feel('fear', .2); feel('annoyance', .2);
     await wait(.9);
     look('cursor', 1.5); expr('angry', 1.6); emote('anger');
@@ -1745,11 +2025,6 @@
     toast(on ? 'Tryb poważny: włączony' : 'Tryb poważny: wyłączony');
     panelSync();
   }
-  function say(text, sec = 1.8) {
-    if (!bubbleEl) return;
-    if (!text) { bubbleEl.hidden = true; return; }
-    bubbleEl.textContent = text; bubbleEl.hidden = false; bubbleUntil = clock + sec;
-  }
   function toast(text) { toastEl.textContent = text; toastEl.hidden = false; toastUntil = clock + 1.6; }
 
   // ---------- input ----------
@@ -1757,12 +2032,13 @@
   function startDrag() {
     cancelAll(); drag.on = true; state = 'drag'; hitEl.classList.add('drag');
     setPose('dangle'); oct.ground = null; oct.angT = 0; unthink();
-    // picked up by the head: not scared, offended
+    // held by the top of the mantle, which pinches up into folds; she hangs under it, offended, not scared
+    drag.gx = 0; drag.gy = S * 1.3;
     expr('angry', 1e6); emote('anger'); feel('annoyance', .35); lastTouch = clock;
     drag.crossAt = clock + .25; drag.thinkAt = clock + 1.1; drag.tapAt = clock + .7;
     oct.motion = {
       step(dt) {
-        oct.x = approach(oct.x, drag.x + drag.gx, 20, dt); oct.y = approach(oct.y, drag.y + drag.gy, 20, dt);
+        oct.x = approach(oct.x, drag.x + drag.gx, 20, dt); oct.y = approach(oct.y, drag.y + drag.gy, 14, dt);
         oct.angT = clamp(-oct.vx * .0005, -.45, .45);
         if (drag.crossAt && clock > drag.crossAt) { drag.crossAt = 0; crossArms(true); }
         if (drag.thinkAt && clock > drag.thinkAt) { drag.thinkAt = 0; think({ icon: 'burza' }, 2.8); }
@@ -1782,7 +2058,7 @@
     hitEl.addEventListener('pointerdown', e => {
       e.preventDefault(); e.stopPropagation();
       try { hitEl.setPointerCapture(e.pointerId); } catch (err) { /* already released */ }
-      Object.assign(drag, { id: e.pointerId, on: false, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, gx: oct.x - e.clientX, gy: oct.y - e.clientY, hist: [{ x: e.clientX, y: e.clientY, t: performance.now() }] });
+      Object.assign(drag, { id: e.pointerId, on: false, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, hist: [{ x: e.clientX, y: e.clientY, t: performance.now() }] });
     });
     hitEl.addEventListener('pointermove', e => {
       if (drag.id !== e.pointerId) return;
@@ -1855,8 +2131,6 @@
     .hit{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;cursor:grab;touch-action:none;border-radius:45%;-webkit-tap-highlight-color:transparent}
     .hit.on{pointer-events:auto}.hit.drag{cursor:grabbing}
     .dim{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
-    .bubble{position:absolute;left:0;top:0;padding:6px 12px;border-radius:14px;background:#F4F0FF;color:#1A0F33;font:600 15px/1.25 system-ui,-apple-system,"Segoe UI",sans-serif;white-space:nowrap;box-shadow:0 6px 24px rgba(10,4,30,.35);pointer-events:none}
-    .bubble::after{content:"";position:absolute;left:50%;bottom:-5px;width:11px;height:11px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:2px}
     .toast{position:absolute;left:16px;bottom:16px;padding:6px 10px;border-radius:8px;background:rgba(18,11,36,.9);color:#C9BFEA;font:12px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;pointer-events:none}
     .panel{position:absolute;top:0;right:0;height:100%;width:min(380px,calc(100vw - 24px));overflow:auto;overscroll-behavior:contain;pointer-events:auto;background:#120B24;color:#F4F0FF;border-left:1px solid rgba(255,255,255,.1);box-shadow:-24px 0 64px rgba(4,1,14,.55);font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;text-align:left;letter-spacing:normal;text-transform:none;padding:0 16px 24px}
     .ph{position:sticky;top:0;z-index:1;background:#120B24;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0 10px;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -2040,10 +2314,6 @@
       hitEl.style.transform = `translate(${(cx - w / 2).toFixed(1)}px,${(cy - h / 2).toFixed(1)}px)`;
       hitEl.style.width = `${w.toFixed(1)}px`; hitEl.style.height = `${h.toFixed(1)}px`;
     }
-    if (!bubbleEl.hidden) {
-      if (clock > bubbleUntil || !oct.on) bubbleEl.hidden = true;
-      else bubbleEl.style.transform = `translate(${(oct.x + oct.face * .25 * S).toFixed(1)}px,${(oct.y - 1.3 * S).toFixed(1)}px) translate(-50%,-100%)`;
-    }
     if (!toastEl.hidden && clock > toastUntil) toastEl.hidden = true;
     if (panelOpen && (panelTick -= dt) <= 0) { panelTick = .25; panelSync(); }
   }
@@ -2086,11 +2356,11 @@
     host.setAttribute('data-osmiornica-host', '');
     host.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483000;';
     root = host.attachShadow({ mode: 'open' });
-    root.innerHTML = `<style>${STYLE}</style><canvas class="stage" aria-hidden="true"></canvas><div class="hit" role="button" tabindex="-1"></div><div class="dim"></div><div class="bubble" hidden></div><div class="toast" role="status" hidden></div><aside class="panel" aria-label="Panel prowadzącego" hidden></aside>`;
+    root.innerHTML = `<style>${STYLE}</style><canvas class="stage" aria-hidden="true"></canvas><div class="hit" role="button" tabindex="-1"></div><div class="dim"></div><div class="toast" role="status" hidden></div><aside class="panel" aria-label="Panel prowadzącego" hidden></aside>`;
     document.body.appendChild(host);
     cv = root.querySelector('.stage'); ctx = cv.getContext('2d');
     hitEl = root.querySelector('.hit'); dimEl = root.querySelector('.dim');
-    bubbleEl = root.querySelector('.bubble'); toastEl = root.querySelector('.toast'); panelEl = root.querySelector('.panel');
+    toastEl = root.querySelector('.toast'); panelEl = root.querySelector('.panel');
     hitEl.setAttribute('aria-label', `${CFG.name}, ośmiornica`);
     const st = document.createElement('style'); st.textContent = '.osm-krzywa{cursor:pointer}'; document.head.appendChild(st);
     makeArms(); resize(); buildPanel(); bindInput();
@@ -2124,7 +2394,7 @@
     get state() { return state; },
     config: CFG,
     actions: ACTS.map(a => a[0]),
-    _dev: { oct, mood, thought, spawn, setPose, expr, look, lookAt, rest, refreshWorld, perform, cancelAll, think, crossArms },
+    _dev: { oct, mood, thought, spawn, setPose, expr, startle, look, lookAt, rest, refreshWorld, perform, cancelAll, think, crossArms },
   };
   if (document.body) init(); else document.addEventListener('DOMContentLoaded', init);
 })();

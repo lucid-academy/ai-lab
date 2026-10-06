@@ -33,7 +33,7 @@
     delayAfterSlide: 1.1, // seconds between a slide change and her move
     memory: true,         // localStorage: sessions, clicks, mood of the day, which pranks worked
     thoughts: true,       // a thought cloud now and then, dreams while she sleeps
-    skin: '#8B3DF5',      // electric violet
+    skin: '#6516D9',      // deep, intense violet
     belly: '#F0369F',     // Lucid magenta: undersides, suckers, web
     glow: '#3DE3F0',      // Lucid cyan: rim light and eyes
     neon: '#B44CFF',      // the glow around her
@@ -100,10 +100,10 @@
   const TINT_MAX = { curiosity: .45, annoyance: .55, boredom: .55, joy: .55, fear: .7 }; // she stays recognisably violet
   // mood of the day: it sets where her feelings drift back to
   const TEMPERS = {
-    pogodna:   { curiosity: .4,  annoyance: .03, boredom: .12, joy: .45, fear: .05 },
-    ciekawska: { curiosity: .6,  annoyance: .05, boredom: .1,  joy: .3,  fear: .05 },
-    marudna:   { curiosity: .3,  annoyance: .24, boredom: .2,  joy: .14, fear: .05 },
-    zaspana:   { curiosity: .25, annoyance: .06, boredom: .36, joy: .25, fear: .05 },
+    pogodna:   { curiosity: .6,  annoyance: .03, boredom: .08, joy: .45, fear: .04 },
+    ciekawska: { curiosity: .78, annoyance: .04, boredom: .05, joy: .32, fear: .04 },
+    marudna:   { curiosity: .45, annoyance: .2,  boredom: .14, joy: .14, fear: .04 },
+    zaspana:   { curiosity: .45, annoyance: .05, boredom: .24, joy: .25, fear: .04 },
   };
   const BASE = Object.assign({}, TEMPERS.pogodna);
   let temper = 'pogodna';
@@ -124,7 +124,7 @@
   function moodTick(dt) {
     for (const k of EMO) mood[k] = approach(mood[k], BASE[k], DECAY[k], dt);
     // ignored: boredom builds up, faster while she is on stage
-    feel('boredom', dt * (oct.on ? (clock - lastTouch > 10 ? .012 : 0) : .004));
+    feel('boredom', dt * (oct.on ? (clock - lastTouch > 15 ? .005 : 0) : .002));
     const last = moodLog.length ? moodLog[moodLog.length - 1].t : -9;
     if (clock - last >= 2) moodLog.push({ t: clock, v: EMO.map(k => mood[k]) });
     if (moodLog.length > 5400) moodLog.splice(0, moodLog.length - 5400);
@@ -139,22 +139,30 @@
   const N = 18; // points per arm
   const WEB = 4; // the web between the arms reaches this far down each arm
   const AT = f => Math.round((N - 1) * f); // a point a fraction of the way down the arm
+  // on the ground the inner arms point toward or away from us, so they look shorter (foreshortened)
+  const GL = [.55, .62, .9, 1];
+  // each arm's tip has its own habit: lying flat, a loose hook, or a small curl
+  const tipCurl = () => { const r = Math.random(); return r < .35 ? rand(0, .25) : r < .75 ? rand(.4, .85) : rand(1.2, 1.7); };
+  const SHIM = 1.8; // seconds a wave of light takes to cross her
+  const shimEnv = () => (oct.shimT > 0 ? Math.sin(Math.PI * (1 - oct.shimT / SHIM)) : 0);
   const POSES = {
-    sit:    { up: 0, s0: .18, sk: .33, curl: 1.6,  wave: .45, wk: 2.6, ww: 1.4, droop: .3,  stiff: .2,   tip: .05,  damp: .9,  g: .4, follow: .35 },
-    lie:    { up: 0, s0: .42, sk: .3,  curl: 1.15, wave: .25, wk: 2.2, ww: .8,  droop: .5,  stiff: .15,  tip: .04,  damp: .9,  g: .5, follow: .15 },
+    sit:    { up: 0, s0: .18, sk: .33, curl: .4,   wave: .45, wk: 2.6, ww: 1.4, droop: 1.1, stiff: .2,   tip: .05,  damp: .9,  g: .4, follow: .35 },
+    lie:    { up: 0, s0: .42, sk: .3,  curl: .3,   wave: .25, wk: 2.2, ww: .8,  droop: 1.2, stiff: .15,  tip: .04,  damp: .9,  g: .5, follow: .15 },
     fall:   { up: 1, s0: .62, sk: .26, curl: .7,   wave: 1.0, wk: 3.2, ww: 9,   droop: 0,   stiff: .06,  tip: .025, damp: .86, g: 0,  follow: 1 },
     jet:    { up: 0, s0: .03, sk: .05, curl: .15,  wave: .3,  wk: 3,   ww: 8,   droop: 0,   stiff: .24,  tip: .09,  damp: .85, g: 0,  follow: 1 },
     dangle: { up: 0, s0: .06, sk: .12, curl: .9,   wave: .85, wk: 2.8, ww: 4,   droop: 1.1, stiff: .045, tip: .02,  damp: .93, g: 1,  follow: .6 },
     tumble: { up: 0, s0: .35, sk: .4,  curl: .8,   wave: 1.2, wk: 3,   ww: 7,   droop: .2,  stiff: .05,  tip: .02,  damp: .9,  g: .6, follow: 1 },
   };
-  // heavy-lidded by default; asym raises one brow, pout pushes out the fold under the eyes
+  // open, curious eyes by default; the heavy lids belong to moods. asym raises one brow, raise lifts both,
+  // pout pushes out the fold under the eyes
   const EXPR = {
-    smug:     { open: .55, low: .26, tilt: .15,  dil: .25, asym: .25 },
-    focus:    { open: .58, low: .3,  tilt: .28,  dil: .3 },
-    surprise: { open: 1,   low: 0,   tilt: -.35, dil: .75 },
-    skeptic:  { open: .62, low: .22, tilt: .1,   dil: .35, asym: .5 },
+    curious:  { open: 1,   low: 0,   tilt: -.05, dil: .85, asym: .3, raise: .6 },
+    smug:     { open: .55, low: .26, tilt: .15,  dil: .3,  asym: .25 },
+    focus:    { open: .66, low: .26, tilt: .25,  dil: .4 },
+    surprise: { open: 1,   low: 0,   tilt: -.2,  dil: .75, raise: 1 },
+    skeptic:  { open: .66, low: .2,  tilt: .1,   dil: .4,  asym: .5 },
     angry:    { open: .52, low: .22, tilt: .95,  dil: .2,  pout: 1 },
-    innocent: { open: .86, low: .05, tilt: -.35, dil: .6 },
+    innocent: { open: .95, low: .05, tilt: -.3,  dil: .7,  raise: .5 },
     guilty:   { open: .66, low: .14, tilt: -.5,  dil: .55, asym: -.2 },
     happy:    { open: .68, low: .38, tilt: -.15, dil: .5 },
     stretch:  { open: .08, low: .25, tilt: -.35, dil: .3 },
@@ -167,18 +175,18 @@
     q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0,
     scale: 1, alpha: 1, camo: 0, camoT: 0, camoC: [12, 7, 32], eyeCamo: false,
     skin: SKIN0.slice(), skinNow: SKIN0.slice(), flash: 0, flashC: WHITE,
-    clouds: 0, flare: 0, glowPulse: 0, glowS: 0, breathe: 0, nextFidget: 2, pinch: 0,
+    clouds: 0, flare: 0, glowPulse: 0, glowS: 0, breathe: 0, nextFidget: 2, nextLift: 3, pinch: 0, shimT: 0, nextShim: 4,
     pose: 'sit', poseP: POSES.sit, ride: .3, ground: null, spot: null,
     exprName: null, exprUntil: 0, exprNext: null, props: [], arms: [],
     look: { mode: 'idle', until: 0, x: 0, y: 0 },
-    eyes: { open: .74, low: .06, tilt: 0, dil: .4, asym: 0, pout: 0, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
+    eyes: { open: .92, low: .04, tilt: 0, dil: .6, asym: 0, raise: .2, pout: 0, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
   };
   function makeArms() {
     // [side, k (0 inner … 3 outer), back]; the roots sit up under the mantle and the web hides them
     const order = [[-1, 1, 1], [1, 1, 1], [-1, 3, 1], [1, 3, 1], [-1, 0, 0], [1, 0, 0], [-1, 2, 0], [1, 2, 0]];
     oct.arms = order.map(([side, k, back], i) => ({
       i, side, k, back: !!back,
-      len: back ? 1.36 : 1.5, w0: back ? .22 : .25, phase: rand(0, TAU), ck: rand(.8, 1.2), roll: rand(.35, 1),
+      len: (back ? 1.3 : 1.42) * rand(.94, 1.06), w0: back ? .22 : .25, phase: rand(0, TAU), ck: rand(.6, 1.3), sp: rand(-.1, .1), lift: 0, liftT: 0, liftUntil: 0, gl: 1, tc: 0, tcT: tipCurl(), run: 0, mw: rand(.4, 1), mph: rand(0, TAU),
       rx: side * (back ? .06 + .065 * k : .08 + .065 * k), ry: back ? -.1 : -.06,
       p: Array.from({ length: N }, () => ({ x: 0, y: 0, px: 0, py: 0 })),
       t: Array.from({ length: N }, () => ({ x: 0, y: 0 })),
@@ -237,27 +245,30 @@
   }
   const FAB = Array.from({ length: N }, () => ({ x: 0, y: 0 }));
   function armTargets(a) {
-    const P = a.P, seg = a.len * S * oct.scale / (N - 1), t = a.t;
+    const P = a.P, seg = a.len * a.gl * S * oct.scale / (N - 1), t = a.t;
     let [x, y] = armRoot(a);
     // outward-down when up = 0, outward-up when up = 1, through horizontal in between
-    const spread = P.s0 + P.sk * a.k + oct.flare * .9;
+    const spread = P.s0 + P.sk * a.k + a.sp + oct.flare * .9;
     const outward = a.side > 0 ? 0 : Math.PI;
     let th = oct.ang * P.follow + outward + a.side * (Math.PI / 2 - spread) * (1 - 2 * P.up);
     const sg = (2 * P.up - 1) * a.side, curl = (P.curl + a.fidget) * a.ck, wv = P.wave * mScale();
-    // resting on something: an arm that meets the surface runs along it and its tip rolls up off it;
-    // past the edge it drapes over
+    // resting on something: an arm that meets the surface lies along it, relaxed, and past an edge drapes over;
+    // now and then one arm lifts its tip to feel around (lift)
     const gr = !oct.physics && P.up < .5 ? oct.ground : null, floorY = gr ? gr.y - a.w0 * S * oct.scale * .3 : 0;
+    let run = 0; // which way the arm runs along the surface, once it reaches it
     t[0].x = x; t[0].y = y;
     for (let i = 1; i < N; i++) {
       const s = i / (N - 1);
-      let kap = sg * curl * 6 * s * s * s + wv * 1.2 * Math.sin(a.phase + s * P.wk - clock * P.ww);
-      if (gr) kap += sg * a.roll * 9 * s * s * s * s;
+      let kap = sg * curl * 6 * s * s * s + wv * (gr ? .5 : 1) * 1.2 * Math.sin(a.phase + s * P.wk - clock * P.ww);
+      // on the ground: a slow, soft meander so no arm lies dead straight, plus the tip's own curl
+      if (gr) kap += sg * (a.tc * 14 * Math.pow(s, 6) + a.lift * 9 * s * s * s * s) + a.mw * Math.sin(a.mph + s * 6 + clock * .12);
       th += kap / (N - 1);
       th += angDiff(th, Math.PI / 2) * P.droop * s * 2 / (N - 1);
-      if (gr && Math.sin(th) > 0 && y + Math.sin(th) * seg > floorY && x > gr.x1 && x < gr.x2) th = Math.cos(th) < 0 ? Math.PI : 0;
+      if (gr && Math.sin(th) > 0 && y + Math.sin(th) * seg > floorY && x > gr.x1 && x < gr.x2) { th = Math.cos(th) < 0 ? Math.PI : 0; if (!run) run = th ? -1 : 1; }
       x += Math.cos(th) * seg; y += Math.sin(th) * seg;
       t[i].x = x; t[i].y = y;
     }
+    a.run = run;
     const r = a.reach;
     if (!r || r.w < .002) return;
     // FABRIK from the current pose keeps the arm's curl; point idx goes to the goal and the rest trails past it
@@ -277,7 +288,7 @@
   }
   function armSim(a, dt) {
     armTargets(a);
-    const P = a.P, p = a.p, t = a.t, seg = a.len * S * oct.scale / (N - 1), f = dt * 60;
+    const P = a.P, p = a.p, t = a.t, seg = a.len * a.gl * S * oct.scale / (N - 1), f = dt * 60;
     const damp = Math.pow(P.damp, f), g = P.g * VH * 1.8 * dt * dt;
     const rb = a.reach ? a.reach.w * (a.reach.stiff || .35) : 0;
     p[0].x = p[0].px = t[0].x; p[0].y = p[0].py = t[0].y;
@@ -307,7 +318,8 @@
   function spawn(x, y, pose = 'sit') {
     Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, turn: 0, turnT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, glowPulse: 0, pinch: 0, props: [], ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
     oct.skin = skinTarget(); setPose(pose); look('idle'); expr(null); unthink();
-    Object.assign(oct.eyes, { dizzy: 0, open: .74, asym: 0, pout: 0 });
+    Object.assign(oct.eyes, { dizzy: 0, open: .92, asym: 0, pout: 0 });
+    feel('curiosity', .15); feel('boredom', -.3); // a new slide to look at
     makeWarp();
     for (const a of oct.arms) {
       Object.assign(a.P, oct.poseP); a.reach = null; a.fidget = 0; a.ft = 0;
@@ -343,13 +355,14 @@
   function eyesUpdate(dt) {
     if (oct.exprName && clock >= oct.exprUntil && oct.exprNext) { const [n, s] = oct.exprNext; expr(n, s); }
     const e = oct.eyes, x = oct.exprName && clock < oct.exprUntil ? EXPR[oct.exprName] : null;
-    // resting face: heavy lids that lift with curiosity or fear and sink with boredom
-    const openT = x ? x.open : clamp(.74 - mood.boredom * .25 + mood.curiosity * .18 + mood.fear * .2 - (oct.pose === 'lie' ? .1 : 0), .3, 1);
+    // resting face: wide open and interested; only real boredom pulls the lids down
+    const openT = x ? x.open : clamp(.9 - mood.boredom * .45 + mood.curiosity * .1 + mood.fear * .1 - (oct.pose === 'lie' ? .08 : 0), .35, 1);
     e.open = approach(e.open, openT, 14, dt);
-    e.low = approach(e.low, x ? x.low : clamp(.06 + mood.joy * .3, 0, .36), 10, dt);
-    e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .9 - mood.fear * .35 - mood.curiosity * .1, -.5, .8), 8, dt);
-    e.dil = approach(e.dil, x ? x.dil : clamp(.4 + mood.fear * .5 + mood.curiosity * .2, 0, 1), 6, dt);
-    e.asym = approach(e.asym, x ? x.asym || 0 : temper === 'marudna' ? .15 : 0, 7, dt);
+    e.low = approach(e.low, x ? x.low : clamp(.04 + mood.joy * .22, 0, .3), 10, dt);
+    e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .75 - mood.fear * .25, -.5, .8), 8, dt);
+    e.dil = approach(e.dil, x ? x.dil : clamp(.42 + mood.curiosity * .35 + mood.fear * .4, 0, 1), 6, dt);
+    e.raise = approach(e.raise, x ? x.raise || 0 : clamp((mood.curiosity - .3) * .9 + mood.fear * .4 - mood.annoyance * .5, 0, .6), 6, dt);
+    e.asym = approach(e.asym, x ? x.asym || 0 : temper === 'marudna' ? .12 : 0, 7, dt);
     e.pout = approach(e.pout, (x && x.pout) || D.inFoch ? 1 : mood.annoyance > .55 ? .6 : 0, 8, dt);
     if (e.dizzy > 0) e.dizzy -= dt;
     if ((e.next -= dt) <= 0) { e.blink = .17; e.next = chance(.2) ? .3 : rand(2, 5.5); }
@@ -377,6 +390,9 @@
     oct.pinch = approach(oct.pinch, state === 'drag' ? 1 : 0, state === 'drag' ? 9 : 4, dt);
     oct.clouds = approach(oct.clouds, 0, .6, dt);
     oct.glowPulse = approach(oct.glowPulse, 0, 2, dt);
+    // now and then a wave of light runs over her skin, more often when she is happy or curious
+    if (oct.shimT > 0) oct.shimT = Math.max(0, oct.shimT - dt);
+    else if (clock > oct.nextShim && oct.camoT < .5) { oct.shimT = SHIM; oct.nextShim = clock + rand(5, 10) * (1.4 - mood.joy * .5 - mood.curiosity * .4); }
     oct.glowS = approach(oct.glowS, state === 'sleep' ? 1 : 0, 1.5, dt);
     oct.skin = mix(oct.skin, skinTarget(), 1 - Math.exp(-3.5 * dt));
     let sk = mix(oct.skin, oct.camoC, clamp(oct.camo, 0, 1) * .92);
@@ -386,8 +402,15 @@
     eyesUpdate(dt);
     makeWarp();
     if ((oct.nextFidget -= dt) <= 0) {
-      oct.nextFidget = rand(1, 3.2);
-      if (state === 'rest' || state === 'sleep') { const a = pick(oct.arms); a.fd = a.ft = rand(.6, 1.3); a.fa = rand(-1, 1.2) * mScale(); }
+      oct.nextFidget = rand(1.2, 3.5);
+      if (state === 'rest' || state === 'sleep') { const a = pick(oct.arms); a.fd = a.ft = rand(1.2, 2.4); a.fa = rand(-.5, .7) * mScale(); }
+    }
+    // one arm at a time lifts its tip and feels around, then lays it down again; tips slowly change their curl
+    if (state === 'rest' && clock > oct.nextLift) {
+      oct.nextLift = clock + rand(3, 7);
+      pick(oct.arms).tcT = tipCurl();
+      const a = pick(oct.arms.filter(x => !x.reach));
+      if (a) { a.liftT = rand(.45, 1) * mScale(); a.liftUntil = clock + rand(1.5, 3.2); }
     }
     for (const a of oct.arms) {
       for (const k in a.P) a.P[k] = approach(a.P[k], oct.poseP[k], 6, dt);
@@ -398,6 +421,10 @@
         if (r.wT === 0 && r.w < .01) a.reach = null;
       }
       if (a.ft > 0) { a.ft -= dt; a.fidget = a.ft > 0 ? a.fa * Math.sin(Math.PI * (1 - a.ft / a.fd)) : 0; }
+      if (a.liftT && (clock > a.liftUntil || state !== 'rest')) a.liftT = 0;
+      a.lift = approach(a.lift, a.liftT, 1.4, dt);
+      a.gl = approach(a.gl, !oct.physics && oct.poseP.up < .5 && oct.ground ? GL[a.k] : 1, 2.5, dt);
+      a.tc = approach(a.tc, a.k < 2 ? Math.min(a.tcT, .5) : a.tcT, .6, dt);
       armSim(a, dt);
     }
   }
@@ -483,6 +510,23 @@
         c.fillStyle = rgba(bc, .4 * k); c.beginPath(); c.arc(p[0], p[1], m.r * S, 0, TAU); c.fill();
       }
     }
+    // the wave of light: a soft band sweeping up across the mantle, lighting the specks as it passes
+    const sh = shimEnv();
+    if (sh > .01) {
+      const d = lerp(-1.25, 1.1, 1 - oct.shimT / SHIM) * S, nx = .41, ny = -.91, cy0 = -.5 * S, w = .3 * S;
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const sg = c.createLinearGradient(nx * (d - w), cy0 + ny * (d - w), nx * (d + w), cy0 + ny * (d + w));
+      sg.addColorStop(0, rgba(NEON, 0)); sg.addColorStop(.5, rgba(mix(NEON, GLOW, .35), .42 * sh * k)); sg.addColorStop(1, rgba(NEON, 0));
+      c.fillStyle = sg; c.fillRect(-S, -1.6 * S, 2 * S, 1.8 * S);
+      for (const m of SKINMARKS) {
+        if (m.blot) continue;
+        const q = Math.exp(-Math.pow((m.x * S * nx + (m.y * S - cy0) * ny - d) / (.2 * S), 2)) * sh;
+        if (q < .05) continue;
+        const p = warp(m.x * S, m.y * S);
+        c.fillStyle = rgba(GLOW, .9 * q * k); c.beginPath(); c.arc(p[0], p[1], m.r * S * 1.8, 0, TAU); c.fill();
+      }
+      c.restore();
+    }
     // held by the top: the skin bunches into folds toward the pinch
     if (oct.pinch > .25) {
       const pa = (oct.pinch - .25) / .75 * k;
@@ -495,11 +539,12 @@
     c.restore();
     // two-tone neon rim: magenta on one side, Lucid cyan on the other
     const rim = c.createLinearGradient(-.55 * S, 0, .55 * S, 0);
-    rim.addColorStop(0, rgba(PINK, .5 * k)); rim.addColorStop(.3, rgba(PINK, 0)); rim.addColorStop(.64, rgba(GLOW, 0)); rim.addColorStop(1, rgba(GLOW, .8 * k));
+    const rk = k * (1 + sh * .9);
+    rim.addColorStop(0, rgba(PINK, Math.min(1, .5 * rk))); rim.addColorStop(.3, rgba(PINK, 0)); rim.addColorStop(.64, rgba(GLOW, 0)); rim.addColorStop(1, rgba(GLOW, Math.min(1, .8 * rk)));
     c.strokeStyle = rim; c.lineWidth = .034 * S; mantlePath(c); c.stroke();
     // a cool sheen along the upper right of the sac
     const s0 = warp(.12 * S, -.97 * S), s1 = warp(.44 * S, -.8 * S), s2 = warp(.49 * S, -.57 * S);
-    c.strokeStyle = rgba([140, 165, 255], .35 * k); c.lineWidth = .045 * S; c.lineCap = 'round';
+    c.strokeStyle = rgba([140, 165, 255], Math.min(1, .35 * rk)); c.lineWidth = .045 * S; c.lineCap = 'round';
     c.beginPath(); c.moveTo(s0[0], s0[1]); c.quadraticCurveTo(s1[0], s1[1], s2[0], s2[1]); c.stroke();
     // wet highlight
     c.save(); c.translate(hl[0], hl[1]); c.rotate(-.55); c.scale(1, .5);
@@ -544,13 +589,13 @@
     // heavy upper lid: a thick fold of skin with a soft shadow under it
     const tilt = -side * e.tilt * .5, uy = cy - r * 1.06 + 2.12 * r * (1 - clamp(open, 0, 1));
     c.save(); c.translate(cx, uy); c.rotate(tilt);
-    const ls = c.createLinearGradient(0, 0, 0, r * .5);
-    ls.addColorStop(0, 'rgba(26,8,56,.5)'); ls.addColorStop(1, 'rgba(26,8,56,0)');
-    c.fillStyle = ls; c.fillRect(-r * 1.4, 0, r * 2.8, r * .5);
+    const ls = c.createLinearGradient(0, 0, 0, r * .4);
+    ls.addColorStop(0, 'rgba(26,8,56,.32)'); ls.addColorStop(1, 'rgba(26,8,56,0)');
+    c.fillStyle = ls; c.fillRect(-r * 1.4, 0, r * 2.8, r * .4);
     const lg = c.createLinearGradient(0, -r * 1.2, 0, r * .2);
     lg.addColorStop(0, rgba(shade(skin, .16))); lg.addColorStop(1, rgba(shade(skin, -.08)));
     c.fillStyle = lg; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .3, r * 1.4, 0); c.lineTo(r * 1.4, -r * 3); c.lineTo(-r * 1.4, -r * 3); c.closePath(); c.fill();
-    c.strokeStyle = rgba(shade(skin, -.55)); c.lineWidth = r * .12; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .3, r * 1.4, 0); c.stroke();
+    c.strokeStyle = rgba(shade(skin, -.55)); c.lineWidth = r * .1; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .3, r * 1.4, 0); c.stroke();
     c.strokeStyle = rgba(shade(skin, .4), .6); c.lineWidth = r * .07; c.beginPath(); c.moveTo(-r * 1.2, -r * .14); c.quadraticCurveTo(0, r * .12, r * 1.2, -r * .14); c.stroke();
     c.restore();
     if (e.low > .02) {
@@ -568,7 +613,7 @@
     }
     c.strokeStyle = rgba(shade(skin, -.5), .55 * sk); c.lineWidth = r * .06; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.stroke();
     // brow fold: it carries most of the expression
-    const lift = (1 - clamp(open, 0, 1)) * r * .22 - (e.asym || 0) * side * r * .3;
+    const lift = (1 - clamp(open, 0, 1)) * r * .22 - (e.asym || 0) * side * r * .3 - (e.raise || 0) * r * .32;
     c.save(); c.globalAlpha *= sk; c.translate(cx, cy - r * 1.22 + lift); c.rotate(-side * e.tilt * .62);
     c.fillStyle = rgba(shade(skin, .2)); c.beginPath(); c.moveTo(-r * 1.3, r * .22); c.quadraticCurveTo(0, -r * .5, r * 1.3, r * .22); c.quadraticCurveTo(0, -r * .1, -r * 1.3, r * .22); c.fill();
     c.strokeStyle = rgba(shade(skin, -.45), .65); c.lineWidth = r * .09; c.lineCap = 'round';
@@ -578,7 +623,7 @@
   function drawFace(c) {
     const e = oct.eyes, f = oct.face, skin = oct.skinNow, tr = oct.turn;
     if (tr > .97) return; // back to the audience
-    const shut = e.blink > 0 ? Math.sin(Math.PI * (1 - e.blink / .17)) : 0, open = e.open * (1 - shut), r = .118 * S;
+    const shut = e.blink > 0 ? Math.sin(Math.PI * (1 - e.blink / .17)) : 0, open = e.open * (1 - shut), r = .145 * S;
     // turning away: the face slides round the side of the head and narrows
     const dir = oct.turnDir, squeeze = Math.max(.12, Math.cos(tr * Math.PI / 2)), shift = Math.sin(tr * Math.PI / 2) * .42 * S * dir;
     for (const side of [-1, 1]) {
@@ -630,16 +675,33 @@
   function armOutline(c, pts, w0, wt, fresh = true) { armFrame(pts, w0, wt); armPath(c, pts, WW, fresh); }
   function drawArm(c, a, col, detail) {
     const p = a.p, k = 1 - oct.camo, w0 = a.w0 * S * oct.scale, wt = .018 * S * oct.scale;
-    armOutline(c, p, w0, wt);
+    // suckers: underneath an arm lying on the ground (they face the floor), on the inner side of the curl otherwise
+    const gr = a.run && !oct.physics && a.P.up < .5 ? oct.ground : null;
+    const sg = gr ? a.run : (2 * a.P.up - 1) * a.side >= 0 ? 1 : -1;
+    const rim = mix(BELLY, [110, 25, 75], .35), disc = mix(BELLY, [255, 236, 248], .62), cup = mix(BELLY, [90, 20, 60], .45);
+    const sucker = (x, y, r) => {
+      c.fillStyle = rgba(rim, .95); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+      c.fillStyle = rgba(disc); c.beginPath(); c.arc(x, y, r * .76, 0, TAU); c.fill();
+      c.fillStyle = rgba(cup, .7); c.beginPath(); c.arc(x, y, r * .34, 0, TAU); c.fill();
+    };
+    armFrame(p, w0, wt);
+    // where the arm lies flat on the ground its suckers are pressed under it, and only their rims peek out
+    const flat = i => gr && Math.abs(NY[i]) > .8 && gr.y - p[i].y < WW[i] * 1.8 + S * .04;
+    if (detail && gr) for (let i = 2; i < N - 1; i++) for (const h of [0, .5]) {
+      if (!flat(i)) continue;
+      const i1 = i + 1, w = lerp(WW[i], WW[i1], h), r = w * .44;
+      if (r < .8) continue;
+      sucker(lerp(p[i].x, p[i1].x, h) + lerp(NX[i], NX[i1], h) * w * .8 * sg, lerp(p[i].y, p[i1].y, h) + lerp(NY[i], NY[i1], h) * w * .8 * sg, r);
+    }
+    armPath(c, p, WW);
     c.fillStyle = rgba(col); c.fill();
-    const sg = (2 * a.P.up - 1) * a.side >= 0 ? 1 : -1; // suckers sit on the inner side of the curl
     // pink underside: a ribbon shifted toward the sucker side
     for (let i = 0; i < N; i++) { SH[i].x = p[i].x + NX[i] * WW[i] * .42 * sg; SH[i].y = p[i].y + NY[i] * WW[i] * .42 * sg; WH[i] = WW[i] * .6; }
     c.fillStyle = rgba(mix(col, BELLY, .8), .75); armPath(c, SH, WH); c.fill();
-    armFrame(p, w0, wt);
     if (!detail) return;
     // a wet lilac sheen along the top, and a few dark speckles
-    c.strokeStyle = rgba(mix(col, [222, 200, 255], .5), .3 * k); c.lineWidth = Math.max(1, WW[1] * .26); c.lineCap = 'round';
+    const sh = shimEnv(), su = 1 - oct.shimT / SHIM;
+    c.strokeStyle = rgba(mix(col, [222, 200, 255], .5), (.3 + sh * .4) * k); c.lineWidth = Math.max(1, WW[1] * .26); c.lineCap = 'round';
     c.beginPath();
     for (let i = 1; i < N - 2; i++) { const x = p[i].x - NX[i] * WW[i] * .5 * sg, y = p[i].y - NY[i] * WW[i] * .5 * sg; i === 1 ? c.moveTo(x, y) : c.lineTo(x, y); }
     c.stroke();
@@ -648,19 +710,18 @@
       const o = .1 + .35 * Math.sin(a.phase * 7 + i * 2.3), x = p[i].x - NX[i] * WW[i] * o * sg, y = p[i].y - NY[i] * WW[i] * o * sg;
       c.beginPath(); c.arc(x, y, Math.max(.6, WW[i] * .12), 0, TAU); c.fill();
     }
-    // suckers: pale discs with a darker rim and cup, two per segment, poking out along the underside
-    const rim = mix(BELLY, [110, 25, 75], .35), disc = mix(BELLY, [255, 236, 248], .62), cup = mix(BELLY, [90, 20, 60], .45);
+    // the rest of the suckers: pale discs with a darker rim and cup, two per segment, along the underside
     for (let i = 2; i < N - 1; i++) for (const h of [0, .5]) {
       const i1 = i + 1, w = lerp(WW[i], WW[i1], h), r = w * .5;
       if (r < .8) continue;
       const x = lerp(p[i].x, p[i1].x, h) + lerp(NX[i], NX[i1], h) * w * .62 * sg, y = lerp(p[i].y, p[i1].y, h) + lerp(NY[i], NY[i1], h) * w * .62 * sg;
-      c.fillStyle = rgba(rim, .95); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
-      c.fillStyle = rgba(disc); c.beginPath(); c.arc(x, y, r * .76, 0, TAU); c.fill();
-      c.fillStyle = rgba(cup, .7); c.beginPath(); c.arc(x, y, r * .34, 0, TAU); c.fill();
-      if (oct.glowS > .02 && !h) { // bioluminescent suckers while she sleeps (every other one is plenty)
+      if (!flat(i) && !(gr && (a.k < 2 || i < N * .6))) sucker(x, y, r); // on the ground only a raised tip shows its suckers
+      // bioluminescent suckers: every other one while she sleeps, and a pulse running down the arm with the wave
+      const gw = Math.max(h ? 0 : oct.glowS, sh > .01 ? sh * Math.exp(-Math.pow(((i + h) / (N - 1) - su * 1.3) / .12, 2)) : 0);
+      if (gw > .02) {
         c.save(); c.globalCompositeOperation = 'lighter';
         const gg = c.createRadialGradient(x, y, 0, x, y, r * 3);
-        gg.addColorStop(0, rgba(GLOW, .5 * oct.glowS)); gg.addColorStop(1, rgba(GLOW, 0));
+        gg.addColorStop(0, rgba(GLOW, (h || !oct.glowS ? .32 : .5) * gw)); gg.addColorStop(1, rgba(GLOW, 0));
         c.fillStyle = gg; c.beginPath(); c.arc(x, y, r * 3, 0, TAU); c.fill(); c.restore();
       }
     }
@@ -692,7 +753,7 @@
   }
   function drawGlow(c) {
     // neon halo around the whole silhouette: one blurred pass behind the body
-    const k = clamp((.55 + mood.joy * .35 + oct.glowPulse) * (1 - oct.camo) * oct.alpha, 0, 1.3);
+    const k = clamp((.45 + mood.joy * .3 + oct.glowPulse + shimEnv() * .55) * (1 - oct.camo) * oct.alpha, 0, 1.3);
     if (k < .03 || oct.scale < .2) return;
     const col = mix(NEON, oct.skinNow, .25);
     c.save();
@@ -1570,9 +1631,13 @@
   }
   function idleLook() {
     const r = Math.random();
-    if (r < .4 && cur.inside && clock - cur.t < 3) look('cursor', rand(1, 2.5));
-    else if (r < .75 && world.lines.length) { const L = pick(world.lines); lookAt(rand(L.x1, L.x2), (L.y + L.base) / 2, rand(1.2, 2.6)); }
-    else look('audience', rand(1, 2));
+    if (r < .35 && cur.inside && clock - cur.t < 3) look('cursor', rand(1, 2.5));
+    else if (r < .8 && world.lines.length) {
+      // reading the slide: often with a head tilt and one brow up, the way a curious animal inspects something
+      const L = pick(world.lines), sec = rand(1.4, 2.8);
+      lookAt(rand(L.x1, L.x2), (L.y + L.base) / 2, sec);
+      if (chance(.25 + mood.curiosity * .6)) { expr('curious', sec); oct.tiltT = rand(.08, .2) * (chance(.5) ? 1 : -1); oct.tiltUntil = clock + sec; return; }
+    } else look('audience', rand(1, 2));
     if (chance(.25)) { oct.tiltT = rand(-.16, .16); oct.tiltUntil = clock + rand(1, 2); }
   }
   const dodgeChance = () => clamp((mem.clicks - 6) / 30, 0, .55) + mood.fear * .3;
@@ -1695,7 +1760,7 @@
     if (RM.matches) { oct.y = T.surface.y - .3 * S; oct.ground = T.surface; setPose('sit'); oct.alpha = 0; await fadeTo(1, .4); }
     else await fallTo(T.surface);
     knock(T, side);
-    startle(.6, 'focus');
+    startle(.6, 'curious');
     await wait(.5);
     lookAt(T.x, T.surface.y + T.fs * .5, 1.3);
     think({ icon: 'pytanie' }, 1.9);
@@ -1806,7 +1871,7 @@
     for (const c of oct.arms) { if (c.back) continue; const t = c.p[N - 1], d = Math.hypot(t.x - cur.x, t.y - cur.y); if (d < bd) { bd = d; a = c; } }
     a.reach = { x: cur.x, y: cur.y, w: 0, wT: 1, rate: 4, stiff: .3, follow: cur.inside, front: cur.y < oct.y - S * .3 };
     if (!cur.inside) Object.assign(a.reach, { x: oct.x + (oct.x < VW / 2 ? 1 : -1) * S * 1.6, y: oct.y - S * 1.2 });
-    look('cursor', 3.2); expr('focus', 3); feel('curiosity', .3);
+    look('cursor', 3.2); expr('curious', 3); feel('curiosity', .3);
     await wait(3.2);
     a.reach.wT = 0; a.reach.follow = false; emote('?');
     await wait(.6);

@@ -92,8 +92,10 @@
   function memSave() { if (!CFG.memory) return; try { localStorage.setItem(MEM_KEY, JSON.stringify(mem)); } catch (e) { /* storage blocked */ } }
   const stat = n => mem.stats[n] || (mem.stats[n] = { n: 0, s: 0 });
   // her colour: the config default, or one picked in the presenter panel (remembered between lectures)
-  const SWATCHES = [[CFG.skin, 'domyślny'], ['#8B3DF5', 'jasny fiolet'], ['#4B17A8', 'indygo'], ['#A31FCB', 'purpura'], ['#C2187A', 'magenta']]
+  const SWATCHES = [[CFG.skin, 'domyślny fiolet'], ['#A3452B', 'naturalny, rdzawy jak Octopus vulgaris'], ['#C21B6E', 'malinowy'], ['#2D5BDB', 'błękitny']]
     .filter((w, i, all) => all.findIndex(v => v[0].toLowerCase() === w[0].toLowerCase()) === i);
+  // a new colour is no use if nobody sees it: she pops up to show it off
+  function showOff() { if (!oct.on && !serious) perform('zerkniecie'); }
   function setSkin(h, remember) {
     if (!/^#([0-9a-f]{3}){1,2}$/i.test(h || '')) return;
     skinHex = h; SKIN0 = hex(h); BELLY = mix(SKIN0, PINK, .5);
@@ -155,28 +157,29 @@
   const SHIM = 1.8; // seconds a wave of light takes to cross her
   const shimEnv = () => (oct.shimT > 0 ? Math.sin(Math.PI * (1 - oct.shimT / SHIM)) : 0);
   const POSES = {
-    sit:    { up: 0, s0: .18, sk: .33, curl: .4,   wave: .45, wk: 2.6, ww: 1.4, droop: 1.1, stiff: .2,   tip: .05,  damp: .9,  g: .4, follow: .35 },
-    lie:    { up: 0, s0: .42, sk: .3,  curl: .3,   wave: .25, wk: 2.2, ww: .8,  droop: 1.2, stiff: .15,  tip: .04,  damp: .9,  g: .5, follow: .15 },
+    sit:    { up: 0, s0: .18, sk: .33, curl: .4,   wave: .1,  wk: 2.6, ww: .5,  droop: 1.1, stiff: .2,   tip: .05,  damp: .9,  g: .4, follow: .35 },
+    lie:    { up: 0, s0: .42, sk: .3,  curl: .3,   wave: .06, wk: 2.2, ww: .35, droop: 1.2, stiff: .15,  tip: .04,  damp: .9,  g: .5, follow: .15 },
     fall:   { up: 1, s0: .62, sk: .26, curl: .7,   wave: 1.0, wk: 3.2, ww: 9,   droop: 0,   stiff: .06,  tip: .025, damp: .86, g: 0,  follow: 1 },
     jet:    { up: 0, s0: .03, sk: .05, curl: .15,  wave: .3,  wk: 3,   ww: 8,   droop: 0,   stiff: .24,  tip: .09,  damp: .85, g: 0,  follow: 1 },
     dangle: { up: 0, s0: .06, sk: .12, curl: .9,   wave: .85, wk: 2.8, ww: 4,   droop: 1.1, stiff: .045, tip: .02,  damp: .93, g: 1,  follow: .6 },
     tumble: { up: 0, s0: .35, sk: .4,  curl: .8,   wave: 1.2, wk: 3,   ww: 7,   droop: .2,  stiff: .05,  tip: .02,  damp: .9,  g: .6, follow: 1 },
+    tuck:   { up: 0, s0: .05, sk: .12, curl: 2.2,  wave: .03, wk: 2,   ww: .3,  droop: .2,  stiff: .3,   tip: .1,   damp: .9,  g: .2, follow: .3 },
   };
-  // open, curious eyes by default; the heavy lids belong to moods. asym raises one brow, raise lifts both,
-  // pout pushes out the fold under the eyes
+  // expressions an octopus can actually make: lids, pupil size, the brow fold (asym raises one side,
+  // raise lifts both), the dark eye bar and the papillae over the eyes; no mouth
   const EXPR = {
-    curious:  { open: .95, low: .14, tilt: -.05, dil: .85, asym: .3,  raise: .45, smile: .35 },
-    smug:     { open: .55, low: .3,  tilt: .15,  dil: .35, asym: .25, smile: .6 },
-    focus:    { open: .66, low: .26, tilt: .25,  dil: .4 },
-    surprise: { open: 1,   low: 0,   tilt: -.2,  dil: .75, raise: 1 },
+    curious:  { open: .95, low: .08, tilt: -.05, dil: .8,  asym: .3,  raise: .45, pap: .45 },
+    smug:     { open: .55, low: .26, tilt: .15,  dil: .35, asym: .25 },
+    focus:    { open: .66, low: .2,  tilt: .25,  dil: .45, pap: .35 },
+    surprise: { open: 1,   low: 0,   tilt: -.2,  dil: .9,  raise: 1,   pap: .8 },
     skeptic:  { open: .66, low: .2,  tilt: .1,   dil: .4,  asym: .5 },
     roll:     { open: .62, low: .16, tilt: .15,  dil: .4,  asym: .35 },
-    angry:    { open: .52, low: .22, tilt: .95,  dil: .2,  pout: 1 },
-    innocent: { open: .95, low: .1,  tilt: -.3,  dil: .7,  raise: .5,  smile: .25 },
-    guilty:   { open: .66, low: .14, tilt: -.5,  dil: .55, asym: -.2 },
-    happy:    { open: .66, low: .4,  tilt: -.1,  dil: .6,  raise: .15, smile: 1 },
+    angry:    { open: .5,  low: .22, tilt: .9,   dil: .2,  bar: 1,     pap: 1 },
+    innocent: { open: .95, low: .08, tilt: -.3,  dil: .7,  raise: .5 },
+    guilty:   { open: .66, low: .14, tilt: -.45, dil: .55, asym: -.2 },
+    happy:    { open: .72, low: .3,  tilt: -.1,  dil: .65, raise: .15 },
     stretch:  { open: .08, low: .25, tilt: -.35, dil: .3 },
-    closed:   { open: 0,   low: 0,   tilt: 0,    dil: .3,  smile: .25 },
+    closed:   { open: 0,   low: 0,   tilt: 0,    dil: .3 },
   };
   const oct = {
     on: false, x: 0, y: 0, vx: 0, vy: 0, physics: false, skipV: false, motion: null,
@@ -185,11 +188,11 @@
     q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0,
     scale: 1, alpha: 1, camo: 0, camoT: 0, camoC: [12, 7, 32], eyeCamo: false,
     skin: SKIN0.slice(), skinNow: SKIN0.slice(), flash: 0, flashC: WHITE,
-    clouds: 0, flare: 0, glowPulse: 0, glowS: 0, breathe: 0, nextFidget: 2, nextLift: 3, pinch: 0, shimT: 0, nextShim: 4,
+    clouds: 0, flare: 0, glowPulse: 0, glowS: 0, breathe: 0, nextFidget: 2, nextLift: 3, mt: 0, pinch: 0, shimT: 0, nextShim: 4,
     pose: 'sit', poseP: POSES.sit, ride: .3, ground: null, spot: null,
-    exprName: null, exprUntil: 0, exprNext: null, arms: [], glass: null, shell: null,
+    exprName: null, exprUntil: 0, exprNext: null, arms: [], glass: null, mimic: false, undo: [],
     look: { mode: 'idle', until: 0, x: 0, y: 0 },
-    eyes: { open: .86, low: .2, tilt: 0, dil: .6, asym: 0, raise: .15, pout: 0, smile: .5, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
+    eyes: { open: .82, low: .1, tilt: 0, dil: .5, asym: 0, raise: .1, bar: 0, pap: .2, gx: 0, gy: .12, gxT: 0, gyT: .12, jx: 0, jy: 0, jt: 0, blink: 0, next: 2, dizzy: 0 },
   };
   function makeArms() {
     // [side, k (0 inner … 3 outer), back]; the roots sit up under the mantle and the web hides them
@@ -263,7 +266,7 @@
     const spread = P.s0 + P.sk * a.k + a.sp + oct.flare * .9;
     const outward = a.side > 0 ? 0 : Math.PI;
     let th = oct.ang * P.follow + outward + a.side * (Math.PI / 2 - spread) * (1 - 2 * P.up);
-    const sg = (2 * P.up - 1) * a.side, curl = (P.curl + a.fidget) * a.ck, wv = P.wave * mScale();
+    const sg = (2 * P.up - 1) * a.side, curl = (P.curl + a.fidget) * a.ck, wv = P.wave * mScale() * (state === 'sleep' ? .1 : 1);
     // resting on something: an arm that meets the surface lies along it, relaxed, and past an edge drapes over;
     // now and then one arm lifts its tip to feel around (lift)
     const gr = !oct.physics && P.up < .5 ? oct.ground : null, floorY = gr ? gr.y - a.w0 * S * oct.scale * .3 : 0;
@@ -273,7 +276,7 @@
       const s = i / (N - 1);
       let kap = sg * curl * 6 * s * s * s + wv * (gr ? .5 : 1) * 1.2 * Math.sin(a.phase + s * P.wk - clock * P.ww);
       // on the ground: a slow, soft meander so no arm lies dead straight, plus the tip's own curl
-      if (gr) kap += sg * (a.tc * 14 * Math.pow(s, 6) + a.lift * 9 * s * s * s * s) + a.mw * Math.sin(a.mph + s * 6 + clock * .12);
+      if (gr) kap += sg * (a.tc * 14 * Math.pow(s, 6) + a.lift * 9 * s * s * s * s) + a.mw * Math.sin(a.mph + s * 6 + oct.mt);
       th += kap / (N - 1);
       th += angDiff(th, Math.PI / 2) * P.droop * s * 2 / (N - 1);
       if (gr && Math.sin(th) > 0 && y + Math.sin(th) * seg > floorY && x > gr.x1 && x < gr.x2) { th = Math.cos(th) < 0 ? Math.PI : 0; if (!run) run = th ? -1 : 1; }
@@ -328,9 +331,9 @@
   }
 
   function spawn(x, y, pose = 'sit') {
-    Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, turn: 0, turnT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, glowPulse: 0, pinch: 0, glass: null, shell: null, ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
+    Object.assign(oct, { on: true, x, y, vx: 0, vy: 0, q: 0, qv: 0, qT: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, ang: 0, angT: 0, angV: 0, spin: false, tilt: 0, tiltT: 0, turn: 0, turnT: 0, scale: 1, alpha: 1, camo: 0, camoT: 0, eyeCamo: false, clouds: 0, flare: 0, glowPulse: 0, pinch: 0, glass: null, mimic: false, ground: null, physics: false, motion: null, ride: .3, skipV: true, face: 0, faceT: 0 });
     oct.skin = skinTarget(); setPose(pose); look('idle'); expr(null); unthink();
-    Object.assign(oct.eyes, { dizzy: 0, open: .92, asym: 0, pout: 0 });
+    Object.assign(oct.eyes, { dizzy: 0, open: .82, asym: 0, bar: 0 });
     feel('curiosity', .15); feel('boredom', -.3); // a new slide to look at
     makeWarp();
     for (const a of oct.arms) {
@@ -342,7 +345,9 @@
     lastTouch = clock;
   }
   function hide() {
-    oct.on = false; oct.motion = null; oct.physics = false; oct.glass = null; oct.shell = null; oct.scale = 1;
+    oct.on = false; oct.motion = null; oct.physics = false; oct.glass = null; oct.mimic = false; oct.scale = 1;
+    for (const f of oct.undo.splice(0)) f();
+    if (DOT.mode === 'held' || DOT.mode === 'hat') DOT.mode = 'gone'; // she took it with her
     unthink();
     hitEl.classList.remove('on', 'drag'); hitEl.style.width = hitEl.style.height = '0px';
     state = 'hidden'; interruptible = false; D.inFoch = false;
@@ -363,7 +368,7 @@
       e.gxT = dx * k; e.gyT = dy * k;
       oct.faceT = clamp(dx / (S * 3), -1, 1);
     }
-    if ((e.jt -= dt) <= 0) { e.jt = rand(.25, .9); e.jx = rand(-.06, .06); e.jy = rand(-.05, .05); }
+    if ((e.jt -= dt) <= 0) { e.jt = rand(.6, 1.8); e.jx = rand(-.035, .035); e.jy = rand(-.03, .03); }
     e.gx = approach(e.gx, e.gxT + e.jx, 28, dt); e.gy = approach(e.gy, e.gyT + e.jy, 28, dt);
     const m = Math.hypot(e.gx, e.gy); if (m > 1) { e.gx /= m; e.gy /= m; }
   }
@@ -371,16 +376,17 @@
     if (oct.exprName && clock >= oct.exprUntil && oct.exprNext) { const [n, s] = oct.exprNext; expr(n, s); }
     const e = oct.eyes, x = oct.exprName && clock < oct.exprUntil ? EXPR[oct.exprName] : null;
     // resting face: wide open and interested; only real boredom pulls the lids down
-    // relaxed upper lids and lower lids pushed up by a smile: cheerful and interested, not startled
-    const openT = x ? x.open : clamp(.84 - mood.boredom * .4 + mood.curiosity * .08 + mood.fear * .12 - (oct.pose === 'lie' ? .06 : 0), .35, 1);
+    // a calm, watchful resting face; moods show the way they do on a real octopus: lids, pupils,
+    // the dark eye bar and the papillae over the eyes
+    const openT = x ? x.open : clamp(.8 - mood.boredom * .4 + mood.curiosity * .1 + mood.fear * .15 - (oct.pose === 'lie' ? .06 : 0), .35, 1);
     e.open = approach(e.open, openT, 14, dt);
-    e.low = approach(e.low, x ? x.low : clamp(.1 + mood.joy * .3 - mood.fear * .2, 0, .4), 10, dt);
-    e.smile = approach(e.smile, x ? x.smile || 0 : clamp(mood.joy * 1.2 + mood.curiosity * .2 - mood.annoyance * 1.5 - mood.boredom * .5 - mood.fear, 0, 1), 6, dt);
-    e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .75 - mood.fear * .25, -.5, .8), 8, dt);
-    e.dil = approach(e.dil, x ? x.dil : clamp(.42 + mood.curiosity * .35 + mood.fear * .4, 0, 1), 6, dt);
-    e.raise = approach(e.raise, x ? x.raise || 0 : clamp((mood.curiosity - .3) * .6 + mood.fear * .4 - mood.annoyance * .5, 0, .45), 6, dt);
-    e.asym = approach(e.asym, x ? x.asym || 0 : temper === 'marudna' ? .12 : 0, 7, dt);
-    e.pout = approach(e.pout, (x && x.pout) || D.inFoch ? 1 : mood.annoyance > .55 ? .6 : 0, 8, dt);
+    e.low = approach(e.low, x ? x.low : clamp(.08 + mood.joy * .15, 0, .3), 10, dt);
+    e.tilt = approach(e.tilt, x ? x.tilt : clamp(mood.annoyance * .5 - mood.fear * .2, -.4, .6), 8, dt);
+    e.dil = approach(e.dil, x ? x.dil : clamp(.2 + mood.curiosity * .25 + mood.fear * .5 + mood.joy * .05, 0, 1), 6, dt);
+    e.raise = approach(e.raise, x ? x.raise || 0 : clamp((mood.curiosity - .35) * .5 + mood.fear * .4, 0, .35), 6, dt);
+    e.asym = approach(e.asym, x ? x.asym || 0 : temper === 'marudna' ? .1 : 0, 7, dt);
+    e.bar = approach(e.bar, x ? x.bar || 0 : D.inFoch ? .6 : clamp((mood.annoyance - .35) * 1.6, 0, .6), 5, dt);
+    e.pap = approach(e.pap, x ? x.pap || 0 : clamp(mood.annoyance + mood.fear * .8 + (mood.curiosity - .55) * .5, 0, .8), 4, dt);
     if (e.dizzy > 0) e.dizzy -= dt;
     if ((e.next -= dt) <= 0) { e.blink = .17; e.next = chance(.2) ? .3 : rand(2, 5.5); }
     if (e.blink > 0) e.blink = Math.max(0, e.blink - dt);
@@ -409,7 +415,7 @@
     oct.glowPulse = approach(oct.glowPulse, 0, 2, dt);
     // now and then a wave of light runs over her skin, more often when she is happy or curious
     if (oct.shimT > 0) oct.shimT = Math.max(0, oct.shimT - dt);
-    else if (clock > oct.nextShim && oct.camoT < .5) { oct.shimT = SHIM; oct.nextShim = clock + rand(5, 10) * (1.4 - mood.joy * .5 - mood.curiosity * .4); }
+    else if (clock > oct.nextShim && oct.camoT < .5 && state !== 'sleep') { oct.shimT = SHIM; oct.nextShim = clock + rand(9, 18) * (1.4 - mood.joy * .5 - mood.curiosity * .4); }
     oct.glowS = approach(oct.glowS, state === 'sleep' ? 1 : 0, 1.5, dt);
     oct.skin = mix(oct.skin, skinTarget(), 1 - Math.exp(-3.5 * dt));
     let sk = mix(oct.skin, oct.camoC, clamp(oct.camo, 0, 1) * .92);
@@ -418,17 +424,18 @@
     oct.breathe += dt * TAU * (.32 + mood.fear * .5) * (state === 'sleep' ? .6 : 1);
     eyesUpdate(dt);
     makeWarp();
-    shellUpdate(dt);
+    // at rest the arms mostly keep still: now and then one shifts, and asleep they barely move at all
+    oct.mt += dt * (state === 'sleep' ? 0 : .025);
     if ((oct.nextFidget -= dt) <= 0) {
-      oct.nextFidget = rand(1.2, 3.5);
-      if (state === 'rest' || state === 'sleep') { const a = pick(oct.arms); a.fd = a.ft = rand(1.2, 2.4); a.fa = rand(-.5, .7) * mScale(); }
+      oct.nextFidget = rand(4, 9);
+      if (state === 'rest') { const a = pick(oct.arms); a.fd = a.ft = rand(1.8, 3); a.fa = rand(-.3, .5) * mScale(); }
     }
     // one arm at a time lifts its tip and feels around, then lays it down again; tips slowly change their curl
     if (state === 'rest' && clock > oct.nextLift) {
-      oct.nextLift = clock + rand(3, 7);
+      oct.nextLift = clock + rand(9, 16);
       pick(oct.arms).tcT = tipCurl();
       const a = pick(oct.arms.filter(x => !x.reach));
-      if (a) { a.liftT = rand(.45, 1) * mScale(); a.liftUntil = clock + rand(1.5, 3.2); }
+      if (a) { a.liftT = rand(.3, .7) * mScale(); a.liftUntil = clock + rand(2, 3.5); }
     }
     for (const a of oct.arms) {
       for (const k in a.P) a.P[k] = approach(a.P[k], oct.poseP[k], 6, dt);
@@ -441,7 +448,7 @@
       if (a.ft > 0) { a.ft -= dt; a.fidget = a.ft > 0 ? a.fa * Math.sin(Math.PI * (1 - a.ft / a.fd)) : 0; }
       if (a.liftT && (clock > a.liftUntil || state !== 'rest')) a.liftT = 0;
       a.lift = approach(a.lift, a.liftT, 1.4, dt);
-      a.gl = approach(a.gl, !oct.physics && oct.poseP.up < .5 && oct.ground ? GL[a.k] : 1, 2.5, dt);
+      a.gl = approach(a.gl, oct.pose === 'tuck' ? .42 : !oct.physics && oct.poseP.up < .5 && oct.ground ? GL[a.k] : 1, 2.5, dt);
       a.tc = approach(a.tc, a.k < 2 ? Math.min(a.tcT, .5) : a.tcT, .6, dt);
       armSim(a, dt);
     }
@@ -579,33 +586,34 @@
     c.stroke();
   }
   function eye(c, cx, cy, r, side, open, e, skin) {
-    const sk = 1 - oct.camo * .95; // mound, lids and brow fade with the skin; only the eyeballs stay
-    // the eye sits on a raised mound, as on a real octopus: lit on top, shadowed below, no hard edge
+    const sk = 1 - oct.camo * .95; // turret, lids and brow fade with the skin; only the eye itself stays
+    // the eye sits on a raised turret, as on a real octopus: lit on top, shadowed below, no hard edge
     const md = c.createRadialGradient(cx, cy + r * .4, r * .4, cx, cy + r * .4, r * 1.55);
     md.addColorStop(0, `rgba(16,6,40,${.34 * sk})`); md.addColorStop(1, 'rgba(16,6,40,0)');
     c.fillStyle = md; c.beginPath(); c.arc(cx, cy + r * .4, r * 1.55, 0, TAU); c.fill();
     const mg = c.createRadialGradient(cx - side * r * .15, cy - r * .55, r * .1, cx, cy - r * .04, r * 1.55);
     mg.addColorStop(0, rgba(shade(skin, .24), sk)); mg.addColorStop(.62, rgba(shade(skin, .05), sk)); mg.addColorStop(1, rgba(skin, 0));
     c.fillStyle = mg; c.beginPath(); c.arc(cx, cy - r * .04, r * 1.55, 0, TAU); c.fill();
+    // the eye bar: a dark stripe through the eye, a real octopus warning display
+    if (e.bar > .03) {
+      c.save(); c.globalAlpha *= e.bar * sk * .7; c.translate(cx, cy); c.rotate(-side * e.tilt * .2);
+      c.fillStyle = rgba(shade(skin, -.72)); pill(c, 0, 0, r * 3.1, r * .6); c.fill(); c.restore();
+    }
     c.save(); c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.clip();
-    c.fillStyle = '#E9E1F2'; c.fillRect(cx - r, cy - r, 2 * r, 2 * r);
-    const sh = c.createLinearGradient(cx, cy - r, cx, cy + r);
-    sh.addColorStop(0, 'rgba(60,30,110,.35)'); sh.addColorStop(.5, 'rgba(60,30,110,0)'); sh.addColorStop(1, 'rgba(60,30,110,.18)');
-    c.fillStyle = sh; c.fillRect(cx - r, cy - r, 2 * r, 2 * r);
-    const ir = r * .8, ix = cx + e.gx * (r - ir * .7), iy = cy + e.gy * (r - ir * .7);
+    // no white: an octopus eye shows only iris, with a horizontal bar of a pupil
+    const px = cx + e.gx * r * .34, py = cy + e.gy * r * .26;
+    const ig = c.createRadialGradient(px, py, r * .1, cx, cy, r * 1.05);
+    ig.addColorStop(0, '#B9FBFF'); ig.addColorStop(.45, rgba(GLOW)); ig.addColorStop(1, '#0A4F66');
+    c.fillStyle = ig; c.fillRect(cx - r, cy - r, 2 * r, 2 * r);
     if (e.dizzy > 0) spiral(c, cx, cy, r * .8);
     else {
-      const ig = c.createRadialGradient(ix - ir * .25, iy - ir * .3, ir * .08, ix, iy, ir);
-      ig.addColorStop(0, '#A8F6F8'); ig.addColorStop(.48, rgba(GLOW)); ig.addColorStop(1, '#09566E');
-      c.fillStyle = ig; c.beginPath(); c.arc(ix, iy, ir, 0, TAU); c.fill();
-      c.strokeStyle = 'rgba(4,34,52,.6)'; c.lineWidth = ir * .1; c.stroke();
-      // octopus pupil: a horizontal bar that rounds out as it dilates
-      c.fillStyle = '#0E0622'; pill(c, ix, iy, ir * lerp(1.05, .86, e.dil), ir * lerp(.58, .86, e.dil)); c.fill();
-      c.fillStyle = 'rgba(255,255,255,.95)'; c.beginPath(); c.arc(ix - ir * .32, iy - ir * .34, ir * .25, 0, TAU); c.fill();
-      c.fillStyle = 'rgba(255,255,255,.8)'; c.beginPath(); c.arc(ix + ir * .34, iy + ir * .3, ir * .11, 0, TAU); c.fill();
-      c.fillStyle = 'rgba(255,255,255,.55)'; c.beginPath(); c.arc(ix - ir * .02, iy - ir * .5, ir * .06, 0, TAU); c.fill();
+      c.strokeStyle = 'rgba(6,55,75,.3)'; c.lineWidth = r * .04;
+      for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; c.beginPath(); c.moveTo(px + Math.cos(a) * r * .42, py + Math.sin(a) * r * .32); c.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); c.stroke(); }
+      // the pupil: a slit in bright light, rounding out when she is excited, curious or scared
+      c.fillStyle = '#0B0518'; pill(c, px, py, r * lerp(1.05, .85, e.dil), r * lerp(.14, .72, e.dil)); c.fill();
+      c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.ellipse(cx - r * .38, cy - r * .42, r * .17, r * .1, -.5, 0, TAU); c.fill();
     }
-    // heavy upper lid: a thick fold of skin with a soft shadow under it
+    // the upper lid: a fold of skin with a soft shadow under it
     const tilt = -side * e.tilt * .5, uy = cy - r * 1.06 + 2.12 * r * (1 - clamp(open, 0, 1));
     c.save(); c.translate(cx, uy); c.rotate(tilt);
     const ls = c.createLinearGradient(0, 0, 0, r * .4);
@@ -615,14 +623,13 @@
     lg.addColorStop(0, rgba(shade(skin, .16))); lg.addColorStop(1, rgba(shade(skin, -.08)));
     c.fillStyle = lg; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .3, r * 1.4, 0); c.lineTo(r * 1.4, -r * 3); c.lineTo(-r * 1.4, -r * 3); c.closePath(); c.fill();
     c.strokeStyle = rgba(shade(skin, -.55)); c.lineWidth = r * .1; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, r * .3, r * 1.4, 0); c.stroke();
-    c.strokeStyle = rgba(shade(skin, .4), .6); c.lineWidth = r * .07; c.beginPath(); c.moveTo(-r * 1.2, -r * .14); c.quadraticCurveTo(0, r * .12, r * 1.2, -r * .14); c.stroke();
+    c.strokeStyle = rgba(shade(skin, .4), .5); c.lineWidth = r * .06; c.beginPath(); c.moveTo(-r * 1.2, -r * .14); c.quadraticCurveTo(0, r * .12, r * 1.2, -r * .14); c.stroke();
     c.restore();
     if (e.low > .02) {
       const ly = cy + r * 1.06 - 2.12 * r * e.low;
-      const arch = r * (.22 + e.low * .8); // a raised lower lid arches up, the way a smile pushes the cheeks
-      c.save(); c.translate(cx, ly + arch * .3); c.rotate(-tilt * .4);
-      c.fillStyle = rgba(shade(skin, .04)); c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -arch, r * 1.4, 0); c.lineTo(r * 1.4, r * 3); c.lineTo(-r * 1.4, r * 3); c.closePath(); c.fill();
-      c.strokeStyle = rgba(shade(skin, -.45)); c.lineWidth = r * .08; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -arch, r * 1.4, 0); c.stroke();
+      c.save(); c.translate(cx, ly); c.rotate(-tilt * .4);
+      c.fillStyle = rgba(shade(skin, .04)); c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -r * .22, r * 1.4, 0); c.lineTo(r * 1.4, r * 3); c.lineTo(-r * 1.4, r * 3); c.closePath(); c.fill();
+      c.strokeStyle = rgba(shade(skin, -.45)); c.lineWidth = r * .08; c.beginPath(); c.moveTo(-r * 1.4, 0); c.quadraticCurveTo(0, -r * .22, r * 1.4, 0); c.stroke();
       c.restore();
     }
     c.restore();
@@ -631,12 +638,19 @@
       c.beginPath(); c.moveTo(cx - r * .85, cy + r * .05); c.quadraticCurveTo(cx, cy + r * .4, cx + r * .85, cy + r * .05); c.stroke();
     }
     c.strokeStyle = rgba(shade(skin, -.5), .55 * sk); c.lineWidth = r * .06; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.stroke();
-    // brow fold: it carries most of the expression
+    // the brow fold over the eye, and the small papillae on it that rise when she is roused
     const lift = (1 - clamp(open, 0, 1)) * r * .22 - (e.asym || 0) * side * r * .3 - (e.raise || 0) * r * .32;
     c.save(); c.globalAlpha *= sk; c.translate(cx, cy - r * 1.22 + lift); c.rotate(-side * e.tilt * .62);
-    c.fillStyle = rgba(shade(skin, .2)); c.beginPath(); c.moveTo(-r * 1.3, r * .22); c.quadraticCurveTo(0, -r * .5, r * 1.3, r * .22); c.quadraticCurveTo(0, -r * .1, -r * 1.3, r * .22); c.fill();
-    c.strokeStyle = rgba(shade(skin, -.45), .65); c.lineWidth = r * .09; c.lineCap = 'round';
-    c.beginPath(); c.moveTo(-r * 1.1, r * .26); c.quadraticCurveTo(0, -r * .06, r * 1.1, r * .26); c.stroke();
+    if (e.pap > .05) {
+      c.fillStyle = rgba(shade(skin, .12)); c.strokeStyle = rgba(shade(skin, -.4), .55); c.lineWidth = r * .05;
+      for (const [x, h] of [[-.42, .9], [.12, 1]]) {
+        const bx = side * x * r, hh = r * .3 * e.pap * h;
+        c.beginPath(); c.moveTo(bx - r * .13, r * .02); c.quadraticCurveTo(bx - r * .02, -hh * .4, bx + side * r * .03, -hh); c.quadraticCurveTo(bx + r * .06, -hh * .3, bx + r * .14, r * .02); c.closePath(); c.fill(); c.stroke();
+      }
+    }
+    c.fillStyle = rgba(shade(skin, .2)); c.beginPath(); c.moveTo(-r * 1.25, r * .22); c.quadraticCurveTo(0, -r * .42, r * 1.25, r * .22); c.quadraticCurveTo(0, -r * .06, -r * 1.25, r * .22); c.fill();
+    c.strokeStyle = rgba(shade(skin, -.45), .55); c.lineWidth = r * .08; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-r * 1.05, r * .26); c.quadraticCurveTo(0, -r * .02, r * 1.05, r * .26); c.stroke();
     c.restore();
   }
   function drawFace(c) {
@@ -652,27 +666,6 @@
       const p = warp(side * .235 * S * squeeze + f * .08 * S + shift, -.31 * S);
       c.save(); c.globalAlpha *= fade; c.translate(p[0], p[1]); c.scale(squeeze, 1);
       eye(c, 0, 0, r * far, side, clamp(open * (1 + e.asym * side * .45), 0, 1), e, skin);
-      c.restore();
-    }
-    // the fold of skin under the eyes curls up in a small smile, or pushes out in a pout when she sulks
-    const sm = e.smile * (1 - e.pout);
-    if (sm > .04 && tr < .5) {
-      const m = warp(f * .06 * S + shift, -.14 * S), w = .07 * S * squeeze;
-      c.save(); c.globalAlpha *= Math.min(1, sm * 1.6) * (1 - oct.camo);
-      c.strokeStyle = rgba(shade(skin, -.62), .85); c.lineWidth = .017 * S; c.lineCap = 'round';
-      c.beginPath(); c.moveTo(m[0] - w, m[1] - w * .12); c.quadraticCurveTo(m[0], m[1] + w * (.25 + .55 * sm), m[0] + w, m[1] - w * .12); c.stroke();
-      c.strokeStyle = rgba(shade(skin, .3), .35); c.lineWidth = .012 * S;
-      c.beginPath(); c.moveTo(m[0] - w * .55, m[1] + w * (.3 + .45 * sm)); c.quadraticCurveTo(m[0], m[1] + w * (.5 + .6 * sm), m[0] + w * .55, m[1] + w * (.3 + .45 * sm)); c.stroke();
-      c.restore();
-    }
-    if (e.pout > .03 && tr < .5) {
-      const m = warp(f * .06 * S + shift, -.13 * S), w = .085 * S * squeeze;
-      c.save(); c.globalAlpha *= e.pout * (1 - oct.camo);
-      const pg = c.createRadialGradient(m[0], m[1] - w * .3, 0, m[0], m[1], w * 1.1);
-      pg.addColorStop(0, rgba(shade(skin, .12))); pg.addColorStop(1, rgba(shade(skin, -.2)));
-      c.fillStyle = pg; c.beginPath(); c.ellipse(m[0], m[1], w, w * .6, 0, 0, TAU); c.fill();
-      c.strokeStyle = rgba(shade(skin, -.6), .8); c.lineWidth = .016 * S; c.lineCap = 'round';
-      c.beginPath(); c.moveTo(m[0] - w * .62, m[1] + w * .3); c.quadraticCurveTo(m[0], m[1] - w * .12, m[0] + w * .62, m[1] + w * .3); c.stroke();
       c.restore();
     }
   }
@@ -704,6 +697,7 @@
   function armOutline(c, pts, w0, wt, fresh = true) { armFrame(pts, w0, wt); armPath(c, pts, WW, fresh); }
   function drawArm(c, a, col, detail) {
     const p = a.p, k = 1 - oct.camo, w0 = a.w0 * S * oct.scale, wt = .018 * S * oct.scale;
+    if (oct.mimic) { armOutline(c, p, w0, wt); c.fillStyle = rgba(col); c.fill(); return; } // no pink, no suckers: just a shape like a letter
     // suckers: underneath an arm lying on the ground (they face the floor), on the inner side of the curl otherwise
     const gr = a.run && !oct.physics && a.P.up < .5 ? oct.ground : null;
     const sg = gr ? a.run : (2 * a.P.up - 1) * a.side >= 0 ? 1 : -1;
@@ -777,7 +771,7 @@
     }
     c.closePath();
     const g = c.createLinearGradient(C.x, C.y - .1 * S, C.x, C.y + .45 * S * oct.scale);
-    g.addColorStop(0, rgba(shade(skin, -.12))); g.addColorStop(1, rgba(mix(shade(skin, -.1), BELLY, .35)));
+    g.addColorStop(0, rgba(shade(skin, -.12))); g.addColorStop(1, rgba(mix(shade(skin, -.1), oct.mimic ? skin : BELLY, .35)));
     c.fillStyle = g; c.fill();
   }
   function drawGlow(c) {
@@ -806,49 +800,6 @@
     c.fillStyle = gr; c.beginPath(); c.arc(0, 0, R, 0, TAU); c.fill(); c.restore();
   }
   // ---------- props and scenes ----------
-  // half a coconut shell: real octopuses carry them around and hide underneath
-  function shellUpdate(dt) {
-    const sh = oct.shell;
-    if (!sh) return;
-    sh.a = approach(sh.a, sh.aT, 6, dt);
-    const rx = .74 * S * oct.scale;
-    let tx, ty, ta;
-    if (sh.mode === 'carry') { // worn like a helmet, rocking a little as she walks
-      const p = toWorld(0, -.62 * S); tx = p.x; ty = p.y; ta = oct.ang + Math.sin(clock * 9) * .05 * sh.rock;
-    } else { // down over her, hinged on one side: tilt opens a gap to peek through, raise lifts the whole thing
-      sh.tilt = approach(sh.tilt, sh.tiltT, 6, dt); sh.raise = approach(sh.raise, sh.raiseT, 6, dt);
-      const gy = (oct.ground ? oct.ground.y : oct.y + .3 * S) - sh.raise * S, hx = oct.x + sh.side * rx, ang = sh.side * sh.tilt;
-      tx = hx - sh.side * rx * Math.cos(ang); ty = gy - sh.side * rx * Math.sin(ang); ta = ang;
-    }
-    const k = sh.snap ? 1 : 1 - Math.exp(-14 * dt); sh.snap = false;
-    sh.x = lerp(sh.x, tx, k); sh.y = lerp(sh.y, ty, k); sh.ang += angDiff(sh.ang, ta) * k;
-  }
-  function drawShell(c) {
-    const sh = oct.shell;
-    if (!sh || sh.a < .01) return;
-    const rx = .74 * S * oct.scale, ry = .72 * S * oct.scale;
-    c.save(); c.globalAlpha *= sh.a * oct.alpha; c.translate(sh.x, sh.y); c.rotate(sh.ang);
-    c.shadowColor = 'rgba(8,3,20,.55)'; c.shadowBlur = S * .14 * DPR;
-    const g = c.createLinearGradient(-rx * .5, -ry, rx * .6, 0);
-    g.addColorStop(0, '#A87443'); g.addColorStop(.45, '#704626'); g.addColorStop(1, '#3B2311');
-    c.fillStyle = g; c.beginPath(); c.ellipse(0, 0, rx, ry, 0, Math.PI, TAU); c.closePath(); c.fill();
-    c.shadowBlur = 0;
-    // coir fibres
-    c.strokeStyle = 'rgba(45,25,10,.5)'; c.lineWidth = Math.max(1, S * .01); c.lineCap = 'round';
-    for (let i = 0; i < 18; i++) {
-      const a = Math.PI * (1.06 + .88 * ((i * 7 % 18) / 18)), r0 = .55 + (i * 13 % 7) / 18, x0 = Math.cos(a) * rx * r0, y0 = Math.sin(a) * ry * r0;
-      c.beginPath(); c.moveTo(x0, y0); c.lineTo(x0 + Math.cos(a + 1.2) * S * .07, y0 + Math.sin(a + 1.2) * S * .05); c.stroke();
-    }
-    // the three "eyes" of a coconut, near the top
-    c.fillStyle = 'rgba(30,16,6,.85)';
-    for (const [x, y] of [[-.12, -.83], [.04, -.9], [.18, -.8]]) { c.beginPath(); c.ellipse(x * rx, y * ry, S * .035, S * .028, 0, 0, TAU); c.fill(); }
-    c.strokeStyle = 'rgba(255,225,180,.35)'; c.lineWidth = S * .03;
-    c.beginPath(); c.ellipse(0, 0, rx * .82, ry * .82, 0, Math.PI * 1.15, Math.PI * 1.45); c.stroke();
-    // the cut rim, pale
-    c.strokeStyle = '#E9DCC0'; c.lineWidth = S * .04; c.beginPath(); c.moveTo(-rx, 0); c.lineTo(rx, 0); c.stroke();
-    c.restore();
-  }
-
   // pressed against the screen from the inside, like an octopus on aquarium glass: we see her underside
   const GLASS = [-22, 12, 46, 78, 102, 134, 168, 202].map(d => d * Math.PI / 180);
   const GLASS_RANK = [0, 1, 2, 3, 3, 2, 1, 0]; // which arms let go first as she slides down
@@ -913,7 +864,7 @@
   const inFront = a => a.reach && a.reach.front && a.reach.w > .15;
   function drawOcto(c) {
     if (oct.glass) { drawGlass(c); return; }
-    const skin = oct.skinNow, bodyA = oct.alpha * (1 - oct.camo * (oct.eyeCamo ? 1 : .96));
+    const skin = oct.skinNow, bodyA = oct.alpha * (oct.mimic ? 1 : 1 - oct.camo * (oct.eyeCamo ? 1 : .96));
     drawShadow(c);
     c.save(); c.globalAlpha = bodyA; drawGlow(c); c.restore();
     c.save(); c.globalAlpha = bodyA;
@@ -930,7 +881,6 @@
     c.save(); c.globalAlpha = bodyA;
     for (const a of oct.arms) if (inFront(a)) drawArm(c, a, shade(skin, -.08), true);
     c.restore();
-    drawShell(c);
   }
 
   // ---------- thoughts and dreams: pictures only, she never talks ----------
@@ -1342,7 +1292,7 @@
       dimEl.style.opacity = o;
       if (fx.dim.t > 1.1) { fx.dim = null; dimEl.style.opacity = 0; }
     }
-    fishUpdate(dt); beamUpdate(dt);
+    fishUpdate(dt); beamUpdate(dt); dotUpdate(dt);
     thoughtTick(dt);
   }
   function drawGhost(c, g) {
@@ -1451,22 +1401,25 @@
   function fxDrawBack(c) {
     for (const g of fx.ghosts) drawGhost(c, g);
     for (const p of fx.p) {
-      if (p.k !== 'ink' || p.delay > 0) continue;
-      const a = .55 * Math.pow(1 - p.life / p.max, 1.2), gr = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-      gr.addColorStop(0, rgba(fx.ink, a)); gr.addColorStop(1, rgba(fx.ink, 0));
+      if ((p.k !== 'ink' && p.k !== 'blot') || p.delay > 0) continue;
+      const col = p.col || fx.ink, a = p.k === 'blot' ? p.peak * Math.min(1, p.life / .5) * Math.pow(1 - p.life / p.max, 1.4) : .55 * Math.pow(1 - p.life / p.max, 1.2);
+      const gr = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      gr.addColorStop(0, rgba(col, a)); gr.addColorStop(1, rgba(col, 0));
       c.fillStyle = gr; c.beginPath(); c.arc(p.x, p.y, p.r, 0, TAU); c.fill();
     }
   }
   function fxDrawFront(c) {
     for (const p of fx.p) {
-      if (p.delay > 0 || p.k === 'ink') continue;
+      if (p.delay > 0 || p.k === 'ink' || p.k === 'blot') continue;
       const a = 1 - p.life / p.max;
-      if (p.k === 'drop') { c.fillStyle = `rgba(190,245,255,${.85 * a})`; c.beginPath(); c.arc(p.x, p.y, p.r, 0, TAU); c.fill(); }
+      if (p.k === 'inkdrop') { c.fillStyle = `rgba(12,5,26,${.9 * a + .1})`; c.strokeStyle = `rgba(150,120,210,${.5 * a})`; c.lineWidth = 1; c.beginPath(); c.arc(p.x, p.y, p.r, 0, TAU); c.fill(); c.stroke(); }
+      else if (p.k === 'drop') { c.fillStyle = `rgba(190,245,255,${.85 * a})`; c.beginPath(); c.arc(p.x, p.y, p.r, 0, TAU); c.fill(); }
       else { c.fillStyle = rgba(p.col, a); star4(c, p.x, p.y, p.r, p.rot + p.life * 3); c.fill(); }
     }
     for (const r of fx.rings) { const u = r.t / .6; c.strokeStyle = rgba(GLOW, .8 * (1 - u)); c.lineWidth = 2; c.beginPath(); c.arc(r.x, r.y, S * (.08 + u * .5), 0, TAU); c.stroke(); }
     if (fx.beam) drawBeam(c, fx.beam);
     if (fx.fish) drawFish(c, fx.fish);
+    drawDot(c);
     for (const e of fx.emotes) drawEmote(c, e);
     drawThought(c);
   }
@@ -1512,6 +1465,136 @@
       }
     },
   };
+  // ---------- things she moves: whole elements (springs like the letters, no layout changes) and the dot over an i ----------
+  const Moved = {
+    act: new Set(), all: new Set(),
+    st(el) { return el._osmM || (el._osmM = { x: 0, y: 0, r: 0, vx: 0, vy: 0, vr: 0, tx: 0, ty: 0, tr: 0 }); },
+    kick(el, o) { const s = this.st(el); for (const k in o) { if (k[0] === 'v') s[k] += o[k]; else s[k] = o[k]; } this.act.add(el); this.all.add(el); },
+    fix(el) { const s = el._osmM; if (!s) return; s.tx = s.ty = s.tr = 0; s.vr += (s.r > 0 ? -1 : 1) * 60; this.act.add(el); },
+    fixAll() { for (const el of this.all) this.fix(el); },
+    moved(el) { const s = el._osmM; return !!s && (Math.abs(s.tx) > 1 || Math.abs(s.ty) > 1 || Math.abs(s.tr) > .8); },
+    update(dt) {
+      for (const el of this.act) {
+        if (!el.isConnected) { this.act.delete(el); continue; }
+        const s = el._osmM;
+        s.vx += ((s.tx - s.x) * 120 - s.vx * 10) * dt; s.x += s.vx * dt;
+        s.vy += ((s.ty - s.y) * 120 - s.vy * 10) * dt; s.y += s.vy * dt;
+        s.vr += ((s.tr - s.r) * 120 - s.vr * 9) * dt; s.r += s.vr * dt;
+        if (Math.abs(s.vx) + Math.abs(s.vy) + Math.abs(s.vr) * .1 < .03 && Math.abs(s.tx - s.x) + Math.abs(s.ty - s.y) + Math.abs(s.tr - s.r) < .05) { s.x = s.tx; s.y = s.ty; s.r = s.tr; this.act.delete(el); }
+        el.style.transform = s.x || s.y || s.r ? `translate(${s.x.toFixed(2)}px,${s.y.toFixed(2)}px) rotate(${s.r.toFixed(2)}deg)` : '';
+        el.classList.toggle('osm-krzywa', this.moved(el));
+      }
+    },
+  };
+  // small framed items on the slide: list points, chips, little cards
+  function findItems() {
+    const out = [];
+    for (const el of slideRoot().querySelectorAll('li, span, div, a, code')) {
+      if (el.closest('[data-osmiornica-host],[data-osmiornica-przeszkoda],[data-osmiornica="nie"],h1,h2,h3,.osm-w') || Moved.moved(el)) continue;
+      const r = shown(el); if (!r || r.width < S * .35 || r.width > VW * .3 || r.height > VH * .25 || r.height < 12) continue;
+      const cs = getComputedStyle(el);
+      if (cs.display === 'inline' || cs.position === 'fixed' || cs.position === 'absolute' || !el.textContent.trim()) continue;
+      const bg = parseColor(cs.backgroundColor);
+      if (el.tagName !== 'LI' && !(parseFloat(cs.borderTopWidth) > 0 && cs.borderTopStyle !== 'none') && !(bg && bg.a > .05)) continue;
+      out.push({ el, r });
+    }
+    // only the innermost: a card full of chips is a frame, not an item
+    return out.filter(a => !out.some(b => b !== a && a.el.contains(b.el)));
+  }
+
+  // the dot over an i (or j): she can flick it off, chase it and keep it; a click on the letter or R brings it back
+  const DOT = { mode: '', el: null, ch: '', x: 0, y: 0, r: 0, vx: 0, vy: 0, col: [244, 240, 255], hx: 0, hy: 0, held: null, rest: false, fx: 0, fy: 0, t: 0 };
+  const DOTLESS = { i: 'ı', j: 'ȷ' };
+  // gradient text (background-clip: text) has no colour of its own, so read it off the gradient
+  function textColorAt(el, x) {
+    for (let g = el; g && g !== document.body; g = g.parentElement) {
+      const cs = getComputedStyle(g);
+      if ((cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text') && cs.backgroundImage !== 'none') {
+        const cols = (cs.backgroundImage.match(/rgba?\([^)]+\)/g) || []).map(parseColor).filter(Boolean).map(p => p.c);
+        if (!cols.length) break;
+        if (cols.length === 1) return cols[0];
+        const r = g.getBoundingClientRect(), f = clamp((x - r.left) / Math.max(1, r.width), 0, 1) * (cols.length - 1), i = Math.min(cols.length - 2, Math.floor(f));
+        return mix(cols[i], cols[i + 1], f - i);
+      }
+    }
+    const p = parseColor(getComputedStyle(el).color);
+    return p && p.a > .1 ? p.c : [244, 240, 255];
+  }
+  function dotTarget() {
+    if (DOT.mode) return null;
+    const cands = [];
+    for (const el of headsOf(slideRoot())) {
+      for (const w of wordsIn(el)) for (let i = 0; i < w.word.length; i++) {
+        if (!DOTLESS[w.word[i]]) continue;
+        const rg = document.createRange(); rg.setStart(w.node, w.start + i); rg.setEnd(w.node, w.start + i + 1);
+        const r = rg.getBoundingClientRect();
+        if (r.width && r.left > S && r.right < VW - S && r.top > S * 1.2) cands.push({ el, w, i, ch: w.word[i], score: rand(0, 1) });
+      }
+      for (const l of el.querySelectorAll('.osm-l')) {
+        const r = l.getBoundingClientRect();
+        if (DOTLESS[l.textContent] && !Letters.crooked(l) && r.left > S && r.right < VW - S && r.top > S * 1.2) cands.push({ el, letter: l, ch: l.textContent, score: rand(0, 1) });
+      }
+    }
+    const c = cands.sort((a, b) => a.score - b.score)[0];
+    if (!c) return null;
+    const L = c.letter || wrapWord(c.w.node, c.w.start, c.w.end)[c.i];
+    const cs = getComputedStyle(L), fs = parseFloat(cs.fontSize) || 32, font = `${cs.fontStyle} ${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
+    if (document.fonts && document.fonts.check && !document.fonts.check(font, DOTLESS[c.ch])) return null;
+    MCTX.font = font;
+    const mi = MCTX.measureText(c.ch), mn = MCTX.measureText(DOTLESS[c.ch]), gap = mi.actualBoundingBoxAscent - mn.actualBoundingBoxAscent;
+    const lr = L.getBoundingClientRect(), line = lineFor(c.el, lr);
+    if (!line || gap < fs * .08) return null; // this font has no separate dot to take
+    const d = gap * .62, cx = c.ch === 'j' ? lr.left + mi.actualBoundingBoxRight - d * .55 : lr.left + (mi.actualBoundingBoxRight - mi.actualBoundingBoxLeft) / 2;
+    return { el: c.el, letter: L, ch: c.ch, cx, cy: line.base - mi.actualBoundingBoxAscent + d / 2, r: d / 2, surface: line, col: textColorAt(L, cx) };
+  }
+  // swap the letter for its dotless twin and draw the dot on the canvas in the very same place
+  function dotDetach(T) {
+    const lr = T.letter.getBoundingClientRect();
+    Object.assign(DOT, { mode: 'stuck', el: T.letter, ch: T.ch, x: T.cx, y: T.cy, ox: T.cx - lr.left, oy: T.cy - lr.top, r: T.r, col: T.col, vx: 0, vy: 0, held: null, rest: false });
+    T.letter.textContent = DOTLESS[T.ch]; T.letter.classList.add('osm-krzywa'); T.letter._osmDot = true;
+  }
+  function dotRestore() {
+    if (DOT.el) { DOT.el.textContent = DOT.ch; DOT.el.classList.remove('osm-krzywa'); DOT.el._osmDot = false; }
+    DOT.mode = ''; DOT.el = null; DOT.held = null;
+  }
+  // the dot flies back to its letter (from wherever it is, or from off-screen if she took it)
+  function dotHome() {
+    if (!DOT.mode || DOT.mode === 'back') return;
+    if (!DOT.el || !shown(DOT.el)) return dotRestore();
+    const r = DOT.el.getBoundingClientRect(); DOT.hx = r.left + DOT.ox; DOT.hy = r.top + DOT.oy;
+    if (DOT.mode === 'gone') { DOT.x = DOT.hx + rand(-.2, .2) * VW; DOT.y = -S; }
+    Object.assign(DOT, { mode: 'back', t: 0, fx: DOT.x, fy: DOT.y, held: null });
+  }
+  function dotUpdate(dt) {
+    if (!DOT.mode) return;
+    if (DOT.el && !DOT.el.isConnected) { DOT.mode = ''; DOT.el = null; return; }
+    if (DOT.mode === 'stuck') { const r = DOT.el.getBoundingClientRect(); DOT.x = r.left + DOT.ox; DOT.y = r.top + DOT.oy; }
+    else if (DOT.mode === 'held' && DOT.held) { const q = DOT.held.p[N - 1]; DOT.x = q.x; DOT.y = q.y; }
+    else if (DOT.mode === 'hat') { const p = toWorld(.04 * S, -1.04 * S); DOT.x = p.x; DOT.y = p.y - DOT.r; }
+    else if (DOT.mode === 'back') {
+      DOT.t += dt; const u = clamp(DOT.t / .7, 0, 1), e = smooth(u);
+      DOT.x = lerp(DOT.fx, DOT.hx, e); DOT.y = lerp(DOT.fy, DOT.hy, e) - Math.sin(Math.PI * u) * S * .7;
+      if (u >= 1) { dotRestore(); }
+    } else if (DOT.mode === 'free' && !DOT.rest) {
+      const py = DOT.y;
+      DOT.vy += G() * .8 * dt; DOT.x += DOT.vx * dt; DOT.y += DOT.vy * dt;
+      if (DOT.x < DOT.r) { DOT.x = DOT.r; DOT.vx = Math.abs(DOT.vx) * .6; }
+      if (DOT.x > VW - DOT.r) { DOT.x = VW - DOT.r; DOT.vx = -Math.abs(DOT.vx) * .6; }
+      let landed = false;
+      if (DOT.vy > 0) for (const s of world.lines.concat(world.boxes, [world.floor])) {
+        if (DOT.x < s.x1 || DOT.x > s.x2 || py + DOT.r > s.y + 1 || DOT.y + DOT.r < s.y) continue;
+        DOT.y = s.y - DOT.r; DOT.ground = s; landed = true;
+        DOT.vy = DOT.vy > VH * .3 ? -DOT.vy * .42 : 0;
+        break;
+      }
+      if (landed && !DOT.vy) { DOT.vx *= Math.exp(-2.4 * dt); if (Math.abs(DOT.vx) < 8) { DOT.vx = 0; DOT.rest = true; } }
+      if (DOT.y > VH + S) DOT.mode = 'gone';
+    }
+  }
+  function drawDot(c) {
+    if (!DOT.mode || DOT.mode === 'gone') return;
+    c.fillStyle = rgba(DOT.col); c.beginPath(); c.arc(DOT.x, DOT.y, DOT.r, 0, TAU); c.fill();
+  }
   const WORD = /\p{L}{4,}/gu;
   const ROUND = /[oOcCsSeęéóÓ0QG]/;
   function wordsIn(el) {
@@ -1670,7 +1753,9 @@
     for (const a of oct.arms) if (a.reach) { a.reach.wT = 0; a.reach.follow = false; }
     if (fx.fish) fx.fish.held = null;
     if (fx.beam) fx.beam.onT = 0;
-    Object.assign(oct, { glass: null, shell: null, physics: false, spin: false, eyeCamo: false, camoT: 0, turnT: 0, scale: 1, alpha: oct.on ? 1 : oct.alpha });
+    for (const f of oct.undo.splice(0)) f();
+    if (DOT.mode === 'held' || DOT.mode === 'hat') Object.assign(DOT, { mode: 'free', held: null, rest: false, vx: rand(-60, 60), vy: -S * 2 });
+    Object.assign(oct, { glass: null, mimic: false, physics: false, spin: false, eyeCamo: false, camoT: 0, turnT: 0, scale: 1, alpha: oct.on ? 1 : oct.alpha });
     interruptible = false; D.inFoch = false;
     if (thought.dream) unthink();
     if (hitEl) hitEl.classList.remove('drag');
@@ -1769,8 +1854,8 @@
   // ---------- behaviours ----------
   const B = {};
   // in demo mode the entrances come in this order, one per slide
-  const ENTRANCES = ['zerkniecie', 'upadek', 'sen', 'szyba', 'kamuflaz', 'rybka', 'reflektor', 'kokos'];
-  const REACTIONS = ['atrament', 'kamuflaz', 'kokos', 'woda', 'foch'];
+  const ENTRANCES = ['zerkniecie', 'przesun', 'kropka', 'szczelina', 'przycisk', 'sen', 'szyba', 'kleks', 'rybka', 'upadek', 'kamuflaz', 'reflektor'];
+  const REACTIONS = ['atrament', 'kamuflaz', 'kleks', 'woda', 'foch'];
   const D = { slide: null, start: 0, appearances: 0, last: -1e9, timer: 0, greeted: false, lastReaction: '', taps: 0, inFoch: false };
   let lastAct = { name: '', at: -1e9 };
 
@@ -1791,7 +1876,7 @@
       lookAt(rand(L.x1, L.x2), (L.y + L.base) / 2, sec);
       if (chance(.25 + mood.curiosity * .6)) { expr('curious', sec); oct.tiltT = rand(.08, .2) * (chance(.5) ? 1 : -1); oct.tiltUntil = clock + sec; return; }
     } else look('audience', rand(1, 2));
-    if (chance(.25)) { oct.tiltT = rand(-.16, .16); oct.tiltUntil = clock + rand(1, 2); }
+    if (chance(.12)) { oct.tiltT = rand(-.14, .14); oct.tiltUntil = clock + rand(1, 2); }
   }
   const dodgeChance = () => clamp((mem.clicks - 6) / 30, 0, .55) + mood.fear * .3;
   // no yawn (she has no mouth to show): a long stretch of all eight arms, then the lids sink
@@ -1821,12 +1906,12 @@
       await wait(.2);
       const near = Math.hypot(cur.x - oct.x, cur.y - (oct.y - .5 * S)) < S * 1.3 && cur.inside;
       if (state === 'sleep') {
-        if (clock > zz) { zz = clock + (thought.on ? 4 : 6); emote('z', 1.6); }
+        if (clock > zz) { zz = clock + (thought.on ? 6 : 9); emote('z', 1.6); }
         if (CFG.thoughts && !thought.on && clock > thought.pauseUntil) think({ dream: true });
         if (near && clock - cur.t < .3) return perform('pobudka');
         continue;
       }
-      if (clock > nextLook) { idleLook(); nextLook = clock + rand(1.2, 3.4); }
+      if (clock > nextLook) { idleLook(); nextLook = clock + rand(2.5, 6); }
       if (CFG.thoughts && clock > nextThought && !thought.on) { think(pickThought(), 3.2); nextThought = clock + (CFG.mode === 'demo' ? rand(8, 14) : rand(20, 45)); }
       if (clock > sleepAt && mood.fear < .25 && oct.pose === 'lie') { await stretchOut(); fallAsleep(); continue; }
       // learned wariness: the more she has been clicked, the more she flinches at a rushing cursor
@@ -1897,7 +1982,7 @@
     const x = peekX();
     spawn(x, VH + S * 1.4, 'sit'); state = 'busy';
     await glideTo(x, VH + S * .08, .7, easeOut);
-    look('audience', 2.6); expr('angry', 2.6); think({ icon: 'nie' }, 2.2);
+    look('audience', 2.6); expr('skeptic', 2.6); think({ icon: 'nie' }, 2.2);
     await wait(.45);
     for (let i = 0; i < 5; i++) { oct.angT = (i % 2 ? -1 : 1) * .16; await wait(.15); }
     oct.angT = 0;
@@ -2057,57 +2142,6 @@
     else await motion(dt => { t += dt; oct.glass.peel = clamp(t / 2.2, 0, 1); oct.y += (S * .25 + t * t * S * .9) * dt; oct.glass.fog = approach(oct.glass.fog, 0, 1, dt); return oct.y > VH + S * 2.2; });
     hide();
   };
-  B.kokos = async () => {
-    // a real octopus trick: she carries half a coconut shell around and hides under it
-    refreshWorld();
-    const entering = !oct.on;
-    if (entering) {
-      const x1 = clamp(peekX(), S * 2, VW - S * 2), from = x1 < VW / 2 ? -1 : 1;
-      spawn(from < 0 ? -S * 1.6 : VW + S * 1.6, VH - .3 * S, 'sit'); oct.ground = world.floor; state = 'busy';
-      oct.spot = { kind: 'floor', x: x1, ground: world.floor, pose: 'sit', face: 0 };
-      oct.shell = { mode: 'carry', a: 1, aT: 1, x: oct.x, y: oct.y - S, ang: 0, tilt: 0, tiltT: 0, raise: 0, raiseT: 0, side: 1, rock: 1, snap: true, poked: 0 };
-      expr('happy', 9); look('audience', 2);
-      await walkTo(x1);
-    } else {
-      state = 'busy';
-      await settle();
-      // pulled out from behind her back
-      oct.shell = { mode: 'carry', a: 0, aT: 1, x: oct.x, y: oct.y - S, ang: 0, tilt: 0, tiltT: 0, raise: 0, raiseT: 0, side: 1, rock: 0, snap: true, poked: 0 };
-      startle(.4, 'focus'); await wait(.45);
-    }
-    interruptible = false;
-    const sh = oct.shell, gy = oct.ground ? oct.ground.y : oct.y + .3 * S;
-    // a poke sends her straight back under; she peeks out again when it feels safe
-    const hidden = async sec => {
-      const end = clock + sec;
-      while (clock < end) {
-        await wait(.1);
-        if (!sh.poked) continue;
-        sh.poked = 0; const tT = sh.tiltT, rT = sh.raiseT; sh.tiltT = sh.raiseT = 0; expr('closed', 1.3); feel('fear', .1);
-        await wait(1.4); sh.tiltT = tT; sh.raiseT = rT; expr('curious', 2);
-      }
-    };
-    // under she goes: squashed flat, the shell down over her
-    sh.side = chance(.5) ? 1 : -1; sh.mode = 'cover'; sh.tiltT = sh.raiseT = 0;
-    oct.qT = -.38; expr('closed', 1.6);
-    await glideTo(oct.x, gy - .08 * S, .25);
-    await hidden(1.3);
-    // a peek from under the rim, one eye first
-    sh.tiltT = .4; expr('curious', 2.4); look('audience', 1);
-    await hidden(1);
-    lookAt(oct.x - sh.side * VW, oct.y - S * .3, .9); await hidden(.9);
-    look('cursor', 1.2); await hidden(1.2);
-    // then the whole shell goes up and she has a proper look around
-    sh.tiltT = .1; sh.raiseT = .38; expr('happy', 2.2); feel('joy', .15);
-    await hidden(2.2);
-    // the shell back on like a hat, and off she goes
-    sh.tiltT = sh.raiseT = 0; sh.mode = 'carry'; oct.qT = 0;
-    await glideTo(oct.x, gy - .3 * S, .25);
-    expr('smug', 1.5); look('audience', 1.5); emote('♪');
-    await wait(1.2);
-    if (entering) { await walkTo(oct.x < VW / 2 ? -S * 2 : VW + S * 2); hide(); }
-    else { sh.aT = 0; await wait(.4); oct.shell = null; await rest(oct.spot); }
-  };
   B.reflektor = async () => {
     // stealth, straight out of Darwin's Paradox: a searchlight sweeps the slide and she must not be seen
     refreshWorld();
@@ -2137,7 +2171,7 @@
     // it comes back, and this time she puts it out
     b.sweep = { a0: b.ang, a1: h0 - dir * .95, t: 0, dur: 3.2 };
     while (b.sweep && Math.abs(angDiff(b.ang, her())) > .6) { lookAt(b.x, b.y, .2); await wait(.05); }
-    b.sweep = null; expr('angry', 1.2); lookAt(b.x, b.y, 1.5);
+    b.sweep = null; expr('focus', 1.2); lookAt(b.x, b.y, 1.5);
     await wait(.3);
     const s = siphonWorld(); squirt(s.x, s.y, b.x, b.y);
     await wait(.6);
@@ -2187,6 +2221,252 @@
     if (peek) { await glideTo(oct.x, VH + S * 1.5, .4, easeIn); hide(); }
     else await rest(oct.spot);
   };
+  // room for her beside a rectangle, at its bottom line: the side with less in the way
+  function besideSpot(r, extra = []) {
+    const room = x => {
+      const box = { l: x - S, r: x + S, t: r.bottom - S * 1.3, b: r.bottom - 3 };
+      let ov = 0; for (const o of world.obstacles) ov += overlap(box, o);
+      for (const q of extra) ov += overlap(box, { l: q.left, r: q.right, t: q.top, b: q.bottom }) * 2;
+      return box.l < 6 || box.r > VW - 6 ? 1e9 : ov;
+    };
+    const xr = r.right + S * 1.15, xl = r.left - S * 1.15, side = room(xr) <= room(xl) ? 1 : -1, x = side > 0 ? xr : xl;
+    const ground = { kind: 'line', x1: x - S * 1.6, x2: x + S * 1.6, y: r.bottom };
+    return { side, spot: { kind: 'beside', x, ground, face: -side, pose: 'sit' }, cost: room(x) };
+  }
+  // drop in from above onto a spot, or hop over if she is already about
+  async function arriveAt(spot) {
+    if (!oct.on) {
+      spawn(spot.x, -S * 1.6, 'fall'); state = 'busy';
+      if (RM.matches) { oct.y = spot.ground.y - .3 * S; oct.ground = spot.ground; oct.alpha = 0; await fadeTo(1, .4); }
+      else await fallTo(spot.ground);
+    } else { state = 'busy'; await hopTo(spot); }
+    oct.spot = spot; oct.ground = spot.ground; interruptible = false;
+  }
+  const armToward = side => oct.arms.find(a => !a.back && a.k === 2 && a.side === side) || oct.arms.find(a => !a.back);
+
+  // buttons on the slide (not the deck's own controls)
+  function findButton() {
+    const out = [];
+    for (const el of slideRoot().querySelectorAll('button, [role="button"], .btn, input[type="button"], input[type="submit"]')) {
+      if (el.closest('[data-osmiornica-host],[data-osmiornica-przeszkoda],[data-osmiornica="nie"]')) continue;
+      const r = shown(el); if (r && r.width < VW * .5) out.push({ el, r });
+    }
+    return out.length ? pick(out) : null;
+  }
+  // a press she can see but the deck never hears: no click is sent
+  function pressEl(el, k = 1) {
+    if (el.animate) el.animate([{ transform: 'none', filter: 'none' }, { transform: `translateY(${2 * k}px) scale(${1 - .05 * k})`, filter: `brightness(${1 + .4 * k})` }, { transform: 'none', filter: 'none' }], { duration: 280, easing: 'ease-out' });
+  }
+  B.przycisk = async () => {
+    // lab octopuses learn to work levers and buttons; this one simply has to know what it does
+    refreshWorld();
+    const T = findButton();
+    if (!T) return B.przesun();
+    const { side, spot } = besideSpot(T.r);
+    await arriveAt(spot);
+    const bx = side > 0 ? T.r.right - Math.min(T.r.width * .25, S * .5) : T.r.left + Math.min(T.r.width * .25, S * .5), by = T.r.top + T.r.height / 2;
+    lookAt(bx, by, 9); expr('curious', 2.6); oct.tiltT = side * .14; oct.tiltUntil = clock + 2;
+    await wait(1.3);
+    const arm = armToward(-side);
+    const press = async k => {
+      arm.reach = { x: bx, y: by, w: arm.reach ? arm.reach.w : 0, wT: 1, rate: 9, stiff: .5, front: true };
+      await wait(.3); pressEl(T.el, k); ring(bx, by);
+      await wait(.15); arm.reach.wT = .3; await wait(.3);
+    };
+    // a careful first touch and a flinch, then she gets the hang of it
+    await press(.4); startle(.35, 'curious'); arm.reach.wT = 0;
+    await wait(1);
+    for (let i = 0; i < 3; i++) await press(1);
+    arm.reach.wT = 0;
+    look('audience', 1.8); expr('smug', 1.8); emote('♪'); feel('joy', .2); feel('curiosity', .1);
+    await wait(1.8);
+    await rest(spot);
+  };
+
+  B.przesun = async () => {
+    // octopuses tidy their dens, shifting stones and shells about; here it is a point in a frame
+    refreshWorld();
+    const found = findItems(), rects = found.map(it => it.r);
+    const items = found.map(it => Object.assign(it, besideSpot(it.r, rects))).filter(it => it.cost < S * S * 1.5).sort((a, b) => a.cost - b.cost + rand(-.2, .2) * S * S);
+    const T = items[0];
+    if (!T) return oct.on ? rest(oct.spot) : B.zerkniecie();
+    await arriveAt(T.spot);
+    const r = T.el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    lookAt(cx, cy, 9); expr('curious', 2.2); oct.tiltT = T.side * .14; oct.tiltUntil = clock + 1.8;
+    await wait(1.2);
+    const arm = armToward(-T.side);
+    arm.reach = { x: cx + T.side * r.width * .3, y: cy, w: 0, wT: 1, rate: 5, stiff: .45, front: true };
+    await wait(1); // suckers on it
+    // the neighbour on the same row, if there is one: then the two may trade places
+    const nb = [T.el.previousElementSibling, T.el.nextElementSibling].map(n => n && items.find(it => it.el === n) ? n : null)
+      .find(n => n && Math.abs(n.getBoundingClientRect().top - r.top) < 4);
+    if (nb && chance(.45)) {
+      const [A, Z] = r.left < nb.getBoundingClientRect().left ? [T.el, nb] : [nb, T.el], ra = A.getBoundingClientRect(), rz = Z.getBoundingClientRect();
+      Moved.kick(A, { tx: rz.width + (rz.left - ra.right), ty: 0, tr: 0, vy: -90 });
+      Moved.kick(Z, { tx: ra.left - rz.left, ty: 0, tr: 0, vy: 90 });
+      arm.reach.x -= T.side * S * .3;
+    } else {
+      Moved.kick(T.el, { tx: T.side * rand(5, 10), ty: rand(-3, 2), tr: T.side * rand(2.5, 5) });
+      arm.reach.x += T.side * S * .12;
+    }
+    await wait(.5);
+    arm.reach.wT = 0;
+    lookAt(cx, cy, 1.2); oct.tiltT = -T.side * .12; oct.tiltUntil = clock + 1.2; expr('skeptic', 1.2);
+    await wait(1.2);
+    look('audience', 1.6); expr('smug', 1.6); feel('joy', .15);
+    await wait(1.6);
+    await rest(T.spot);
+  };
+
+  B.kropka = async () => {
+    // the dot over an i: she flicks it off, watches it roll, goes after it and keeps it
+    refreshWorld();
+    const T = dotTarget();
+    if (!T) return oct.on ? B.przesun() : B.upadek();
+    const surf = T.surface, side = T.cx - surf.x1 > surf.x2 - T.cx ? -1 : 1;
+    const x = clamp(T.cx + side * S * .95, surf.x1 + S * .25, surf.x2 - S * .25);
+    await arriveAt({ kind: 'top', x, ground: surf, pose: 'sit', face: 0 });
+    lookAt(T.cx, T.cy, 2.2); expr('curious', 2.2); oct.tiltT = -side * .15; oct.tiltUntil = clock + 1.8;
+    await wait(1.4);
+    dotDetach(T);
+    const arm = armToward(-side);
+    arm.reach = { x: T.cx + side * T.r * .6, y: T.cy, w: 0, wT: 1, rate: 7, stiff: .5, front: true };
+    await wait(.55);
+    // flick
+    Object.assign(DOT, { mode: 'free', vx: -side * rand(.6, 1) * S * 3, vy: -S * rand(5, 7), rest: false });
+    arm.reach.wT = 0; startle(.3, 'curious');
+    for (let i = 0; i < 90 && DOT.mode === 'free' && !DOT.rest; i++) { lookAt(DOT.x, DOT.y, .3); await wait(.05); }
+    if (DOT.mode === 'free' && DOT.rest && DOT.ground) {
+      // she goes after it
+      const g = DOT.ground, ds = Math.sign(oct.x - DOT.x) || 1, fx = clamp(DOT.x + ds * S * .9, Math.max(g.x1, S) + S * .2, Math.min(g.x2, VW - S) - S * .2);
+      await hopTo({ x: fx, ground: g }); oct.ground = g;
+      const a2 = armToward(-ds);
+      a2.reach = { x: DOT.x, y: DOT.y, w: 0, wT: 1, rate: 8, stiff: .5, front: true };
+      await wait(.5);
+      DOT.mode = 'held'; DOT.held = a2;
+      a2.reach = { rel: [-ds * .55 * S, -1.05 * S], w: a2.reach.w, wT: 1, rate: 4, stiff: .4, front: true };
+      lookAt(oct.x - ds * .55 * S, oct.y - 1.05 * S, 1.5); expr('happy', 1.5); feel('joy', .2);
+      await wait(1.5);
+      oct.spot = { kind: g.kind, x: oct.x, ground: g, pose: 'sit', face: 0 };
+      if (chance(.5)) { // she wears it
+        a2.reach = { rel: [0, -1.25 * S], w: a2.reach.w, wT: 1, rate: 5, stiff: .45, front: true };
+        await wait(.6);
+        DOT.mode = 'hat'; DOT.held = null; a2.reach.wT = 0;
+        look('audience', 2); expr('smug', 2); emote('♪');
+        await wait(2);
+        await rest(oct.spot);
+      } else { // or keeps it and takes it away with her
+        look('audience', 1.4); expr('smug', 1.4);
+        await wait(1.4);
+        await B.odrzut();
+      }
+    } else { // it went off the screen: never mind
+      rollEyes(); await wait(1.4);
+      await rest(oct.spot);
+    }
+  };
+
+  // a line of text on the slide to ink
+  function inkTarget() {
+    const lines = [];
+    for (const el of slideRoot().querySelectorAll('p, li, figcaption, dd, td, blockquote')) {
+      if (el.closest('[data-osmiornica-host],[data-osmiornica-przeszkoda],[data-osmiornica="nie"]') || !shown(el)) continue;
+      for (const L of linesOf(el)) if (L.right - L.left > S * 1.5 && L.top > S) lines.push(L);
+    }
+    return lines.length ? pick(lines) : null;
+  }
+  // a jet from the funnel to a spot on the slide
+  function inkJet(x, y, tx, ty) {
+    const a = Math.atan2(ty - y, tx - x), d = Math.hypot(tx - x, ty - y), T = .35;
+    for (let i = 0; i < 26; i++) {
+      const b = a + rand(-.05, .05), sp = d / T * rand(.9, 1.05);
+      fx.p.push({ k: 'inkdrop', x, y, vx: Math.cos(b) * sp, vy: Math.sin(b) * sp, r: rand(.02, .045) * S, life: 0, max: T * rand(.95, 1.1), delay: i * .008, drag: 0 });
+    }
+  }
+  // ...that blooms into a cloud over the text, hangs there, drifts and slowly thins out
+  function blot(cx, cy, w, h) {
+    for (let i = 0; i < 34; i++) {
+      const u = rand(-1, 1), v = rand(-1, 1);
+      fx.p.push({ k: 'blot', x: cx + u * w * .5, y: cy + v * h * .5, vx: rand(-12, 12), vy: rand(-4, 10), r: rand(.2, .42) * S, gr: rand(.02, .06) * S, life: 0, max: rand(10, 15), drag: .4, peak: rand(.7, .92), col: [8, 3, 18], delay: Math.abs(u) * .25 });
+    }
+  }
+  B.kleks = async () => {
+    // octopuses really do ink, to hide or to confuse; this one inks the slide out of sheer mischief
+    refreshWorld();
+    const L = inkTarget();
+    if (!L) return oct.on ? B.atrament() : B.zerkniecie();
+    const peek = !oct.on;
+    if (peek) { // she comes up from the bottom edge below the text she has in mind
+      const x = clamp((L.left + L.right) / 2 + rand(-.3, .3) * (L.right - L.left), S * 1.2, VW - S * 1.2);
+      spawn(x, VH + S * 1.4, 'sit'); state = 'busy';
+      await glideTo(x, VH + S * .1, .7, easeOut);
+    } else { state = 'busy'; await settle(); }
+    interruptible = false;
+    const tx = clamp(oct.x + rand(-.15, .15) * VW, L.left + S * .5, L.right - S * .5), ty = (L.top + L.bottom) / 2;
+    lookAt(tx, ty, 1.8); expr('focus', 1.4); oct.clouds = .5;
+    await wait(1.2);
+    oct.qT = -.14; await wait(.25);
+    const s = siphonWorld(); inkJet(s.x, s.y, tx, ty); oct.qv += 3 * mScale(); oct.qT = 0;
+    await wait(.35);
+    blot(tx, ty, Math.min(L.right - L.left, S * 4), (L.bottom - L.top) * 2.2);
+    await wait(.6);
+    look('audience', 2); expr('innocent', 2); feel('joy', .15);
+    await wait(2);
+    if (peek) { await glideTo(oct.x, VH + S * 1.5, .4, easeIn); hide(); }
+    else await rest(oct.spot);
+  };
+
+  // hiding among the letters: she squeezes into the gap between two words, the colour of the text
+  function gapTarget() {
+    const cands = [];
+    for (const el of headsOf(slideRoot())) {
+      const er = el.getBoundingClientRect(), m = metrics(el), lines = linesOf(el), words = wordsIn(el);
+      const sc = clamp(m.cap * 1.1 / (1.33 * S), .3, .8), gapW = S * 1.15 * sc;
+      for (let i = 0; i < words.length - 1; i++) {
+        const w = words[i], rg = document.createRange(); rg.setStart(w.node, w.start); rg.setEnd(w.node, w.end);
+        const r = rg.getBoundingClientRect(), L = lines.find(l => (r.top + r.bottom) / 2 > l.top && (r.top + r.bottom) / 2 < l.bottom);
+        if (!L || r.right > L.right - 4 || er.width - (L.right - L.left) < gapW + 8) continue; // last on its line, or the line would wrap
+        cands.push({ el, w, L, sc, gapW, score: rand(0, 1) });
+      }
+    }
+    return cands.sort((a, b) => a.score - b.score)[0] || null;
+  }
+  B.szczelina = async () => {
+    refreshWorld();
+    const T = gapTarget();
+    if (!T) return B.kamuflaz();
+    if (oct.on) await B._wyjscie();
+    const letters = wrapWord(T.w.node, T.w.start, T.w.end), wrap = letters[0].parentElement, m = metrics(T.el), base = lineSurface(T.el, m, T.L).base;
+    const gapX = () => wrap.getBoundingClientRect().right + T.gapW / 2;
+    // the words part to make room, and she squeezes up into the gap from below, coloured like the text
+    wrap.style.transition = 'margin-right .7s cubic-bezier(.3,.7,.3,1)'; wrap.style.marginRight = `${T.gapW}px`;
+    oct.undo.push(() => { wrap.style.marginRight = ''; });
+    spawn(gapX(), base + S * .3, 'tuck'); state = 'busy'; interruptible = false;
+    oct.ground = { kind: 'line', x1: gapX() - S, x2: gapX() + S, y: base }; oct.spot = null;
+    oct.mimic = true; oct.camoC = textColorAt(wrap, gapX()); oct.camo = oct.camoT = .88; oct.scale = .15; oct.alpha = 0;
+    expr('closed', 1); let t = 0;
+    await motion(dt => {
+      t += dt; const u = clamp(t / .8, 0, 1);
+      oct.x = gapX(); oct.y = lerp(base + S * .3, base - .3 * S * T.sc, smooth(u)); oct.scale = lerp(.15, T.sc, smooth(u)); oct.alpha = Math.min(1, u * 2);
+      return u >= 1;
+    });
+    // one eye, then two: something in the heading is looking at you
+    look('audience', 30); expr('curious', 1.5); oct.eyes.blink = .17;
+    const end = clock + rand(8, 11);
+    let hiding = false;
+    while (clock < end) {
+      await wait(.15);
+      oct.x = gapX();
+      const near = cur.inside && Math.hypot(cur.x - oct.x, cur.y - oct.y) < S * 1.4;
+      if (near && !hiding) { hiding = true; expr('closed', 99); }
+      else if (!near && hiding) { hiding = false; expr('curious', 1.2); oct.eyes.blink = .17; }
+      else if (!hiding && chance(.04)) lookAt(rand(0, VW), rand(0, VH), rand(.8, 1.6));
+    }
+    // and she slips back out the way she came; the words close up behind her
+    expr('closed', 2); t = 0;
+    await motion(dt => { t += dt; const u = clamp(t / .6, 0, 1); oct.y = lerp(base - .3 * S * T.sc, base + S * .4, smooth(u)); oct.scale = lerp(T.sc, .15, u); oct.alpha = 1 - u; return u >= 1; });
+    hide();
+  };
   B.atrament = async () => {
     if (!oct.on) return B.kamuflaz();
     state = 'busy'; interruptible = false;
@@ -2211,7 +2491,7 @@
     if (!oct.on) return B.zerkniecie();
     state = 'busy'; interruptible = false;
     // the famous aquarium octopus that kept shorting the lamp with a water jet
-    lookAt(VW / 2, -S, 2.4); expr('angry', 2.4);
+    lookAt(VW / 2, -S, 2.4); expr('focus', 2.4);
     await wait(.5);
     const s = siphonWorld(); squirt(s.x, s.y, VW / 2, -10);
     await wait(.55);
@@ -2253,22 +2533,22 @@
   };
   B.unik = async () => {
     state = 'busy'; interruptible = false;
-    startle(.8, 'angry'); feel('fear', .2);
+    startle(.8, 'skeptic'); feel('fear', .2);
     const dir = Math.sign(oct.x - cur.x) || 1, g = oct.ground || world.floor;
     const nx = clamp(clamp(oct.x + dir * S * 1.3, S, VW - S), g.x1 + S * .3, g.x2 - S * .3);
     await hopTo({ x: nx, ground: g }, { h: S * .5, dur: .35, crouch: .02 });
     oct.spot = Object.assign({}, oct.spot, { x: nx, ground: g });
-    look('cursor', 1.2); expr('angry', 1.2);
+    look('cursor', 1.2); expr('skeptic', 1.2);
     await wait(1.2);
     await rest(oct.spot);
   };
   B.pobudka = async () => {
     state = 'busy'; interruptible = false; unthink();
     fx.emotes = fx.emotes.filter(e => e.sym !== 'z');
-    startle(1, 'angry'); emote('!');
+    startle(1, 'skeptic'); emote('!');
     feel('fear', .2); feel('annoyance', .2);
     await wait(.9);
-    look('cursor', 1.5); expr('angry', 1.6); emote('anger');
+    look('cursor', 1.5); expr('focus', 1.6);
     await wait(1.6);
     await rest(Object.assign({}, oct.spot, { pose: 'sit' }));
   };
@@ -2307,11 +2587,14 @@
     // she likes a nap on a slide, more so as the lecture wears on
     const min = (clock - D.start) / 60;
     return bandit(ENTRANCES, nm => (nm === 'sen' ? .3 + mood.boredom * .5 + (min > 30 ? .2 : 0) + (temper === 'zaspana' ? .3 : 0)
-      : nm === 'upadek' ? mood.boredom * .3 : nm === 'rybka' || nm === 'szyba' ? mood.curiosity * .3 : nm === 'kamuflaz' || nm === 'kokos' ? mood.fear * .3 : 0));
+      : nm === 'upadek' || nm === 'kleks' ? mood.boredom * .3 + mood.annoyance * .2 : nm === 'rybka' || nm === 'szyba' || nm === 'przycisk' || nm === 'kropka' || nm === 'przesun' ? mood.curiosity * .3
+      : nm === 'kamuflaz' || nm === 'szczelina' ? mood.fear * .3 + .05 : 0));
   }
   function slideChanged(el) {
     el = el || null;
     if (el && el === D.slide) return;
+    // the dot never follows her onto the next slide: if she has it, it is gone; if it is lying about, it goes home
+    if (DOT.mode === 'held' || DOT.mode === 'hat') DOT.mode = 'gone'; else if (DOT.mode && DOT.mode !== 'gone') dotRestore();
     D.slide = el; world.slide = el;
     clearTimeout(D.timer);
     if (oct.on && state !== 'drag') perform('_wyjscie');
@@ -2331,7 +2614,7 @@
   }
   function summon() {
     if (serious) return;
-    if (oct.on) { if (interruptible) perform(pick(['atrament', 'kamuflaz', 'kokos', 'rybka', 'mysl', 'sen'])); return; }
+    if (oct.on) { if (interruptible) perform(pick(['atrament', 'kamuflaz', 'kleks', 'kropka', 'przesun', 'przycisk', 'rybka', 'mysl', 'sen'])); return; }
     // she has her moods: on a grumpy day she may simply refuse
     if ((temper === 'marudna' || mood.annoyance > .5) && chance(.35)) return perform('odmowa');
     perform(nextEntrance());
@@ -2345,11 +2628,10 @@
       if (chance(.5)) perform('odrzut');
       return;
     }
-    if (oct.shell && oct.shell.mode === 'cover') { oct.shell.poked = clock; return; }
     if (!interruptible) { oct.qv += 2.5; oct.flash = .18; oct.flashC = TINT.fear; return; } // busy: just a flinch
     D.taps++;
     const opts = REACTIONS.filter(n => n !== D.lastReaction && (n !== 'woda' || (mood.annoyance > .45 && D.taps >= 3)) && (n !== 'foch' || mood.annoyance > .3 || temper === 'marudna'));
-    const n = bandit(opts, nm => (nm === 'atrament' ? mood.fear * .6 : nm === 'kokos' ? mood.fear * .4 + (temper === 'ciekawska' ? .2 : 0) : nm === 'woda' ? mood.annoyance * .6 : nm === 'foch' ? mood.annoyance * .6 + (temper === 'marudna' ? .4 : 0) : 0));
+    const n = bandit(opts, nm => (nm === 'atrament' ? mood.fear * .6 : nm === 'kleks' ? mood.fear * .3 + mood.annoyance * .3 : nm === 'woda' ? mood.annoyance * .6 : nm === 'foch' ? mood.annoyance * .6 + (temper === 'marudna' ? .4 : 0) : 0));
     D.lastReaction = n; feel('fear', .15); feel('annoyance', .1);
     perform(n);
   }
@@ -2418,11 +2700,13 @@
     document.addEventListener('pointerleave', () => { cur.inside = false; });
     // a crooked letter is fixed with a click, without the click reaching the deck
     const onLetter = e => {
-      const L = e.target && e.target.closest ? e.target.closest('.osm-l.osm-krzywa') : null;
+      const L = e.target && e.target.closest ? e.target.closest('.osm-krzywa') : null;
       if (!L) return;
       e.stopPropagation(); e.preventDefault();
       if (e.type !== 'click') return;
-      for (const l of L.parentElement.children) Letters.fix(l);
+      if (L._osmDot) dotHome();
+      else if (L._osmM) Moved.fix(L);
+      else for (const l of L.parentElement.children) Letters.fix(l);
       if (oct.on && interruptible) { rollEyes(); emote('…'); feel('annoyance', .12); }
     };
     addEventListener('click', onLetter, true);
@@ -2437,7 +2721,7 @@
       else if (k === K.hide) perform('_wyjscie');
       else if (k === K.serious) setSerious(!serious);
       else if (k === K.reward || (K.reward === '+' && k === '=')) reward();
-      else if (k === K.fix) { Letters.fixAll(); if (oct.on && interruptible) { rollEyes(); emote('…'); } }
+      else if (k === K.fix) { Letters.fixAll(); Moved.fixAll(); dotHome(); if (oct.on && interruptible) { rollEyes(); emote('…'); } }
       else if (k === K.panel) togglePanel();
       else used = false;
       if (used) { e.preventDefault(); e.stopPropagation(); }
@@ -2459,7 +2743,8 @@
   // ---------- presenter panel ----------
   const ACTS = [
     ['zerkniecie', 'Zerknięcie zza krawędzi'], ['upadek', 'Upadek na literę'], ['sen', 'Drzemka ze snami'], ['kamuflaz', 'Kamuflaż'],
-    ['szyba', 'Przyklejona do szyby'], ['kokos', 'Kryjówka w łupinie'], ['reflektor', 'Reflektor (skradanie)'], ['rybka', 'Polowanie na rybkę'],
+    ['szczelina', 'Kryje się między słowami'], ['kropka', 'Kradnie kropkę znad i'], ['przesun', 'Przestawia punkt w ramce'], ['przycisk', 'Naciska przycisk'],
+    ['kleks', 'Atrament na treści'], ['szyba', 'Przyklejona do szyby'], ['reflektor', 'Reflektor (skradanie)'], ['rybka', 'Polowanie na rybkę'],
     ['atrament', 'Atrament i wabik'], ['woda', 'Woda w rzutnik'], ['mysl', 'Myśl'], ['foch', 'Foch'],
     ['odmowa', 'Odmowa'], ['uklon', 'Ukłon („wyszło”)'], ['_wyjscie', 'Odpływa'],
   ];
@@ -2531,7 +2816,7 @@
         <p class="hint mode-hint"></p>
       </section>
       <section><h3>Wywołaj</h3><div class="grid acts"></div>
-        <p class="hint">Ośmiornicę można złapać myszką i rzucić. Przekrzywioną literę naprawisz kliknięciem.</p></section>
+        <p class="hint">Ośmiornicę można złapać myszką i rzucić. Przekrzywioną literę, przesunięty punkt albo kropkę nad i naprawisz kliknięciem albo klawiszem R.</p></section>
       <section><h3>Nastrój</h3><div class="bars"></div>
         <div class="chart"><canvas aria-label="Nastrój w czasie, pięć serii od 0 do 100%"></canvas><div class="tip" hidden></div></div>
         <div class="legend"></div>
@@ -2550,10 +2835,10 @@
     const sw = $('.sw');
     for (const [h, name] of SWATCHES) {
       const b = el('button'); b.type = 'button'; b.dataset.h = h; b.title = name; b.setAttribute('aria-label', name); b.style.background = h;
-      b.addEventListener('click', () => { setSkin(h, h !== CFG.skin); panelSync(); }); sw.appendChild(b);
+      b.addEventListener('click', () => { setSkin(h, h !== CFG.skin); panelSync(); showOff(); }); sw.appendChild(b);
     }
     const pickC = el('input'); pickC.type = 'color'; pickC.title = 'własny kolor'; pickC.setAttribute('aria-label', 'własny kolor');
-    pickC.addEventListener('input', () => { setSkin(pickC.value, true); panelSync(); }); sw.appendChild(pickC);
+    pickC.addEventListener('input', () => { setSkin(pickC.value, true); panelSync(); }); pickC.addEventListener('change', showOff); sw.appendChild(pickC);
     $('#osm-serious').addEventListener('change', e => setSerious(e.target.checked));
     const acts = $('.acts');
     for (const [n, t] of ACTS) { const b = el('button', '', t); b.type = 'button'; b.addEventListener('click', () => { if (n === 'uklon') reward(); else perform(n); }); acts.appendChild(b); }
@@ -2678,9 +2963,9 @@
     moodTick(dt);
     cur.speed = approach(cur.speed, 0, 6, dt);
     octUpdate(dt);
-    Letters.update(dt);
+    Letters.update(dt); Moved.update(dt);
     fxUpdate(dt);
-    const busy = oct.on || fx.p.length || fx.ghosts.length || fx.emotes.length || fx.rings.length || fx.fish || fx.beam;
+    const busy = oct.on || fx.p.length || fx.ghosts.length || fx.emotes.length || fx.rings.length || fx.fish || fx.beam || DOT.mode;
     if (busy || dirty) {
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, VW, VH);
       if (busy) { fxDrawBack(ctx); if (oct.on) drawOcto(ctx); fxDrawFront(ctx); }

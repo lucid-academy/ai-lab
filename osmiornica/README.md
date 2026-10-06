@@ -30,7 +30,7 @@ document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: el } })
 
 ## Klawisze prowadzącego
 
-`O` przywołaj (gdy już jest: psota; w gorszy dzień może odmówić) · `H` schowaj · `0` tryb poważny · `+` „wyszło”: ukłon i nagroda dla ostatniej psoty, przy okazji poprawia humor · `R` napraw litery · `D` panel.
+`O` przywołaj (gdy już jest: psota; w gorszy dzień może odmówić) · `H` schowaj · `0` tryb poważny · `+` „wyszło”: ukłon i nagroda dla ostatniej psoty, przy okazji poprawia humor · `R` napraw litery, przesunięte punkty i kropkę nad i · `D` panel.
 
 Przekrzywioną literę naprawia się też kliknięciem. Klawisze ośmiornicy mają pierwszeństwo przed prezentacją. W reveal.js `O` otwiera przegląd slajdów, więc warto je przemapować: `window.OSMIORNICA = { keys: { summon: 'q' } }`. Przycisk „czarny ekran” w pilocie zwykle wysyła `B` albo kropkę, więc można go przypisać do przywołania i nie podchodzić do laptopa.
 
@@ -49,26 +49,31 @@ Przekrzywioną literę naprawia się też kliknięciem. Klawisze ośmiornicy maj
 | `memory` | `true` | pamięć w `localStorage` (sesje, kliknięcia, humor dnia, co działało) |
 | `skin`, `belly`, `glow`, `neon` | ciemny fiolet `#6516D9`, magenta, cyjan, neon | kolory ciała, spodu ramion, poświaty i obwódki |
 
-Kolor ciała najprościej zmienić w panelu (`D` → Kolor): kilka gotowych odcieni i własny kolor z próbnika. Wybór zostaje zapamiętany na kolejne wykłady. W kodzie: `window.OSMIORNICA = { skin: '#6516D9' }` przed wczytaniem skryptu.
+Kolor ciała najprościej zmienić w panelu (`D` → Kolor): fiolet, rdzawy (jak prawdziwa Octopus vulgaris), malinowy, błękitny albo własny kolor z próbnika. Po wyborze Luci wyskakuje na chwilę, żeby było widać zmianę. Wybór zostaje zapamiętany na kolejne wykłady. W kodzie: `window.OSMIORNICA = { skin: '#6516D9' }` przed wczytaniem skryptu.
 
 ## Co umie
 
-- **Wygląd:** duży, cętkowany worek płaszcza nad wąską twarzą, duże, wesołe oczy na wypukłościach (iskierki w tęczówkach, dolne powieki uniesione w uśmiechu, mały uśmiech pod oczami), fałdy brwi, które niosą większość mimiki, i grube ramiona z dużymi przyssawkami. Skóra jest w głębokim, intensywnym fiolecie, a co kilka sekund przebiega po niej fala światła: rozbłyskują obwódki, kropki na płaszczu i przyssawki.
-- **Ramiona:** w spoczynku leżą luźno na podłożu, każde trochę inaczej. Przyssawki są wtedy pod spodem i widać tylko ich brzegi, a za krawędzią podestu ramiona zwisają. Co jakiś czas jedno ramię unosi koniec i obmacuje okolicę, a końcówki powoli zmieniają zwinięcie.
-- **Wejścia:** zerknięcie zza dolnej krawędzi (często z machnięciem ramienia na powitanie), upadek na nagłówek z przekrzywieniem litery (wzdryga się i patrzy na literę z pytajnikiem w chmurce), drzemka (opada na slajd jak liść, z ramionami w górze jak spadochron, przeciąga się i zasypia), kamuflaż (na slajdzie otwierają się same oczy) oraz cztery sceny inspirowane Darwin's Paradox i prawdziwymi ośmiornicami:
-  - **Przyklejona do szyby:** wypływa z głębi i przykleja się do ekranu od środka jak do szyby akwarium. Widać jej spód z rzędami przyssawek, rozgląda się po sali, a potem zsuwa się w dół, odklejając przyssawki od góry.
-  - **Kryjówka w łupinie:** wchodzi z połówką kokosa na głowie jak w kasku, chowa się pod nią, zerka jednym okiem spod brzegu, potem unosi łupinę i się rozgląda. Szturchnięta chowa się z powrotem. Ośmiornice naprawdę noszą ze sobą łupiny i się w nich chowają.
-  - **Reflektor:** skrada się nisko i płasko, a z górnego rogu omiata slajd reflektor jak w grze. Gdy światło się zbliża, Luci znika w kamuflażu i zamyka oczy, bo to oczy zdradzają ośmiornicę. Za drugim razem gasi lampę strumieniem wody.
-  - **Polowanie na rybkę:** przez slajd przepływa świecąca rybka, Luci śledzi ją oczami i próbuje złapać. Zwykle chybia i udaje, że wcale jej nie zależało. Czasem złapie, przytuli i wypuści.
-- **Reakcje na kliknięcie:** atrament z wabikiem w kształcie ośmiornicy (pseudomorf, prawdziwa sztuczka głowonogów), kamuflaż, chowanie się pod łupiną kokosa, foch, rzadko woda w rzutnik i przygaszony ekran. Złapana myszką wisi za czubek płaszcza, który marszczy się w fałdy. Robi naburmuszoną minę, krzyżuje ramiona i myśli o burzy. Rzucona koziołkuje i ląduje z zawrotami głowy.
-- **Charakter:** ciekawska, wesoła i miejscami marudna indywidualistka. Kiedy coś jej nie pasuje (poprawiona litera, nieudane polowanie), przewraca oczami. Czasem patrzy na salę z zadowoloną, nieco bezczelną miną.
-- **Humor dnia:** pogodna, ciekawska, marudna albo zaspana. Losowany raz na dzień, zmienia jej nastroje, myśli i sny. Marudna rzadziej się uśmiecha, częściej przewraca oczami, strzela focha i potrafi odmówić wyjścia. Zaspana szybciej zasypia.
-- **Foch:** odwraca się plecami, krzyżuje ramiona, zerka przez ramię, czy ktoś zauważył. Szturchnięta w trakcie focha potrafi się obrazić i odpłynąć. `+` (przeprosiny) ją udobrucha.
-- **Myśli i sny:** nie mówi, myśli obrazkami w neonowej chmurce: planeta, galaktyka, atom, sieć neuronowa, żarówka, kawa, zegar, burza i inne. Gdy zaśnie, sen ma zupełnie inną chmurkę: owalny kawałek nocnego nieba z gwiazdami i przerywaną poświatą, z pustymi bańkami zamiast kropek. Śni o swoich zainteresowaniach: sieć neuronowa z płynącą aktywacją, mechanizm uwagi nad tokenami, test lustra (rozpoznaje siebie), jej własny gwiazdozbiór, galaktyka, orbity i czarna dziura. Sny zmieniają się co 15 sekund, a po trzech zapada w głęboki sen bez chmurki na mniej więcej 40 sekund, żeby nie rozpraszać, gdy zostajecie dłużej na slajdzie. Śpiąca zostaje na slajdzie znacznie dłużej i budzi się, gdy podjedzie do niej kursor.
-- **Wyjścia:** odrzut z pulsującym płaszczem albo zsunięcie się za dolną krawędź.
-- **Nastrój:** pięć zmiennych (ciekawość, irytacja, nuda, radość, strach) zmienia kolor skóry, cętki, źrenice, powieki i brwi oraz wybór psot. Domyślnie przeważają ciekawość i radość: rozluźnione powieki, uśmiechnięte oczy, rozszerzone źrenice, a gdy czyta slajd, przechyla głowę i unosi jedną brew. Ciężkie powieki pojawiają się dopiero przy prawdziwej nudzie. Wykres nastroju jest w panelu.
-- **Zaskoczenie:** wzdrygnięcie, nie wytrzeszcz. Blednie, podskakuje, podkurcza ramiona i po pół sekundy przechodzi w prawdziwą reakcję: podejrzliwość, złość albo zakłopotanie.
-- **Uczenie:** po każdym `+` zapisuje, która psota zadziałała, i wybiera takie częściej (prosty „wieloręki bandyta”). Klikana częściej zaczyna płoszyć się przed kursorem. Od drugiego wykładu wita salę sceptycznym spojrzeniem i myślą ↻ („znowu wy?”). Drzemkę wybiera tym chętniej, im dłużej trwa wykład.
+Wzorem jest prawdziwa ośmiornica z małymi twistami: anatomia i zachowania są jak u żywego zwierzęcia, tylko ta akurat psoci na slajdach.
+
+- **Wygląd:** duży, cętkowany worek płaszcza nad wąską twarzą, oczy na wypukłościach, lejek z boku i grube ramiona z przyssawkami połączone błoną. Nie ma ust ani uśmiechu. Oko wygląda jak u ośmiornicy: bez białek, cała tęczówka z poziomą, prostokątną źrenicą, która przy ekscytacji, ciekawości czy strachu rozszerza się i zaokrągla. Skóra jest w głębokim fiolecie, a co jakiś czas przebiega po niej fala światła.
+- **Emocje jak u ośmiornicy:** zmienia kolor skóry (ciemnieje z irytacji, blednie ze strachu), przez oko przebiega ciemny pas (prawdziwy sygnał ostrzegawczy), nad oczami unoszą się brodawki (papille). Złość jest rzadka: gdy ktoś ją podniesie, rzuci nią albo przy fochu.
+- **Spokój:** w spoczynku ramiona leżą luźno i prawie się nie ruszają. Co kilkanaście sekund jedno przesunie się albo uniesie koniec i obmacuje okolicę. We śnie nie ruszają się wcale.
+- **Wejścia:** zerknięcie zza dolnej krawędzi (często z machnięciem ramienia), upadek na nagłówek z przekrzywieniem litery, drzemka (opada na slajd jak liść i zasypia), kamuflaż (na slajdzie otwierają się same oczy) i sceny oparte na zachowaniach prawdziwych ośmiornic:
+  - **Kryje się między słowami:** słowa w nagłówku rozsuwają się, a ona wciska się w szczelinę w kolorze tekstu, jak dodatkowa litera z oczami. Gdy podjedzie kursor, zamyka oczy i znika w tekście. Ośmiornice żyją w szczelinach i przeciskają się przez każdą większą od dzioba.
+  - **Kradnie kropkę znad i:** siada na nagłówku, strąca kropkę z „i” (albo „j”), patrzy, jak się toczy, idzie po nią i zakłada ją sobie na głowę albo zabiera ze sobą. Litera zostaje bez kropki, dopóki jej nie klikniesz.
+  - **Przestawia punkt w ramce:** chwyta przyssawkami punkt listy, kafelek albo kartę i przesuwa go trochę krzywo, a czasem zamienia dwa sąsiednie miejscami. Ośmiornice przestawiają kamienie i muszle w swoich norach.
+  - **Naciska przycisk:** siada przy przycisku na slajdzie, dotyka go ostrożnie, wzdryga się, a potem wciska kilka razy z coraz większą pewnością. Prezentacja tego nie słyszy, kliknięcie jest tylko na niby. Ośmiornice w laboratoriach uczą się obsługiwać przyciski i dźwignie.
+  - **Atrament na treści:** celuje lejkiem w akapit i psika. Na tekście rozlewa się ciemna chmura, która wisi, dryfuje i po kilkunastu sekundach rzednie.
+  - **Przyklejona do szyby:** przykleja się do ekranu od środka jak do szyby akwarium, widać spód z rzędami przyssawek, potem zsuwa się w dół.
+  - **Reflektor** (w duchu Darwin's Paradox): skrada się, a gdy nadchodzi światło, znika w kamuflażu i zamyka oczy, bo to oczy zdradzają ośmiornicę. Za drugim razem gasi lampę strumieniem wody.
+  - **Polowanie na rybkę:** śledzi przepływającą rybkę i rzuca się na nią ramieniem. Zwykle chybia i udaje, że wcale jej nie zależało.
+- **Reakcje na kliknięcie:** atrament z wabikiem w kształcie ośmiornicy (pseudomorf), psiknięcie atramentem na treść, kamuflaż, foch, rzadko woda w rzutnik. Złapana myszką wisi za czubek płaszcza, który marszczy się w fałdy, i krzyżuje ramiona. Rzucona koziołkuje i ląduje z zawrotami głowy.
+- **Charakter:** ciekawska, spokojna obserwatorka, miejscami marudna indywidualistka. Kiedy coś jej nie pasuje (poprawiona litera, nieudane polowanie), przewraca oczami.
+- **Humor dnia:** pogodna, ciekawska, marudna albo zaspana. Losowany raz na dzień, zmienia jej nastroje, myśli i sny. Marudna częściej przewraca oczami, strzela focha i potrafi odmówić wyjścia. Zaspana szybciej zasypia.
+- **Foch:** odwraca się plecami, krzyżuje ramiona, zerka przez ramię, czy ktoś zauważył. `+` (przeprosiny) ją udobrucha.
+- **Myśli i sny:** nie mówi, myśli obrazkami w neonowej chmurce. Gdy śpi, sen ma inną chmurkę: owalny kawałek nocnego nieba. Śni o swoich zainteresowaniach: sieć neuronowa, mechanizm uwagi, test lustra, jej własny gwiazdozbiór, galaktyka, orbity, czarna dziura. Sny zmieniają się co 15 sekund, a po trzech zapada w głęboki sen bez chmurki na około 40 sekund. Śpiąca zostaje na slajdzie dłużej i budzi się, gdy podjedzie do niej kursor.
+- **Naprawianie:** przekrzywioną literę, przesunięty punkt albo literę bez kropki naprawisz kliknięciem; `R` naprawia wszystko naraz (kropka wraca z powrotem na swoje miejsce).
+- **Uczenie:** po każdym `+` zapisuje, która psota zadziałała, i wybiera takie częściej. Klikana częściej zaczyna płoszyć się przed kursorem. Od drugiego wykładu wita salę sceptycznym spojrzeniem i myślą ↻ („znowu wy?”).
 - Przy `prefers-reduced-motion` pojawia się i znika płynnie, bez spadania i skoków.
 
 API: `Osmiornica.summon('foch')`, `.temper('marudna')`, `.reward()`, `.panel(true)`; nazwy akcji są w `Osmiornica.actions`.

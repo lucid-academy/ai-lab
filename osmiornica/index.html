@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ośmiornica Lucek</title>
+<meta name="description" content="Prototyp: ośmiornica-psotnica do prezentacji HTML Lucid Academy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Archivo:wght@400;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a one-screen deck; slides stacked in place, content column up to 1000px, controls pinned bottom-right. */
+:root{
+  color-scheme:dark;
+  --bg:#0C0720; --panel:#150C30; --ink:#F4F0FF; --muted:#B3A7DE; --dim:#8A7CB8;
+  --violet:#A855F7; --cyan:#3DE3F0; --magenta:#F0369F; --line:rgba(168,85,247,.34);
+  --display:"Bricolage Grotesque","Archivo",system-ui,sans-serif;
+  --body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-text-size-adjust:100%}
+.deck{position:relative;height:100%;overflow:hidden;
+  background-image:radial-gradient(700px 520px at 0% -10%,rgba(124,58,237,.42),transparent 62%),radial-gradient(600px 460px at 100% 40%,rgba(61,227,240,.12),transparent 60%)}
+.slide{position:absolute;inset:0;display:grid;align-content:center;padding:clamp(28px,7vh,80px) max(16px,6vw) clamp(84px,12vh,120px);
+  opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease,visibility 0s linear .45s}
+.slide.active{opacity:1;visibility:visible;transform:none;transition:opacity .45s ease,transform .45s ease,visibility 0s}
+.inner{max-width:1000px;width:100%;margin-inline:auto;display:grid;gap:clamp(14px,2.6vh,26px);min-width:0}
+.eyebrow{font-family:var(--mono);font-weight:700;font-size:clamp(11px,1.5vh,14px);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin:0}
+h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;line-height:1.02;margin:0;text-wrap:balance}
+h1{font-size:clamp(40px,min(11vh,15vw),124px);background:linear-gradient(104deg,#FFFFFF 6%,#C9A6FF 45%,#6FE9F3 96%);-webkit-background-clip:text;background-clip:text;color:transparent;justify-self:start}
+h2{font-size:clamp(30px,min(8vh,11vw),88px)}
+.lead{font-size:clamp(17px,2.7vh,27px);color:var(--muted);max-width:44ch;margin:0;line-height:1.45}
+.note{margin:clamp(8px,2vh,20px) 0 0;font-size:clamp(13px,1.8vh,16px);color:var(--dim);max-width:60ch;line-height:1.5}
+kbd{font:600 .85em/1 var(--mono);padding:.15em .4em;border-radius:5px;background:#21163F;border:1px solid var(--line);color:var(--ink)}
+.rule{height:3px;width:110px;border-radius:3px;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:0 0 18px rgba(168,85,247,.8)}
+
+.tokens{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;font:500 clamp(18px,3.2vh,30px)/1 var(--mono)}
+.tokens span{padding:.35em .45em;border-radius:8px;border:1px solid rgba(168,85,247,.55);background:rgba(124,58,237,.16)}
+.tokens span:nth-child(even){border-color:rgba(61,227,240,.55);background:rgba(61,227,240,.1)}
+.tokens .gap{border:0;background:none;padding:0 .4em}
+
+.two{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center;column-gap:clamp(20px,4vw,56px)}
+.card{margin:0;border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vh,28px);background:linear-gradient(160deg,rgba(124,58,237,.2),rgba(124,58,237,.05));display:grid;gap:14px;justify-items:center}
+.hub{font:700 clamp(14px,2vh,18px)/1 var(--mono);padding:.7em 1em;border-radius:12px;background:linear-gradient(90deg,rgba(168,85,247,.9),rgba(61,227,240,.65));color:#fff}
+.subs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%}
+.subs li{font:500 clamp(12px,1.7vh,15px)/1.2 var(--mono);text-align:center;padding:.6em .3em;border-radius:10px;border:1px solid rgba(61,227,240,.45);color:var(--ink)}
+.card figcaption{font-size:clamp(13px,1.7vh,15px);color:var(--dim)}
+
+.temps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.6vw,18px)}
+.t{border:1px solid var(--line);border-radius:16px;padding:clamp(14px,2.4vh,22px);background:rgba(124,58,237,.1);display:grid;gap:10px;align-content:start}
+.t b{font:800 clamp(26px,5vh,48px)/1 var(--display);color:var(--cyan)}
+.t span{font-size:clamp(14px,2vh,18px);color:var(--muted);line-height:1.4}
+.t:nth-child(3) b{color:var(--magenta)}
+
+.btn{font:700 clamp(14px,1.9vh,17px)/1 var(--mono);letter-spacing:.03em;color:#fff;border:0;border-radius:12px;padding:.95em 1.2em;cursor:pointer;justify-self:start;
+  background:linear-gradient(90deg,rgba(168,85,247,.95),rgba(61,227,240,.7))}
+.btn:focus-visible,.nav button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.center{justify-items:center;text-align:center}
+.thanks{font-size:clamp(48px,min(14vh,17vw),150px);background:linear-gradient(104deg,#FFFFFF 6%,#C9A6FF 45%,#6FE9F3 96%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.nav{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:6px;
+  padding:6px;border-radius:14px;background:rgba(21,12,48,.82);border:1px solid rgba(168,85,247,.25);backdrop-filter:blur(8px);z-index:2}
+.nav button{font:600 13px/1 var(--body);color:var(--ink);background:rgba(124,58,237,.18);border:1px solid rgba(168,85,247,.3);border-radius:10px;min-width:38px;height:36px;padding:0 10px;cursor:pointer}
+.nav button:hover{background:rgba(124,58,237,.32)}
+.count{font:500 12px/1 var(--mono);color:var(--muted);padding:0 6px;font-variant-numeric:tabular-nums}
+
+@media (max-width:760px){
+  .two{grid-template-columns:minmax(0,1fr)}
+  .temps{grid-template-columns:minmax(0,1fr)}
+  .subs{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){.slide,.slide.active{transition:none;transform:none}}
+</style>
+</head>
+<body>
+<main class="deck" id="deck">
+
+  <section class="slide active" aria-label="Slajd 1">
+    <div class="inner">
+      <p class="eyebrow">Lucid Academy · warsztaty</p>
+      <h1>Zrozumieć AI</h1>
+      <div class="rule"></div>
+      <p class="lead">Jak działają modele językowe, skąd biorą się ich pomyłki i co z tego wynika dla nas.</p>
+      <p class="note">Prototyp: na slajdach pojawia się ośmiornica Lucek. Strzałki zmieniają slajdy, <kbd>D</kbd> otwiera panel prowadzącego, <kbd>O</kbd> ją przywołuje. Kliknij ją albo złap i rzuć.</p>
+    </div>
+  </section>
+
+  <section class="slide" aria-label="Slajd 2">
+    <div class="inner">
+      <p class="eyebrow">Tokeny</p>
+      <h2>Czym jest token?</h2>
+      <p class="lead">Model nie czyta liter ani całych słów. Widzi tokeny, czyli kawałki tekstu ze swojego słownika.</p>
+      <div class="tokens" aria-label="Przykład podziału na tokeny: nie, zwy, kle, ośmior, nica"><span>nie</span><span>zwy</span><span>kle</span><span class="gap"></span><span>ośmior</span><span>nica</span></div>
+    </div>
+  </section>
+
+  <section class="slide" aria-label="Slajd 3">
+    <div class="inner two">
+      <div class="inner">
+        <p class="eyebrow">Agenci</p>
+        <h2>Mózg i osiem ramion</h2>
+        <p class="lead">Dwie trzecie neuronów ośmiornicy siedzi w ramionach. Każde ramię trochę decyduje samo, jak podagent z zadaniem od orkiestratora.</p>
+      </div>
+      <figure class="card" data-osmiornica-podest>
+        <div class="hub">orkiestrator</div>
+        <ul class="subs"><li>szukaj</li><li>czytaj</li><li>licz</li><li>pisz</li></ul>
+        <figcaption>Jedno zlecenie, kilku wykonawców</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="slide" aria-label="Slajd 4">
+    <div class="inner">
+      <p class="eyebrow">Generowanie</p>
+      <h2>Temperatura modelu</h2>
+      <div class="temps">
+        <div class="t"><b>0,2</b><span>Przewidywalnie: „Ośmiornica ma osiem ramion.”</span></div>
+        <div class="t"><b>0,8</b><span>Swobodniej: „Ośmiornica to mistrzyni ucieczek.”</span></div>
+        <div class="t"><b>1,4</b><span>Chaotycznie: „Ośmiornica gra na ksylofonie z kalmarem.”</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" aria-label="Slajd 5">
+    <div class="inner">
+      <p class="eyebrow">Interpretowalność</p>
+      <h2>Emocje funkcjonalne</h2>
+      <p class="lead">Stany wewnętrzne modelu zmieniają jego zachowanie. U ośmiornicy widać je na skórze: kolor, plamki i kształt źrenic.</p>
+      <button class="btn" type="button" id="show-chart">Pokaż wykres nastroju Lucka</button>
+    </div>
+  </section>
+
+  <section class="slide" data-osmiornica="final" aria-label="Slajd 6">
+    <div class="inner center">
+      <h2 class="thanks">Dziękuję!</h2>
+      <p class="lead">Pytania?</p>
+    </div>
+  </section>
+
+  <nav class="nav" data-osmiornica-przeszkoda aria-label="Sterowanie">
+    <button type="button" id="prev" aria-label="Poprzedni slajd">←</button>
+    <span class="count" id="count">1 / 6</span>
+    <button type="button" id="next" aria-label="Następny slajd">→</button>
+    <button type="button" id="panel">Panel</button>
+    <button type="button" id="fs" aria-label="Pełny ekran">⛶</button>
+  </nav>
+</main>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  const count = document.getElementById('count');
+  let i = 0;
+  function go(n) {
+    n = Math.max(0, Math.min(slides.length - 1, n));
+    if (n === i) return;
+    slides[i].classList.remove('active');
+    i = n;
+    slides[i].classList.add('active');
+    count.textContent = `${i + 1} / ${slides.length}`;
+    document.dispatchEvent(new CustomEvent('slidechange', { detail: { slide: slides[i], index: i } }));
+  }
+  addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(i + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(i - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+  });
+  document.getElementById('prev').addEventListener('click', () => go(i - 1));
+  document.getElementById('next').addEventListener('click', () => go(i + 1));
+  document.getElementById('panel').addEventListener('click', () => window.Osmiornica && Osmiornica.panel());
+  document.getElementById('show-chart').addEventListener('click', () => window.Osmiornica && Osmiornica.panel(true));
+  document.getElementById('fs').addEventListener('click', () => {
+    const p = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    if (p && p.catch) p.catch(() => {});
+  });
+  // swipe on touch screens
+  let sx = null;
+  const deck = document.getElementById('deck');
+  deck.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') sx = e.clientX; });
+  deck.addEventListener('pointerup', e => { if (sx == null) return; const dx = e.clientX - sx; sx = null; if (Math.abs(dx) > 60) go(i + (dx < 0 ? 1 : -1)); });
+})();
+</script>
+<script>window.OSMIORNICA = { mode: 'demo' };</script>
+<script src="osmiornica.js" defer></script>
+</body>
+</html>

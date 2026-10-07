@@ -4,6 +4,27 @@ Ciemnofioletowa, neonowa ośmiornica, która od czasu do czasu wpada na slajd, p
 
 Demo na żywo: https://lucid-academy.github.io/ai-lab/osmiornica/ (plik `osmiornica/index.html`). Strzałki zmieniają slajdy, `D` otwiera panel prowadzącego, `O` przywołuje Luci.
 
+## Luci na telefonie
+
+Luci może też mieszkać w telefonie, poza prezentacjami: https://lucid-academy.github.io/ai-lab/osmiornica/telefon/
+
+To aplikacja internetowa (PWA). Instaluje się z przeglądarki, dostaje własną ikonę na ekranie głównym i działa bez internetu.
+
+- **iPhone (Safari):** Udostępnij, potem „Do ekranu początkowego”.
+- **Android (Chrome):** przycisk „Zainstaluj Luci na telefonie” pod przełącznikiem albo menu ⋮, potem „Zainstaluj aplikację”.
+
+W środku jest nocne akwarium z zegarem, datą i ciekawostką o ośmiornicach (dotknięcie pokazuje następną). Jeden przycisk włącza i wyłącza Luci, a aplikacja pamięta wybór. Włączona Luci:
+
+- wpada na zegar albo układa się do snu na swojej norze;
+- co minutę lub dwie robi psikus;
+- zasypia i śni;
+- reaguje na dotyk; można ją przeciągnąć i rzucić;
+- gdy ucieknie, wraca po kilkunastu sekundach.
+
+Aplikacja korzysta z tego samego silnika co prezentacje (`osmiornica/osmiornica.js`), więc poprawki Luci trafiają do niej przy następnym uruchomieniu. Pliki: `osmiornica/telefon/`.
+
+Luci żyje tylko we własnej aplikacji. iPhone nie pozwala żadnej aplikacji rysować nad innymi. Na Androidzie dałoby się to zrobić osobną aplikacją z uprawnieniem „Wyświetlanie nad innymi aplikacjami”.
+
 ## Wpięcie we własną prezentację
 
 Są trzy sposoby. Na wykład najlepszy jest pierwszy.

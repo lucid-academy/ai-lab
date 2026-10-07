@@ -1588,7 +1588,8 @@
     if (!DOT.mode || DOT.mode === 'gone') return;
     c.fillStyle = rgba(DOT.col); c.beginPath(); c.arc(DOT.x, DOT.y, DOT.r, 0, TAU); c.fill();
   }
-  const WORD = /\p{L}{4,}/gu;
+  // a word worth landing on: four or more letters, or a number (a year in a title, the minutes of a clock)
+  const WORD = /[\p{L}\p{N}]{4,}|\p{N}{2,}/gu;
   const ROUND = /[oOcCsSeęéóÓ0QG]/;
   function wordsIn(el) {
     const out = [];

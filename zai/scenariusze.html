@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Scenariusze AI · notatki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#0C0720;--ink:#F4F0FF;--muted:#A294D2;--dim:#7C6DA8;--violet:#A855F7;--cyan:#3DE3F0;--magenta:#F0369F;
+    --display:"Bricolage Grotesque","Archivo",system-ui,sans-serif;--body:"Archivo",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;
+    background:radial-gradient(700px 500px at 0% -10%,rgba(124,58,237,.45),transparent 60%),radial-gradient(600px 500px at 100% 110%,rgba(61,227,240,.16),transparent 60%),linear-gradient(160deg,#110A2C,#0C0720 55%,#0A0618);}
+  .wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin:0 0 8px;}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,46px);line-height:1.02;letter-spacing:-.03em;margin:0;}
+  .lead{color:var(--muted);margin:10px 0 18px;}
+  .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 14px;padding:0 16px;position:sticky;top:0;z-index:5;background:rgba(12,7,32,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding-top:10px;padding-bottom:10px;}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:none;font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.35);border-radius:999px;padding:9px 13px;}
+  .tabs button.on{background:var(--violet);border-color:var(--violet);color:#fff;}
+  .tabs button.done::after{content:" ✓";color:var(--cyan);}
+  .tabs button.on.done::after{color:#fff;}
+  .card{border:1px solid rgba(168,85,247,.3);border-radius:18px;padding:18px 16px;background:linear-gradient(160deg,rgba(124,58,237,.16),rgba(124,58,237,.03));}
+  .card .k{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;}
+  .card h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.08;letter-spacing:-.02em;margin:4px 0 8px;}
+  .card .d{color:var(--muted);margin:0 0 14px;}
+  .c1 .k,.c1 h2{color:var(--violet)} .c2 .k,.c2 h2{color:var(--cyan)} .c3 .k,.c3 h2{color:#FF8CC6} .c4 .k{color:#EAFDFF}
+  label{display:block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:14px 0 6px;}
+  textarea{width:100%;min-height:92px;resize:vertical;font:inherit;font-size:17px;color:var(--ink);background:rgba(10,6,24,.65);border:1px solid rgba(168,85,247,.4);border-radius:12px;padding:10px 12px;}
+  textarea:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 1px rgba(61,227,240,.35);}
+  .scale{display:flex;gap:8px;}
+  .scale button{flex:1;font-family:var(--display);font-weight:800;font-size:22px;color:var(--muted);background:rgba(10,6,24,.6);border:1px solid rgba(168,85,247,.4);border-radius:12px;padding:10px 0;}
+  .scale button.on{background:var(--cyan);border-color:var(--cyan);color:#0C0720;box-shadow:0 0 18px rgba(61,227,240,.6);}
+  .scale small{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-top:4px;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+  .btn{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);background:rgba(61,227,240,.08);border:1px solid rgba(61,227,240,.5);border-radius:999px;padding:11px 16px;}
+  .btn.pri{color:#0C0720;background:linear-gradient(100deg,#3DE3F0,#B6F6FA);border-color:transparent;}
+  .read{display:none;}
+  .read.on{display:block;}
+  .read .card{margin-bottom:14px;}
+  .read h3{font-family:var(--display);font-weight:800;font-size:24px;margin:0 0 6px;}
+  .read .item{font-size:20px;line-height:1.4;margin:8px 0;}
+  .read .item b{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:block;}
+  .note{font-size:13px;color:var(--dim);margin-top:22px;}
+  .saved{font-family:var(--mono);font-size:12px;color:var(--cyan);min-height:16px;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Zrozumieć AI · ćwiczenie</p>
+  <h1>Który scenariusz i&nbsp;dlaczego?</h1>
+  <p class="lead">Wybierz scenariusz swojej grupy. Wpisz plusy, minusy, oceń realność i&nbsp;dopisz, co musiałoby się stać. Notatki zostają na tym telefonie, nikt inny ich nie widzi.</p>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="edit"></div>
+  <div class="read" id="read"></div>
+  <div class="row">
+    <button class="btn pri" id="toggle">Czytaj moje notatki</button>
+    <button class="btn" id="copy">Kopiuj wszystko</button>
+    <button class="btn" id="clear">Wyczyść</button>
+  </div>
+  <p class="saved" id="saved"></p>
+  <p class="note">Źródła: The Information (19 października 2026), relacje Crypto Briefing i Cryptopolitan; AI Futures Project, „AI 2040: Plan A” (lipiec 2026).</p>
+</div>
+<script>
+(function(){
+  'use strict';
+  var S = [
+    { id: 's1', c: 'c1', k: '01 · podobno faworyt Altmana', t: 'Międzynarodowy inspektor', d: 'Urząd na wzór MAEA (agencji atomowej) kontroluje laboratoria AI: audyty, testy, zasady bezpieczeństwa. Na rynku zostaje wielu graczy.' },
+    { id: 's2', c: 'c2', k: '02 · „plan Demisa”', t: 'Wspólne laboratorium', d: 'Czołowe firmy łączą się w jedno laboratorium, jak CERN w&nbsp;fizyce, i&nbsp;budują AI dla państw, a&nbsp;nie dla akcjonariuszy.' },
+    { id: 's3', c: 'c3', k: '03 · „plan Eliezera”', t: 'Jeden zwycięzca', d: 'Firma z&nbsp;największą przewagą używa AI, żeby wyłączyć konkurencję („stopić wszystkim GPU”). Altman nazwał to szkodliwym.' },
+    { id: 's4', c: 'c4', k: 'A może · AI 2040: Plan A', t: 'Hamujemy do 2040', d: 'USA i&nbsp;Chiny umawiają się na limity, a superinteligencja przychodzi ok. 2040 zamiast ok. 2030. Propozycja autorów AI 2027.' }
+  ];
+  var KEY = 'zai-scenariusze-v1';
+  var data = {};
+  try { data = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { data = {}; }
+  var cur = data._cur || 's1';
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(data)); document.getElementById('saved').textContent = 'zapisano na tym telefonie'; } catch (e) { document.getElementById('saved').textContent = 'nie da się zapisać (tryb prywatny?) · skopiuj notatki przed zamknięciem'; } }
+  function esc(s){ return String(s || '').replace(/[&<>]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function filled(id){ var v = data[id] || {}; return !!(v.plus || v.minus || v.real || v.cond); }
+  function tabs(){
+    var t = document.getElementById('tabs'); t.innerHTML = '';
+    S.forEach(function(s, i){
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = (i + 1) + '. ' + s.t;
+      if (s.id === cur) b.className = 'on'; if (filled(s.id)) b.className += ' done';
+      b.addEventListener('click', function(){ cur = s.id; data._cur = cur; save(); render(); });
+      t.appendChild(b);
+    });
+  }
+  function render(){
+    tabs();
+    var s = S.filter(function(x){ return x.id === cur; })[0], v = data[s.id] = data[s.id] || {};
+    var e = document.getElementById('edit');
+    e.innerHTML = '<div class="card ' + s.c + '"><div class="k">' + s.k + '</div><h2>' + s.t + '</h2><p class="d">' + s.d + '</p>' +
+      '<label for="plus">Plusy</label><textarea id="plus" placeholder="co w tym dobrego?"></textarea>' +
+      '<label for="minus">Minusy</label><textarea id="minus" placeholder="co może pójść źle?"></textarea>' +
+      '<label>Realność</label><div class="scale" id="scale"></div><small style="display:flex;justify-content:space-between;font-size:12px;color:#7C6DA8;margin-top:4px;"><span>1 · fantazja</span><span>5 · prawie pewne</span></small>' +
+      '<label for="cond">Co musiałoby się stać, żeby się spełnił?</label><textarea id="cond" placeholder="jedno zdanie"></textarea></div>';
+    ['plus', 'minus', 'cond'].forEach(function(f){ var a = document.getElementById(f); a.value = v[f] || ''; a.addEventListener('input', function(){ v[f] = a.value; save(); tabs(); }); });
+    var sc = document.getElementById('scale');
+    for (var n = 1; n <= 5; n++) (function(n){ var b = document.createElement('button'); b.type = 'button'; b.textContent = n; if (v.real === n) b.className = 'on'; b.addEventListener('click', function(){ v.real = v.real === n ? 0 : n; save(); render(); }); sc.appendChild(b); })(n);
+  }
+  function readView(){
+    var r = document.getElementById('read'), html = '';
+    S.forEach(function(s){
+      var v = data[s.id] || {}; if (!filled(s.id)) return;
+      html += '<div class="card ' + s.c + '"><h3>' + s.t + (v.real ? ' · realność ' + v.real + '/5' : '') + '</h3>' +
+        (v.plus ? '<p class="item"><b>Plusy</b>' + esc(v.plus).replace(/\n/g, '<br>') + '</p>' : '') +
+        (v.minus ? '<p class="item"><b>Minusy</b>' + esc(v.minus).replace(/\n/g, '<br>') + '</p>' : '') +
+        (v.cond ? '<p class="item"><b>Co musiałoby się stać</b>' + esc(v.cond).replace(/\n/g, '<br>') + '</p>' : '') + '</div>';
+    });
+    r.innerHTML = html || '<div class="card"><p class="d" style="margin:0">Jeszcze nic nie wpisano.</p></div>';
+  }
+  function asText(){
+    return S.filter(function(s){ return filled(s.id); }).map(function(s){ var v = data[s.id];
+      return s.t + (v.real ? ' (realność ' + v.real + '/5)' : '') + '\nPlusy: ' + (v.plus || '-') + '\nMinusy: ' + (v.minus || '-') + '\nCo musiałoby się stać: ' + (v.cond || '-'); }).join('\n\n');
+  }
+  var reading = false;
+  document.getElementById('toggle').addEventListener('click', function(){
+    reading = !reading; this.textContent = reading ? 'Wróć do pisania' : 'Czytaj moje notatki';
+    document.getElementById('edit').style.display = reading ? 'none' : '';
+    document.getElementById('tabs').style.display = reading ? 'none' : '';
+    document.getElementById('read').classList.toggle('on', reading);
+    if (reading) readView();
+  });
+  document.getElementById('copy').addEventListener('click', function(){
+    var t = asText() || 'Brak notatek.';
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ document.getElementById('saved').textContent = 'skopiowano do schowka'; }, function(){ prompt('Skopiuj:', t); });
+    else prompt('Skopiuj:', t);
+  });
+  document.getElementById('clear').addEventListener('click', function(){ if (confirm('Usunąć wszystkie notatki z tego telefonu?')) { data = { _cur: 's1' }; cur = 's1'; save(); render(); if (reading) readView(); } });
+  render();
+})();
+</script>
+</body>
+</html>

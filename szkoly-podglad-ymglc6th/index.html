@@ -11,6 +11,7 @@
 <meta property="og:locale" content="pl_PL">
 <meta property="og:title" content="Nowoczesna edukacja z AI – szkolenie dla nauczycieli">
 <meta property="og:description" content="Oferta Lucid Academy dla szkół: narzędzia AI, zagrożenia dla uczniów, szanse i vibe coding. Warianty 3, 6 i 9 godzin.">
+<link rel="canonical" href="https://lucidacademy.pl/szkoly/">
 <meta property="og:url" content="https://lucidacademy.pl/szkoly/">
 <meta property="og:image" content="https://lucidacademy.pl/szkoly/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -1740,6 +1741,21 @@ footer .made{font-family:var(--f-mono);font-size:.74rem;color:var(--soft);letter
   });
 
   setVar('9'); refreshChips();
+})();
+</script>
+
+<script>
+/* Licznik odwiedzin (GoatCounter), jak na stronie głównej: liczy tylko na lucidacademy.pl.
+   Parametr ?z= mówi, skąd przyszło wejście (qr = skan kodu, pdf = link w ofercie PDF);
+   po zliczeniu znika z paska adresu, żeby nie trafiał do kopiowanych linków. */
+(function(){
+  var DOMENY=['lucidacademy.pl','www.lucidacademy.pl'];
+  var q=new URLSearchParams(location.search), z=q.get('z');
+  if(location.protocol==='https:' && DOMENY.indexOf(location.hostname)!==-1 && !navigator.webdriver){
+    var par=new URLSearchParams({p:location.pathname+(z?'?z='+z:''),t:document.title,r:document.referrer,s:[screen.width,screen.height,window.devicePixelRatio||1].join(','),rnd:Math.random().toString(36).slice(2)});
+    new Image().src='https://lucidacademy.goatcounter.com/count?'+par;
+  }
+  if(z && history.replaceState){ q.delete('z'); var rest=q.toString(); try{ history.replaceState(null,'',location.pathname+(rest?'?'+rest:'')+location.hash); }catch(e){} }
 })();
 </script>
 

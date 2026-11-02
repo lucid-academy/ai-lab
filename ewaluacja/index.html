@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ankieta po zajęciach · Lucid Academy</title>
+<meta name="description" content="Krótka, anonimowa ankieta po zajęciach Fundacji Lucid Academy.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#08091e; --ink:#F6F3FF; --muted:#C4B8EC; --dim:#9C90C8;
+  --violet:#7c4ddb; --violet-deep:#4c26ad; --lilac:#b088f4; --pink:#d85cc8; --cyan:#4bffff;
+  --line:rgba(176,136,244,.38);
+  --font:"Sora",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background-color:var(--bg);color:var(--ink);font-family:var(--font);font-size:20px;line-height:1.5;
+  padding:env(safe-area-inset-top,0px) 16px calc(48px + env(safe-area-inset-bottom,0px));
+  background-image:radial-gradient(700px 520px at 0% -10%, rgba(124,77,219,.45), transparent 62%),radial-gradient(600px 460px at 100% 40%, rgba(75,255,255,.10), transparent 60%);
+  background-attachment:fixed}
+.wrap{max-width:660px;margin-inline:auto}
+header{padding-block:28px 18px;display:flex;flex-direction:column;gap:10px}
+.eyebrow{font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin:0}
+h1{font-weight:800;font-size:clamp(42px,11vw,62px);line-height:1.02;letter-spacing:-.03em;margin:0;
+  background:linear-gradient(104deg,#FFFFFF 6%,#d4bcff 45%,#8ff4f7 96%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin:0;color:var(--muted);font-size:19px}
+.rule{height:4px;width:110px;border-radius:3px;background:linear-gradient(90deg,var(--violet),var(--pink),var(--cyan));margin-top:4px}
+form{display:flex;flex-direction:column;gap:16px}
+.field{border:1px solid var(--line);border-radius:18px;padding:18px 16px 20px;background:linear-gradient(160deg,rgba(124,77,219,.18),rgba(124,77,219,.05));display:flex;flex-direction:column;gap:12px}
+.field.ctx{border-color:rgba(75,255,255,.5);background:linear-gradient(160deg,rgba(75,255,255,.12),rgba(124,77,219,.06))}
+.q{font-size:21px;font-weight:700;line-height:1.3;margin:0;color:var(--ink)}
+.req{color:var(--pink);font-weight:700}
+.opt{font-weight:400;font-size:15px;color:var(--dim);margin-left:6px}
+.hint{font-size:16px;color:var(--muted);margin:0}
+input[type=text],input[type=date],select,textarea{width:100%;font:inherit;font-size:19px;color:var(--ink);background:rgba(3,2,12,.6);border:1px solid rgba(176,136,244,.6);border-radius:12px;padding:14px}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--lilac) 50%),linear-gradient(135deg,var(--lilac) 50%,transparent 50%);background-position:calc(100% - 22px) 50%,calc(100% - 16px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:40px}
+select option{background:#14122e;color:var(--ink)}
+textarea{resize:vertical;line-height:1.5;min-height:96px}
+input:focus,textarea:focus,select:focus{outline:3px solid var(--cyan);outline-offset:1px;border-color:transparent}
+.sub{display:flex;flex-direction:column;gap:6px}
+.sub label{font-size:16px;font-weight:600;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chips input,.scale5 input{position:absolute;opacity:0;pointer-events:none}
+.chips label{display:inline-flex;align-items:center;min-height:56px;padding:10px 18px;border-radius:999px;border:1px solid rgba(176,136,244,.6);background:rgba(3,2,12,.5);font-size:19px;cursor:pointer;line-height:1.25}
+.chips.big label{flex:1 1 100%;border-radius:14px;justify-content:flex-start;font-weight:600}
+.chips input:checked + label,.scale5 input:checked + label{background:linear-gradient(135deg,var(--violet),var(--pink));border-color:transparent;color:#fff;box-shadow:0 0 16px rgba(216,92,200,.5)}
+.chips input:checked + label::before{content:"✓ ";font-weight:800;margin-right:4px}
+.chips input:focus-visible + label,.scale5 input:focus-visible + label{outline:3px solid var(--cyan);outline-offset:2px}
+.scale5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.scale5 label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:76px;border-radius:14px;border:1px solid rgba(176,136,244,.6);background:rgba(3,2,12,.5);font-size:28px;font-weight:700;cursor:pointer}
+.scale5 label small{font-weight:400;font-size:12px;color:var(--muted);line-height:1.1;text-align:center}
+.scale5 input:checked + label small{color:#fff}
+.ctx-sum{display:flex;flex-direction:column;gap:4px;font-size:19px}
+.ctx-sum b{font-weight:700}
+.link{font:inherit;font-size:16px;color:var(--cyan);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;align-self:flex-start}
+.btn{font:inherit;font-weight:700;font-size:19px;color:var(--ink);border:1px solid rgba(176,136,244,.7);background:rgba(124,77,219,.25);border-radius:14px;padding:16px 20px;cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:60px}
+.btn.pri{background:linear-gradient(90deg,var(--violet),var(--pink));border-color:transparent;font-size:21px;color:#fff}
+.btn:disabled{opacity:.6;cursor:progress}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.msg{border-radius:16px;padding:16px 18px;font-size:18px}
+.msg.ok{border:1px solid rgba(75,255,255,.6);background:rgba(75,255,255,.1)}
+.msg.err{border:1px solid rgba(216,92,200,.7);background:rgba(216,92,200,.14)}
+.msg b{display:block;font-size:24px;margin-bottom:6px}
+.err-field{color:#ff9be8;font-size:16px;font-weight:600;margin:0}
+.hp{position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden}
+footer{margin-top:28px;color:var(--dim);font-size:15px;text-align:center}
+@media (max-width:380px){.scale5 label small{font-size:10px}}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Fundacja Lucid Academy</p>
+  <h1>Jak było?</h1>
+  <p class="lead">Ankieta jest <b>anonimowa</b>, nie pytamy o imię ani kontakt. Zajmie około 2 minut.</p>
+  <div class="rule"></div>
+</header>
+
+<div id="done" hidden></div>
+
+<form id="f" novalidate>
+  <!-- O jakie zajęcia chodzi -->
+  <div class="field ctx" id="ctx">
+    <p class="q">Zajęcia</p>
+    <div class="ctx-sum" id="ctxSum" hidden>
+      <span>Szkolenie: <b id="sumS"></b></span>
+      <span>Data: <b id="sumD"></b></span>
+      <span id="sumMWrap">Miejsce: <b id="sumM"></b></span>
+      <button type="button" class="link" id="ctxEdit">To nie te zajęcia? Zmień</button>
+    </div>
+    <div id="ctxForm" class="sub" style="gap:14px">
+      <div class="sub">
+        <label for="szk">Nazwa szkolenia <span class="req">*</span></label>
+        <select id="szk"></select>
+        <input type="text" id="szkInne" placeholder="Wpisz nazwę szkolenia" maxlength="120" hidden>
+      </div>
+      <div class="sub">
+        <label for="data">Data zajęć <span class="req">*</span></label>
+        <input type="date" id="data">
+      </div>
+      <div class="sub">
+        <label for="miejsce">Miejscowość lub miejsce<span class="opt">nieobowiązkowo</span></label>
+        <input type="text" id="miejsce" maxlength="120" placeholder="np. Ciechocinek, sanatorium">
+      </div>
+    </div>
+    <p class="err-field" id="ctx-err" hidden>Wybierz szkolenie i datę zajęć.</p>
+  </div>
+
+  <div class="field">
+    <p class="q" id="qTyp">Kim jesteś? <span class="req">*</span></p>
+    <div class="chips big" role="radiogroup" aria-labelledby="qTyp">
+      <input type="radio" name="typ" id="ty1" value="senior"><label for="ty1">Senior / seniorka</label>
+      <input type="radio" name="typ" id="ty2" value="urzednik"><label for="ty2">Urzędnik / urzędniczka</label>
+      <input type="radio" name="typ" id="ty3" value="inna"><label for="ty3">Inna osoba</label>
+    </div>
+    <p class="err-field" id="typ-err" hidden>Zaznacz jedną odpowiedź.</p>
+  </div>
+
+  <div class="field">
+    <p class="q" id="qOcena">Jak oceniasz zajęcia? <span class="req">*</span></p>
+    <div class="scale5" role="radiogroup" aria-labelledby="qOcena">
+      <input type="radio" name="ocena" id="o1" value="1"><label for="o1">1<small>bardzo słabo</small></label>
+      <input type="radio" name="ocena" id="o2" value="2"><label for="o2">2</label>
+      <input type="radio" name="ocena" id="o3" value="3"><label for="o3">3</label>
+      <input type="radio" name="ocena" id="o4" value="4"><label for="o4">4</label>
+      <input type="radio" name="ocena" id="o5" value="5"><label for="o5">5<small>bardzo dobrze</small></label>
+    </div>
+    <p class="err-field" id="ocena-err" hidden>Wybierz ocenę od 1 do 5.</p>
+  </div>
+
+  <div class="field">
+    <p class="q" id="qPrz">Czy to, czego się dowiedziałeś / dowiedziałaś, przyda się w życiu lub pracy?</p>
+    <div class="chips" role="radiogroup" aria-labelledby="qPrz">
+      <input type="radio" name="przydatnosc" id="pr1" value="tak"><label for="pr1">tak</label>
+      <input type="radio" name="przydatnosc" id="pr2" value="raczej tak"><label for="pr2">raczej tak</label>
+      <input type="radio" name="przydatnosc" id="pr3" value="raczej nie"><label for="pr3">raczej nie</label>
+      <input type="radio" name="przydatnosc" id="pr4" value="nie"><label for="pr4">nie</label>
+    </div>
+  </div>
+
+  <div class="field">
+    <p class="q" id="qPro">Czy prowadzący tłumaczyli zrozumiale?</p>
+    <div class="scale5" role="radiogroup" aria-labelledby="qPro">
+      <input type="radio" name="prowadzacy" id="w1" value="1"><label for="w1">1<small>niejasno</small></label>
+      <input type="radio" name="prowadzacy" id="w2" value="2"><label for="w2">2</label>
+      <input type="radio" name="prowadzacy" id="w3" value="3"><label for="w3">3</label>
+      <input type="radio" name="prowadzacy" id="w4" value="4"><label for="w4">4</label>
+      <input type="radio" name="prowadzacy" id="w5" value="5"><label for="w5">5<small>bardzo jasno</small></label>
+    </div>
+  </div>
+
+  <div class="field">
+    <p class="q" id="qTempo">Tempo zajęć było…</p>
+    <div class="chips" role="radiogroup" aria-labelledby="qTempo">
+      <input type="radio" name="tempo" id="t1" value="za wolne"><label for="t1">za wolne</label>
+      <input type="radio" name="tempo" id="t2" value="w sam raz"><label for="t2">w sam raz</label>
+      <input type="radio" name="tempo" id="t3" value="za szybkie"><label for="t3">za szybkie</label>
+    </div>
+  </div>
+
+  <div class="field">
+    <p class="q" id="qPew">Czy po zajęciach czujesz się pewniej w tym temacie?</p>
+    <div class="chips" role="radiogroup" aria-labelledby="qPew">
+      <input type="radio" name="pewnosc" id="pe1" value="tak"><label for="pe1">tak</label>
+      <input type="radio" name="pewnosc" id="pe2" value="trochę"><label for="pe2">trochę</label>
+      <input type="radio" name="pewnosc" id="pe3" value="nie"><label for="pe3">nie</label>
+    </div>
+  </div>
+
+  <div class="field">
+    <p class="q" id="qPol">Czy polecisz te zajęcia znajomym?</p>
+    <div class="chips" role="radiogroup" aria-labelledby="qPol">
+      <input type="radio" name="polecenie" id="p1" value="tak"><label for="p1">tak</label>
+      <input type="radio" name="polecenie" id="p2" value="raczej tak"><label for="p2">raczej tak</label>
+      <input type="radio" name="polecenie" id="p3" value="raczej nie"><label for="p3">raczej nie</label>
+      <input type="radio" name="polecenie" id="p4" value="nie"><label for="p4">nie</label>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="q" for="naj">Co było dla Ciebie najcenniejsze?<span class="opt">nieobowiązkowo</span></label>
+    <textarea id="naj" rows="3" maxlength="1500"></textarea>
+  </div>
+
+  <div class="field">
+    <label class="q" for="popr">Co możemy poprawić albo dodać?<span class="opt">nieobowiązkowo</span></label>
+    <textarea id="popr" rows="3" maxlength="1500"></textarea>
+    <p class="hint">Prosimy nie wpisywać tu imienia, telefonu ani adresu.</p>
+  </div>
+
+  <div class="hp" aria-hidden="true"><label for="website">Nie wypełniaj</label><input type="text" id="website" tabindex="-1" autocomplete="off"></div>
+
+  <div class="actions">
+    <button class="btn pri" type="submit" id="send">Wyślij ankietę</button>
+  </div>
+  <div id="result" aria-live="polite"></div>
+</form>
+
+<footer>Dziękujemy za udział! · Fundacja Lucid Academy, Toruń</footer>
+</div>
+
+<script>
+(function () {
+  var CFG = window.EWAL_CONFIG || {};
+  var ENDPOINT = CFG.ENDPOINT || '';
+  var TO = CFG.FALLBACK_EMAIL || '';
+  var INNE = '__inne__';
+  var qs = new URLSearchParams(location.search);
+  var DEBUG = qs.get('debug') === '1';
+  var $ = function (id) { return document.getElementById(id); };
+  var f = $('f'), sendBtn = $('send'), result = $('result');
+
+  function today() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function plDate(iso) { var p = (iso || '').split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : iso; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // --- Lista szkoleń: najpierw z config.js, potem (jeśli jest) z arkusza „Szkolenia”
+  var sel = $('szk'), inne = $('szkInne');
+  function fillTrainings(list, keep) {
+    var cur = keep || sel.value;
+    sel.innerHTML = '<option value="">— wybierz z listy —</option>';
+    list.forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+    var o = document.createElement('option'); o.value = INNE; o.textContent = 'Inne szkolenie (wpiszę nazwę)'; sel.appendChild(o);
+    if (cur) setTraining(cur);
+  }
+  function setTraining(name) {
+    var has = Array.prototype.some.call(sel.options, function (o) { return o.value === name; });
+    if (has) { sel.value = name; inne.hidden = name !== INNE; }
+    else { sel.value = INNE; inne.hidden = false; inne.value = name; }
+  }
+  function training() { return sel.value === INNE ? inne.value.trim() : sel.value; }
+  sel.addEventListener('change', function () { inne.hidden = sel.value !== INNE; if (!inne.hidden) inne.focus(); });
+  fillTrainings(CFG.TRAININGS || []);
+
+  if (ENDPOINT) {
+    jsonp(ENDPOINT + '?action=config', function (j) {
+      if (j && j.ok && j.trainings && j.trainings.length) fillTrainings(j.trainings, training() || qs.get('s') || '');
+    });
+  }
+  function jsonp(url, cb) {
+    var name = 'ewalcb' + Math.random().toString(36).slice(2, 9), s = document.createElement('script'), t;
+    window[name] = function (j) { clearTimeout(t); delete window[name]; s.remove(); cb(j); };
+    t = setTimeout(function () { delete window[name]; s.remove(); cb(null); }, 8000);
+    s.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'callback=' + name;
+    s.onerror = function () { clearTimeout(t); delete window[name]; s.remove(); cb(null); };
+    document.head.appendChild(s);
+  }
+
+  // --- Parametry z kodu QR: ?s=szkolenie&d=RRRR-MM-DD&m=miejsce&t=senior|urzednik|inna&z=zrodlo
+  var ALIASES = CFG.ALIASES || {};
+  var pS = (qs.get('s') || '').trim(); if (ALIASES[pS.toLowerCase()]) pS = ALIASES[pS.toLowerCase()];
+  var pD = qs.get('d') || '', pM = (qs.get('m') || '').trim(), pT = qs.get('t') || '';
+  var source = (qs.get('z') || (pS ? 'qr' : 'link')).slice(0, 30);
+  var initDate = /^\d{4}-\d{2}-\d{2}$/.test(pD) ? pD : today();
+  $('data').value = initDate;
+  $('data').max = today();
+  if (pM) $('miejsce').value = pM;
+  if (pS) {
+    setTraining(pS);
+    $('sumS').textContent = pS;
+    $('sumD').textContent = plDate($('data').value) + ($('data').value === today() ? ' (dzisiaj)' : '');
+    $('sumM').textContent = pM; $('sumMWrap').hidden = !pM;
+    $('ctxSum').hidden = false; $('ctxForm').hidden = true;
+  }
+  $('ctxEdit').addEventListener('click', function () { $('ctxSum').hidden = true; $('ctxForm').hidden = false; sel.focus(); });
+  if (/^(senior|urzednik|inna)$/.test(pT)) { var r = f.querySelector('input[name="typ"][value="' + pT + '"]'); if (r) r.checked = true; }
+
+  // --- Dane formularza
+  function val(name) { var c = f.querySelector('input[name="' + name + '"]:checked'); return c ? c.value : ''; }
+  function data() {
+    return {
+      data_szkolenia: $('data').value, szkolenie: training(), miejsce: $('miejsce').value.trim(),
+      typ: val('typ'), ocena: val('ocena'), przydatnosc: val('przydatnosc'), prowadzacy: val('prowadzacy'),
+      tempo: val('tempo'), pewnosc: val('pewnosc'), polecenie: val('polecenie'),
+      najcenniejsze: $('naj').value.trim(), do_poprawy: $('popr').value.trim(), zrodlo: source, website: $('website').value
+    };
+  }
+  var TYP = { senior: 'senior/seniorka', urzednik: 'urzędnik/urzędniczka', inna: 'inna osoba' };
+  function plain(x) {
+    return 'SZKOLENIE: ' + x.szkolenie + '\nDATA: ' + x.data_szkolenia + '\nMIEJSCE: ' + (x.miejsce || '—') + '\nKTO: ' + (TYP[x.typ] || x.typ) +
+      '\nOCENA (1-5): ' + x.ocena + '\nPRZYDATNOŚĆ: ' + (x.przydatnosc || '—') + '\nPROWADZĄCY (1-5): ' + (x.prowadzacy || '—') +
+      '\nTEMPO: ' + (x.tempo || '—') + '\nPEWNIEJ PO ZAJĘCIACH: ' + (x.pewnosc || '—') + '\nPOLECENIE: ' + (x.polecenie || '—') +
+      '\nNAJCENNIEJSZE: ' + (x.najcenniejsze || '—') + '\nDO POPRAWY: ' + (x.do_poprawy || '—');
+  }
+
+  // Szkic zostaje w telefonie, gdyby strona się przeładowała (tylko w tej przeglądarce).
+  var DRAFT = 'ewal-draft-v1';
+  function saveDraft() { try { var x = data(); delete x.website; localStorage.setItem(DRAFT, JSON.stringify(x)); } catch (e) {} }
+  try {
+    var d = JSON.parse(localStorage.getItem(DRAFT) || 'null');
+    if (d && d.szkolenie === training() && d.data_szkolenia === $('data').value) {
+      ['typ', 'ocena', 'przydatnosc', 'prowadzacy', 'tempo', 'pewnosc', 'polecenie'].forEach(function (n) {
+        if (d[n]) { var r = f.querySelector('input[name="' + n + '"][value="' + d[n] + '"]'); if (r) r.checked = true; }
+      });
+      $('naj').value = d.najcenniejsze || ''; $('popr').value = d.do_poprawy || '';
+    }
+  } catch (e) {}
+  f.addEventListener('input', saveDraft); f.addEventListener('change', saveDraft);
+
+  // Czy z tego telefonu już wysłano ankietę dla tych zajęć?
+  function sentKey(x) { return 'ewal-sent:' + x.szkolenie + '|' + x.data_szkolenia; }
+  function showDone(again) {
+    f.hidden = true;
+    var box = $('done'); box.hidden = false;
+    box.innerHTML = '<div class="msg ok"><b>Dziękujemy! ✓</b>' + (again
+      ? 'Z tego telefonu ankieta o tych zajęciach została już wysłana.'
+      : 'Ankieta wysłana. Twoja opinia naprawdę nam pomaga.') +
+      '<div class="actions" style="margin-top:14px"><button class="btn" type="button" id="againBtn">Wypełnij jeszcze raz (np. za inną osobę)</button></div></div>';
+    $('againBtn').addEventListener('click', function () { box.hidden = true; f.hidden = false; var keepS = training(), keepD = $('data').value, keepM = $('miejsce').value; f.reset(); setTraining(keepS); $('data').value = keepD || initDate; $('miejsce').value = keepM; window.scrollTo(0, 0); });
+  }
+  try { if (pS && localStorage.getItem(sentKey(data()))) showDone(true); } catch (e) {}
+
+  function markSent(x) { try { localStorage.setItem(sentKey(x), '1'); localStorage.removeItem(DRAFT); } catch (e) {} }
+
+  function mailtoHref(x) { return 'mailto:' + TO + '?subject=' + encodeURIComponent('Ankieta — ' + x.szkolenie + ' ' + x.data_szkolenia) + '&body=' + encodeURIComponent(plain(x)); }
+  function fallbackUI(x, detail) {
+    sendBtn.hidden = true;
+    result.innerHTML = '<div class="msg err"><b>Jeszcze jedno stuknięcie</b>Nie udało się wysłać automatycznie. Odpowiedzi są już wpisane w wiadomość, wystarczy ją wysłać ze swojej poczty.' +
+      '<div class="actions" style="margin-top:12px;"><a class="btn pri" href="' + mailtoHref(x) + '">Wyślij z mojej poczty ✉</a></div>' +
+      (DEBUG && detail ? '<p class="hint">debug: ' + esc(detail) + '</p>' : '') + '</div>';
+  }
+  function resetBtn() { sendBtn.disabled = false; sendBtn.textContent = 'Wyślij ankietę'; }
+
+  function post(url, body) {
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = setTimeout(function () { ctl && ctl.abort(); }, 15000);
+    return fetch(url, body(ctl)).then(function (r) { clearTimeout(timer); return r.json().catch(function () { return {}; }); },
+      function (e) { clearTimeout(timer); throw e; });
+  }
+  function viaEmail(x) {
+    var p = { _subject: 'Ankieta — ' + x.szkolenie + ' ' + x.data_szkolenia, _template: 'table', _captcha: 'false' };
+    var labels = { szkolenie: 'Szkolenie', data_szkolenia: 'Data', miejsce: 'Miejsce', typ: 'Kto', ocena: 'Ocena (1-5)', przydatnosc: 'Przydatność', prowadzacy: 'Prowadzący (1-5)', tempo: 'Tempo', pewnosc: 'Pewniej po zajęciach', polecenie: 'Polecenie', najcenniejsze: 'Najcenniejsze', do_poprawy: 'Do poprawy' };
+    for (var k in labels) p[labels[k]] = (k === 'typ' ? TYP[x[k]] : x[k]) || '—';
+    return post('https://formsubmit.co/ajax/' + TO, function (ctl) {
+      return { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(p), signal: ctl ? ctl.signal : undefined };
+    }).then(function (j) { if (!(j && (j.success === true || j.success === 'true'))) throw new Error(JSON.stringify(j)); });
+  }
+  function viaSheet(x) {
+    // text/plain = bez zapytania wstępnego CORS; Apps Script odpowiada JSON-em
+    return post(ENDPOINT, function (ctl) { return { method: 'POST', body: JSON.stringify(x), signal: ctl ? ctl.signal : undefined }; })
+      .then(function (j) { if (!(j && j.ok)) throw new Error(JSON.stringify(j)); });
+  }
+
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var x = data(), bad = null;
+    var ctxBad = !x.szkolenie || !x.data_szkolenia;
+    $('ctx-err').hidden = !ctxBad; if (ctxBad) { $('ctxSum').hidden = true; $('ctxForm').hidden = false; bad = bad || $('ctx'); }
+    $('typ-err').hidden = !!x.typ; if (!x.typ) bad = bad || $('typ-err');
+    $('ocena-err').hidden = !!x.ocena; if (!x.ocena) bad = bad || $('ocena-err');
+    if (bad) { bad.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    if (x.website) { showDone(false); return; }
+    sendBtn.disabled = true; sendBtn.textContent = 'Wysyłam…'; result.innerHTML = '';
+    var first = ENDPOINT ? viaSheet(x) : (TO ? viaEmail(x) : Promise.reject(new Error('brak ENDPOINT')));
+    first.catch(function (err) {
+      if (ENDPOINT && TO) return viaEmail(x);
+      throw err;
+    }).then(function () { markSent(x); showDone(false); window.scrollTo(0, 0); })
+      .catch(function (err) { resetBtn(); fallbackUI(x, String(err && (err.message || err.name) || err)); });
+  });
+})();
+</script>
+</body>
+</html>

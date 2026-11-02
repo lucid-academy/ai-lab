@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Panel ankiet · Lucid Academy</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#08091e; --panel:#121331; --panel2:#181a3d; --ink:#F6F3FF; --muted:#C4B8EC; --dim:#8f84bd;
+  --violet:#7c4ddb; --lilac:#b088f4; --pink:#d85cc8; --cyan:#4bffff;
+  --line:rgba(176,136,244,.28);
+  --font:"Sora",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;padding:0 16px 48px;
+  background-image:radial-gradient(800px 500px at 0% -10%, rgba(124,77,219,.35), transparent 62%)}
+.wrap{max-width:1180px;margin-inline:auto}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding:24px 0 16px}
+h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em}
+.eyebrow{margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+h2{font-size:17px;margin:0 0 12px;font-weight:700}
+.card{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:16px}
+.grid{display:grid;gap:14px}
+.grid>*{min-width:0}
+.tiles{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.two{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.tile .v{font-size:32px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .l{color:var(--muted);font-size:13px}
+.tile .s{color:var(--dim);font-size:12px;margin-top:2px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+input,select,button,textarea{font:inherit;color:var(--ink)}
+input[type=text],input[type=date],input[type=password],select{background:rgba(3,2,12,.6);border:1px solid rgba(176,136,244,.5);border-radius:10px;padding:9px 10px;width:100%;min-width:0}
+select option{background:#14122e}
+input:focus,select:focus{outline:2px solid var(--cyan);outline-offset:1px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips label{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid rgba(176,136,244,.5);cursor:pointer;font-size:13px;user-select:none}
+.chips input{accent-color:var(--pink)}
+.btn{border:1px solid rgba(176,136,244,.6);background:rgba(124,77,219,.25);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:600;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.pri{background:linear-gradient(90deg,var(--violet),var(--pink));border-color:transparent;color:#fff}
+.btn.ghost{background:transparent}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:110px 1fr 74px;gap:10px;align-items:center;font-size:13px}
+.bar .t{height:14px;border-radius:7px;background:rgba(255,255,255,.06);overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--violet),var(--pink))}
+.bar .n{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+#tAll{min-width:1250px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(176,136,244,.14);vertical-align:top}
+th{position:sticky;top:0;background:#1b1c42;font-weight:700;color:var(--muted);white-space:nowrap;cursor:pointer}
+tbody tr:hover{background:rgba(124,77,219,.12)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.click{cursor:pointer}
+.comments{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow:auto;padding-right:4px}
+.cm{border-left:3px solid var(--pink);padding:6px 10px;background:rgba(3,2,12,.35);border-radius:0 10px 10px 0}
+.cm.good{border-left-color:var(--cyan)}
+.cm .meta{font-size:11px;color:var(--dim);margin-bottom:2px}
+.muted{color:var(--muted)}
+.note{font-size:13px;color:var(--dim)}
+.err{color:#ff9be8;font-weight:600}
+.login{max-width:460px;margin:12vh auto 0;display:flex;flex-direction:column;gap:12px}
+.qrbox{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:16px;align-items:start}
+#qr{background:#fff;border-radius:12px;padding:10px;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+#qr svg{width:100%;height:100%}
+.url{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all;background:rgba(3,2,12,.6);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(176,136,244,.2);color:var(--lilac)}
+@media (max-width:640px){.qrbox{grid-template-columns:1fr}#qr{margin-inline:auto}.bar{grid-template-columns:90px 1fr 64px}}
+</style>
+<script src="config.js"></script>
+<script src="qrcode.js"></script><!-- qrcode-generator 1.4.4, MIT, Kazuhiko Arase -->
+</head>
+<body>
+<div class="wrap">
+
+<section id="login" class="login card" hidden>
+  <p class="eyebrow">Lucid Academy</p>
+  <h1>Panel ankiet</h1>
+  <p class="muted">Wpisz klucz administratora (pokazuje go funkcja <code>setup</code> w Apps Script). Klucz zostaje tylko w tej przeglądarce.</p>
+  <label class="f">Klucz<input type="password" id="key" autocomplete="current-password"></label>
+  <div class="row"><button class="btn pri" id="loginBtn">Pokaż odpowiedzi</button><a class="btn ghost" href="?demo=1">Zobacz na danych przykładowych</a></div>
+  <p class="err" id="loginErr" hidden></p>
+  <p class="note" id="noEndpoint" hidden>Zaplecze nie jest jeszcze podłączone: w pliku <code>config.js</code> brakuje adresu ENDPOINT (instrukcja w README.md). Do tego czasu odpowiedzi przychodzą e-mailem.</p>
+</section>
+
+<main id="app" hidden>
+<header>
+  <div>
+    <p class="eyebrow">Lucid Academy · ankiety po zajęciach</p>
+    <h1>Panel ankiet <span class="pill" id="demoPill" hidden>dane przykładowe</span></h1>
+  </div>
+  <div class="row">
+    <span class="note" id="loadedAt"></span>
+    <button class="btn" id="reload">Odśwież</button>
+    <button class="btn" id="csv">Pobierz CSV</button>
+    <button class="btn ghost" id="logout">Wyloguj</button>
+  </div>
+</header>
+
+<div class="grid" style="gap:16px">
+  <div class="card">
+    <div class="filters">
+      <label class="f">Od dnia<input type="date" id="fFrom"></label>
+      <label class="f">Do dnia<input type="date" id="fTo"></label>
+      <label class="f">Szkolenie<select id="fS"></select></label>
+      <label class="f">Miejsce<select id="fM"></select></label>
+      <label class="f">Szukaj w komentarzach<input type="text" id="fQ" placeholder="np. tempo"></label>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:space-between">
+      <div class="chips" id="fT">
+        <label><input type="checkbox" value="senior" checked> seniorzy</label>
+        <label><input type="checkbox" value="urzednik" checked> urzędnicy</label>
+        <label><input type="checkbox" value="inna" checked> inne osoby</label>
+      </div>
+      <div class="row">
+        <button class="btn ghost" data-range="7">7 dni</button>
+        <button class="btn ghost" data-range="30">30 dni</button>
+        <button class="btn ghost" data-range="month">ten miesiąc</button>
+        <button class="btn ghost" id="clear">Wyczyść filtry</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid tiles" id="tiles"></div>
+
+  <div class="grid two">
+    <div class="card"><h2>Ocena zajęć</h2><div class="bars" id="bOcena"></div></div>
+    <div class="card"><h2>Kto odpowiadał</h2><div class="bars" id="bTyp"></div></div>
+    <div class="card"><h2>Przydatność w życiu lub pracy</h2><div class="bars" id="bPrz"></div></div>
+    <div class="card"><h2>Tempo</h2><div class="bars" id="bTempo"></div></div>
+    <div class="card"><h2>Pewniej po zajęciach</h2><div class="bars" id="bPew"></div></div>
+    <div class="card"><h2>Polecenie znajomym</h2><div class="bars" id="bPol"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Zajęcia <span class="note">(kliknij wiersz, żeby zawęzić do tych zajęć)</span></h2>
+    <div class="tw"><table id="tSes"></table></div>
+  </div>
+
+  <div class="grid two">
+    <div class="card"><h2>Co było najcenniejsze</h2><div class="comments" id="cGood"></div></div>
+    <div class="card"><h2>Co poprawić</h2><div class="comments" id="cBad"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Wszystkie odpowiedzi <span class="note" id="allCount"></span></h2>
+    <div class="tw" style="max-height:560px"><table id="tAll"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Link i kod QR do ankiety dla nowych zajęć</h2>
+    <div class="qrbox">
+      <div class="grid" style="gap:10px">
+        <div class="filters">
+          <label class="f">Szkolenie<input type="text" id="qS" list="qSList" placeholder="np. Sprawdź, zanim zaufasz (eFajfy)"><datalist id="qSList"></datalist></label>
+          <label class="f">Miejsce (opcjonalnie)<input type="text" id="qM" placeholder="np. Ciechocinek"></label>
+          <label class="f">Data (puste = dzień wypełnienia)<input type="date" id="qD"></label>
+          <label class="f">Grupa (opcjonalnie)<select id="qT"><option value="">— pytaj w ankiecie —</option><option value="senior">seniorzy</option><option value="urzednik">urzędnicy</option></select></label>
+        </div>
+        <div class="url" id="qUrl"></div>
+        <div class="row"><button class="btn" id="qCopy">Kopiuj link</button><button class="btn" id="qPng">Pobierz QR (PNG)</button><button class="btn" id="qSvg">Pobierz QR (SVG)</button></div>
+        <p class="note">Bez daty w linku ankieta sama wstawi dzień, w którym ktoś ją wypełnia. Jeden stały kod QR na szkolenie wystarczy więc na wszystkie terminy.</p>
+      </div>
+      <div id="qr"></div>
+    </div>
+  </div>
+</div>
+</main>
+</div>
+
+<script>
+(function () {
+  var CFG = window.EWAL_CONFIG || {};
+  var ENDPOINT = CFG.ENDPOINT || '';
+  var PUBLIC_URL = CFG.PUBLIC_URL || location.href.replace(/panel\.html.*$/, '');
+  var qs = new URLSearchParams(location.search);
+  var DEMO = qs.get('demo') === '1';
+  var KEYSTORE = 'ewal-admin-key';
+  var $ = function (id) { return document.getElementById(id); };
+  var ALL = [], VIEW = [];
+  var TYP = { senior: 'senior', urzednik: 'urzędnik', inna: 'inna osoba' };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function plDate(iso) { var p = (iso || '').split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : iso; }
+  function iso(d) { d = new Date(d); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+
+  function jsonp(url, cb) {
+    var name = 'ewalcb' + Math.random().toString(36).slice(2, 9), s = document.createElement('script'), t;
+    function done(j) { clearTimeout(t); delete window[name]; s.remove(); cb(j); }
+    window[name] = done;
+    t = setTimeout(function () { done(null); }, 20000);
+    s.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'callback=' + name;
+    s.onerror = function () { done(null); };
+    document.head.appendChild(s);
+  }
+
+  // ---------- logowanie i pobieranie
+  function showLogin(msg) {
+    $('app').hidden = true; $('login').hidden = false;
+    $('noEndpoint').hidden = !!ENDPOINT;
+    $('loginErr').hidden = !msg; $('loginErr').textContent = msg || '';
+    $('key').focus();
+  }
+  function load(key) {
+    if (DEMO) { ALL = demoRows(); start(); return; }
+    if (!ENDPOINT) { showLogin('Brak adresu ENDPOINT w config.js.'); return; }
+    $('loginBtn').disabled = true; $('loginBtn').textContent = 'Ładuję…';
+    jsonp(ENDPOINT + '?action=list&key=' + encodeURIComponent(key), function (j) {
+      $('loginBtn').disabled = false; $('loginBtn').textContent = 'Pokaż odpowiedzi';
+      if (!j) return showLogin('Nie udało się połączyć z arkuszem. Sprawdź internet i adres ENDPOINT.');
+      if (!j.ok) { lsSet(KEYSTORE, null); return showLogin(j.error === 'unauthorized' ? 'Nieprawidłowy klucz.' : 'Błąd: ' + j.error); }
+      lsSet(KEYSTORE, key);
+      ALL = (j.rows || []).filter(function (r) { return r.data_szkolenia; });
+      if (j.trainings) fillDatalist(j.trainings);
+      start();
+    });
+  }
+  $('loginBtn').addEventListener('click', function () { var k = $('key').value.trim(); if (k) load(k); });
+  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('loginBtn').click(); });
+  $('logout').addEventListener('click', function () { lsSet(KEYSTORE, null); if (DEMO) location.search = ''; else showLogin(); });
+  $('reload').addEventListener('click', function () { load(lsGet(KEYSTORE) || ''); });
+
+  function start() {
+    $('login').hidden = true; $('app').hidden = false; $('demoPill').hidden = !DEMO;
+    $('loadedAt').textContent = 'Wczytano ' + ALL.length + ' odp. · ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+    fillSelect($('fS'), uniq(ALL.map(function (r) { return r.szkolenie; })), 'wszystkie szkolenia');
+    fillSelect($('fM'), uniq(ALL.map(function (r) { return r.miejsce || ''; }).filter(Boolean)), 'wszystkie miejsca');
+    fillDatalist(uniq((CFG.TRAININGS || []).concat(ALL.map(function (r) { return r.szkolenie; }))));
+    readHash(); render(); qrUpdate();
+  }
+  function uniq(a) { var o = {}; a.forEach(function (x) { if (x) o[x] = 1; }); return Object.keys(o).sort(function (a, b) { return a.localeCompare(b, 'pl'); }); }
+  function fillSelect(el, items, allLabel) {
+    var cur = el.value; el.innerHTML = '<option value="">' + allLabel + '</option>' + items.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('');
+    el.value = cur;
+  }
+  function fillDatalist(items) { $('qSList').innerHTML = items.map(function (x) { return '<option value="' + esc(x) + '">'; }).join(''); }
+
+  // ---------- filtry (zapamiętywane w adresie strony, żeby dało się wysłać link do widoku)
+  var F = ['fFrom', 'fTo', 'fS', 'fM', 'fQ'];
+  function types() { return Array.prototype.filter.call($('fT').querySelectorAll('input'), function (c) { return c.checked; }).map(function (c) { return c.value; }); }
+  function writeHash() {
+    var p = new URLSearchParams();
+    F.forEach(function (id) { if ($(id).value) p.set(id, $(id).value); });
+    var t = types(); if (t.length < 3) p.set('t', t.join(','));
+    history.replaceState(null, '', location.pathname + location.search + (p.toString() ? '#' + p : ''));
+  }
+  function readHash() {
+    var p = new URLSearchParams(location.hash.slice(1));
+    F.forEach(function (id) { if (p.has(id)) $(id).value = p.get(id); });
+    if (p.has('t')) { var t = p.get('t').split(','); $('fT').querySelectorAll('input').forEach(function (c) { c.checked = t.indexOf(c.value) >= 0; }); }
+  }
+  F.forEach(function (id) { $(id).addEventListener('input', function () { render(); writeHash(); }); });
+  $('fT').addEventListener('change', function () { render(); writeHash(); });
+  $('clear').addEventListener('click', function () { F.forEach(function (id) { $(id).value = ''; }); $('fT').querySelectorAll('input').forEach(function (c) { c.checked = true; }); render(); writeHash(); });
+  document.querySelectorAll('[data-range]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var now = new Date(), r = b.getAttribute('data-range');
+      $('fTo').value = iso(now);
+      $('fFrom').value = r === 'month' ? iso(new Date(now.getFullYear(), now.getMonth(), 1)) : iso(now.getTime() - (+r - 1) * 864e5);
+      render(); writeHash();
+    });
+  });
+
+  function filtered() {
+    var from = $('fFrom').value, to = $('fTo').value, s = $('fS').value, m = $('fM').value, q = $('fQ').value.trim().toLowerCase(), t = types();
+    return ALL.filter(function (r) {
+      if (from && r.data_szkolenia < from) return false;
+      if (to && r.data_szkolenia > to) return false;
+      if (s && r.szkolenie !== s) return false;
+      if (m && (r.miejsce || '') !== m) return false;
+      if (t.indexOf(r.typ) < 0) return false;
+      if (q && ((r.najcenniejsze || '') + ' ' + (r.do_poprawy || '')).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+
+  // ---------- widok
+  function avg(rows, k) { var v = rows.map(function (r) { return +r[k]; }).filter(function (x) { return x > 0; }); return v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : null; }
+  function share(rows, k, yes) { var v = rows.filter(function (r) { return r[k]; }); return v.length ? v.filter(function (r) { return yes.indexOf(r[k]) >= 0; }).length / v.length : null; }
+  function fmt(x, d) { return x == null ? '—' : x.toLocaleString('pl-PL', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function pct(x) { return x == null ? '—' : Math.round(x * 100) + '%'; }
+
+  function render() {
+    VIEW = filtered();
+    var n = VIEW.length;
+    var sesje = groupSessions(VIEW);
+    var tiles = [
+      ['Odpowiedzi', n, sesje.length + ' zajęć'],
+      ['Średnia ocena', fmt(avg(VIEW, 'ocena'), 2), 'skala 1–5'],
+      ['Przyda się', pct(share(VIEW, 'przydatnosc', ['tak', 'raczej tak'])), '„tak” + „raczej tak”'],
+      ['Prowadzący', fmt(avg(VIEW, 'prowadzacy'), 2), 'zrozumiałość, 1–5'],
+      ['Pewniej po zajęciach', pct(share(VIEW, 'pewnosc', ['tak', 'trochę'])), '„tak” + „trochę”'],
+      ['Poleci znajomym', pct(share(VIEW, 'polecenie', ['tak', 'raczej tak'])), '„tak” + „raczej tak”']
+    ];
+    $('tiles').innerHTML = tiles.map(function (t) { return '<div class="card tile"><div class="l">' + t[0] + '</div><div class="v">' + t[1] + '</div><div class="s">' + t[2] + '</div></div>'; }).join('');
+
+    bars('bOcena', 'ocena', ['5', '4', '3', '2', '1'], { 5: '5 bardzo dobrze', 1: '1 bardzo słabo' });
+    bars('bTyp', 'typ', ['senior', 'urzednik', 'inna'], { senior: 'seniorzy', urzednik: 'urzędnicy', inna: 'inne osoby' });
+    bars('bPrz', 'przydatnosc', ['tak', 'raczej tak', 'raczej nie', 'nie']);
+    bars('bTempo', 'tempo', ['za wolne', 'w sam raz', 'za szybkie']);
+    bars('bPew', 'pewnosc', ['tak', 'trochę', 'nie']);
+    bars('bPol', 'polecenie', ['tak', 'raczej tak', 'raczej nie', 'nie']);
+
+    // zajęcia
+    $('tSes').innerHTML = '<thead><tr><th>Data</th><th>Szkolenie</th><th>Miejsce</th><th class="num">Odp.</th><th class="num">Seniorzy</th><th class="num">Urzędnicy</th><th class="num">Śr. ocena</th><th class="num">Prowadzący</th></tr></thead><tbody>' +
+      (sesje.length ? sesje.map(function (s, i) {
+        return '<tr class="click" data-i="' + i + '"><td>' + plDate(s.d) + '</td><td>' + esc(s.s) + '</td><td>' + esc(s.m || '—') + '</td><td class="num">' + s.rows.length + '</td><td class="num">' + s.sen + '</td><td class="num">' + s.urz + '</td><td class="num">' + fmt(avg(s.rows, 'ocena'), 2) + '</td><td class="num">' + fmt(avg(s.rows, 'prowadzacy'), 2) + '</td></tr>';
+      }).join('') : '<tr><td colspan="8" class="muted">Brak odpowiedzi dla wybranych filtrów.</td></tr>') + '</tbody>';
+    $('tSes').querySelectorAll('tr.click').forEach(function (tr) {
+      tr.addEventListener('click', function () {
+        var s = sesje[+tr.getAttribute('data-i')];
+        $('fFrom').value = s.d; $('fTo').value = s.d; $('fS').value = s.s; $('fM').value = s.m || '';
+        render(); writeHash(); window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    comments('cGood', 'najcenniejsze', 'good');
+    comments('cBad', 'do_poprawy', '');
+    allTable();
+  }
+
+  function groupSessions(rows) {
+    var g = {};
+    rows.forEach(function (r) {
+      var k = r.data_szkolenia + '|' + r.szkolenie + '|' + (r.miejsce || '');
+      (g[k] = g[k] || { d: r.data_szkolenia, s: r.szkolenie, m: r.miejsce || '', rows: [], sen: 0, urz: 0 }).rows.push(r);
+      if (r.typ === 'senior') g[k].sen++; if (r.typ === 'urzednik') g[k].urz++;
+    });
+    return Object.keys(g).map(function (k) { return g[k]; }).sort(function (a, b) { return b.d.localeCompare(a.d) || a.s.localeCompare(b.s, 'pl'); });
+  }
+
+  function bars(id, key, order, labels) {
+    var c = {}, tot = 0;
+    VIEW.forEach(function (r) { if (r[key]) { c[r[key]] = (c[r[key]] || 0) + 1; tot++; } });
+    $(id).innerHTML = tot ? order.map(function (o) {
+      var v = c[o] || 0, p = v / tot;
+      return '<div class="bar"><span>' + esc((labels && labels[o]) || o) + '</span><span class="t"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span><span class="n">' + v + ' · ' + Math.round(p * 100) + '%</span></div>';
+    }).join('') + '<p class="note" style="margin:4px 0 0">' + tot + ' z ' + VIEW.length + ' osób odpowiedziało na to pytanie</p>' : '<p class="muted">Brak odpowiedzi.</p>';
+  }
+
+  function comments(id, key, cls) {
+    var rows = VIEW.filter(function (r) { return r[key]; }).sort(function (a, b) { return (b.wyslano || '').localeCompare(a.wyslano || ''); });
+    $(id).innerHTML = rows.length ? rows.map(function (r) {
+      return '<div class="cm ' + cls + '"><div class="meta">' + plDate(r.data_szkolenia) + ' · ' + esc(r.szkolenie) + (r.miejsce ? ' · ' + esc(r.miejsce) : '') + ' · ' + esc(TYP[r.typ] || r.typ) + ' · ocena ' + esc(r.ocena) + '</div>' + esc(r[key]) + '</div>';
+    }).join('') : '<p class="muted">Brak komentarzy.</p>';
+  }
+
+  var COLS = [['data_szkolenia', 'Data'], ['szkolenie', 'Szkolenie'], ['miejsce', 'Miejsce'], ['typ', 'Kto'], ['ocena', 'Ocena'], ['przydatnosc', 'Przydatność'], ['prowadzacy', 'Prowadzący'], ['tempo', 'Tempo'], ['pewnosc', 'Pewniej'], ['polecenie', 'Poleci'], ['najcenniejsze', 'Najcenniejsze'], ['do_poprawy', 'Do poprawy'], ['wyslano', 'Wysłano']];
+  var sortKey = 'wyslano', sortDir = -1;
+  function allTable() {
+    var rows = VIEW.slice().sort(function (a, b) { return String(a[sortKey] || '').localeCompare(String(b[sortKey] || ''), 'pl', { numeric: true }) * sortDir; });
+    $('allCount').textContent = '(' + rows.length + ')';
+    $('tAll').innerHTML = '<thead><tr>' + COLS.map(function (c) { return '<th data-k="' + c[0] + '">' + c[1] + (sortKey === c[0] ? (sortDir > 0 ? ' ▲' : ' ▼') : '') + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.map(function (r) {
+        return '<tr>' + COLS.map(function (c) {
+          var v = r[c[0]] || '';
+          if (c[0] === 'data_szkolenia') v = plDate(v);
+          if (c[0] === 'typ') v = TYP[v] || v;
+          if (c[0] === 'wyslano' && v) v = new Date(v).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' });
+          return '<td>' + esc(v) + '</td>';
+        }).join('') + '</tr>';
+      }).join('') + '</tbody>';
+    $('tAll').querySelectorAll('th').forEach(function (th) {
+      th.addEventListener('click', function () { var k = th.getAttribute('data-k'); if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; } allTable(); });
+    });
+  }
+
+  // ---------- CSV (otwiera się w Excelu z polskimi znakami)
+  $('csv').addEventListener('click', function () {
+    var head = ['id'].concat(COLS.map(function (c) { return c[0]; })).concat(['zrodlo']);
+    var lines = [head.join(';')].concat(VIEW.map(function (r) {
+      return head.map(function (k) { var v = String(r[k] == null ? '' : r[k]).replace(/"/g, '""'); return /[;"\n\r]/.test(v) ? '"' + v + '"' : v; }).join(';');
+    }));
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    dl(blob, 'ankiety-' + iso(new Date()) + '.csv');
+  });
+  function dl(blob, name) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+
+  // ---------- generator linku i QR
+  function qrLink() {
+    var p = [];
+    var name = $('qS').value.trim(), al = CFG.ALIASES || {}, code = Object.keys(al).filter(function (k) { return al[k] === name; })[0];
+    if (name) p.push('s=' + encodeURIComponent(code || name));
+    if ($('qM').value.trim()) p.push('m=' + encodeURIComponent($('qM').value.trim()));
+    if ($('qD').value) p.push('d=' + $('qD').value);
+    if ($('qT').value) p.push('t=' + $('qT').value);
+    return PUBLIC_URL + (p.length ? '?' + p.join('&') : '');
+  }
+  var lastSvg = '';
+  function qrUpdate() {
+    var url = qrLink(); $('qUrl').textContent = url;
+    if (typeof qrcode !== 'function') { $('qr').innerHTML = '<span style="color:#333;font-size:12px">Brak biblioteki QR (offline?)</span>'; return; }
+    var q = qrcode(0, 'M'); q.addData(url); q.make();
+    lastSvg = q.createSvgTag({ cellSize: 8, margin: 4, scalable: true });
+    $('qr').innerHTML = lastSvg;
+  }
+  ['qS', 'qM', 'qD', 'qT'].forEach(function (id) { $(id).addEventListener('input', qrUpdate); });
+  $('qCopy').addEventListener('click', function () {
+    var u = qrLink();
+    (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function () { $('qCopy').textContent = 'Skopiowano ✓'; setTimeout(function () { $('qCopy').textContent = 'Kopiuj link'; }, 1500); }, function () { prompt('Skopiuj link:', u); });
+  });
+  function qrName(ext) { return 'qr-ankieta' + ($('qS').value.trim() ? '-' + $('qS').value.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '') + '.' + ext; }
+  $('qSvg').addEventListener('click', function () { if (lastSvg) dl(new Blob([lastSvg], { type: 'image/svg+xml' }), qrName('svg')); });
+  $('qPng').addEventListener('click', function () {
+    if (!lastSvg) return;
+    var img = new Image(), size = 1200;
+    img.onload = function () {
+      var c = document.createElement('canvas'); c.width = c.height = size; var x = c.getContext('2d');
+      x.fillStyle = '#fff'; x.fillRect(0, 0, size, size); x.imageSmoothingEnabled = false; x.drawImage(img, 0, 0, size, size);
+      c.toBlob(function (b) { dl(b, qrName('png')); }, 'image/png');
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(lastSvg.replace('<svg ', '<svg width="' + size + '" height="' + size + '" '));
+  });
+
+  // ---------- dane przykładowe (?demo=1), żeby zobaczyć panel przed podłączeniem arkusza
+  function demoRows() {
+    var seed = 7; function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+    function pick(a, w) { var r = rnd(), s = 0; for (var i = 0; i < a.length; i++) { s += (w ? w[i] : 1 / a.length); if (r < s) return a[i]; } return a[a.length - 1]; }
+    var ses = [
+      ['Sprawdź, zanim zaufasz (eFajfy)', 'Ciechocinek', 3, 22, 'senior'],
+      ['Sprawdź, zanim zaufasz (eFajfy)', 'Inowrocław', 9, 18, 'senior'],
+      ['Warsztaty AI', 'Toruń', 14, 15, 'urzednik'],
+      ['Sprawdź, zanim zaufasz (eFajfy)', 'Ciechocinek', 21, 25, 'senior'],
+      ['Wykład o AI', 'Bydgoszcz', 27, 30, 'urzednik']
+    ];
+    var good = ['Przykład z fałszywym SMS-em o paczce', 'Że można zadzwonić do banku i sprawdzić', 'Ćwiczenie z czatem AI', 'Konkretne numery telefonów', 'Spokojne tłumaczenie'];
+    var bad = ['Więcej czasu na pytania', 'Większe litery na slajdach', 'Krótsza przerwa', 'Więcej ćwiczeń na telefonie', ''];
+    var out = [], now = Date.now();
+    ses.forEach(function (s) {
+      var d = iso(now - s[2] * 864e5);
+      for (var i = 0; i < s[3]; i++) {
+        var typ = rnd() < .85 ? s[4] : pick(['senior', 'urzednik', 'inna']);
+        out.push({
+          id: Math.random().toString(16).slice(2, 10), wyslano: new Date(now - s[2] * 864e5 + i * 6e4).toISOString(), data_szkolenia: d,
+          szkolenie: s[0], miejsce: s[1], typ: typ,
+          ocena: pick(['5', '4', '3', '2'], [.55, .3, .1, .05]), przydatnosc: pick(['tak', 'raczej tak', 'raczej nie', ''], [.6, .28, .07, .05]),
+          prowadzacy: pick(['5', '4', '3', ''], [.6, .28, .08, .04]), tempo: pick(['za wolne', 'w sam raz', 'za szybkie'], [.08, .72, .2]),
+          pewnosc: pick(['tak', 'trochę', 'nie'], [.55, .38, .07]), polecenie: pick(['tak', 'raczej tak', 'raczej nie'], [.62, .3, .08]),
+          najcenniejsze: rnd() < .4 ? pick(good) : '', do_poprawy: rnd() < .3 ? pick(bad) : '', zrodlo: 'qr'
+        });
+      }
+    });
+    return out;
+  }
+
+  // ---------- start
+  if (DEMO) load('');
+  else if (lsGet(KEYSTORE) && ENDPOINT) load(lsGet(KEYSTORE));
+  else showLogin();
+})();
+</script>
+</body>
+</html>

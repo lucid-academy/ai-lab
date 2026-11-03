@@ -195,7 +195,7 @@ footer{margin-top:28px;color:var(--dim);font-size:15px;text-align:center}
     <p class="hint">Prosimy nie wpisywać tu imienia, telefonu ani adresu.</p>
   </div>
 
-  <div class="hp" aria-hidden="true"><label for="website">Nie wypełniaj</label><input type="text" id="website" tabindex="-1" autocomplete="off"></div>
+  <div class="hp" aria-hidden="true"><label for="kz7q">Zostaw puste</label><input type="text" id="kz7q" name="kz7q" tabindex="-1" autocomplete="new-password"></div>
 
   <div class="actions">
     <button class="btn pri" type="submit" id="send">Wyślij ankietę</button>
@@ -279,7 +279,7 @@ footer{margin-top:28px;color:var(--dim);font-size:15px;text-align:center}
       data_szkolenia: $('data').value, szkolenie: training(), miejsce: $('miejsce').value.trim(),
       typ: val('typ'), ocena: val('ocena'), przydatnosc: val('przydatnosc'), prowadzacy: val('prowadzacy'),
       tempo: val('tempo'), pewnosc: val('pewnosc'), polecenie: val('polecenie'),
-      najcenniejsze: $('naj').value.trim(), do_poprawy: $('popr').value.trim(), zrodlo: source, website: $('website').value
+      najcenniejsze: $('naj').value.trim(), do_poprawy: $('popr').value.trim(), zrodlo: source, website: $('kz7q').value
     };
   }
   var TYP = { senior: 'senior/seniorka', urzednik: 'urzędnik/urzędniczka', inna: 'inna osoba' };
@@ -315,7 +315,13 @@ footer{margin-top:28px;color:var(--dim);font-size:15px;text-align:center}
       '<div class="actions" style="margin-top:14px"><button class="btn" type="button" id="againBtn">Wypełnij jeszcze raz (np. za inną osobę)</button></div></div>';
     $('againBtn').addEventListener('click', function () { box.hidden = true; f.hidden = false; var keepS = training(), keepD = $('data').value, keepM = $('miejsce').value; f.reset(); setTraining(keepS); $('data').value = keepD || initDate; $('miejsce').value = keepM; window.scrollTo(0, 0); });
   }
-  try { if (pS && localStorage.getItem(sentKey(data()))) showDone(true); } catch (e) {}
+  if (qs.get('wyslano') === '1') {
+    try { var pend = JSON.parse(localStorage.getItem('ewal-pending') || 'null'); if (pend && pend.k) localStorage.setItem(pend.k, '1'); localStorage.removeItem('ewal-pending'); localStorage.removeItem(DRAFT); } catch (e) {}
+    showDone(false);
+    try { qs.delete('wyslano'); history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs : '')); } catch (e) {}
+  } else {
+    try { if (pS && localStorage.getItem(sentKey(data()))) showDone(true); } catch (e) {}
+  }
 
   function markSent(x) { try { localStorage.setItem(sentKey(x), '1'); localStorage.removeItem(DRAFT); } catch (e) {} }
 
@@ -324,23 +330,43 @@ footer{margin-top:28px;color:var(--dim);font-size:15px;text-align:center}
     sendBtn.hidden = true;
     result.innerHTML = '<div class="msg err"><b>Jeszcze jedno stuknięcie</b>Nie udało się wysłać automatycznie. Odpowiedzi są już wpisane w wiadomość, wystarczy ją wysłać ze swojej poczty.' +
       '<div class="actions" style="margin-top:12px;"><a class="btn pri" href="' + mailtoHref(x) + '">Wyślij z mojej poczty ✉</a></div>' +
-      (DEBUG && detail ? '<p class="hint">debug: ' + esc(detail) + '</p>' : '') + '</div>';
+      (detail ? '<p class="hint" style="margin-top:10px;font-size:13px;opacity:.7">kod: ' + esc(String(detail).slice(0, 160)) + '</p>' : '') + '</div>';
   }
   function resetBtn() { sendBtn.disabled = false; sendBtn.textContent = 'Wyślij ankietę'; }
 
   function post(url, body) {
     var ctl = ('AbortController' in window) ? new AbortController() : null;
-    var timer = setTimeout(function () { ctl && ctl.abort(); }, 15000);
+    var timer = setTimeout(function () { ctl && ctl.abort(); }, 30000);
     return fetch(url, body(ctl)).then(function (r) { clearTimeout(timer); return r.json().catch(function () { return {}; }); },
       function (e) { clearTimeout(timer); throw e; });
   }
-  function viaEmail(x) {
+  function emailPayload(x) {
     var p = { _subject: 'Ankieta — ' + x.szkolenie + ' ' + x.data_szkolenia, _template: 'table', _captcha: 'false' };
     var labels = { szkolenie: 'Szkolenie', data_szkolenia: 'Data', miejsce: 'Miejsce', typ: 'Kto', ocena: 'Ocena (1-5)', przydatnosc: 'Przydatność', prowadzacy: 'Prowadzący (1-5)', tempo: 'Tempo', pewnosc: 'Pewniej po zajęciach', polecenie: 'Polecenie', najcenniejsze: 'Najcenniejsze', do_poprawy: 'Do poprawy' };
     for (var k in labels) p[labels[k]] = (k === 'typ' ? TYP[x[k]] : x[k]) || '—';
+    return p;
+  }
+  function viaEmail(x) {
+    var p = emailPayload(x);
     return post('https://formsubmit.co/ajax/' + TO, function (ctl) {
       return { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(p), signal: ctl ? ctl.signal : undefined };
     }).then(function (j) { if (!(j && (j.success === true || j.success === 'true'))) throw new Error(JSON.stringify(j)); });
+  }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function retry(fn) { return fn().catch(function (e1) { return wait(2000).then(fn).catch(function (e2) { throw new Error(errText(e1) + ' / ' + errText(e2)); }); }); }
+  function errText(e) { return String(e && (e.message || e.name) || e); }
+  // Ostatnia automatyczna próba: zwykłe wysłanie formularza (przejście na stronę FormSubmit i powrót tutaj).
+  // Działa bez CORS i bez fetch, więc także w starszych i wbudowanych przeglądarkach.
+  function viaNativeForm(x) {
+    var p = emailPayload(x);
+    var back = location.origin + location.pathname + '?wyslano=1' + (pS ? '&s=' + encodeURIComponent(qs.get('s')) : '');
+    p._next = back; p._captcha = 'false';
+    var fm = document.createElement('form');
+    fm.method = 'POST'; fm.action = 'https://formsubmit.co/' + TO; fm.acceptCharset = 'UTF-8'; fm.style.display = 'none';
+    for (var k in p) { var i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = p[k]; fm.appendChild(i); }
+    document.body.appendChild(fm);
+    try { localStorage.setItem('ewal-pending', JSON.stringify({ k: sentKey(x) })); } catch (e) {}
+    fm.submit();
   }
   function viaSheet(x) {
     // text/plain = bez zapytania wstępnego CORS; Apps Script odpowiada JSON-em
@@ -358,12 +384,23 @@ footer{margin-top:28px;color:var(--dim);font-size:15px;text-align:center}
     if (bad) { bad.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
     if (x.website) { showDone(false); return; }
     sendBtn.disabled = true; sendBtn.textContent = 'Wysyłam…'; result.innerHTML = '';
-    var first = ENDPOINT ? viaSheet(x) : (TO ? viaEmail(x) : Promise.reject(new Error('brak ENDPOINT')));
-    first.catch(function (err) {
-      if (ENDPOINT && TO) return viaEmail(x);
-      throw err;
+    var errs = [];
+    var chain = ENDPOINT ? retry(function () { return viaSheet(x); }) : Promise.reject(new Error('brak ENDPOINT'));
+    chain.catch(function (err) {
+      if (ENDPOINT) errs.push('arkusz: ' + errText(err));
+      if (!TO) throw err;
+      return retry(function () { return viaEmail(x); });
     }).then(function () { markSent(x); showDone(false); window.scrollTo(0, 0); })
-      .catch(function (err) { resetBtn(); fallbackUI(x, String(err && (err.message || err.name) || err)); });
+      .catch(function (err) {
+        errs.push('mail: ' + errText(err));
+        if (TO && !qs.get('wyslano') && navigator.onLine !== false) {
+          // najpierw spróbuj zwykłego formularza; mailto zostaje jako ostatnia deska ratunku
+          sendBtn.textContent = 'Jeszcze chwila…';
+          try { viaNativeForm(x); return; } catch (e) { errs.push('form: ' + errText(e)); }
+        }
+        resetBtn();
+        fallbackUI(x, navigator.onLine === false ? 'brak internetu' : errs.join(' | '));
+      });
   });
 })();
 </script>

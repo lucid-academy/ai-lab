@@ -116,10 +116,12 @@
   #pad .rt svg{transform:rotate(90deg)}
 
   /* zadanie */
-  #sTask{background:rgba(6,9,32,.9);display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:2.5vh;
-    padding-left:calc(76px + var(--sl))}
-  #bRepeat{position:absolute;top:calc(12px + var(--st));left:calc(14px + var(--sl));width:56px;height:56px;pointer-events:auto}
-  #bRepeat svg{width:30px;height:30px}
+  #sTask{background:rgba(6,9,32,.92);display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:2.2vh}
+  #tTop{display:flex;align-items:center;gap:14px;width:100%;max-width:860px;flex:none}
+  #bRepeat{width:54px;height:54px;pointer-events:auto}
+  #bRepeat svg{width:28px;height:28px}
+  #tQ{flex:1;font-weight:800;font-size:min(26px,6.6vh);line-height:1.2;color:#fff;background:rgba(123,47,255,.35);border:2px solid rgba(180,140,255,.5);
+    border-radius:18px;padding:8px 16px;text-align:left}
   #tVis{flex:1;min-height:0;width:100%;max-width:820px;box-sizing:border-box;border-radius:26px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.1);
     display:flex;align-items:center;justify-content:center;gap:2vh 14px;flex-wrap:wrap;padding:10px 16px;font-size:min(44px,11vh);line-height:1.15;overflow:hidden}
   #tVis.light{background:#dff4ff}
@@ -146,10 +148,37 @@
   .ans.hint{border-color:#FFD23F;animation:glow 1s infinite}
   .ans.ok{background:#15803d;border-color:#86efac;box-shadow:0 0 26px #22c55e}
   #tVis .ans{font-size:1em}
+  #sTask.novis{justify-content:flex-start}
+  #sTask.novis #tAns{flex:1}
+  #sTask.novis .ans{min-width:min(140px,32vh);height:min(140px,32vh);font-size:min(66px,15vh)}
 
   #wStars{display:flex;gap:12px;min-height:64px}
   #wStars svg{width:64px;height:64px;animation:pop .5s backwards}
   #sTravel{pointer-events:auto}
+  #sIntro{display:grid;grid-template-columns:44% 56%;align-items:stretch}
+  #sIntro .hero{height:100%}
+  #sIntro .side{gap:3vh;align-items:flex-start;padding-right:10px}
+  #iName{font-weight:800;font-size:min(34px,9vh);color:#fff;text-shadow:0 0 14px var(--pc,#7B2FFF)}
+  #iText{font-size:min(21px,5.4vh);line-height:1.35;font-weight:600;color:#e6f3ff;max-width:470px}
+  #iIcons{display:flex;gap:12px}
+  #iIcons canvas{width:min(62px,15vh);height:min(62px,15vh);border-radius:16px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15)}
+  #sIntro .big{align-self:center}
+  #sItem{background:rgba(6,9,32,.8);display:grid;place-items:center}
+  .card{pointer-events:auto;display:grid;grid-template-columns:auto 1fr;gap:4px 22px;align-items:center;max-width:min(680px,88vw);
+    background:rgba(20,26,74,.97);border:3px solid rgba(240,171,252,.7);border-radius:28px;padding:18px 24px;box-shadow:0 0 40px rgba(123,47,255,.6)}
+  .card canvas{grid-row:1/4;width:min(130px,30vh);height:min(130px,30vh)}
+  #itTitle{font-weight:800;font-size:min(28px,7vh)}
+  #itText{font-size:min(20px,5vh);line-height:1.35;font-weight:600;color:#e6f3ff}
+  .card .row{justify-content:space-between;gap:20px;margin-top:6px}
+  .know{display:flex;align-items:center;gap:10px;font-weight:700;font-size:min(19px,5vh);color:#cfe9ff;cursor:pointer;pointer-events:auto}
+  .know input{width:28px;height:28px;accent-color:#22D3EE;margin:0}
+  .card .mid{width:min(70px,17vh);height:min(70px,17vh)}
+  #toast{position:fixed;z-index:7;left:50%;top:calc(10px + var(--st));transform:translate(-50%,-140%);max-width:min(560px,62vw);
+    background:rgba(20,26,74,.94);border:2px solid rgba(34,211,238,.6);border-radius:18px;padding:9px 16px;font-weight:700;font-size:min(19px,5vh);
+    line-height:1.3;text-align:center;pointer-events:none;transition:transform .35s ease;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+  #toast.on{transform:translate(-50%,0)}
+  #noVoice{position:absolute;left:50%;bottom:calc(8px + var(--sb));transform:translateX(-50%);font-size:13px;color:#ffd3a1;text-align:center;max-width:80vw}
+  .it{pointer-events:auto;cursor:pointer}
 </style>
 </head>
 <body>
@@ -168,6 +197,7 @@
     <button class="big play" id="bStart" aria-label="Graj"><svg viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg></button>
   </div>
   <div class="corner tr"><button class="hb tgM" aria-label="Muzyka"></button><button class="hb tgS" aria-label="Dźwięk"></button></div>
+  <div id="noVoice" class="hide">Ten telefon nie ma polskiego głosu, więc polecenia będą widoczne tylko na ekranie.</div>
 </div>
 
 <div id="sMap" class="scr hide">
@@ -192,7 +222,10 @@
 </div>
 
 <div id="sTask" class="scr hide">
-  <button class="hb" id="bRepeat" aria-label="Powtórz pytanie"><svg viewBox="0 0 24 24"><path d="M4 9h3.5L12 5v14l-4.5-4H4z"/><path d="M15.5 8.8a4.5 4.5 0 0 1 0 6.4M18 6.3a8 8 0 0 1 0 11.4" stroke="#d6f6ff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></button>
+  <div id="tTop">
+    <button class="hb" id="bRepeat" aria-label="Powtórz polecenie"><svg viewBox="0 0 24 24"><path d="M4 9h3.5L12 5v14l-4.5-4H4z"/><path d="M15.5 8.8a4.5 4.5 0 0 1 0 6.4M18 6.3a8 8 0 0 1 0 11.4" stroke="#d6f6ff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></button>
+    <div id="tQ"></div>
+  </div>
   <div id="tVis"></div>
   <div id="tAns"></div>
 </div>
@@ -217,6 +250,30 @@
 </div>
 
 <div id="sTravel" class="scr hide"></div>
+
+<div id="sIntro" class="scr hide">
+  <div class="hero"></div>
+  <div class="side">
+    <div id="iName"></div>
+    <div id="iText"></div>
+    <div id="iIcons"></div>
+    <button class="big play" id="bIntroGo" aria-label="Graj"><svg viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg></button>
+  </div>
+</div>
+
+<div id="sItem" class="scr hide">
+  <div class="card">
+    <canvas id="itPic" width="260" height="260"></canvas>
+    <div id="itTitle"></div>
+    <div id="itText"></div>
+    <div class="row">
+      <label class="know"><input type="checkbox" id="itKnow"> Wiem to, nie pokazuj więcej</label>
+      <button class="mid" id="bItemOk" aria-label="Graj dalej"><svg viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
 (() => {
@@ -292,6 +349,7 @@ const save = (() => {
   if (!s || typeof s !== 'object') s = {};
   if (!s.stars || typeof s.stars !== 'object') s.stars = {};
   if (!s.seen || typeof s.seen !== 'object') s.seen = {};
+  if (!s.know || typeof s.know !== 'object') s.know = {};
   if (typeof s.music !== 'boolean') s.music = true;
   if (typeof s.sound !== 'boolean') s.sound = true;
   return s;
@@ -315,7 +373,9 @@ const Snd = {
       const comp = c.createDynamicsCompressor();
       this.out.connect(comp); comp.connect(c.destination);
       this.sfx = c.createGain(); this.sfx.gain.value = 1; this.sfx.connect(this.out);
-      this.mus = c.createGain(); this.mus.gain.value = 0; this.mus.connect(this.out);
+      this.mus = c.createGain(); this.mus.gain.value = 0;
+      this.musF = c.createBiquadFilter(); this.musF.type = 'lowpass'; this.musF.frequency.value = 12000; this.musF.Q.value = 0.5;
+      this.mus.connect(this.musF); this.musF.connect(this.out);
       try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
       Music.boot();
     }
@@ -416,11 +476,13 @@ const Snd = {
 
 /* ================= głos (synteza mowy telefonu) ================= */
 const Voice = {
-  v: null, id: 0, _t: null, _d: null,
+  v: null, id: 0, _t: null, _d: null, noPl: false,
   pickVoice() {
     try {
-      const vs = speechSynthesis.getVoices().filter(v => /^pl/i.test(v.lang));
+      const all = speechSynthesis.getVoices(), vs = all.filter(v => /^pl/i.test(v.lang));
       this.v = vs.find(v => /zosia|ewa|paulina|maja|agnieszka|google/i.test(v.name)) || vs[0] || null;
+      this.noPl = all.length > 0 && !vs.length;
+      const n = document.getElementById('noVoice'); if (n) n.classList.toggle('hide', !this.noPl);
     } catch (e) {}
   },
   say(text, delay = 0) {
@@ -456,9 +518,7 @@ const SAY = {
   dinos: 'Uwaga, dinozaur! Chodzi powoli. Przepłyń, kiedy pójdzie do swojego gniazda.',
   bumpRobot: ['Ups! Robot nie śpi. Poczekaj chwilkę.', 'Poczekaj, aż robot zaśnie.', 'Cichutko... poczekaj, aż zaśnie.'],
   bumpDino: ['Ups! Poczekaj, aż dinozaur pójdzie do gniazda.', 'Dinozaur jest na drodze. Poczekaj chwilkę.'],
-  pearlFirst: 'Tęczowa perła! Luci jest teraz niewidzialna. Może przepłynąć obok robotów i dinozaurów!',
   pearl: ['Kamuflaż!', 'Niewidzialna Luci!', 'Tęczowa perła!'],
-  inkFirst: 'Kropla atramentu! Kiedy spotkasz robota albo dinozaura, Luci plunie atramentem!',
   ink: ['Atrament!', 'Mam atrament!'],
   chestFirst: 'Skrzynia ze skarbem! Rozwiąż zagadkę, żeby ją otworzyć.',
   correct: ['Dobrze!', 'Brawo, dobrze!', 'Tak! Świetnie!', 'Zgadza się!', 'Super!'],
@@ -468,6 +528,17 @@ const SAY = {
   planetDone: `Super, ${NAME}! Gratulacje! Cała planeta przepłynięta!`,
   final: `Brawo, ${NAME}! Zwiedziłeś wszystkie planety! Jesteś mistrzem kosmosu!`,
 };
+
+const ITEM_INFO = {
+  pearl: { title: 'Tęczowa perła', text: 'Luci staje się niewidzialna. Przez chwilę może przepływać obok robotów i dinozaurów, a one jej nie zatrzymają.' },
+  ink: { title: 'Kropla atramentu', text: 'Kiedy Luci spotka robota albo dinozaura, sama plunie atramentem. Wróg zakręci się w kółko i na chwilę przestanie przeszkadzać.' },
+};
+const PLANET_INTRO = [
+  'Luci zaczyna podróż w Oceanie, swoim domu, gdzie przejść pilnują śpiące roboty. Może tu znaleźć rozgwiazdy i skrzynie z zagadkami.',
+  'Luci leci na Planetę Dinozaurów, na której między wulkanami spacerują powolne dinozaury. Może tam znaleźć tęczowe perły, dzięki którym staje się niewidzialna.',
+  'Luci leci na Lodową Planetę, na której roboty i dinozaury pilnują lodowych korytarzy. Może tam znaleźć krople atramentu, którymi oszałamia wrogów.',
+  'Luci leci na Grzybową Planetę, na której rosną świecące grzyby i czekają najtrudniejsze labirynty. Może tam znaleźć ostatni, największy skarb.',
+];
 
 /* ================= muzyka: własne melodie chiptune, grane na żywo ================= */
 const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -484,14 +555,28 @@ function parseTrack(def) {
     if (n !== 'r') (ev[s] = ev[s] || []).push({ n: nm(n), len });
     s += len;
   }
-  return { bpm: def.bpm, chords: def.chords.map(chordOf), ev, len: s, drums: def.drums !== false, arp: def.arp || 4, lead: def.lead || 0.25, gap: def.gap || 0.9 };
+  return Object.assign({ chords: def.chords.map(chordOf), ev, len: s }, STYLES[def.style]);
 }
 
+/* każda planeta ma inne brzmienie: tempo, instrument melodii, rodzaj basu, perkusję, echo i barwę */
+const STYLES = {
+  space: { bpm: 92, lead: 'triangle', leadVol: 0.12, gap: 0.95, arp: { pat: [0, 1, 2, 3, 2, 1, 0, 1], oct: 4, wave: 'sine', vol: 0.05 },
+    bass: { pat: 'long', wave: 'sine', vol: 0.14 }, drums: 'none', echo: 0.35, cutoff: 5000 },
+  ocean: { bpm: 112, lead: 'triangle', leadVol: 0.15, vib: 16, gap: 0.9, arp: { pat: [0, 1, 2, 1], oct: 4, wave: 0.25, vol: 0.026 },
+    bass: { pat: 'walk', wave: 'triangle', vol: 0.22 }, drums: 'soft', echo: 0.3, cutoff: 1900 },
+  dino: { bpm: 152, lead: 0.25, leadVol: 0.12, gap: 0.8, arp: { pat: [0, 1, 2, 3], oct: 4, wave: 0.125, vol: 0.03 },
+    bass: { pat: 'drive', wave: 0.5, vol: 0.08 }, drums: 'tribal', echo: 0.04, cutoff: 15000 },
+  ice: { bpm: 96, lead: 'bell', leadVol: 0.13, gap: 1.3, arp: { pat: [3, 2, 1, 0], oct: 5, wave: 'triangle', vol: 0.03, every: 2 },
+    bass: { pat: 'long', wave: 'triangle', vol: 0.17 }, drums: 'hats', echo: 0.42, cutoff: 9000 },
+  mush: { bpm: 138, swing: 0.22, lead: 0.125, leadVol: 0.12, slide: true, gap: 0.75, arp: null,
+    bass: { pat: 'oompah', wave: 0.5, vol: 0.075 }, drums: 'wood', echo: 0.12, cutoff: 12000 },
+};
+
 const TRACK_DEFS = {
-  space: { bpm: 112, drums: false, lead: 0.5, chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'F', 'G'], mel: `
+  space: { style: 'space', chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'F', 'G'], mel: `
     E5-4 G5-4 C6-4 G5-4  D5-4 G5-4 B5-4 G5-4  C5-4 E5-4 A5-4 E5-4  F5-4 A5-4 C6-8
     E6-4 D6-2 C6-2 G5-4 E5-4  D6-4 B5-2 G5-2 D5-8  C6-4 A5-2 F5-2 A5-4 C6-4  B5-4 D6-4 G6-8` },
-  ocean: { bpm: 132, chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G', 'F', 'G', 'Em', 'Am', 'F', 'G', 'C', 'G'], mel: `
+  ocean: { style: 'ocean', chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G', 'F', 'G', 'Em', 'Am', 'F', 'G', 'C', 'G'], mel: `
     E5-2 G5-2 C6-2 G5-2 E5-2 G5-2 A5-2 G5-2   E5-2 C5-2 E5-2 A5-4 G5-2 E5-2 r-2
     F5-2 A5-2 C6-4 A5-2 G5-2 F5-2 A5-2        G5-4 D5-2 G5-2 B5-4 A5-2 G5-2
     E5-2 G5-2 C6-2 G5-2 E5-2 G5-2 C6-2 D6-2   E6-4 D6-2 C6-2 A5-4 C6-2 A5-2
@@ -500,7 +585,7 @@ const TRACK_DEFS = {
     E6-2 B5-2 G5-2 E5-2 G5-2 B5-2 E6-4        C6-4 B5-2 A5-2 E5-4 A5-4
     F5-2 G5-2 A5-2 C6-2 F6-2 E6-2 C6-2 A5-2   B5-2 C6-2 D6-4 G5-2 A5-2 B5-4
     C6-4 G5-2 E5-2 C6-2 E6-2 G6-4             F6-2 E6-2 D6-2 B5-2 G5-8` },
-  dino: { bpm: 144, chords: ['Am', 'Am', 'F', 'G', 'Am', 'Am', 'F', 'E', 'Dm', 'Am', 'Dm', 'E', 'F', 'G', 'Am', 'E'], mel: `
+  dino: { style: 'dino', chords: ['Am', 'Am', 'F', 'G', 'Am', 'Am', 'F', 'E', 'Dm', 'Am', 'Dm', 'E', 'F', 'G', 'Am', 'E'], mel: `
     A4-1 r-1 A4-1 r-1 C5-2 E5-2 A5-2 G5-2 E5-2 C5-2   D5-2 E5-2 C5-2 A4-2 E5-4 r-4
     F5-2 E5-2 C5-2 A4-2 C5-2 F5-2 A5-4                G5-4 F5-2 E5-2 D5-2 B4-2 G4-4
     A4-1 r-1 A4-1 r-1 C5-2 E5-2 A5-2 B5-2 C6-2 A5-2   B5-2 A5-2 E5-2 C5-2 E5-4 A5-4
@@ -509,7 +594,7 @@ const TRACK_DEFS = {
     F5-2 A5-2 D6-4 C6-2 A5-2 F5-4                     E5-2 G#5-2 B5-2 E6-2 D6-4 B5-4
     A5-2 C6-2 F6-4 E6-2 C6-2 A5-4                     B5-2 D6-2 G6-4 F6-2 D6-2 B5-4
     C6-2 B5-2 A5-2 E5-2 A5-2 C6-2 E6-4                D6-2 C6-2 B5-2 G#5-2 E5-8` },
-  ice: { bpm: 118, lead: 0.125, chords: ['Em', 'C', 'G', 'D', 'Em', 'C', 'Am', 'B', 'C', 'D', 'G', 'Em', 'Am', 'C', 'B', 'B'], mel: `
+  ice: { style: 'ice', chords: ['Em', 'C', 'G', 'D', 'Em', 'C', 'Am', 'B', 'C', 'D', 'G', 'Em', 'Am', 'C', 'B', 'B'], mel: `
     B5-4 G5-2 E5-2 B5-4 A5-2 G5-2    E5-6 G5-2 C6-4 B5-4
     D6-4 B5-2 G5-2 D5-4 G5-4         F#5-6 E5-2 D5-4 A5-4
     B5-4 G5-2 E5-2 B5-2 C6-2 D6-4    E6-6 D6-2 C6-4 G5-4
@@ -518,7 +603,7 @@ const TRACK_DEFS = {
     B5-2 D6-2 G6-4 F#6-2 E6-2 D6-4   E6-6 B5-2 G5-4 E5-4
     C6-4 B5-2 A5-2 E6-4 C6-4         G5-2 A5-2 C6-4 E6-4 G6-4
     F#6-4 D#6-4 B5-4 A5-4            B5-12 r-4` },
-  mush: { bpm: 136, chords: ['F', 'Dm', 'Bb', 'C', 'F', 'Dm', 'Gm', 'C', 'Bb', 'C', 'Am', 'Dm', 'Bb', 'C', 'F', 'C'], mel: `
+  mush: { style: 'mush', chords: ['F', 'Dm', 'Bb', 'C', 'F', 'Dm', 'Gm', 'C', 'Bb', 'C', 'Am', 'Dm', 'Bb', 'C', 'F', 'C'], mel: `
     C5-2 F5-2 A5-2 F5-2 C6-2 A5-2 F5-2 A5-2           D5-2 F5-2 A5-4 G#5-2 A5-2 F5-4
     Bb5-2 A5-2 G5-2 F5-2 D5-2 F5-2 Bb5-4              C6-4 Bb5-2 A5-2 G5-4 E5-4
     F5-1 r-1 F5-1 r-1 A5-2 C6-2 F6-4 E6-2 D6-2        C6-2 A5-2 F5-2 D5-2 F5-2 A5-2 D6-4
@@ -532,9 +617,15 @@ const TRACKS = {};
 for (const k in TRACK_DEFS) TRACKS[k] = parseTrack(TRACK_DEFS[k]);
 
 const Music = {
-  name: null, cur: null, step: 0, next: 0, ducked: false, timer: null,
+  name: null, cur: null, step: 0, next: 0, ducked: false, timer: null, echoIn: null, delay: null, lastF: 0,
   boot() {
     if (this.timer) return;
+    const c = Snd.ctx;
+    this.echoIn = c.createGain(); this.echoIn.gain.value = 0;
+    this.delay = c.createDelay(1.5); this.delay.delayTime.value = 0.3;
+    const fb = c.createGain(); fb.gain.value = 0.38;
+    const tone = c.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 3500;
+    this.echoIn.connect(this.delay); this.delay.connect(tone); tone.connect(fb); fb.connect(this.delay); tone.connect(Snd.mus);
     this.timer = setInterval(() => this.tick(), 30);
     this.apply();
     if (this.cur) this.restart();
@@ -544,7 +635,16 @@ const Music = {
     this.name = name; this.cur = TRACKS[name];
     this.restart();
   },
-  restart() { const c = Snd.ctx; if (!c) return; this.step = 0; this.next = c.currentTime + 0.08; },
+  restart() {
+    const c = Snd.ctx; if (!c || !this.cur) return;
+    this.step = 0; this.next = c.currentTime + 0.08; this.lastF = 0;
+    const tr = this.cur, sd = 60 / tr.bpm / 4;
+    if (this.delay) {
+      this.delay.delayTime.setTargetAtTime(Math.min(1.4, sd * 3), c.currentTime, 0.05);
+      this.echoIn.gain.setTargetAtTime(tr.echo || 0, c.currentTime, 0.05);
+    }
+    Snd.musF.frequency.setTargetAtTime(tr.cutoff || 12000, c.currentTime, 0.1);
+  },
   apply() {
     const c = Snd.ctx; if (!c) return;
     const v = !save.music ? 0 : (this.ducked ? 0.14 : 0.42);
@@ -557,42 +657,86 @@ const Music = {
     const tr = this.cur, sd = 60 / tr.bpm / 4;
     if (this.next < c.currentTime - 0.1) this.next = c.currentTime + 0.05;
     while (this.next < c.currentTime + 0.15) {
-      this.playStep(this.step, this.next, sd);
+      const sw = (tr.swing && (this.step & 1)) ? tr.swing * sd : 0;
+      this.playStep(this.step, this.next + sw, sd);
       this.step = (this.step + 1) % tr.len;
       this.next += sd;
     }
   },
-  note(type, f, t, dur, vol) {
-    const c = Snd.ctx, o = Snd.osc(type, f, t), g = c.createGain();
+  note(type, f, t, dur, vol, o = {}) {
+    const c = Snd.ctx, osc = Snd.osc(type, o.from || f, t), g = c.createGain();
+    if (o.from) osc.frequency.exponentialRampToValueAtTime(f, t + 0.06);
+    if (o.vib) {
+      const lfo = c.createOscillator(), lg = c.createGain();
+      lfo.frequency.value = 5.5; lg.gain.value = f * (Math.pow(2, o.vib / 1200) - 1);
+      lfo.connect(lg); lg.connect(osc.frequency); lfo.start(t + 0.08); lfo.stop(t + dur + 0.05);
+    }
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
-    g.gain.exponentialRampToValueAtTime(vol * 0.55, t + dur * 0.7);
+    g.gain.exponentialRampToValueAtTime(vol, t + (o.att || 0.006));
+    g.gain.exponentialRampToValueAtTime(vol * (o.sus ?? 0.55), t + dur * 0.7);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(Snd.mus);
-    o.start(t); o.stop(t + dur + 0.03);
+    osc.connect(g); g.connect(Snd.mus);
+    if (o.echo && this.echoIn) g.connect(this.echoIn);
+    osc.start(t); osc.stop(t + dur + 0.03);
+  },
+  drum(kind, t) {
+    const c = Snd.ctx;
+    const thump = (f0, f1, len, vol) => {
+      const o = Snd.osc('sine', f0, t), g = c.createGain();
+      o.frequency.exponentialRampToValueAtTime(f1, t + len * 0.8);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      o.connect(g); g.connect(Snd.mus); o.start(t); o.stop(t + len + 0.02);
+    };
+    if (kind === 'kick') thump(150, 50, 0.14, 0.3);
+    else if (kind === 'softkick') thump(120, 55, 0.18, 0.16);
+    else if (kind === 'tomLo') thump(130, 75, 0.22, 0.22);
+    else if (kind === 'tomHi') thump(200, 120, 0.16, 0.18);
+    else if (kind === 'wood') thump(1100, 700, 0.05, 0.12);
+    else if (kind === 'wood2') thump(800, 520, 0.05, 0.1);
+    else if (kind === 'snare') Snd.rawNoise(Snd.mus, t, 0.12, { ft: 'bandpass', freq: 1900, q: 0.8, vol: 0.09, att: 0.002 });
+    else if (kind === 'hat') Snd.rawNoise(Snd.mus, t, 0.035, { ft: 'highpass', freq: 7500, q: 0.7, vol: 0.03, att: 0.002 });
+    else if (kind === 'shaker') Snd.rawNoise(Snd.mus, t, 0.07, { ft: 'bandpass', freq: 5200, q: 1.2, vol: 0.025, att: 0.01 });
   },
   playStep(s, t, sd) {
     const tr = this.cur, bar = (s >> 4) % tr.chords.length, pos = s & 15, ch = tr.chords[bar];
+    // melodia
     const ev = tr.ev[s];
-    if (ev) for (const e of ev) this.note(tr.lead, mf(e.n), t, e.len * sd * tr.gap, 0.12);
-    // arpeggio jak w starych grach: akord rozbity na szesnastki
-    const k = pos % 4, an = 12 * (tr.arp + 1) + ch.root + (k === 3 ? 12 : ch.tones[k]);
-    this.note(0.125, mf(an), t, sd * 0.75, 0.032);
-    // bas
-    if (pos % 2 === 0) {
-      const bn = 48 + ch.root + ((pos % 4 === 2) ? 12 : 0);
-      this.note(0.5, mf(bn - 12), t, sd * 1.6, 0.075);
-    }
-    if (tr.drums) {
-      if (pos === 0 || pos === 8 || pos === 10) {
-        const o = Snd.osc('sine', 150, t), g = Snd.ctx.createGain();
-        o.frequency.exponentialRampToValueAtTime(50, t + 0.12);
-        g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-        o.connect(g); g.connect(Snd.mus); o.start(t); o.stop(t + 0.16);
+    if (ev) for (const e of ev) {
+      const f = mf(e.n), dur = e.len * sd * (tr.gap || 0.9);
+      if (tr.lead === 'bell') {
+        this.note('sine', f, t, dur, tr.leadVol, { echo: true, sus: 0.3, att: 0.003 });
+        this.note('sine', f * 2, t, dur * 0.5, tr.leadVol * 0.25, { sus: 0.2, att: 0.003 });
+      } else {
+        this.note(tr.lead, f, t, dur, tr.leadVol, { echo: true, vib: tr.vib, from: tr.slide && this.lastF ? this.lastF : 0 });
       }
-      if (pos === 4 || pos === 12) Snd.rawNoise(Snd.mus, t, 0.12, { ft: 'bandpass', freq: 1900, q: 0.8, vol: 0.09, att: 0.002 });
-      if (pos % 2 === 0) Snd.rawNoise(Snd.mus, t, 0.035, { ft: 'highpass', freq: 7500, q: 0.7, vol: 0.035, att: 0.002 });
+      this.lastF = f;
     }
+    // arpeggio
+    if (tr.arp && pos % (tr.arp.every || 1) === 0) {
+      const k = tr.arp.pat[(pos / (tr.arp.every || 1)) % tr.arp.pat.length];
+      const an = 12 * (tr.arp.oct + 1) + ch.root + (k === 3 ? 12 : ch.tones[k]);
+      this.note(tr.arp.wave, mf(an), t, sd * 0.75 * (tr.arp.every || 1), tr.arp.vol);
+    }
+    // bas
+    const b = tr.bass, root = 36 + ch.root;
+    if (b.pat === 'drive' && pos % 2 === 0) this.note(b.wave, mf(root + (pos % 4 === 2 ? 12 : 0)), t, sd * 1.6, b.vol);
+    else if (b.pat === 'walk' && pos % 4 === 0) this.note(b.wave, mf(root + 12 + [0, 7, 12, 7][pos / 4]), t, sd * 3.6, b.vol);
+    else if (b.pat === 'long' && pos === 0) this.note(b.wave, mf(root + 12), t, sd * 15, b.vol, { sus: 0.7 });
+    else if (b.pat === 'oompah') {
+      if (pos % 8 === 0) this.note(b.wave, mf(root + (pos === 8 ? 7 : 0)), t, sd * 2, b.vol);
+      if (pos % 8 === 4) for (const tn of ch.tones) this.note(0.25, mf(48 + ch.root + tn), t, sd * 1.2, 0.025);
+    }
+    // perkusja
+    const d = tr.drums;
+    if (d === 'soft') { if (pos === 0 || pos === 8) this.drum('softkick', t); if (pos % 4 === 2) this.drum('shaker', t); }
+    else if (d === 'tribal') {
+      if (pos === 0 || pos === 6 || pos === 8) this.drum('kick', t);
+      if (pos === 3 || pos === 11) this.drum('tomLo', t);
+      if (pos === 10 || pos === 14) this.drum('tomHi', t);
+      if (pos === 4 || pos === 12) this.drum('snare', t);
+    }
+    else if (d === 'hats') { if (pos % 4 === 2) this.drum('hat', t); }
+    else if (d === 'wood') { if (pos === 0 || pos === 8) this.drum('softkick', t); if (pos === 2 || pos === 6 || pos === 10) this.drum('wood', t); if (pos === 13) this.drum('wood2', t); }
   },
 };
 
@@ -1570,7 +1714,7 @@ function bump(en, d) {
   luci.bumpT = 0.55; luci.bumpDir = d; luci.oopsT = 0.9;
   en.alertT = 0.7;
   if (L.time - en.lastBz > 1.1) { isRobot(en) ? Snd.bzzt() : Snd.roar(); en.lastBz = L.time; }
-  if (L.time - L.bumpVoice > 9) { L.bumpVoice = L.time; Voice.say(pick(isRobot(en) ? SAY.bumpRobot : SAY.bumpDino), 450); }
+  if (L.time - L.bumpVoice > 9) { L.bumpVoice = L.time; sayShow(pick(isRobot(en) ? SAY.bumpRobot : SAY.bumpDino), 450); }
   if (!ptr.down) target = null;
 }
 function pushBack() {
@@ -1640,16 +1784,10 @@ function arrive(i) {
   }
   for (const it of L.items) if (!it.got && it.i === i) {
     it.got = true; it.t = 0; luci.happyT = 0.8;
-    if (it.kind === 'pearl') {
-      luci.camoT = CAMO_TIME; Snd.pearl();
-      burstSparks(p.x, p.y, 20, L.cell, ['#ff7eb6', '#ffd36e', '#7dffb2', '#6ecbff', '#c38bff']);
-      if (!save.seen.pearl) { save.seen.pearl = 1; persist(); Voice.say(SAY.pearlFirst, 200); } else Voice.say(pick(SAY.pearl), 150);
-    } else {
-      luci.ink++; Snd.inkPick();
-      burstSparks(p.x, p.y, 12, L.cell, ['#8b7bff', '#c4b5fd', '#fff']);
-      if (!save.seen.ink) { save.seen.ink = 1; persist(); Voice.say(SAY.inkFirst, 200); } else Voice.say(pick(SAY.ink), 150);
-    }
-    updateItemsHud();
+    if (it.kind === 'pearl') { Snd.pearl(); burstSparks(p.x, p.y, 20, L.cell, ['#ff7eb6', '#ffd36e', '#7dffb2', '#6ecbff', '#c38bff']); }
+    else { luci.ink++; Snd.inkPick(); burstSparks(p.x, p.y, 12, L.cell, ['#8b7bff', '#c4b5fd', '#fff']); updateItemsHud(); }
+    if (save.know[it.kind]) { activateItem(it.kind); Voice.say(pick(SAY[it.kind]), 150); toast(ITEM_INFO[it.kind].title + '!', 1800); }
+    else showItemInfo(it.kind, true);
   }
   const rb = L.robots.find(r => r.i === i);
   if (rb && rb.state !== 'awake') Snd.shh();
@@ -1729,7 +1867,7 @@ function updatePlay(dt) {
 function reachChest() {
   L.phase = 'chest'; L.phaseT = 0; luci.happyT = 99; target = null;
   Snd.knock();
-  if (!save.seen.chest) { save.seen.chest = 1; persist(); Voice.say(SAY.chestFirst); }
+  if (!save.seen.chest) { save.seen.chest = 1; persist(); sayShow(SAY.chestFirst); }
 }
 function chestOpen() {
   L.phase = 'open'; L.phaseT = 0;
@@ -1835,11 +1973,41 @@ function updateItemsHud() {
   if (luci.camoT > 0) {
     const d = document.createElement('div'); d.className = 'it camo'; d.appendChild(itemIcon('pearl')); box.appendChild(d);
     box.style.setProperty('--p', (luci.camoT / CAMO_TIME).toFixed(3));
+    d.addEventListener('click', () => { if (L && L.phase === 'play') showItemInfo('pearl', false); });
   }
   if (luci.ink > 0) {
     const d = document.createElement('div'); d.className = 'it'; d.appendChild(itemIcon('ink'));
     const b = document.createElement('b'); b.textContent = luci.ink; d.appendChild(b); box.appendChild(d);
+    d.addEventListener('click', () => { if (L && L.phase === 'play') showItemInfo('ink', false); });
   }
+}
+
+/* ---------- okienko z wyjaśnieniem przedmiotu ---------- */
+let itemCtx = null;
+function activateItem(kind) {
+  if (kind === 'pearl') luci.camoT = CAMO_TIME;
+  updateItemsHud();
+}
+function showItemInfo(kind, pickup) {
+  const info = ITEM_INFO[kind];
+  itemCtx = { kind, pickup };
+  L.phase = 'item'; padDir = null; setPadVisual(null); target = null; ptr.down = false;
+  const c = $('itPic'), g = c.getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+  g.scale(c.width / 100, c.height / 100);
+  (kind === 'pearl' ? drawPearl : drawInkDrop)(g, 50, 52, 100, 0);
+  $('itTitle').textContent = info.title;
+  $('itText').textContent = info.text;
+  $('itKnow').checked = !!save.know[kind];
+  showScreen('sItem');
+  Voice.say(info.title + '! ' + info.text, 250);
+}
+function closeItemInfo() {
+  if (!itemCtx) return;
+  const { kind, pickup } = itemCtx; itemCtx = null;
+  save.know[kind] = $('itKnow').checked; persist();
+  Voice.stop(); showScreen(null);
+  if (L) { L.phase = 'play'; if (pickup) activateItem(kind); }
 }
 
 /* ================= zagadki w skrzyniach ================= */
@@ -1917,6 +2085,10 @@ function pickTaskType(p) {
 }
 
 const cap = s => s[0].toUpperCase() + s.slice(1);
+const UNITS = ['zero', 'jeden', 'dwa', 'trzy', 'cztery', 'pięć', 'sześć', 'siedem', 'osiem', 'dziewięć', 'dziesięć', 'jedenaście', 'dwanaście',
+  'trzynaście', 'czternaście', 'piętnaście', 'szesnaście', 'siedemnaście', 'osiemnaście', 'dziewiętnaście'];
+const TENS = { 2: 'dwadzieścia', 3: 'trzydzieści', 4: 'czterdzieści' };
+const numWord = n => n < 20 ? UNITS[n] : TENS[Math.floor(n / 10)] + (n % 10 ? ' ' + UNITS[n % 10] : '');
 const span = (e, st = '') => `<span${st ? ` style="${st}"` : ''}>${e}</span>`;
 const many = (e, n) => Array.from({ length: n }, () => span(e)).join('');
 const ball = hex => `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="${hex}" stroke="rgba(255,255,255,.35)" stroke-width="3"/><ellipse cx="36" cy="34" rx="12" ry="8" fill="#fff" opacity=".45"/></svg>`;
@@ -1938,7 +2110,7 @@ const GEN = {
     const n = randi(...[[5, 9], [7, 12], [9, 15], [11, 18]][t]);
     const tip = save.seen.countTap ? '' : ' Możesz dotykać, żeby liczyć.';
     return {
-      say: `Ile jest ${gen}?` + tip, fs: Math.min(56, Math.floor(Math.sqrt((W - 140) * (H * 0.55) / (n * 3)))),
+      say: `Ile jest ${gen}?` + tip, text: `Ile jest ${gen}? Dotykaj obrazków, żeby liczyć, a potem wybierz liczbę.`, fs: Math.min(56, Math.floor(Math.sqrt((W - 140) * (H * 0.55) / (n * 3)))),
       vis: el => {
         save.seen.countTap = 1; persist();
         let counter = 0;
@@ -1963,14 +2135,15 @@ const GEN = {
     const a = randi(1, lim - 2), b = randi(1, lim - a);
     const [em] = pick(COUNTABLE);
     const col = n => `<div class="col"><div class="grp">${many(em, n)}</div><span class="lbl">${n}</span></div>`;
-    return { say: `Ile to jest ${a} dodać ${b}?`, fs: a + b > 8 ? 30 : 38,
+    return { say: `Ile to jest ${a} dodać ${b}?`, text: `Ile to jest ${a} + ${b}? Wybierz wynik.`, fs: a + b > 8 ? 30 : 38,
       vis: `${col(a)}<span class="op">+</span>${col(b)}<span class="op">=</span><span class="q">?</span>`, opts: numOpts(a + b, 1, 40) };
   },
   sub(t) {
     const a = t >= 3 ? randi(6, 12) : randi(4, 9);
     const b = randi(1, Math.min(t >= 3 ? 6 : 4, a - 1));
     const items = Array.from({ length: a }, (_, k) => `<span class="${k >= a - b ? 'gone' : ''}">🍎</span>`).join('');
-    return { say: `Było ${a} ${pl(a, 'jabłko', 'jabłka', 'jabłek')}. Dinozaur zjadł ${b}. Ile zostało?`, fs: a > 9 ? 34 : 42,
+    return { say: `Było ${a} ${pl(a, 'jabłko', 'jabłka', 'jabłek')}. Dinozaur zjadł ${b}. Ile zostało?`,
+      text: `Było ${a} ${pl(a, 'jabłko', 'jabłka', 'jabłek')}. Dinozaur zjadł ${b}. Ile jabłek zostało?`, fs: a > 9 ? 34 : 42,
       vis: `<div class="grp" style="max-width:70%">${items}</div><span>🦖</span>`, opts: numOpts(a - b, 0, 40) };
   },
   compareGroups(t) {
@@ -1980,14 +2153,14 @@ const GEN = {
     while (t ? (Math.abs(a - b) < 1 || Math.abs(a - b) > 2) : Math.abs(a - b) < 2);
     const more = Math.random() < 0.6, okA = more ? a > b : a < b;
     const grp = n => `<div class="grp" style="max-width:none">${many(em, n)}</div>`;
-    return { say: more ? 'Gdzie jest więcej?' : 'Gdzie jest mniej?', fs: 34, optsIn: 'vis', optCls: 'big2',
+    return { say: more ? 'Gdzie jest więcej?' : 'Gdzie jest mniej?', text: more ? 'Gdzie jest więcej? Dotknij tej grupy.' : 'Gdzie jest mniej? Dotknij tej grupy.', fs: 34, optsIn: 'vis', optCls: 'big2',
       opts: [{ html: grp(a), ok: okA }, { html: grp(b), ok: !okA }] };
   },
   compareNums(t) {
     const hi = t >= 3 ? 30 : 20, s = new Set();
     while (s.size < 3) s.add(randi(1, hi));
     const arr = shuffle([...s]), most = Math.random() < 0.6, ans = most ? Math.max(...arr) : Math.min(...arr);
-    return { say: most ? 'Która liczba jest największa?' : 'Która liczba jest najmniejsza?', vis: span('⚖️', 'font-size:1.7em'),
+    return { say: most ? 'Która liczba jest największa?' : 'Która liczba jest najmniejsza?', text: most ? 'Która liczba jest największa? Dotknij jej.' : 'Która liczba jest najmniejsza? Dotknij jej.',
       opts: arr.map(x => ({ html: String(x), ok: x === ans })) };
   },
   numFind(t) {
@@ -1996,7 +2169,7 @@ const GEN = {
     const rev = +String(n).split('').reverse().join('');
     if (n >= 12 && rev !== n && rev > 0) c.add(rev);
     while (c.size < 3) { const x = n + randi(-5, 5); if (x > 0) c.add(x); }
-    return { say: `Znajdź liczbę ${n}.`, vis: span('🔎', 'font-size:1.7em'), opts: shuffle([...c]).map(x => ({ html: String(x), ok: x === n })) };
+    return { say: `Znajdź liczbę ${n}.`, text: `Znajdź liczbę: ${numWord(n)}.`, opts: shuffle([...c]).map(x => ({ html: String(x), ok: x === n })) };
   },
   pattern(t) {
     if (t >= 2 && Math.random() < (t === 3 ? 0.6 : 0.35)) {
@@ -2010,7 +2183,7 @@ const GEN = {
       else { const s = randi(1, 6); seq = [s, s + 1, null, s + 3, s + 4]; ans = s + 2; }
       const html = seq.map(x => x == null ? '<span class="q">?</span>' : `<span class="num">${x}</span>`).join('<span class="op">,</span>')
         + (k === 'miss' ? '' : '<span class="op">,</span><span class="q">?</span>');
-      return { say: k === 'miss' ? 'Jakiej liczby brakuje?' : 'Jaka liczba będzie dalej?', vis: html, opts: numOpts(ans, 0, 40) };
+      return { say: k === 'miss' ? 'Jakiej liczby brakuje?' : 'Jaka liczba będzie dalej?', text: k === 'miss' ? 'Jakiej liczby brakuje w miejscu znaku zapytania?' : 'Jaka liczba będzie następna?', vis: html, opts: numOpts(ans, 0, 40) };
     }
     const tpl = pick([['AB'], ['AB', 'AABB', 'ABC'], ['ABB', 'AAB', 'ABC', 'AABB'], ['ABB', 'ABC', 'AABC', 'ABCC']][t]);
     const syms = shuffle(PAT).slice(0, 4), map = { A: syms[0], B: syms[1], C: syms[2] };
@@ -2019,62 +2192,62 @@ const GEN = {
     const ans = map[tpl[len % tpl.length]];
     const pool = [...new Set([map.A, map.B, tpl.includes('C') ? map.C : syms[3], syms[3]])].filter(x => x !== ans);
     const o = shuffle([ans, ...shuffle(pool).slice(0, 2)]);
-    return { say: 'Co będzie dalej?', vis: seq.map(s => span(s)).join('') + '<span class="q">?</span>', opts: o.map(x => ({ html: x, ok: x === ans })) };
+    return { say: 'Co będzie dalej?', text: 'Co będzie następne w tym rzędzie?', vis: seq.map(s => span(s)).join('') + '<span class="q">?</span>', opts: o.map(x => ({ html: x, ok: x === ans })) };
   },
   odd(t) {
     const set = pick(t >= 2 ? (Math.random() < 0.75 ? ODD_HARD : ODD_EASY) : ODD_EASY);
     const x = pick(set.x), g = shuffle(set.g).slice(0, 3);
-    return { say: 'Co tu nie pasuje?', vis: span('❓', 'font-size:1.6em'), opts: shuffle([x, ...g]).map(e => ({ html: e, ok: e === x })), explain: `Tak! ${set.why}` };
+    return { say: 'Co tu nie pasuje?', text: 'Co tu nie pasuje do reszty? Dotknij tego obrazka.', opts: shuffle([x, ...g]).map(e => ({ html: e, ok: e === x })), explain: `Tak! ${set.why}` };
   },
   shapes(t) {
     const cols = shuffle(SHAPE_COLS);
     if (t >= 2 && Math.random() < 0.45) {
       const k = pick(['trojkat', 'kwadrat', 'pieciokat', 'szesciokat']), n = SHP[k][2];
-      return { say: 'Ile boków ma ta figura?', vis: `<div style="width:2.6em;height:2.6em">${shapeSvg(k, cols[0])}</div>`, opts: numOpts(n, 3, 8) };
+      return { say: 'Ile boków ma ta figura?', text: 'Ile boków ma ta figura? Policz jej ściany.', vis: `<div style="width:2.6em;height:2.6em">${shapeSvg(k, cols[0])}</div>`, opts: numOpts(n, 3, 8) };
     }
     const keys = shuffle(SHAPE_POOLS[t]).slice(0, t >= 2 ? 4 : 3), tgt = pick(keys);
-    return { say: `Gdzie jest ${SHP[tgt][0]}?`, vis: span('🔷', 'font-size:1.6em'), opts: keys.map((k, i) => ({ html: shapeSvg(k, cols[i]), ok: k === tgt })) };
+    return { say: `Gdzie jest ${SHP[tgt][0]}?`, text: `Gdzie jest ${SHP[tgt][0]}? Dotknij go.`, opts: keys.map((k, i) => ({ html: shapeSvg(k, cols[i]), ok: k === tgt })) };
   },
   colors(t) {
     if (t >= 2) return GEN.colorMix(t);
     const pool = t === 0 ? COLS.slice(0, 6) : COLS.slice(0, 9);
     const opts = shuffle(pool).slice(0, 4), tgt = pick(opts);
-    return { say: `Dotknij ${tgt.g} kulki.`, vis: span('🎨', 'font-size:1.6em'), opts: opts.map(c => ({ html: ball(c.hex), ok: c === tgt })) };
+    return { say: `Dotknij ${tgt.g} kulki.`, text: `Dotknij ${tgt.g} kulki.`, opts: opts.map(c => ({ html: ball(c.hex), ok: c === tgt })) };
   },
   colorMix() {
     const [a, b, res] = pick(MIX), cr = COL(res);
     const others = shuffle(COLS.filter(c => ![a, b, res].includes(c.n))).slice(0, 2);
-    return { say: `${cap(a)} i ${b}. Jaki kolor wyjdzie, kiedy je zmieszamy?`,
+    return { say: `${cap(a)} i ${b}. Jaki kolor wyjdzie, kiedy je zmieszamy?`, text: `Mieszamy farby: ${a} i ${b}. Jaki kolor wyjdzie?`,
       vis: `<div style="width:1.8em;height:1.8em">${blob(COL(a).hex)}</div><span class="op">+</span><div style="width:1.8em;height:1.8em">${blob(COL(b).hex)}</div><span class="op">=</span><span class="q">?</span>`,
       opts: shuffle([cr, ...others]).map(c => ({ html: ball(c.hex), ok: c === cr })), explain: `Tak! Wyjdzie ${res}.` };
   },
   shadow() {
     const pool = shuffle(SHADOWS).slice(0, 3), tgt = pool[0];
-    return { say: 'Czyj to cień?', visClass: 'light', vis: `<span class="shadow">${tgt}</span>`, opts: shuffle(pool).map(e => ({ html: e, ok: e === tgt })) };
+    return { say: 'Czyj to cień?', text: 'Czyj to cień? Dotknij właściwego obrazka.', visClass: 'light', vis: `<span class="shadow">${tgt}</span>`, opts: shuffle(pool).map(e => ({ html: e, ok: e === tgt })) };
   },
   emotions(t) {
     const set = t >= 2 ? ['happy', 'sad', 'surprised', 'angry'] : ['happy', 'sad', 'surprised'];
     if (t >= 1 && Math.random() < 0.5) {
       const sc = pick(SCEN.filter(s => set.includes(s.m)));
-      return { say: sc.s, vis: span(sc.e, 'font-size:1.8em'), opts: shuffle(set).map(m => ({ html: '', draw: luciFace(m), ok: m === sc.m })), explain: `Tak! Luci jest ${MOODS[sc.m]}.` };
+      return { say: sc.s, text: sc.s + ' Dotknij właściwej buzi.', vis: span(sc.e, 'font-size:1.8em'), opts: shuffle(set).map(m => ({ html: '', draw: luciFace(m), ok: m === sc.m })), explain: `Tak! Luci jest ${MOODS[sc.m]}.` };
     }
     const m = pick(set);
-    return { say: `Która Luci jest ${MOODS[m]}?`, vis: span('🤔', 'font-size:1.6em'), opts: shuffle(set).map(x => ({ html: '', draw: luciFace(x), ok: x === m })) };
+    return { say: `Która Luci jest ${MOODS[m]}?`, text: `Która Luci jest ${MOODS[m]}? Dotknij jej.`, opts: shuffle(set).map(x => ({ html: '', draw: luciFace(x), ok: x === m })) };
   },
   letters(t) {
     if (t === 0 || (t === 1 && Math.random() < 0.5)) {
       const [l, w] = pick(FIND), others = shuffle(LETTER_POOL.filter(x => x !== l)).slice(0, 2);
-      return { say: `Znajdź literę ${l}, jak ${w}.`, vis: span('🔤', 'font-size:1.6em'), opts: shuffle([l, ...others]).map(x => ({ html: x, ok: x === l })) };
+      return { say: `Znajdź literę ${l}, jak ${w}.`, text: `Znajdź literę ${l}, jak ${w}.`, opts: shuffle([l, ...others]).map(x => ({ html: x, ok: x === l })) };
     }
     const [em, word, l] = pick(WORDS), others = shuffle(LETTER_POOL.filter(x => x !== l)).slice(0, 2);
-    return { say: `Na jaką literę zaczyna się słowo: ${word}?`, vis: span(em, 'font-size:2em'), opts: shuffle([l, ...others]).map(x => ({ html: x, ok: x === l })),
+    return { say: `Na jaką literę zaczyna się słowo: ${word}?`, text: `Na jaką literę zaczyna się słowo „${word}”?`, vis: span(em, 'font-size:2em'), opts: shuffle([l, ...others]).map(x => ({ html: x, ok: x === l })),
       explain: `Tak! ${cap(word)} zaczyna się na ${l}.` };
   },
   size() {
     const [em, name, g] = pick(SIZES), big = Math.random() < 0.5;
     const sizes = shuffle([0.5, 0.82, 1.2]), tgt = big ? 1.2 : 0.5;
     const adj = big ? (g === 'f' ? 'największa' : 'największy') : (g === 'f' ? 'najmniejsza' : 'najmniejszy');
-    return { say: `${g === 'f' ? 'Która' : 'Który'} ${name} jest ${adj}?`, vis: span('📏', 'font-size:1.6em'), opts: sizes.map(s => ({ html: span(em, `font-size:${s}em`), ok: s === tgt })) };
+    return { say: `${g === 'f' ? 'Która' : 'Który'} ${name} jest ${adj}?`, text: `${g === 'f' ? 'Która' : 'Który'} ${name} jest ${adj}? Dotknij.`, opts: sizes.map(s => ({ html: span(em, `font-size:${s}em`), ok: s === tgt })) };
   },
 };
 
@@ -2087,6 +2260,10 @@ function openTask() {
   TK = { t, tries: 0, done: false };
   const vis = $('tVis'), ans = $('tAns');
   vis.className = t.visClass || ''; vis.innerHTML = ''; ans.innerHTML = '';
+  $('tQ').textContent = t.text || t.say;
+  const hasVis = !!t.vis || t.optsIn === 'vis';
+  vis.classList.toggle('hide', !hasVis);
+  $('sTask').classList.toggle('novis', !hasVis);
   vis.style.fontSize = t.fs ? `${t.fs}px` : '';
   if (typeof t.vis === 'function') t.vis(vis); else if (t.vis) vis.innerHTML = t.vis;
   const holder = t.optsIn === 'vis' ? vis : ans;
@@ -2131,7 +2308,16 @@ function closeTask() {
 const SA = { t: 0, r: 0, b: 0, l: 0 };
 const hero = { x: 0, y: 0, w: 0, h: 0, size: 0 };
 const heroSt = { squash: 0, happyT: 0, lookX: 0, lookY: 0.3 };
-let mapPlanet = 0, TR = null, padPending = null;
+let mapPlanet = 0, TR = null, padPending = null, introP = 0, introThen = null;
+
+/* ---------- dymek z poleceniem (gdy głos nie wystarczy) ---------- */
+let toastTimer = null;
+function toast(text, ms) {
+  const el = $('toast'); el.textContent = text; el.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), ms || Math.max(2800, text.length * 75));
+}
+function toastOff() { clearTimeout(toastTimer); $('toast').classList.remove('on'); }
+function sayShow(text, delay) { Voice.say(text, delay); toast(text); }
 
 const ICON = {
   mus: '<svg viewBox="0 0 24 24"><path d="M19 3v11.6A3 3 0 1 1 17 12V7.3L10 8.7v8A3 3 0 1 1 8 14V5.5z"/></svg>',
@@ -2171,13 +2357,14 @@ function layoutPlay() {
   renderMaze();
 }
 function updateHero() {
-  const id = { title: 'sTitle', map: 'sMap', win: 'sWin', final: 'sFinal' }[scene];
+  const id = { title: 'sTitle', map: 'sMap', win: 'sWin', final: 'sFinal', intro: 'sIntro' }[scene];
   if (!id) return;
   const r = $(id).querySelector('.hero').getBoundingClientRect();
   hero.x = r.left + r.width / 2; hero.y = r.top + r.height / 2; hero.w = r.width; hero.h = r.height;
 }
 function showScreen(id) {
-  for (const s of ['sTitle', 'sMap', 'sTask', 'sWin', 'sFinal', 'sTravel']) $(s).classList.toggle('hide', s !== id);
+  for (const s of ['sTitle', 'sMap', 'sTask', 'sWin', 'sFinal', 'sTravel', 'sIntro', 'sItem']) $(s).classList.toggle('hide', s !== id);
+  if (id) toastOff();
 }
 function setPlayUi(on) { $('hud').classList.toggle('hide', !on); $('pad').classList.toggle('hide', !on); }
 function setToggles() {
@@ -2187,12 +2374,12 @@ function setToggles() {
 
 /* ---------- ekrany ---------- */
 function goTitle() {
-  scene = 'title'; L = null; TR = null;
+  scene = 'title'; L = null; TR = null; toastOff();
   setPlayUi(false); showScreen('sTitle'); setAmb('space');
   Music.play('space'); Voice.stop(); updateHero();
 }
 function goMap(p) {
-  scene = 'map'; L = null; TR = null;
+  scene = 'map'; L = null; TR = null; toastOff();
   setPlayUi(false); Voice.stop();
   mapPlanet = p == null ? LEVELS[firstOpenLevel()].p : p;
   buildMap(); showScreen('sMap'); setAmb('space');
@@ -2233,8 +2420,9 @@ function buildMap() {
     wrap.append(b, st); grid.appendChild(wrap);
   }
 }
-function startLevel(idx) {
+function startLevel(idx, skipIntro) {
   idx = clamp(idx, 0, LEVELS.length - 1);
+  if (!skipIntro && idx % PER_PLANET === 0) { showIntro(LEVELS[idx].p, () => startLevel(idx, true)); return; }
   Voice.stop(); TR = null;
   L = buildLevel(idx); startLevelState(); parts.length = 0;
   scene = 'play'; showScreen(null); setPlayUi(true);
@@ -2243,9 +2431,46 @@ function startLevel(idx) {
   const p = cellXY(L.start); luci.x = p.x; luci.y = p.y;
   buildHud(); setPadVisual(null);
   const cfg = L.cfg, prev = LEVELS[idx - 1];
-  if (cfg.dinos > 0 && !(prev && prev.dinos > 0)) Voice.say(SAY.dinos, 500);
-  else if (cfg.robots > 0 && !(prev && prev.robots > 0)) Voice.say(SAY.robots, 500);
+  if (cfg.dinos > 0 && !(prev && prev.dinos > 0)) sayShow(SAY.dinos, 500);
+  else if (cfg.robots > 0 && !(prev && prev.robots > 0)) sayShow(SAY.robots, 500);
 }
+const INTRO_ICONS = [['robot', 'star', 'chest'], ['dino', 'robot', 'pearl'], ['robot', 'dino', 'ink', 'pearl'], ['robot', 'dino', 'pearl', 'ink']];
+function iconCanvas(kind, col) {
+  const c = document.createElement('canvas'); c.width = c.height = 130;
+  const g = c.getContext('2d'); g.scale(1.3, 1.3);
+  if (kind === 'robot') drawRobot(g, 50, 54, 92, { state: 'sleep', stunT: 0, alertT: 0, seed: 1, col: ROBOT_COLS[0] });
+  else if (kind === 'dino') drawDino(g, 48, 50, 92, { state: 'pause', stunT: 0, alertT: 0, seed: 1, col: DINO_COLS[0], face: 1, walkPh: 0 });
+  else if (kind === 'pearl') drawPearl(g, 50, 52, 100, 0);
+  else if (kind === 'ink') drawInkDrop(g, 50, 52, 100, 0);
+  else if (kind === 'star') drawStar(g, 50, 50, 110, 0);
+  else if (kind === 'chest') drawChest(g, 50, 58, 90, false, '❓');
+  return c;
+}
+function showIntro(p, then) {
+  introP = p; introThen = then; parts.length = 0;
+  scene = 'intro'; L = null; setPlayUi(false); showScreen('sIntro'); setAmb('space');
+  Music.play(PLANETS[p].music);
+  const P = PLANETS[p];
+  $('iName').textContent = P.name;
+  $('sIntro').style.setProperty('--pc', P.pc);
+  $('iText').textContent = PLANET_INTRO[p];
+  const box = $('iIcons'); box.innerHTML = '';
+  for (const k of INTRO_ICONS[p]) box.appendChild(iconCanvas(k));
+  Voice.say(PLANET_INTRO[p], 300);
+  updateHero();
+}
+function firstOpenIn(p) {
+  for (let k = 0; k < PER_PLANET; k++) { const i = p * PER_PLANET + k; if (isUnlocked(i) && !isDone(i)) return i; }
+  return p * PER_PLANET;
+}
+function drawIntroHero() {
+  const R = Math.min(hero.w, hero.h) * 0.38;
+  drawPlanet(ctx, hero.x - R * 0.12, hero.y, R, introP, T);
+  const a = T * 0.6;
+  drawLuci(ctx, hero.x + R * 0.95 + Math.cos(a) * R * 0.08, hero.y - R * 0.55 + Math.sin(a) * R * 0.08, R * 0.7, {
+    blink: luci.blink, mood: 'happy', tilt: -0.2, helmet: introP > 0 });
+}
+
 function showWin() {
   L.phase = 'done';
   if (L.idx === LEVELS.length - 1) { showFinal(); return; }
@@ -2327,6 +2552,7 @@ function drawTravel() {
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
+  if (window.innerWidth !== W || window.innerHeight !== H) resize();
   const paused = H > W || document.hidden;
   if (!paused) {
     T += dt;
@@ -2351,6 +2577,7 @@ function draw() {
   else if (scene === 'win') drawWinHero();
   else if (scene === 'final') drawFinalHero();
   else if (scene === 'travel') drawTravel();
+  else if (scene === 'intro') drawIntroHero();
   drawParts();
 }
 
@@ -2369,7 +2596,24 @@ function goFull() {
     }
   } catch (e) {}
 }
-function userStart() { Snd.init(); keepAwake(); }
+let fsFails = 0, fsBusy = false, fsLast = 0;
+function ensureFull() {
+  try {
+    if (fsBusy || fsFails >= 3 || document.fullscreenElement || !document.fullscreenEnabled) return;
+    if (performance.now() - fsLast < 800) return;
+    if (matchMedia('(display-mode: fullscreen)').matches || matchMedia('(display-mode: standalone)').matches) return;
+    const el = document.documentElement;
+    if (!el.requestFullscreen) return;
+    fsBusy = true; fsLast = performance.now();
+    el.requestFullscreen({ navigationUI: 'hide' }).then(() => {
+      fsBusy = false;
+      try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
+      settleSize();
+    }).catch(err => { fsBusy = false; if (!/gesture|activation/i.test(String(err && err.message))) fsFails++; });
+  } catch (e) { fsBusy = false; }
+}
+function settleSize() { [60, 200, 450, 900].forEach(ms => setTimeout(() => { if (innerWidth !== W || innerHeight !== H) resize(); }, ms)); }
+function userStart() { Snd.init(); keepAwake(); ensureFull(); }
 
 const pad = $('pad');
 let padId = null;
@@ -2382,7 +2626,7 @@ function padFromEvent(e) {
   return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0);
 }
 pad.addEventListener('pointerdown', e => {
-  e.preventDefault(); userStart();
+  e.preventDefault(); Snd.init(); keepAwake();
   padId = e.pointerId;
   try { pad.setPointerCapture(e.pointerId); } catch (_) {}
   setPad(padFromEvent(e));
@@ -2402,6 +2646,9 @@ addEventListener('keyup', e => { if (e.key in KEYS && padDir === KEYS[e.key]) se
 function toCell(e) { return { x: (e.clientX - L.ox) / L.cell, y: (e.clientY - L.oy) / L.cell }; }
 cv.addEventListener('pointerdown', e => {
   e.preventDefault(); Snd.init();
+  if (scene === 'map' && Math.hypot(e.clientX - hero.x, e.clientY - hero.y) < Math.min(hero.w, hero.h) * 0.4) {
+    userStart(); Snd.tap(); const p = mapPlanet; showIntro(p, () => startLevel(firstOpenIn(p), true)); return;
+  }
   if (scene === 'title') {
     if (Math.hypot(e.clientX - hero.x, e.clientY - hero.y) < hero.size * 0.5) {
       heroSt.squash = 1; heroSt.happyT = 0.9; Snd.giggle(); burstBubbles(e.clientX, e.clientY, 6, 20);
@@ -2426,7 +2673,10 @@ cv.addEventListener('pointerup', release);
 cv.addEventListener('pointercancel', release);
 $('sTravel').addEventListener('pointerdown', () => { if (TR && TR.t > 0.6) endTravel(); });
 addEventListener('contextmenu', e => e.preventDefault());
-addEventListener('resize', resize);
+addEventListener('resize', () => { resize(); settleSize(); });
+addEventListener('orientationchange', settleSize);
+document.addEventListener('fullscreenchange', settleSize);
+if (window.visualViewport) visualViewport.addEventListener('resize', settleSize);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { Voice.stop(); try { Snd.ctx && Snd.ctx.suspend(); } catch (e) {} }
   else { try { Snd.ctx && Snd.ctx.resume(); } catch (e) {} if (scene !== 'title') keepAwake(); }
@@ -2447,6 +2697,9 @@ $('bWinNext').addEventListener('click', () => {
 $('bWinMap').addEventListener('click', () => { Snd.tap(); goMap(LEVELS[Math.min(L.idx + 1, LEVELS.length - 1)].p); });
 $('bFinal').addEventListener('click', () => { Snd.tap(); goMap(PLANETS.length - 1); });
 $('bRepeat').addEventListener('click', () => { if (TK) Voice.say(TK.t.say); });
+$('bIntroGo').addEventListener('click', () => { userStart(); Snd.tap(); Voice.stop(); const f = introThen; introThen = null; if (f) f(); });
+$('bItemOk').addEventListener('click', () => { Snd.tap(); closeItemInfo(); });
+document.addEventListener('pointerup', () => ensureFull(), true);
 $$('.tgM').forEach(b => b.addEventListener('click', () => {
   save.music = !save.music; persist(); Snd.init(); Music.apply(); if (save.music) Music.restart(); setToggles();
 }));

@@ -1,7 +1,7 @@
 // Luci w kosmosie działa bez internetu: po pierwszej wizycie wszystko jest w pamięci telefonu.
 // Strona gry jest najpierw pobierana z sieci (żeby nowa wersja była od razu), a bez internetu bierze się kopię z pamięci.
 // Ikony i manifest idą z pamięci, a w tle się odświeżają.
-const CACHE = 'luci-kosmos-v3';
+const CACHE = 'luci-kosmos-v4';
 const PLIKI = ['./', './index.html', './manifest.webmanifest', './ikona-192.png', './ikona-512.png', './ikona-maskowalna-512.png', './apple-touch-icon.png', './luci-spi.webp', './luci-nagroda.webp'];
 
 self.addEventListener('install', e => {

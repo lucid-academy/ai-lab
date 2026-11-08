@@ -76,7 +76,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--ink-2)}.small{font-size:.88rem}
 .eyebrow{font:700 .72rem/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
-mark{background:linear-gradient(104deg,transparent 2%,var(--hl) 4%,var(--hl) 96%,transparent 98%);color:inherit;border-radius:4px;padding:0 .15em;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:color .2s,background .2s}
+mark{background:var(--hl);color:inherit;border-radius:4px;padding:0 .15em;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:color .2s,background .2s}
 .hand{font:600 1.25em/1 var(--font-hand);color:var(--F1)}
 .grad-F{background:linear-gradient(135deg,var(--F1),var(--F2))}.grad-S{background:linear-gradient(135deg,var(--S1),var(--S2))}
 .grad-W{background:linear-gradient(135deg,var(--W1),var(--W2))}.grad-I{background:linear-gradient(135deg,var(--I1),var(--I2))}
@@ -234,7 +234,7 @@ label.ck input{width:19px;height:19px;accent-color:var(--good)}
 .toggle[aria-pressed="true"] .sl{background:linear-gradient(135deg,var(--S1),var(--S2))}
 .toggle[aria-pressed="true"] .sl::after{transform:translateX(16px)}
 .cloze mark{color:transparent;background:repeating-linear-gradient(-45deg,var(--card-3) 0 6px,var(--line-2) 6px 12px);cursor:pointer;border-radius:5px}
-.cloze mark.rev{color:inherit;background:linear-gradient(104deg,transparent 2%,var(--hl) 4%,var(--hl) 96%,transparent 98%);animation:pop .3s}
+.cloze mark.rev{color:inherit;background:var(--hl);animation:pop .3s}
 @keyframes pop{50%{transform:scale(1.06)}}
 .mod{display:grid;gap:14px;scroll-margin-top:150px}
 .mod+.mod{margin-top:22px}
@@ -550,6 +550,11 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
 .wq .yours{color:var(--bad);font-weight:700}.wq .corr{color:var(--good);font-weight:700}
 .foot{color:var(--ink-3);font-size:.85rem;display:grid;gap:8px;max-width:80ch}
 .nojs-note{margin-bottom:20px}
+.ver{display:block;max-width:76ch;background:var(--warn-bg);border-radius:14px;padding:10px 14px;font-size:.92rem;line-height:1.55}
+.ver::before{display:block;margin-bottom:4px;content:"✎ Weryfikacja merytoryczna";font:700 .66rem/1.4 var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--warn)}
+.vnote{background:var(--warn-bg);border-radius:6px;padding:1px 6px;font-size:.9em;font-weight:600;color:var(--ink);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.vnote::before{content:"✎ ";color:var(--warn);font-weight:800}
+.cloze .vnote mark,.cloze .ver mark{color:inherit}
 .qualifier{display:grid;gap:14px}
 .q-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px}
 .q-form label{display:grid;gap:4px;font-size:.86rem;font-weight:700;color:var(--ink-2)}
@@ -643,7 +648,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
   <div class="vhead">
     <p class="eyebrow">Nauka · 28 tematów</p>
     <h1>Kompendium, które się klika</h1>
-    <p class="lead">Każdy temat to karta. Rozwiń ją, pobaw się narzędziem, odpowiedz na pytanie kontrolne i oznacz jako przerobioną. Tryb luk zamienia zakreślenia w luki do odgadnięcia.</p>
+    <p class="lead">Każdy temat to karta. Rozwiń ją, pobaw się narzędziem, odpowiedz na pytanie kontrolne i oznacz jako przerobioną. Tryb luk zamienia zakreślenia w luki do odgadnięcia. Żółte dopiski <span class="vnote">weryfikacja</span> pokazują miejsca, w których notatki różnią się od podręczników albo się zdezaktualizowały; na egzamin obowiązuje wersja z wykładu.</p>
   </div>
   <div class="k-tools">
     <nav class="chips" aria-label="Moduły">
@@ -689,6 +694,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       </tbody>
     </table></div>
     <p class="bang">Część przewodząca tworzy się w dwóch pierwszych fazach: embrionalnej i rzekomogruczołowej. Surfaktant: śladowo 22.–24. tc, ciała lamelarne ok. 28. tc.</p>
+    <p class="ver">Ciała lamelarne: 28. tc to wartość z tabeli w notatkach. W wielu podręcznikach embriologii pneumocyty II z ciałami lamelarnymi opisuje się już ok. 22.–24. tc, równolegle z pojawieniem się surfaktantu. Na egzamin trzymaj się wykładu, ale nie zdziw się innym zakresem w pytaniu.</p>
   </section>
 
   <section class="topic" id="k-f-plod">
@@ -705,8 +711,8 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
     <h3>Budowa: strefy, chrząstki, pęcherzyk</h3>
     <ul class="pts">
       <li>Dwie strefy: <b>przewodząca</b> (do oskrzelików) i <b>wymiany gazowej</b> (pęcherzyki). Granica leży <mark>między 16. a 17. generacją</mark> podziałów drzewa oskrzelowego.</li>
-      <li>Najwęższe miejsce dróg oddechowych to <b>krtań</b>. Największe opory oddychania generują <b>górne drogi oddechowe</b>.</li>
-      <li>Chrząstki tchawicy mają kształt <b>litery C</b>, poza chrząstką pierścieniowatą. Zamknięte pierścienie chrzęstne są w oskrzelach mniejszego kalibru. <b>Poniżej 11. generacji</b> nie ma pierścieni, tylko chrzęstne płytki.</li>
+      <li>Najwęższe miejsce dróg oddechowych to <b>krtań</b> (u małego dziecka okolica podgłośniowa, na wysokości chrząstki pierścieniowatej). Największe opory oddychania generują <b>górne drogi oddechowe</b>.</li>
+      <li>Chrząstki tchawicy mają kształt <b>litery C</b>, poza chrząstką pierścieniowatą (to chrząstka krtani i jedyny pełny pierścień). Zamknięte pierścienie chrzęstne są w oskrzelach mniejszego kalibru <span class="vnote">w podręcznikach histologii: w oskrzelach wewnątrzpłucnych chrząstka tworzy nieregularne płytki dookoła całego oskrzela</span>. <b>Poniżej 11. generacji</b> nie ma pierścieni, tylko chrzęstne płytki.</li>
       <li>W strefie oddechowej wymiana gazowa zachodzi w oskrzelikach końcowych, przewodach i woreczkach pęcherzykowych. Pole przekroju jest tu prawie <b>5000 razy</b> większe niż tchawicy, przepływ jest <b>laminarny</b>, nie ma gruczołów śluzowych ani komórek kubkowych, a nabłonek staje się coraz bardziej płaski.</li>
       <li>Pęcherzyk ma kształt ¾ kuli. <b>Pneumocyty typu I</b> są płaskie i pokrywają <b>90% powierzchni</b>, ale jest ich mało. <b>Pneumocyty typu II</b> są ziarniste, liczniejsze, multipotencjalne (mogą przejść w typ I) i <mark>produkują surfaktant</mark>. Są tam też makrofagi pęcherzykowe.</li>
       <li><b>Surfaktant</b> zmniejsza napięcie powierzchniowe: pozwala płucom rozprężyć się przy wdechu i <mark>zapobiega zapadaniu się pęcherzyków przy wydechu</mark>.</li>
@@ -723,7 +729,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <li>Ściana oskrzelików <b>nie ma chrząstki</b>, dominują w niej <b>włókna mięśniowe</b>, co dodatkowo predysponuje do obturacji.</li>
       <li>Noworodki i niemowlęta mają <b>niską czynnościową pojemność zalegającą</b>, czyli małą rezerwę oddechową.</li>
       <li>Wysoka <b>podatność</b> drzewa oskrzelowego i klatki piersiowej sprzyja zaburzeniom wentylacji przy obturacji.</li>
-      <li><b>Brak wentylacji obocznej</b>: pory Kohna pojawiają się ok. <b>6. rż</b>, kanały Lamberta ok. <b>8. rż</b>.</li>
+      <li><b>Brak wentylacji obocznej</b>: pory Kohna pojawiają się ok. <b>6. rż</b>, kanały Lamberta ok. <b>8. rż</b>. <span class="vnote">Źródła podają różnie, często ok. 3.–4. rż dla obu połączeń. Wiek z wykładu traktuj jako wersję egzaminacyjną.</span></li>
       <li>W pierwszych latach strefa wymiany gazowej rośnie szybciej niż przewodząca. <b>Do 5. rż</b> drogi przewodzące są nieproporcjonalnie wąskie względem ciała.</li>
       <li>Większy wymiar przednio-tylny klatki i <b>poziome ustawienie żeber</b> ograniczają rezerwy. Dziecko zwiększa wentylację głównie przez <mark>przyspieszenie oddechu</mark>, dlatego miernikiem zaburzeń jest <b>liczba oddechów</b>.</li>
     </ol>
@@ -810,7 +816,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
     <div class="widget" data-w="bd"></div>
     <div class="cols">
       <div class="box"><h4>Próba rozkurczowa (odwracalności)</h4>
-        <p class="small">FEV1 i/lub FVC przed i po podaniu <b>β2-mimetyku</b>. <mark>Znamienna odwracalność: wzrost o ≥12% i ≥0,2 l</mark> względem badania wyjściowego.</p>
+        <p class="small">FEV1 i/lub FVC przed i po podaniu <b>β2-mimetyku</b>. <mark>Znamienna odwracalność: wzrost o ≥12% i ≥0,2 l</mark> względem badania wyjściowego. <span class="vnote">To kryterium ERS/ATS z 2005 r. Nowsze zalecenia ERS/ATS oceniają wzrost FEV1 lub FVC o ponad 10% wartości należnej; u dzieci próg 0,2 l bywa pomijany.</span></p>
         <p class="formula small">% odwracalności = (FEV1 po leku − FEV1 wyjściowe) / FEV1 wyjściowe</p>
         <p class="small muted">Przykład: 1,50 l → 1,74 l to +0,24 l i +16%, więc próba dodatnia.</p>
       </div>
@@ -850,6 +856,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <li><b>Odruch Arnolda</b>: kaszel wywołany podrażnieniem przewodu słuchowego zewnętrznego (np. wymazówką przy pobieraniu materiału w OZUŚ albo otoskopem) przez <mark>gałąź uszną nerwu błędnego</mark>. U kaszlącego dziecka zrób <b>otoskopię</b>: ciało obce, woskowina, włosy.</li>
     </ul>
     <div class="widget" data-w="cough"></div>
+    <p class="ver">W notatkach dosłownie „ostry: od 2 do 4 tygodni”; chodzi o kaszel krótszy niż 2–4 tygodnie. W piśmiennictwie najczęściej: ostry do 3 tygodni, przewlekły u dzieci powyżej 4 tygodni.</p>
     <div class="cols">
       <div class="box"><h4>Kaszel ostry <span class="hand">2–4 tyg.</span></h4><ul class="pts small"><li>infekcja układu oddechowego</li><li>okresowy alergiczny nieżyt nosa</li><li>zachłyśnięcie</li></ul></div>
       <div class="box"><h4>Kaszel nawracający</h4><p class="small"><mark>≥2 razy w roku, każdy epizod &gt;14 dni</mark>, jeśli nie jest związany z ostrą infekcją dróg oddechowych.</p></div>
@@ -878,12 +885,12 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
         <p class="small"><b>Objawy:</b> odchrząkiwanie, objaw „kostki brukowej” <span class="hand">→ spływanie wydzieliny po gardle</span></p>
       </div>
       <div class="box"><h4>Kaszel nawykowy</h4>
-        <ul class="pts small"><li>przewlekły, <mark>nie reaguje na leczenie</mark></li><li>głośny, ostry, „beczącej kozy”, dudniący, „teatralny”</li><li><mark>nasila się przy świadkach</mark>, <mark>ustępuje w nocy i po odwróceniu uwagi</mark></li><li><mark>zaczyna się zwykle od infekcji</mark> i trwa po jej ustąpieniu</li><li>dobry stan dziecka nieproporcjonalny do nasilenia kaszlu; badania i osłuchiwanie bez zmian</li><li>często z chrząkaniem, wzdychaniem, zespołem hiperwentylacji</li><li>rozpoznanie <b>po wykluczeniu</b> przyczyn organicznych; dawniej „kaszel psychogenny”</li><li>diagnostycznie: próba z hydroksyzyną, po której kaszel powinien ustąpić</li></ul>
+        <ul class="pts small"><li>przewlekły, <mark>nie reaguje na leczenie</mark></li><li>głośny, ostry, „beczącej kozy”, dudniący, „teatralny”</li><li><mark>nasila się przy świadkach</mark>, <mark>ustępuje w nocy i po odwróceniu uwagi</mark></li><li><mark>zaczyna się zwykle od infekcji</mark> i trwa po jej ustąpieniu</li><li>dobry stan dziecka nieproporcjonalny do nasilenia kaszlu; badania i osłuchiwanie bez zmian</li><li>często z chrząkaniem, wzdychaniem, zespołem hiperwentylacji</li><li>rozpoznanie <b>po wykluczeniu</b> przyczyn organicznych; dawniej „kaszel psychogenny”</li><li>diagnostycznie: próba z hydroksyzyną, po której kaszel powinien ustąpić <span class="vnote">w piśmiennictwie rozpoznanie jest kliniczne, a leczeniem z wyboru jest terapia behawioralna (sugestia); próba z hydroksyzyną to wersja z wykładu</span></li></ul>
         <p class="small"><mark>Różnicowanie z krztuścem: kaszel nawykowy nie występuje w nocy, krztuścowy tak.</mark></p>
       </div>
       <div class="box"><h4>Kaszel poinfekcyjny</h4>
         <p class="small">Poinfekcyjna <mark>nadreaktywność oskrzeli po uszkodzeniu nabłonka</mark> w czasie zakażenia. Kaszel jest <mark>suchy</mark>, pojawia się po bodźcach nieswoistych: <mark>zimne powietrze, zmiana temperatury, wysiłek</mark>.</p>
-        <p class="small">Trwa zwykle <mark>do 8–12 tygodni</mark>, stopniowo słabnąc. W astmie też jest nadreaktywność, ale nie poinfekcyjna.</p>
+        <p class="small">Trwa zwykle <mark>do 8–12 tygodni</mark>, stopniowo słabnąc. <span class="vnote">Inne źródła podają zwykle 3–8 tygodni; do 8–12 tygodni trwa głównie kaszel po krztuścu.</span> W astmie też jest nadreaktywność, ale nie poinfekcyjna.</p>
       </div>
     </div>
   </section>
@@ -1014,7 +1021,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
     <div class="widget" data-w="corr"></div>
     <p class="prose">Bezdech to <b>całkowite przerwanie</b> przepływu powietrza (w duszności i świście przepływ jest tylko osłabiony). Najgroźniejszy jest u wcześniaków, noworodków i małych niemowląt.</p>
     <div class="cols">
-      <div class="box"><h4>Ośrodkowy (centralny)</h4><p class="small">Wcześniaki: niedojrzałość ośrodków oddechowych (<mark>rdzeń przedłużony</mark>) i ich <b>słaba wrażliwość na hiperkapnię</b> (nadmiar CO<sub>2</sub>).</p><p class="small"><mark>Bezdechy z niedojrzałości zwykle ustępują samoistnie do 36. tyg. wieku skorygowanego</mark>, najpóźniej do 43. tyg.</p><p class="small muted">Wiek skorygowany: dziecko urodzone w 30. tc po 6 tygodniach życia ma 36 tygodni wieku skorygowanego.</p></div>
+      <div class="box"><h4>Ośrodkowy (centralny)</h4><p class="small">Wcześniaki: niedojrzałość ośrodków oddechowych (<mark>rdzeń przedłużony</mark>) i ich <b>słaba wrażliwość na hiperkapnię</b> (nadmiar CO<sub>2</sub>).</p><p class="small"><mark>Bezdechy z niedojrzałości zwykle ustępują samoistnie do 36. tyg. wieku skorygowanego</mark>, najpóźniej do 43. tyg.</p><p class="small muted">Wiek skorygowany: dziecko urodzone w 30. tc po 6 tygodniach życia ma 36 tygodni wieku skorygowanego.</p><p class="small"><span class="vnote">Ten rachunek (wiek ciążowy + tygodnie życia) w neonatologii to wiek postmenstruacyjny. „Wiek skorygowany” zwykle liczy się od terminu porodu. W notatkach oba pojęcia się mieszają.</span></p></div>
       <div class="box"><h4>Obturacyjny</h4><p class="small">Niedrożność górnych dróg oddechowych przy zachowanych, nieefektywnych ruchach oddechowych. Postać: <b>obturacyjny bezdech senny</b>.</p>
         <p class="small"><b>Przyczyny:</b> wrodzone wady górnych dróg; <mark>przerost migdałka gardłowego i/lub podniebiennych</mark> <span class="hand">najczęściej</span>; niskie napięcie mięśniowe; otyłość; aspiracja ciała obcego; wady twarzoczaszki; mukopolisacharydozy <span class="hand">rzadko</span>.</p>
         <p class="small"><mark>Diagnostyka: polisomnografia.</mark> <mark>Objawy: spanie z otwartymi ustami i chrapanie.</mark></p></div>
@@ -1033,6 +1040,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <li>Unerwienie: <b>ściana klatki</b> nerwy międzyżebrowe <b>Th1–Th12</b>; <b>przepona</b> nerw przeponowy <b>C3–C5</b>; <b>narządy wewnętrzne</b> włókna pnia współczulnego i gałęzie nerwu błędnego.</li>
       <li>Może towarzyszyć zapaleniu płuc, ale <mark>zwykle jest objawem chorób układu krążenia</mark>. Bywa bólem udzielonym z jamy brzusznej, nawet przy zakażeniu układu moczowego. Objaw niecharakterystyczny.</li>
     </ul>
+    <p class="ver">Tak jest w notatkach, ale w piśmiennictwie pediatrycznym przyczyny sercowe to tylko kilka procent bólów w klatce u dzieci. Najczęstsze są mięśniowo-szkieletowe (np. zapalenie chrząstek żebrowych), idiopatyczne, oddechowe i psychogenne. Sercowej przyczyny szukaj przy bólu wysiłkowym, z omdleniem, kołataniem albo przy wadzie serca w wywiadzie.</p>
   </section>
 
   <section class="topic" id="k-s-krwioplucie">
@@ -1096,6 +1104,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <li>Zapalenie krtani u dziecka z tracheomalacją wymaga szczególnej opieki.</li>
       <li>Diagnostyka: <b>ocena endoskopowa w trakcie oddychania</b>.</li>
       <li><mark>Większość dzieci nie wymaga leczenia, objawy ustępują z wiekiem.</mark> Bardzo rzadko <mark>tracheostomia</mark>.</li>
+      <li><span class="vnote">Uzupełnienie: w laryngomalacji zapadają się struktury nadgłośniowe (fałdy nalewkowo-nagłośniowe, chrząstki nalewkowate, nagłośnia); zapadanie ścian tchawicy to tracheomalacja. Objawy zwykle narastają przez pierwsze miesiące i ustępują do 12.–24. mż. W ciężkich postaciach leczeniem z wyboru jest supraglotoplastyka, tracheostomia to wyjątek.</span></li>
     </ul>
   </section>
 
@@ -1106,9 +1115,10 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <dt>aplazja</dt><dd>brak podziału jednego z oskrzeli płatowych (definicja z notatek)</dd>
       <dt>hipoplazja</dt><dd>niekompletny rozwój płuc i oskrzeli: mniej pęcherzyków i są mniejsze</dd>
     </dl>
+    <p class="ver">Definicje z notatek różnią się od podręcznikowych (klasyfikacja Schneidera i Boydena): <b>agenezja</b> to całkowity brak płuca, oskrzela i naczyń; <b>aplazja</b> to szczątkowe, ślepo zakończone oskrzele bez miąższu; <b>hipoplazja</b> to obecne oskrzele i miąższ, ale niedorozwinięte.</p>
     <p class="bang">Obustronna aplazja lub agenezja jest wadą letalną. Jednostronna daje kompensacyjny przerost drugiego płuca.</p>
     <div class="cols">
-      <div class="box"><h4>Hipoplazja płuca: przyczyny</h4><ul class="pts small"><li>mniejsza pojemność klatki: guz, <b>wrodzona przepuklina przeponowa</b></li><li>nieprawidłowe ukrwienie płuca: stenoza zastawki lub tętnicy płucnej, <b>tetralogia Fallota</b></li><li>choroby nerwowo-mięśniowe</li></ul></div>
+      <div class="box"><h4>Hipoplazja płuca: przyczyny</h4><ul class="pts small"><li>mniejsza pojemność klatki: guz, <b>wrodzona przepuklina przeponowa</b></li><li><span class="vnote">uzupełnienie: klasyczną przyczyną jest też małowodzie (np. agenezja nerek, długotrwałe sączenie wód płodowych)</span></li><li>nieprawidłowe ukrwienie płuca: stenoza zastawki lub tętnicy płucnej, <b>tetralogia Fallota</b></li><li>choroby nerwowo-mięśniowe</li></ul></div>
       <div class="box"><h4>Obraz, diagnostyka, leczenie</h4><p class="small"><b>Objawy:</b> niewydolność oddychania, zaburzenia oddychania u noworodka lub niemowlęcia.</p><p class="small"><b>Diagnostyka:</b> RTG klatki, angio-TK, scyntygrafia perfuzyjna i wentylacyjna.</p><p class="small"><b>Leczenie:</b> operacja, gdy przyczyną jest guz lub przepuklina.</p><p class="small"><b>Rokowanie:</b> <mark>śmiertelność dwukrotnie większa przy hipoplazji prawego płuca</mark>.</p></div>
     </div>
   </section>
@@ -1124,8 +1134,8 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <div class="box"><h4>Torbiele</h4>
         <dl class="dl small">
           <dt>torbiel płuca</dt><dd>nieprawidłowy rozwój uchyłka z prajelita; zwykle pojedyncza, jednokomorowa; unaczynienie z krążenia systemowego; może uciskać, nadkazić się lub krwawić (ropień)</dd>
-          <dt>oskrzelopochodna</dt><dd>zawiera <b>chrząstki</b>; śródpiersie przednie, okolica rozwidlenia tchawicy i oskrzeli</dd>
-          <dt>enterogenna</dt><dd>zawiera <b>element przewodu pokarmowego</b>; śródpiersie przednie wzdłuż przełyku, także tylne przykręgosłupowo</dd>
+          <dt>oskrzelopochodna</dt><dd>zawiera <b>chrząstki</b>; śródpiersie przednie, okolica rozwidlenia tchawicy i oskrzeli <span class="vnote">w podręcznikach zwykle śródpiersie środkowe, pod rozwidleniem tchawicy</span></dd>
+          <dt>enterogenna</dt><dd>zawiera <b>element przewodu pokarmowego</b>; śródpiersie przednie wzdłuż przełyku, także tylne przykręgosłupowo <span class="vnote">w podręcznikach zwykle śródpiersie tylne, przy przełyku</span></dd>
         </dl>
         <p class="small">Najczęstsze lokalizacje torbieli: okolica osierdzia i poniżej przepony.</p>
       </div>
@@ -1160,6 +1170,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <li>Niepełne oddzielenie układu oddechowego i pokarmowego w życiu płodowym. U noworodka ujawnia się <b>podczas karmienia</b>. Występuje z drożnym lub niedrożnym przełykiem.</li>
       <li>Leczenie: <mark>operacja w pierwszych 24 h życia, gdy przełyk jest niedrożny</mark>.</li>
       <li><span class="hand">Późne rozpoznanie: przetoka typu H, przełyk i tchawica są drożne</span></li>
+      <li><span class="vnote">Uzupełnienie: najczęstszy typ (ok. 85%) to zarośnięcie przełyku z dolną przetoką tchawiczo-przełykową; typ H to kilka procent.</span></li>
     </ul>
   </section>
 
@@ -1172,6 +1183,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <div>Wrodzona przepuklina przeponowa<span class="hand">ubytek w przeponie</span></div>
     </div>
     <p class="small muted">Pozostałe wady leczy się zachowawczo.</p>
+    <p class="ver">Doprecyzowanie: groźne jest obustronne zarośnięcie nozdrzy tylnych (noworodek oddycha przez nos), więc najpierw zabezpiecza się drogi oddechowe rurką ustno-gardłową. Wrodzoną przepuklinę przeponową operuje się po stabilizacji oddechowej i krążeniowej, a nie natychmiast po porodzie. Rozedmę płatową operuje się, gdy daje objawy.</p>
     <div class="widget" data-w="gamelink" data-game="mem:wady" data-label="Zagraj: memory z wad wrodzonych"></div>
   </section>
 
@@ -1237,14 +1249,14 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
     </div>
     <div class="box"><h4>Leczenie ostrego zapalenia oskrzeli <span class="hand">nie ma przyczynowego</span></h4>
       <ul class="pts small">
-        <li>objawowo: <b>nawodnienie</b> <span class="hand">płynna wydzielina</span>, nawilżanie powietrza, leki przeciwgorączkowe <span class="hand">paracetamol od urodzenia, ibuprofen &gt;3 mż</span></li>
+        <li>objawowo: <b>nawodnienie</b> <span class="hand">płynna wydzielina</span>, nawilżanie powietrza, leki przeciwgorączkowe <span class="hand">paracetamol od urodzenia, ibuprofen &gt;3 mż</span> <span class="vnote">ibuprofen od 3. mż i masy co najmniej 5 kg</span></li>
         <li><b>brak udowodnionej skuteczności</b> leków przeciwkaszlowych i przeciwhistaminowych <span class="hand">bo chcemy, żeby pacjent kaszlał i odkrztuszał</span>; przeciwhistaminowe tylko przy skłonności do atopii, astmie, obciążonym wywiadzie lub AZS</li>
         <li>krótkotrwale mukolityki <span class="hand">ambroksol</span>, nebulizacje z <b>3% NaCl</b> (sól hipertoniczna; <span class="hand">dla młodszych 1,5%</span>)</li>
         <li>przy obturacji <span class="hand">jeśli są świsty</span>: <b>salbutamol w nebulizacji</b> (może przyspieszać rytm serca)</li>
         <li>kaszel <b>&gt;14 dni</b>: rozważ antybiotyk, zwłaszcza na bakterie atypowe</li>
       </ul>
       <p class="small"><b>Nebulizacja:</b> 0,9% NaCl przy wodnistym, lekko nasilonym katarze (nawilżenie dróg); 1,5%, 2,2% lub 3% NaCl, gdy chcesz efektu wykrztuśnego.</p>
-      <p class="small"><b>Profilaktyka:</b> higiena (mycie rąk, zasłanianie ust przy kaszlu), dziecko z gorączką zostaje w domu, <mark>szczepienie przeciw grypie od 6. mż</mark> (do 8. rż 2 dawki, potem jedna).</p>
+      <p class="small"><b>Profilaktyka:</b> higiena (mycie rąk, zasłanianie ust przy kaszlu), dziecko z gorączką zostaje w domu, <mark>szczepienie przeciw grypie od 6. mż</mark>. Dzieci do 8. rż szczepione pierwszy raz w życiu dostają 2 dawki w odstępie co najmniej 4 tygodni, w kolejnych sezonach 1 dawkę.</p>
     </div>
     <div class="cols">
       <div class="box"><h4>Przewlekłe zapalenie oskrzeli</h4><p class="small">U dzieci <b>nie stosuje się</b> definicji dorosłych (kaszel produktywny przez co najmniej 3 miesiące w dwóch kolejnych latach). Przewlekanie się objawów wymaga diagnostyki różnicowej: <b>astma, mukowiscydoza, pierwotna dyskineza rzęsek, rozstrzenie oskrzeli, ciało obce, dym tytoniowy</b>.</p></div>
@@ -1294,6 +1306,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <div class="box crit"><span class="st crit">⚠ Pilna hospitalizacja</span><ul class="pts small"><li><b>bezdech</b> (predysponuje do zaburzeń oddychania w kolejnych dniach)</li><li>stan dziecka niepokoi lekarza lub rodzica</li><li>ciężka duszność: stękanie, wyraźne zaciąganie ścian klatki, skrzydełka nosa, <b>&gt;70 oddechów/min</b></li><li>sinica centralna</li><li><b>SpO₂ &lt;92%</b> bez tlenu</li></ul></div>
       <div class="box warn"><span class="st warn">◐ Rozważ hospitalizację</span><ul class="pts small"><li><b>&gt;60 oddechów/min</b></li><li>trudności z karmieniem piersią lub przyjmowanie tylko <b>50–75%</b> dziennego zapotrzebowania płynów</li><li>objawy odwodnienia</li><li>czynniki ryzyka ciężkiego przebiegu + warunki socjalne (odległość od szpitala, transport, doświadczenie rodziców, np. pierwsze dziecko)</li></ul></div>
     </div>
+    <p class="ver">Progi saturacji: w notatkach (rekomendacje polskie) 92%. Brytyjskie wytyczne NICE od 2021 r. kierują pilnie do szpitala przy SpO₂ &lt;90% u dzieci od 6. tygodnia życia i &lt;92% u młodszych oraz z chorobami współistniejącymi. Na egzamin: 92%.</p>
     <h4>Leczenie <span class="hand">tlenoterapia i nawodnienie!</span></h4>
     <div class="cols">
       <div class="box okb"><span class="st okb">✓ Zalecane</span><ul class="pts small"><li><mark>tlenoterapia przy SpO₂ ≤90%</mark>: nie przez maskę; urządzenie wysokoprzepływowe, które podgrzewa i nawilża; u małych dzieci wąsy przyklejone plastrami</li><li><mark>nawadnianie</mark> dożylne lub przez zgłębnik żołądkowy</li></ul></div>
@@ -1317,13 +1330,15 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
       <div class="box"><h4>Swoista</h4>
         <p class="small"><b>Paliwizumab</b>: swoiste przeciwciało monoklonalne dla grup ryzyka w sezonie zachorowań; <mark>domięśniowo co miesiąc</mark>. <span class="hand">za darmo (program)</span></p>
         <p class="small"><b>Abrysvo</b>: szczepienie kobiet w ciąży <span class="hand">32.–36. tc</span>; matka przekazuje przeciwciała, które chronią dziecko ok. <b>6 miesięcy</b>. Nie wyklucza dziecka z profilaktyki przeciwciałem. Stosowane też u seniorów. <span class="hand">płatne, ok. 1000 zł</span></p>
-        <p class="small"><b>Nirsewimab</b>: według wykładu w Polsce dzieci jeszcze go nie otrzymują.</p>
+        <p class="small"><span class="vnote">Okno 32.–36. tc to zalecenie amerykańskie. Charakterystyka produktu w UE podaje 24.–36. tc (w Wielkiej Brytanii od 2025 r. 28.–36. tc). U dorosłych szczepionkę stosuje się od 60. roku życia.</span></p>
+        <p class="small"><b>Nirsewimab</b>: według wykładu w Polsce dzieci jeszcze go nie otrzymują. To przeciwciało podawane jednorazowo domięśniowo, chroni przez cały sezon. <span class="vnote">Stan się zmienia: w 2026 r. AOTMiT zarekomendował refundację nirsewimabu dla noworodków i niemowląt w pierwszym sezonie RSV. Sprawdź, czy weszła w życie.</span></p>
       </div>
       <div class="box"><h4>Czynniki ryzyka ciężkiego przebiegu</h4><ul class="pts small"><li>wiek <b>&lt;12 tygodni</b></li><li>wcześniactwo, zwłaszcza <b>&lt;32 tc</b></li><li>hemodynamicznie istotna wrodzona wada serca</li><li>przewlekła choroba płuc (dysplazja oskrzelowo-płucna, mukowiscydoza, wada płuc)</li><li>niedobory odporności</li><li>choroby nerwowo-mięśniowe</li></ul></div>
     </div>
     <div class="box qualifier" id="pali">
       <h4>Kryteria programu paliwizumabu: sprawdź na przykładzie</h4>
       <p class="small muted">Dziecko kwalifikuje się, jeśli w chwili rozpoczęcia immunizacji spełnia jedno z kryteriów: (1) &lt;6 mż i 29.–32. tc (+6 dni); (2) &lt;6 mż, ≤35. tc (+6 dni) i masa urodzeniowa ≤1500 g; (3) &lt;1 rż i urodzone ≤28. tc (+6 dni); (4) &lt;2 rż z rozpoznaną BPD; (5) &lt;2 rż z hemodynamicznie istotną wadą serca oraz niewydolnością serca mimo leczenia, umiarkowanym lub ciężkim nadciśnieniem płucnym albo siniczą wadą z SaO₂ &lt;90%. Poniżej są przykładowe dane, zmieniaj je i obserwuj wynik.</p>
+      <p class="ver">Uzupełnienie: dawka paliwizumabu to 15 mg/kg domięśniowo co miesiąc, zwykle 3–5 dawek w sezonie (wrzesień–kwiecień). Kryteria programu lekowego B.40 były rozszerzane (ostatnio w 2023 r.), więc w praktyce sprawdzaj aktualne obwieszczenie.</p>
       <div class="q-form">
         <label for="pq-age">Wiek dziecka (ukończone miesiące)<input type="number" id="pq-age" min="0" max="60" value="4"></label>
         <label for="pq-w">Wiek ciążowy przy urodzeniu<span class="ga"><input type="number" id="pq-w" min="22" max="42" value="31" aria-label="tygodnie ciąży"> tc + <input type="number" id="pq-d" min="0" max="6" value="0" aria-label="dni"> dni</span></label>
@@ -1346,7 +1361,7 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
     <h3>Pozaszpitalne zapalenie płuc</h3>
     <ul class="pts">
       <li>Choroba zapalna <b>obwodowej części układu oddechowego</b>, najczęściej wskutek zakażenia. Przebiega z <b>gorączką</b>, objawami oddechowymi i <b>naciekiem zapalnym</b> w badaniu przedmiotowym i/lub radiologicznym.</li>
-      <li>Etiologia bakteryjna lub wirusowa (w notatkach: najczęściej bakteryjna; zobacz jednak tabelę etiologii według wieku). Typowe są <b>trzeszczenia</b>: pęcherzyki sklejają się wydzieliną i nie wymieniają gazów.</li>
+      <li>Etiologia bakteryjna lub wirusowa (w notatkach: najczęściej bakteryjna; u dzieci przed 5. rż przeważają jednak wirusy, co widać w tabeli etiologii według wieku). Typowe są <b>trzeszczenia</b>: pęcherzyki sklejają się wydzieliną i nie wymieniają gazów.</li>
     </ul>
     <div class="cols">
       <div class="box"><h4>Bakterie typowe <span class="small muted">(najczęściej <i>S. pneumoniae</i>)</span></h4><p class="small">Gorączka (często tydzień przed rozpoznaniem), dreszcze, duszność, tachypnoe, kaszel, ból w klatce, <b>ból brzucha</b> („maska brzuszna” zapalenia płuc: wymioty, objawy jak nieżyt pokarmowy przez podrażnienie nerwów). Zajęty cały płat. Trzeszczeń może nie być, słychać ściszenie; po lekach wykrztuśnych pojawiają się trzeszczenia i kaszel.</p></div>
@@ -1369,10 +1384,10 @@ svg .zone:hover,svg .zone.on{fill-opacity:.5}
         <tr><td>Noworodki (do 20. dnia)</td><td>paciorkowce grupy B (<i>S. agalactiae</i>), <i>Enterobacteriaceae</i>, cytomegalowirus, <i>Listeria monocytogenes</i></td><td class="muted">brak w notatkach</td></tr>
         <tr><td>3 tyg. – 3 mies.</td><td><i>Chlamydia trachomatis</i>, RSV, paragrypa, <i>S. pneumoniae</i>, <i>Bordetella pertussis</i>, <i>S. aureus</i></td><td><b>cefuroksym</b> 75–100 mg/kg/d (cięższe 100–150) co 8 h (6–14–22) <b>lub amoksycylina z klawulanianem</b> iv (100 mg/kg/d amoksycyliny). Ciężkie, zagrażające życiu: <b>cefotaksym</b> (co 6–8 h) lub <b>ceftriakson</b> (1×/d) <b>+ kloksacylina</b> 100 mg/kg/d co 6 h iv. Obraz atypowy: <b>makrolid</b> w I rzucie.<br><span class="small muted">W notatkach przy ceftriaksonie w tym wierszu stoi 50–180 mg/kg/d. Ten zakres pasuje do cefotaksymu; dla ceftriaksonu notatki niżej podają 50–100 mg/kg/d.</span></td></tr>
         <tr><td>4 mies. – 4 lata (leczenie: do 5 lat)</td><td>RSV, grypa, paragrypa, adenowirusy, rhinowirusy, <i>S. pneumoniae</i>, <i>H. influenzae</i>, <i>M. pneumoniae</i></td><td>Antybiotyk I rzutu musi działać na <i>S. pneumoniae</i>: <b>amoksycylina 75–90 mg/kg/d p.o. w 3 dawkach co 8 h</b>. Łagodne: 5 dni, cięższe: 7–10 dni. <mark>Łagodny przebieg bez wysokiej gorączki u dziecka zaszczepionego przeciw pneumokokom: można rozważyć leczenie bez antybiotyku</mark> (sugeruje etiologię wirusową).</td></tr>
-        <tr><td>5–15 lat</td><td><i>S. pneumoniae</i>, <i>M. pneumoniae</i>, <i>Chlamydia pneumoniae</i></td><td>Ciężkie postaci: <b>β-laktam przeciwpneumokokowy (amoksycylina/ampicylina, ceftriakson, cefotaksym) + makrolid</b>. Amoksycylina p.o. 75–90 mg/kg/d w 3 dawkach (co 8 h); iv &lt;40 kg 100–200 mg/kg/d w 4 dawkach co 6 h (maks. 4 g/d), &gt;40 kg 1–2 g co 6 h. Ceftriakson &lt;40 kg 50–100 mg/kg 1×/d, &gt;40 kg 1–2 g 1×/d (maks. 4 g/d). Cefotaksym &lt;40 kg 50–180 mg/kg/d co 6–8 h, &gt;40 kg 0,5–1 g co 8 h. Kuracja 7–10 dni.</td></tr>
+        <tr><td>5–15 lat</td><td><i>S. pneumoniae</i>, <i>M. pneumoniae</i>, <i>Chlamydia pneumoniae</i></td><td>Ciężkie postaci: <b>β-laktam przeciwpneumokokowy (amoksycylina/ampicylina, ceftriakson, cefotaksym) + makrolid</b>. Amoksycylina p.o. 75–90 mg/kg/d w 3 dawkach (co 8 h); iv &lt;40 kg 100–200 mg/kg/d w 4 dawkach co 6 h (maks. 4 g/d), &gt;40 kg 1–2 g co 6 h. Ceftriakson &lt;40 kg 50–100 mg/kg 1×/d, &gt;40 kg 1–2 g 1×/d (maks. 4 g/d). Cefotaksym &lt;40 kg 50–180 mg/kg/d co 6–8 h, &gt;40 kg 0,5–1 g co 8 h. Kuracja 7–10 dni. <span class="vnote">U dzieci powyżej 40 kg nie przekracza się dawek dla dorosłych (amoksycylina zwykle do ok. 4 g/d). U dorosłych w ciężkich zakażeniach cefotaksym podaje się zwykle po 1–2 g co 8 h.</span></td></tr>
       </tbody>
     </table></div>
-    <p class="small muted">Pneumokokowe zapalenie płuc ma 4 stadia: nawał, zwątrobienie czerwone, zwątrobienie szare, zwątrobienie żółte i rozejście. Niepowikłane nie niszczy przegród i zwykle ustępuje bez powikłań.</p>
+    <p class="small muted">Pneumokokowe zapalenie płuc ma 4 stadia: nawał, zwątrobienie czerwone, zwątrobienie szare, zwątrobienie żółte i rozejście. <span class="vnote">Większość podręczników patomorfologii podaje: przekrwienie (nawał), zwątrobienie czerwone, zwątrobienie szare, rozejście.</span> Niepowikłane nie niszczy przegród i zwykle ustępuje bez powikłań.</p>
     <div class="cols">
       <div class="box"><h4>Diagnostyka</h4><ul class="pts small"><li>wskaźniki zapalne i morfologia: CRP, prokalcytonina, leukocytoza z neutrofilią</li><li><b>pulsoksymetria</b>: koreluje z ciężkością i decyduje o hospitalizacji</li><li>mikrobiologia: posiew krwi (ciężki przebieg, wysokie wskaźniki), płyn z jamy opłucnej (drenaż)</li><li>serologia IgM, IgG: głównie bakterie atypowe</li><li>obrazowanie: RTG (kontrolne, gdy objawy trwają, a pierwsze RTG pokazało okrągły cień lub niedodmę); USG nie ma w wytycznych. <b>Sam obraz nie definiuje choroby.</b></li></ul><p class="formula small">zmiany w USG + brak wzrostu wskaźników zapalnych → wirusowe lub atypowe</p></div>
       <div class="box"><h4>Profilaktyka</h4><ul class="pts small"><li>szczepienia przeciw <i>H. influenzae</i>, <i>S. pneumoniae</i> i grypie</li><li>chemioprofilaktyka w wybranych sytuacjach: zakażenie matki <i>S. agalactiae</i> lub <i>Chlamydia trachomatis</i>, kontakt z <i>H. influenzae</i> typu b</li><li>izolacja chorych, zwłaszcza z RSV</li><li>higiena, karmienie piersią, brak dymu tytoniowego</li></ul></div>
@@ -1457,13 +1472,13 @@ const FC=[
 ["F","rozwoj","Co powstaje w fazie rzekomogruczołowej?","Przepona, opłucna, naczynia płucne, <b>pierścienie chrzęstne tchawicy</b>. Kończy się strefa przewodząca (17 generacji)."],
 ["F","rozwoj","W których fazach tworzy się część przewodząca?","W <b>embrionalnej i rzekomogruczołowej</b>."],
 ["F","rozwoj","Faza kanalikowa: co się w niej dzieje?","17.–27. tc: oskrzeliki oddechowe, intensywne unaczynienie, bariera krew–powietrze, pneumocyty I i II typu, pojawia się surfaktant."],
-["F","rozwoj","Kiedy surfaktant jest wykrywalny śladowo, a kiedy pojawiają się ciała lamelarne?","Surfaktant śladowo: <b>22.–24. tc</b>. Ciała lamelarne: ok. <b>28. tc</b>."],
+["F","rozwoj","Kiedy surfaktant jest wykrywalny śladowo, a kiedy pojawiają się ciała lamelarne?","Surfaktant śladowo: <b>22.–24. tc</b>. Ciała lamelarne: ok. <b>28. tc</b> (wg notatek; część podręczników podaje już ok. 24. tc)."],
 ["F","rozwoj","Co to jest alweolaryzacja i kiedy zachodzi?","Wykształcenie dojrzałej części obwodowej płuc i zwielokrotnienie liczby pęcherzyków. Faza pęcherzykowa: od ok. 37. tc / po urodzeniu <b>do 2. rż</b>."],
 ["F","rozwoj","Ile płynu płucnego produkuje płód i ile ma go donoszony noworodek?","Produkcja <b>2–5 ml/kg/h</b>; u donoszonego noworodka ok. <b>30 ml/kg</b>."],
 ["F","rozwoj","Co dzieje się z płynem płucnym przy porodzie?","Produkcja ustaje przed porodem (m.in. steroidy). Część płynu zostaje wyciśnięta w drogach rodnych, reszta wchłania się do naczyń limfatycznych i jest wydalana przez nerki w pierwszych dniach."],
 ["F","rozwoj","Dlaczego naczynia płucne płodu są obkurczone?","Przez niskie ciśnienie parcjalne tlenu we krwi płodu. Po pierwszym oddechu tlen powoduje ich rozkurcz."],
 ["F","budowa","Gdzie przebiega granica między strefą przewodzącą a strefą wymiany gazowej?","Między <b>16. a 17. generacją</b> podziałów drzewa oskrzelowego."],
-["F","budowa","Najwęższe miejsce dróg oddechowych i gdzie są największe opory?","<b>Krtań</b>; największe opory generują górne drogi oddechowe."],
+["F","budowa","Najwęższe miejsce dróg oddechowych i gdzie są największe opory?","<b>Krtań</b> (u małego dziecka okolica podgłośniowa); największe opory generują górne drogi oddechowe."],
 ["F","budowa","Chrząstki w drzewie oskrzelowym: kształt w tchawicy i co poniżej 11. generacji?","Tchawica: chrząstki w kształcie <b>litery C</b> (poza pierścieniowatą). Poniżej 11. generacji nie ma pierścieni, tylko płytki chrzęstne."],
 ["F","budowa","Cechy strefy oddechowej","Pole przekroju ok. <b>5000×</b> większe niż tchawicy, przepływ laminarny, brak gruczołów śluzowych i komórek kubkowych, nabłonek coraz bardziej płaski."],
 ["F","budowa","Pneumocyty typu I a typu II","<b>I</b>: płaskie, 90% powierzchni, ale nieliczne.<br><b>II</b>: ziarniste, liczniejsze, multipotencjalne (mogą przejść w typ I), produkują surfaktant."],
@@ -1474,7 +1489,7 @@ const FC=[
 ["F","budowa","Powierzchnia wymiany gazowej: niemowlę, 8. rż, dorosły","<b>3 m² → 30 m² → 70 m²</b>"],
 ["F","budowa","Liczba pęcherzyków: po urodzeniu i w 8. rż","ok. <b>25 mln</b> → ok. <b>300 mln</b>"],
 ["F","budowa","Do kiedy drogi przewodzące są nieproporcjonalnie wąskie?","Do <b>5. rż</b>."],
-["F","budowa","Kiedy pojawia się wentylacja oboczna (wg notatek)?","Pory Kohna ok. <b>6. rż</b>, kanały Lamberta ok. <b>8. rż</b>."],
+["F","budowa","Kiedy pojawia się wentylacja oboczna (wg notatek)?","Pory Kohna ok. <b>6. rż</b>, kanały Lamberta ok. <b>8. rż</b>.<br><small>Inne źródła: ok. 3.–4. rż.</small>"],
 ["F","budowa","Pory Kohna i kanały Lamberta: co to jest?","<b>Kohna</b>: otwory między pęcherzykami (1–12 µm).<br><b>Lamberta</b>: kanały łączące oskrzeliki końcowe z sąsiednimi pęcherzykami.<br>Obie wyrównują ciśnienia między pęcherzykami."],
 ["F","budowa","Jak dziecko zwiększa wentylację i co jest miernikiem zaburzeń oddechowych?","Głównie przez <b>przyspieszenie oddechu</b>; miernikiem jest <b>liczba oddechów</b>."],
 ["F","budowa","Czynnościowa pojemność zalegająca u noworodków i niemowląt","Niska, czyli mała rezerwa oddechowa."],
@@ -1490,7 +1505,7 @@ const FC=[
 ["F","spiro","Stopnie obturacji według FEV1","lekki <b>&gt;70%</b>; umiarkowany <b>60–69%</b>; umiarkowanie ciężki <b>50–59%</b>; ciężki <b>35–49%</b>; bardzo ciężki <b>&lt;35%</b>"],
 ["F","spiro","Bezwzględne przeciwwskazania do spirometrii","Świeży zawał serca i udar, krwioplucie o nieznanej przyczynie, odma opłucnowa, tętniak aorty, niedawna operacja okulistyczna, brak współpracy."],
 ["F","spiro","Wskazania do spirometrii (4 grupy)","Diagnostyczne, monitorujące, orzecznicze, epidemiologiczne."],
-["F","spiro","Kryterium dodatniej próby rozkurczowej","Wzrost FEV1 (i/lub FVC) o <b>≥12% i ≥0,2 l</b> po β2-mimetyku."],
+["F","spiro","Kryterium dodatniej próby rozkurczowej","Wzrost FEV1 (i/lub FVC) o <b>≥12% i ≥0,2 l</b> po β2-mimetyku.<br><small>ERS/ATS 2005; nowsze zalecenia: wzrost o ponad 10% wartości należnej.</small>"],
 ["F","spiro","Co trzeba odstawić przed spirometrią?","Leki rozszerzające oskrzela."],
 ["F","spiro","Kiedy przerywa się test prowokacji oskrzeli?","Przy <b>spadku FEV1 o 20%</b> względem wartości po rozpuszczalniku. Spadek &lt;20% oznacza próbę ujemną."],
 ["F","spiro","Farmakologiczne czynniki prowokujące w teście nadreaktywności","Metacholina, histamina, monofosforan adenozyny, mannitol."],
@@ -1508,7 +1523,7 @@ const FC=[
 ["S","kaszel","Zespół kaszlu z górnych dróg oddechowych: mechanizm i przyczyny","Nadprodukcja wydzieliny drażni receptory kaszlu. Przyczyny: nieżyt nosa, zapalenie zatok, przerost migdałka gardłowego. Objaw kostki brukowej, odchrząkiwanie."],
 ["S","kaszel","Kaszel nawykowy: cechy","Głośny („beczącej kozy”), nasila się przy świadkach, <b>ustępuje w nocy</b> i po odwróceniu uwagi, zaczyna się od infekcji, dobry stan dziecka, rozpoznanie z wykluczenia."],
 ["S","kaszel","Kaszel nawykowy a krztusiec","Nawykowy <b>nie występuje w nocy</b>; krztuścowy jest ciągły, także w nocy."],
-["S","kaszel","Kaszel poinfekcyjny","Suchy, z nadreaktywności po uszkodzeniu nabłonka; nasila go zimne powietrze, zmiana temperatury i wysiłek; trwa do <b>8–12 tyg.</b> i słabnie."],
+["S","kaszel","Kaszel poinfekcyjny","Suchy, z nadreaktywności po uszkodzeniu nabłonka; nasila go zimne powietrze, zmiana temperatury i wysiłek; trwa do <b>8–12 tyg.</b> i słabnie.<br><small>Inne źródła: zwykle 3–8 tyg.; 8–12 tyg. głównie po krztuścu.</small>"],
 ["S","kaszel","Kiedy przewlekły kaszel jest wskazaniem do RTG klatki piersiowej?","Gdy długo się utrzymuje: trzeba wykluczyć m.in. guz wewnątrztchawiczy lub wewnątrzoskrzelowy i ciało obce."],
 ["S","kaszel","Kaszel nieswoisty (izolowany): co mu towarzyszy?","Brak innych objawów oddechowych i zmian osłuchowych, brak zmian w RTG i USG, prawidłowa spirometria."],
 ["S","kaszel","8 objawów alarmowych przy kaszlu","Początek w okresie noworodkowym; kaszel przy karmieniu; nagły początek; przewlekły mokry z plwociną; poty nocne i utrata masy ciała; nieustępujące napady; objawy przewlekłej choroby płuc; utrzymująca się gorączka."],
@@ -1541,12 +1556,12 @@ const FC=[
 ["S","bezdech","Definicja bezdechu u wcześniaka","Przerwa <b>&gt;20 s</b> albo krótsza, ale z bradykardią <b>&lt;80/min</b>, sinicą centralną i/lub SpO₂ <b>&lt;85%</b>."],
 ["S","bezdech","Bezdech ośrodkowy a obturacyjny","<b>Ośrodkowy</b>: niedojrzałość ośrodków w rdzeniu przedłużonym, słaba odpowiedź na hiperkapnię.<br><b>Obturacyjny</b>: niedrożność górnych dróg przy zachowanych, nieefektywnych ruchach oddechowych."],
 ["S","bezdech","Do kiedy ustępują bezdechy wcześniacze z niedojrzałości?","Zwykle do <b>36. tyg. wieku skorygowanego</b>, najpóźniej do 43. tyg."],
-["S","bezdech","Oblicz wiek skorygowany: urodzony w 30. tc, ma 6 tygodni życia","<b>36 tygodni</b> wieku skorygowanego."],
+["S","bezdech","Oblicz wiek skorygowany: urodzony w 30. tc, ma 6 tygodni życia","<b>36 tygodni</b> wieku skorygowanego.<br><small>Ściślej to wiek postmenstruacyjny: wiek ciążowy + tygodnie życia.</small>"],
 ["S","bezdech","Obturacyjny bezdech senny u dziecka: najczęstsza przyczyna, objawy, diagnostyka","Przerost migdałka gardłowego i/lub podniebiennych; chrapanie, spanie z otwartymi ustami; <b>polisomnografia</b>."],
 ["S","bezdech","Leczenie bezdechu z niedojrzałości","Stymulacja dotykowa, optymalna temperatura, płytka bezdechu, <b>cytrynian kofeiny lub teofilina</b>, CPAP przez kaniulę nosową lub wspomagana wentylacja."],
 ["S","bezdech","Metaboliczne przyczyny bezdechu","Hipoglikemia, hipokalcemia, hiponatremia."],
 ["S","inne","Unerwienie czuciowe klatki piersiowej","Ściana: nerwy międzyżebrowe <b>Th1–Th12</b>. Przepona: nerw przeponowy <b>C3–C5</b>. Narządy: pień współczulny i nerw błędny."],
-["S","inne","Ból w klatce piersiowej u dziecka: z jakim układem najczęściej się wiąże?","Zwykle z <b>układem krążenia</b>. Może towarzyszyć zapaleniu płuc albo być bólem udzielonym z brzucha."],
+["S","inne","Ból w klatce piersiowej u dziecka: z jakim układem najczęściej się wiąże?","<b>Wg notatek</b>: zwykle z układem krążenia.<br><b>Wg piśmiennictwa</b>: u dzieci najczęściej przyczyny mięśniowo-szkieletowe i idiopatyczne, sercowe tylko w kilku procentach. Objaw niecharakterystyczny, bywa udzielony z brzucha."],
 ["S","inne","Cele leczenia krwioplucia","Zahamować utratę krwi, utrzymać drożność dróg oddechowych, nie dopuścić do aspiracji krwi do zdrowego płuca."],
 ["S","inne","Na którym boku układasz dziecko z krwiopluciem?","Na <b>chorym</b> (krwawiącym) boku: drenaż ułożeniowy chroni zdrowe płuco."],
 ["S","inne","Metody leczenia krwioplucia","Drenaż ułożeniowy, selektywna intubacja z zamknięciem oskrzela krwawiącego płuca, bronchoskopia (odessanie, fotokoagulacja laserowa), leczenie przyczynowe."],
@@ -1555,12 +1570,12 @@ const FC=[
 
 ["W","wady","Jaki odsetek wad wrodzonych stanowią wady układu oddechowego?","<b>0,1–3,9%</b>. W krajach rozwiniętych to druga po wadach serca wadowa przyczyna zgonów noworodków."],
 ["W","wady","Najczęstsza wada wrodzona układu oddechowego","<b>Laryngomalacja</b> (wiotkość krtani)."],
-["W","wady","Laryngomalacja: mechanizm stridoru","Fałdy nalewkowo-nagłośniowe i ściany tchawicy zapadają się do światła w trakcie wdechu, co daje <b>stridor wdechowy</b>."],
-["W","wady","Laryngomalacja: diagnostyka i leczenie","Endoskopia w trakcie oddychania. Zwykle bez leczenia, ustępuje z wiekiem; bardzo rzadko tracheostomia."],
+["W","wady","Laryngomalacja: mechanizm stridoru","Struktury nadgłośniowe (fałdy nalewkowo-nagłośniowe, chrząstki nalewkowate, nagłośnia) zapadają się do światła krtani w trakcie wdechu, co daje <b>stridor wdechowy</b>."],
+["W","wady","Laryngomalacja: diagnostyka i leczenie","Endoskopia w trakcie oddychania. Zwykle bez leczenia, ustępuje z wiekiem (do 12.–24. mż). W ciężkich postaciach supraglotoplastyka, tracheostomia wyjątkowo."],
 ["W","wady","Z jaką wadą zwykle współistnieje laryngomalacja?","Z <b>tracheomalacją</b> (rozmiękaniem tchawicy)."],
-["W","wady","Agenezja, aplazja, hipoplazja (definicje z notatek)","<b>Agenezja</b>: brak podziału tchawicy na oskrzela główne.<br><b>Aplazja</b>: brak podziału jednego z oskrzeli płatowych.<br><b>Hipoplazja</b>: niekompletny rozwój (mniej i mniejszych pęcherzyków)."],
+["W","wady","Agenezja, aplazja, hipoplazja","<b>Wg notatek</b>: agenezja to brak podziału tchawicy na oskrzela główne, aplazja brak podziału jednego z oskrzeli płatowych, hipoplazja niekompletny rozwój.<br><b>Podręcznikowo</b>: agenezja to brak płuca, oskrzela i naczyń; aplazja to szczątkowe oskrzele bez miąższu; hipoplazja to oskrzele i miąższ obecne, ale niedorozwinięte."],
 ["W","wady","Obustronna a jednostronna agenezja lub aplazja","Obustronna: <b>wada letalna</b>. Jednostronna: <b>kompensacyjny przerost drugiego płuca</b>."],
-["W","wady","Przyczyny hipoplazji płuca","Mniejsza pojemność klatki (guz, przepuklina przeponowa), złe ukrwienie (stenoza zastawki lub tętnicy płucnej, tetralogia Fallota), choroby nerwowo-mięśniowe."],
+["W","wady","Przyczyny hipoplazji płuca","Mniejsza pojemność klatki (guz, przepuklina przeponowa), złe ukrwienie (stenoza zastawki lub tętnicy płucnej, tetralogia Fallota), choroby nerwowo-mięśniowe. Klasycznie też <b>małowodzie</b> (np. agenezja nerek)."],
 ["W","wady","Hipoplazja którego płuca rokuje gorzej?","<b>Prawego</b>: śmiertelność dwukrotnie większa."],
 ["W","wady","Diagnostyka hipoplazji płuca","RTG klatki, angio-TK, scyntygrafia perfuzyjna i wentylacyjna."],
 ["W","wady","W których fazach rozwoju może powstać hipoplazja płuca?","W <b>rzekomogruczołowej, kanalikowej oraz woreczkowej i pęcherzykowej</b>."],
@@ -1569,7 +1584,7 @@ const FC=[
 ["W","wady","Wady faz woreczkowej i pęcherzykowej","Hipoplazja płuca, dysplazja gronka płucnego, <b>dysplazja kapilarno-pęcherzykowa</b>."],
 ["W","wady","Wrodzona torbielowatość gruczolakowata: typ 1 i typ 2","<b>Typ 1</b>: najczęstszy, najlepsze rokowanie, wielokomorowe torbiele &gt;2 cm.<br><b>Typ 2</b>: wiele małych torbieli.<br>Razem 5 typów."],
 ["W","wady","Dlaczego wrodzoną torbielowatość gruczolakowatą się resekuje?","Ryzyko <b>zakażenia torbieli</b> i <b>metaplazji nowotworowej</b>."],
-["W","wady","Torbiel oskrzelopochodna a enterogenna","<b>Oskrzelopochodna</b>: chrząstki, okolica rozwidlenia tchawicy.<br><b>Enterogenna</b>: element przewodu pokarmowego, wzdłuż przełyku (także śródpiersie tylne)."],
+["W","wady","Torbiel oskrzelopochodna a enterogenna","<b>Oskrzelopochodna</b>: chrząstki, okolica rozwidlenia tchawicy (zwykle śródpiersie środkowe).<br><b>Enterogenna</b>: element przewodu pokarmowego, wzdłuż przełyku (zwykle śródpiersie tylne).<br><small>W notatkach obie opisano jako śródpiersie przednie.</small>"],
 ["W","wady","Torbiel płuca: unaczynienie i powikłania","Unaczynienie z krążenia <b>systemowego</b>; ucisk sąsiednich tkanek, nadkażenie, krwawienie (ropień)."],
 ["W","wady","Sekwestracja płuca: definicja","Miąższ <b>bez połączenia z drzewem tchawiczo-oskrzelowym</b>, unaczyniony z <b>krążenia systemowego</b>. Postać wewnątrz- lub zewnątrzpłucna."],
 ["W","wady","Sekwestracja: objaw, diagnostyka, leczenie","Nawracające zapalenia płuc w tym samym miejscu; RTG i <b>angio-TK</b> (źródło unaczynienia); resekcja."],
@@ -1594,11 +1609,11 @@ const FC=[
 ["I","oskrzela","Powikłania ostrego zapalenia oskrzeli","Poinfekcyjna nadreaktywność oskrzeli (po krztuścu 8–12 tyg.), zapalenie ucha środkowego i zapalenie płuc (<i>S. pneumoniae</i>, <i>H. influenzae</i>), rzadko nadkażenie bakteryjne oskrzeli."],
 ["I","oskrzela","Antybiotyk w zapaleniu ucha środkowego","Amoksycylina lub amoksycylina z kwasem klawulanowym."],
 ["I","oskrzela","Leczenie objawowe ostrego zapalenia oskrzeli","Nawodnienie, nawilżanie powietrza, leki przeciwgorączkowe; krótko mukolityki; nebulizacje 3% NaCl (młodsze 1,5%); salbutamol, gdy są świsty."],
-["I","oskrzela","Paracetamol i ibuprofen: od kiedy?","Paracetamol <b>od urodzenia</b>, ibuprofen <b>po 3. mż</b>."],
+["I","oskrzela","Paracetamol i ibuprofen: od kiedy?","Paracetamol <b>od urodzenia</b>, ibuprofen <b>od 3. mż</b> (i masy co najmniej 5 kg)."],
 ["I","oskrzela","Dlaczego nie podaje się leków przeciwkaszlowych?","Brak udowodnionej skuteczności; dziecko ma kaszleć i odkrztuszać wydzielinę."],
 ["I","oskrzela","Kiedy rozważyć antybiotyk przy kaszlu w zapaleniu oskrzeli?","Gdy kaszel trwa <b>&gt;14 dni</b> (zwłaszcza bakterie atypowe; przy podejrzeniu krztuśca makrolid)."],
 ["I","oskrzela","Nebulizacja 0,9% NaCl a sól hipertoniczna","<b>0,9%</b>: nawilżenie przy wodnistym katarze.<br><b>1,5%, 2,2%, 3%</b>: efekt wykrztuśny."],
-["I","oskrzela","Szczepienie przeciw grypie u dzieci","Od <b>6. mż</b>; do 8. rż dwie dawki, potem jedna."],
+["I","oskrzela","Szczepienie przeciw grypie u dzieci","Od <b>6. mż</b>. Dzieci do 8. rż szczepione pierwszy raz: <b>2 dawki</b> (odstęp ≥4 tyg.), potem 1 dawka co sezon."],
 ["I","oskrzela","Przewlekłe zapalenie oskrzeli u dzieci","Nie stosuje się definicji dorosłych (3 mies. kaszlu w 2 kolejnych latach). Różnicuj: astma, mukowiscydoza, dyskineza rzęsek, rozstrzenie, ciało obce, dym tytoniowy."],
 ["I","oskrzela","Nawracające zapalenie oskrzeli: definicja","Co najmniej <b>4 zapalenia oskrzeli w roku</b>."],
 ["I","oskrzela","Ile trwa pełna regeneracja nabłonka oddechowego?","Od <b>6 tygodni do 3 miesięcy</b>."],
@@ -1618,9 +1633,9 @@ const FC=[
 ["I","oskrzeliki","Czy w zapaleniu oskrzelików rutynowo robi się RTG?","<b>Nie.</b> Brak wskazań przy dobrym stanie, niskich wskaźnikach zapalnych i bez wysokiej gorączki."],
 ["I","oskrzeliki","Test antygenowy „5 w 1”: co wykrywa?","COVID, RSV, adenowirus, <i>Mycoplasma</i>, grypa A i B."],
 ["I","oskrzeliki","Rekomendacja 5: antybiotyk w zapaleniu oskrzeli i oskrzelików","Nie rutynowo. Kaszel &gt;14 dni: makrolid (krztusiec). Kaszel produktywny &gt;4 tyg. bez poprawy: przewlekające się bakteryjne zapalenie oskrzeli, amoksycylina z klawulanianem lub makrolid przez 10–14 dni."],
-["I","oskrzeliki","Paliwizumab: co to jest i jak się podaje?","Przeciwciało monoklonalne przeciw RSV; <b>domięśniowo co miesiąc</b> w sezonie zachorowań, u dzieci z grup ryzyka."],
+["I","oskrzeliki","Paliwizumab: co to jest i jak się podaje?","Przeciwciało monoklonalne przeciw RSV; <b>15 mg/kg domięśniowo co miesiąc</b> w sezonie zachorowań (zwykle 3–5 dawek), u dzieci z grup ryzyka."],
 ["I","oskrzeliki","Kryteria programu paliwizumabu","&lt;6 mż i 29.–32. tc; &lt;6 mż, ≤35. tc i ≤1500 g; &lt;1 rż i ≤28. tc; &lt;2 rż z BPD; &lt;2 rż z istotną wadą serca + niewydolność serca, nadciśnienie płucne lub sinica (SaO₂ &lt;90%)."],
-["I","oskrzeliki","Abrysvo","Szczepionka przeciw RSV dla kobiet w ciąży (32.–36. tc); przeciwciała chronią dziecko ok. 6 mies.; nie wyklucza paliwizumabu; stosowana też u seniorów."],
+["I","oskrzeliki","Abrysvo","Szczepionka przeciw RSV dla kobiet w ciąży; przeciwciała chronią dziecko ok. 6 mies.; nie wyklucza paliwizumabu; stosowana też u osób po 60. rż.<br><small>W notatkach 32.–36. tc (zalecenie z USA); w UE charakterystyka produktu: 24.–36. tc.</small>"],
 ["I","oskrzeliki","Czynniki ryzyka ciężkiego zakażenia RSV","Wiek <b>&lt;12 tyg.</b>, wcześniactwo (&lt;32 tc), istotna wada serca, przewlekła choroba płuc, niedobory odporności, choroby nerwowo-mięśniowe."],
 ["I","oskrzeliki","Profilaktyka nieswoista zakażeń RSV","Higiena rąk, brak dymu tytoniowego, karmienie piersią <b>≥6 mies.</b>"],
 ["I","pluca","Zapalenie płuc: definicja","Zapalenie obwodowej części układu oddechowego: gorączka, objawy oddechowe i naciek w badaniu przedmiotowym i/lub RTG."],
@@ -1648,13 +1663,13 @@ const FC=[
 ["I","pluca","RTG po 4–12 tygodniach: kiedy?","Niepełny efekt leczenia, nawroty w tej samej okolicy, niejasne zmiany (cień okrągły, lite zacienienie, wysięk), podejrzenie ciała obcego lub wady."],
 ["I","pluca","Profilaktyka zapalenia płuc","Szczepienia (Hib, pneumokoki, grypa), chemioprofilaktyka (GBS lub <i>Chlamydia trachomatis</i> u matki, kontakt z Hib), izolacja (RSV), higiena, karmienie piersią, brak dymu."],
 ["I","pluca","Czynniki ryzyka pozaszpitalnego zapalenia płuc","Młody wiek, zaburzenia odporności, przewlekłe choroby oddechowe i krążenia, zaburzenia rzęsek, stany sprzyjające zachłyśnięciu."],
-["I","pluca","Stadia pneumokokowego zapalenia płuc","Nawał → zwątrobienie czerwone → zwątrobienie szare → zwątrobienie żółte i rozejście."]
+["I","pluca","Stadia pneumokokowego zapalenia płuc","Nawał → zwątrobienie czerwone → zwątrobienie szare → zwątrobienie żółte i rozejście (wg notatek).<br><small>Podręcznikowo: przekrwienie, zwątrobienie czerwone, zwątrobienie szare, rozejście.</small>"]
 ];
 
 /* Pytania: pierwsza odpowiedź w tablicy jest poprawna; kolejność losuje się przy wyświetlaniu. */
 const Q=[
 {m:"F",t:"rozwoj",q:"Surfaktant w śladowych ilościach można wykryć w:",o:["22.–24. tc","16.–18. tc","28.–30. tc","34.–36. tc","dopiero po urodzeniu"],e:"Surfaktant pojawia się w fazie kanalikowej (17.–27. tc), śladowo w 22.–24. tc. Ciała lamelarne, które go syntetyzują, pojawiają się ok. 28. tc."},
-{m:"F",t:"rozwoj",q:"Ciała lamelarne odpowiedzialne za syntezę surfaktantu pojawiają się około:",o:["28. tc","16. tc","22. tc","36. tc","40. tc"],e:"Ok. 28. tc, w fazie woreczków końcowych (28.–36. tc)."},
+{m:"F",t:"rozwoj",q:"Ciała lamelarne odpowiedzialne za syntezę surfaktantu pojawiają się około:",o:["28. tc","16. tc","22. tc","36. tc","40. tc"],e:"Ok. 28. tc, w fazie woreczków końcowych (28.–36. tc), według notatek. Część podręczników podaje już ok. 24. tc."},
 {m:"F",t:"rozwoj",q:"Część przewodząca układu oddechowego jest ukształtowana około:",o:["16. tc","7. tc","27. tc","36. tc","2. rż"],e:"Drzewo oskrzelowe zewnątrzpęcherzykowe kończy rozwój w 16. tc, pod koniec fazy rzekomogruczołowej."},
 {m:"F",t:"rozwoj",q:"Alweolaryzacja zachodzi w fazie:",o:["pęcherzykowej","kanalikowej","woreczków końcowych","rzekomogruczołowej","embrionalnej"],e:"Faza pęcherzykowa (od ok. 37. tc / po urodzeniu do 2. rż): dojrzewanie części obwodowej i zwielokrotnienie liczby pęcherzyków."},
 {m:"F",t:"rozwoj",q:"Podział na oskrzela segmentarne następuje w:",o:["6. tygodniu","4. tygodniu","5. tygodniu","8. tygodniu","12. tygodniu"],e:"Faza embrionalna: oskrzela główne 4. tydz., płatowe 5. tydz., segmentarne 6. tydz."},
@@ -1667,7 +1682,7 @@ const Q=[
 {m:"F",t:"budowa",q:"Liczba gruczołów śluzowych u noworodka wynosi nawet:",o:["15/mm²","1/mm²","5/mm²","30/mm²","50/mm²"],e:"U dorosłego ok. 1/mm², u noworodka do 15/mm², stąd skłonność do nadprodukcji śluzu i obturacji."},
 {m:"F",t:"budowa",q:"Powierzchnia wymiany gazowej w 8. roku życia wynosi ok.:",o:["30 m²","3 m²","10 m²","70 m²","100 m²"],e:"Niemowlę ok. 3 m², 8. rż ok. 30 m², dorosły ok. 70 m²."},
 {m:"F",t:"budowa",q:"Do którego roku życia drogi przewodzące są nieproporcjonalnie wąskie względem wymiarów ciała?",o:["5.","2.","8.","12.","18."],e:"Do 5. rż. W pierwszych latach szybciej rośnie strefa wymiany gazowej niż przewodząca."},
-{m:"F",t:"budowa",q:"Według notatek pory Kohna pojawiają się około:",o:["6. rż","1. rż","3. rż","8. rż","12. rż"],e:"Pory Kohna ok. 6. rż, kanały Lamberta ok. 8. rż. Wcześniej brakuje wentylacji obocznej."},
+{m:"F",t:"budowa",q:"Według notatek pory Kohna pojawiają się około:",o:["6. rż","1. rż","3. rż","8. rż","12. rż"],e:"Pory Kohna ok. 6. rż, kanały Lamberta ok. 8. rż według wykładu; inne źródła podają ok. 3.–4. rż. Wcześniej brakuje wentylacji obocznej."},
 {m:"F",t:"budowa",q:"Głównym miernikiem zaburzeń oddechowych u małego dziecka jest:",o:["liczba oddechów na minutę","saturacja","FEV1","gazometria włośniczkowa","RTG klatki piersiowej"],e:"Dziecko zwiększa wentylację głównie przez przyspieszenie oddechu. W notatkach z symptomatologii: u małych dzieci liczba oddechów jest bardziej wiarygodna niż saturacja."},
 {m:"F",t:"budowa",q:"Która cecha NIE należy do odrębności układu oddechowego dziecka, które sprzyjają obturacji?",o:["Liczne pory Kohna i kanały Lamberta","Duża liczba gruczołów śluzowych","Ściana oskrzelików bez chrząstki, z przewagą włókien mięśniowych","Szkielet chrzęstny podatny na odkształcenia","Wąskie drogi przewodzące"],e:"U małych dzieci wentylacji obocznej brakuje (pory Kohna ok. 6. rż, kanały Lamberta ok. 8. rż). Pozostałe cechy sprzyjają obturacji."},
 {m:"F",t:"budowa",q:"Rola surfaktantu polega na:",o:["zmniejszaniu napięcia powierzchniowego i zapobieganiu zapadaniu pęcherzyków przy wydechu","zwiększaniu napięcia powierzchniowego pęcherzyków","transporcie tlenu przez barierę pęcherzykowo-włośniczkową","produkcji płynu płucnego u płodu","niszczeniu bakterii w pęcherzykach"],e:"Surfaktant ułatwia rozprężenie płuc przy wdechu i chroni pęcherzyki przed zapadaniem przy wydechu."},
@@ -1678,7 +1693,7 @@ const Q=[
 {m:"F",t:"spiro",q:"Zaburzenia obturacyjne w spirometrii to:",o:["obniżenie FEV1 i wskaźnika FEV1/FVC","obniżenie FVC i TLC przy prawidłowym FEV1/FVC","obniżenie FEV1, FVC i TLC","izolowane obniżenie TLCO","podwyższenie FEV1/FVC"],e:"Obturacja: ↓FEV1 i ↓FEV1/FVC (<5. centyla lub <75% należnej). Restrykcja: ↓FVC i TLC. Zaburzenia mieszane: ↓FEV1, FVC i TLC."},
 {m:"F",t:"spiro",q:"FEV1 wynosi 55% wartości należnej. Stopień obturacji to:",o:["umiarkowanie ciężki","lekki","umiarkowany","ciężki","bardzo ciężki"],e:"Lekki >70%, umiarkowany 60–69%, umiarkowanie ciężki 50–59%, ciężki 35–49%, bardzo ciężki <35%."},
 {m:"F",t:"spiro",q:"FEV1 wynosi 40% wartości należnej. Stopień obturacji to:",o:["ciężki","umiarkowanie ciężki","umiarkowany","bardzo ciężki","lekki"],e:"Ciężki to 35–49%."},
-{m:"F",t:"spiro",q:"Znamienną odwracalność skurczu oskrzeli w próbie rozkurczowej stwierdza się, gdy FEV1 wzrośnie o:",o:["≥12% i ≥0,2 l","≥5% i ≥0,1 l","≥20%","≥15% i ≥0,5 l","≥8%"],e:"Wzrost FEV1 i/lub FVC o co najmniej 12% i 0,2 l po β2-mimetyku."},
+{m:"F",t:"spiro",q:"Znamienną odwracalność skurczu oskrzeli w próbie rozkurczowej stwierdza się, gdy FEV1 wzrośnie o:",o:["≥12% i ≥0,2 l","≥5% i ≥0,1 l","≥20%","≥15% i ≥0,5 l","≥8%"],e:"Wzrost FEV1 i/lub FVC o co najmniej 12% i 0,2 l po β2-mimetyku (ERS/ATS 2005). Nowsze zalecenia ERS/ATS: wzrost o ponad 10% wartości należnej."},
 {m:"F",t:"spiro",q:"FEV1 przed podaniem salbutamolu 1,50 l, po podaniu 1,74 l. Wynik próby:",o:["dodatnia: wzrost o 16% i 0,24 l","ujemna: wzrost poniżej 12%","ujemna: wzrost poniżej 0,2 l","dodatnia: wzrost o 24%","nie da się ocenić bez pomiaru TLC"],e:"(1,74 − 1,50) / 1,50 = 0,16, czyli 16%; różnica 0,24 l. Oba progi (12% i 0,2 l) przekroczone."},
 {m:"F",t:"spiro",q:"Test prowokacji oskrzeli przerywa się, gdy:",o:["FEV1 spadnie o 20% względem wartości po rozpuszczalniku","FEV1 wzrośnie o 12%","FEV1 spadnie o 10%","FEV1/FVC spadnie poniżej 90%","pacjent zakaszle po raz pierwszy"],e:"Spadek FEV1 o 20% przerywa test. Spadek <20% oznacza próbę ujemną."},
 {m:"F",t:"spiro",q:"Który z wymienionych NIE jest farmakologicznym czynnikiem prowokującym w teście nadreaktywności oskrzeli?",o:["salbutamol","metacholina","histamina","mannitol","monofosforan adenozyny"],e:"Salbutamol to β2-mimetyk używany w próbie rozkurczowej."},
@@ -1694,7 +1709,7 @@ const Q=[
 {m:"S",t:"kaszel",q:"Do pozaoddechowych lokalizacji receptorów kaszlu wymienionych w notatkach NIE należy:",o:["trzustka","przewód słuchowy zewnętrzny","przepona","osierdzie","żołądek"],e:"Receptory kaszlu poza układem oddechowym: przewód słuchowy zewnętrzny, przepona, osierdzie, żołądek."},
 {m:"S",t:"kaszel",q:"Cechą kaszlu nawykowego jest:",o:["ustępowanie w nocy i po odwróceniu uwagi","nasilenie w nocy","gorączka i podwyższone CRP","dobra odpowiedź na leki przeciwkaszlowe","napady zakończone „pianiem”"],e:"Kaszel nawykowy nie reaguje na leczenie, nasila się przy świadkach i ustępuje w nocy."},
 {m:"S",t:"kaszel",q:"8-letni chłopiec od 2 miesięcy głośno kaszle („jak becząca koza”). Kaszel nasila się przy rodzicach, w nocy go nie ma, badania są prawidłowe, chłopiec czuje się dobrze. Najbardziej prawdopodobne rozpoznanie:",o:["kaszel nawykowy","krztusiec","astma oskrzelowa","zespół kaszlu z górnych dróg oddechowych","ciało obce w oskrzelu"],e:"Typowe cechy kaszlu nawykowego. Krztusiec daje kaszel ciągły, także w nocy. Kaszel nawykowy rozpoznaje się po wykluczeniu przyczyn organicznych."},
-{m:"S",t:"kaszel",q:"Kaszel poinfekcyjny utrzymuje się zwykle do:",o:["8–12 tygodni","2 tygodni","4 tygodni","6 miesięcy","roku"],e:"Kaszel jest suchy, słabnie stopniowo; wywołuje go nadreaktywność oskrzeli po uszkodzeniu nabłonka."},
+{m:"S",t:"kaszel",q:"Kaszel poinfekcyjny utrzymuje się zwykle do:",o:["8–12 tygodni","2 tygodni","4 tygodni","6 miesięcy","roku"],e:"Wersja z notatek. Kaszel jest suchy, słabnie stopniowo; wywołuje go nadreaktywność oskrzeli po uszkodzeniu nabłonka. Inne źródła podają zwykle 3–8 tyg., a 8–12 tyg. głównie po krztuścu."},
 {m:"S",t:"kaszel",q:"Kaszel pojawiający się w trakcie karmienia noworodka sugeruje przede wszystkim:",o:["przetokę tchawiczo-przełykową","laryngomalację","zapalenie oskrzelików","mukowiscydozę","kaszel nawykowy"],e:"Kaszel przy karmieniu to objaw alarmowy wady wrodzonej. Wśród przyczyn kaszlu przy karmieniu wymienia się też refluks."},
 {m:"S",t:"kaszel",q:"Objaw „kostki brukowej” i odchrząkiwanie wskazują na:",o:["zespół kaszlu z górnych dróg oddechowych","kaszel nawykowy","astmę","krztusiec","przetokę tchawiczo-przełykową"],e:"Nadprodukcja wydzieliny w górnych drogach drażni receptory kaszlu: nieżyt nosa, zapalenie zatok, przerost migdałka gardłowego."},
 {m:"S",t:"kaszel",q:"Dziecko kaszle po zabawie z królikami. Należy pomyśleć o:",o:["Francisella tularensis","Chlamydia psittaci","gorączce Q","histoplazmozie","hantawirusach"],e:"Króliki: tularemia. Ptaki: C. psittaci; gołębie: histoplazmoza; gryzonie: Yersinia pestis, hantawirusy; owce i bydło: gorączka Q."},
@@ -1720,8 +1735,8 @@ const Q=[
 {m:"S",t:"dusznosc",q:"Najczęstszą przyczyną zapalenia oskrzelików jest:",o:["RSV","adenowirus","Mycoplasma pneumoniae","Streptococcus pneumoniae","Haemophilus influenzae"],e:"RSV odpowiada za 50–80% zachorowań."},
 {m:"S",t:"dusznosc",q:"U starszego dziecka z dusznością typowym objawem pracy dodatkowych mięśni oddechowych jest:",o:["pozycja siedząca lub stojąca z opartymi kończynami górnymi","rytmiczne poruszanie główką","postękiwanie","bezdech","sinica centralna"],e:"Rytmiczne poruszanie główką dotyczy małych dzieci (mięśnie mostkowo-obojczykowo-sutkowe)."},
 {m:"S",t:"bezdech",q:"U wcześniaka bezdechem nazywamy przerwę w oddychaniu:",o:[">20 s lub krótszą z bradykardią <80/min, sinicą centralną i/lub SpO₂ <85%",">10 s niezależnie od objawów",">15 s z bradykardią <100/min",">30 s z sinicą","każdą przerwę z SpO₂ <92%"],e:"Definicja z notatek: >20 s albo <20 s z bradykardią <80/min, sinicą centralną i/lub spadkiem saturacji <85%."},
-{m:"S",t:"bezdech",q:"Wcześniak urodzony w 30. tc ma 6 tygodni życia. Jego wiek skorygowany wynosi:",o:["36 tygodni","30 tygodni","6 tygodni","40 tygodni","24 tygodnie"],e:"30 tc + 6 tygodni życia = 36 tygodni wieku skorygowanego."},
-{m:"S",t:"bezdech",q:"Bezdechy wcześniacze z niedojrzałości ustępują zwykle do:",o:["36. tygodnia wieku skorygowanego","28. tygodnia wieku skorygowanego","1. roku życia","52. tygodnia wieku skorygowanego","6. miesiąca życia kalendarzowego"],e:"Zwykle do 36. tyg., najpóźniej do 43. tyg. wieku skorygowanego."},
+{m:"S",t:"bezdech",q:"Wcześniak urodzony w 30. tc ma 6 tygodni życia. Jego wiek skorygowany wynosi:",o:["36 tygodni","30 tygodni","6 tygodni","40 tygodni","24 tygodnie"],e:"30 tc + 6 tygodni życia = 36 tygodni. Notatki nazywają to wiekiem skorygowanym; ściśle jest to wiek postmenstruacyjny."},
+{m:"S",t:"bezdech",q:"Bezdechy wcześniacze z niedojrzałości ustępują zwykle do:",o:["36. tygodnia wieku skorygowanego","28. tygodnia wieku skorygowanego","1. roku życia","52. tygodnia wieku skorygowanego","6. miesiąca życia kalendarzowego"],e:"Zwykle do 36. tyg., najpóźniej do 43. tyg. (ściśle: wieku postmenstruacyjnego)."},
 {m:"S",t:"bezdech",q:"Najczęstszą przyczyną obturacyjnego bezdechu sennego u dzieci jest:",o:["przerost migdałka gardłowego i/lub migdałków podniebiennych","mukopolisacharydoza","otyłość","wady twarzoczaszki","niskie napięcie mięśniowe"],e:"Mukopolisacharydozy są przyczyną rzadką. Typowe objawy: chrapanie i spanie z otwartymi ustami."},
 {m:"S",t:"bezdech",q:"Badaniem diagnostycznym w obturacyjnym bezdechu sennym jest:",o:["polisomnografia","spirometria","TLCO","bronchoskopia","EEG"],e:"Badanie polisomnograficzne wykonuje się podczas snu."},
 {m:"S",t:"bezdech",q:"W leczeniu bezdechów z niedojrzałości stosuje się:",o:["cytrynian kofeiny","salbutamol","glikokortykosteroidy wziewne","adrenalinę wziewnie","morfinę"],e:"Leki pobudzające ośrodek oddechowy: cytrynian kofeiny, teofilina. Do tego stymulacja dotykowa, temperatura, płytka bezdechu, CPAP."},
@@ -1731,11 +1746,11 @@ const Q=[
 {m:"S",t:"inne",q:"Dziecko z krwiopluciem z prawego płuca należy ułożyć:",o:["na prawym boku","na lewym boku","na brzuchu","na plecach z uniesionymi nogami","w pozycji siedzącej z pochyleniem w lewo"],e:"Drenaż ułożeniowy: na chorym boku, żeby krew nie spływała do zdrowego płuca."},
 {m:"S",t:"inne",q:"Przykładem krwawienia rzekomego jest:",o:["niemowlę wypluwające krew połkniętą z podrażnionych brodawek matki","krwioplucie w mukowiscydozie","krwioplucie w ziarniniakowatości Wegenera","krwioplucie przy niewydolności krążenia","krwioplucie w DIC"],e:"Inne przykłady: krew z nosa spływająca po gardle, wymioty świeżą krwią."},
 {m:"S",t:"inne",q:"Najważniejszym krokiem w postępowaniu przy krwiopluciu jest:",o:["ustalenie źródła krwawienia","podanie kwasu traneksamowego","natychmiastowa intubacja","podanie antybiotyku","przetoczenie koncentratu krwinek"],e:"Trzeba odróżnić krwawienie prawdziwe od rzekomego."},
-{m:"S",t:"inne",q:"Ból w klatce piersiowej u dziecka najczęściej jest objawem chorób:",o:["układu krążenia","układu oddechowego","układu moczowego","układu pokarmowego","ośrodkowego układu nerwowego"],e:"Może też towarzyszyć zapaleniu płuc albo być bólem udzielonym, ale zwykle wiąże się z układem krążenia."},
+{m:"S",t:"inne",q:"Które stwierdzenie o bólu w klatce piersiowej u dziecka jest zgodne z notatkami?",o:["To objaw niecharakterystyczny; może być bólem udzielonym, np. z jamy brzusznej","Zawsze wskazuje na zapalenie płuc","Przeponę unerwiają czuciowo nerwy międzyżebrowe Th1–Th12","Nigdy nie towarzyszy zakażeniom układu moczowego","Wyklucza chorobę serca"],e:"Notatki dodają, że ból w klatce zwykle wiąże się z układem krążenia. W piśmiennictwie pediatrycznym przyczyny sercowe to jednak tylko kilka procent; najczęstsze są mięśniowo-szkieletowe i idiopatyczne. Przeponę unerwia nerw przeponowy (C3–C5)."},
 
 {m:"W",t:"wady",q:"Najczęstszą wadą wrodzoną układu oddechowego jest:",o:["laryngomalacja","przetoka przełykowo-tchawicza","wrodzona torbielowatość gruczolakowata","sekwestracja płuca","wrodzona rozedma płatowa"],e:"Laryngomalacja (wiotkość krtani), często z tracheomalacją."},
-{m:"W",t:"wady",q:"Stridor w laryngomalacji:",o:["jest wdechowy i wynika z zapadania się fałdów nalewkowo-nagłośniowych","jest wydechowy i wynika ze skurczu oskrzeli","pojawia się wyłącznie podczas snu","zawsze wymaga tracheostomii","świadczy o porażeniu strun głosowych"],e:"Fałdy nalewkowo-nagłośniowe i ściany tchawicy zapadają się w trakcie wdechu."},
-{m:"W",t:"wady",q:"Postępowanie w laryngomalacji u większości dzieci to:",o:["obserwacja, bo objawy ustępują z wiekiem","tracheostomia","operacja w 1. dobie życia","przewlekła sterydoterapia wziewna","operacja w pierwszych 24 h"],e:"Tracheostomia jest potrzebna bardzo rzadko."},
+{m:"W",t:"wady",q:"Stridor w laryngomalacji:",o:["jest wdechowy i wynika z zapadania się fałdów nalewkowo-nagłośniowych","jest wydechowy i wynika ze skurczu oskrzeli","pojawia się wyłącznie podczas snu","zawsze wymaga tracheostomii","świadczy o porażeniu strun głosowych"],e:"Struktury nadgłośniowe (fałdy nalewkowo-nagłośniowe, chrząstki nalewkowate, nagłośnia) zapadają się w trakcie wdechu."},
+{m:"W",t:"wady",q:"Postępowanie w laryngomalacji u większości dzieci to:",o:["obserwacja, bo objawy ustępują z wiekiem","tracheostomia","operacja w 1. dobie życia","przewlekła sterydoterapia wziewna","operacja w pierwszych 24 h"],e:"Tracheostomia jest potrzebna bardzo rzadko; w ciężkich postaciach leczeniem z wyboru jest supraglotoplastyka."},
 {m:"W",t:"wady",q:"Do wad wymagających pilnej interwencji chirurgicznej NIE należy:",o:["sekwestracja płuca","zarośnięcie nozdrzy tylnych","wrodzona rozedma płatowa","przetoka przełykowo-tchawicza","wrodzona przepuklina przeponowa"],e:"Sekwestrację też się resekuje, ale nie pilnie. Pilne: zarośnięcie nozdrzy tylnych, rozedma płatowa, przetoka, przepuklina przeponowa."},
 {m:"W",t:"wady",q:"Wrodzona rozedma płatowa najczęściej dotyczy:",o:["płata górnego lewego płuca","płata dolnego prawego płuca","płata środkowego","płata dolnego lewego płuca","obu płuc jednocześnie"],e:"Ok. 42% przypadków."},
 {m:"W",t:"wady",q:"Noworodek z narastającą dusznością. Nad lewym górnym polem nadmiernie jawny odgłos opukowy i poszerzone międzyżebrza. Najbardziej prawdopodobne rozpoznanie:",o:["wrodzona rozedma płatowa","hipoplazja płuca","sekwestracja płuca","laryngomalacja","torbiel oskrzelopochodna"],e:"Typowe objawy i lokalizacja. Różnicuj z odmą prężną i ciałem obcym."},
@@ -1761,11 +1776,11 @@ const Q=[
 {m:"I",t:"oskrzela",q:"Ostre bakteryjne zapalenie krtani, tchawicy i oskrzeli:",o:["jest rzadkie, ale zagraża życiu (S. aureus, Hib, paciorkowce)","jest najczęstszą postacią zapalenia oskrzeli","przebiega bez gorączki","leczy się ambulatoryjnie salbutamolem","wywołuje je głównie RSV"],e:"Gorączka i postępujące zwężenie dróg oddechowych grożą niewydolnością oddechową."},
 {m:"I",t:"oskrzela",q:"Które zmiany osłuchowe przemawiają za zapaleniem płuc, a nie za zapaleniem oskrzeli?",o:["jednostronne, ogniskowe trzeszczenia","symetryczne furczenia nad całymi polami płucnymi","rzężenia drobno- i średniobańkowe obustronnie","świsty wydechowe obustronnie","furczenia przewiedzione z górnych dróg"],e:"Symetryczne zmiany: zapalenie oskrzeli. Jednostronne: zapalenie płuc."},
 {m:"I",t:"oskrzela",q:"Gorączka w ostrym zapaleniu oskrzeli u dziecka:",o:["zwykle nie przekracza 38°C lub jej brak","zwykle przekracza 39,5°C","trwa zawsze ponad 5 dni","jest wskazaniem do antybiotyku","jest objawem obowiązkowym"],e:"Wyższa gorączka częściej towarzyszy zapaleniu płuc."},
-{m:"I",t:"oskrzela",q:"Lekiem przeciwgorączkowym, który można stosować od urodzenia, jest:",o:["paracetamol","ibuprofen","kwas acetylosalicylowy","metamizol","naproksen"],e:"Ibuprofen od ukończenia 3. mż."},
+{m:"I",t:"oskrzela",q:"Lekiem przeciwgorączkowym, który można stosować od urodzenia, jest:",o:["paracetamol","ibuprofen","kwas acetylosalicylowy","metamizol","naproksen"],e:"Ibuprofen od ukończenia 3. mż (i masy co najmniej 5 kg)."},
 {m:"I",t:"oskrzela",q:"W leczeniu ostrego zapalenia oskrzeli leki przeciwkaszlowe:",o:["nie mają udowodnionej skuteczności","są lekami pierwszego wyboru","stosuje się zawsze u niemowląt","zastępują nawodnienie","skracają chorobę o tydzień"],e:"Dziecko ma kaszleć i odkrztuszać wydzielinę."},
 {m:"I",t:"oskrzela",q:"Antybiotykoterapię w zapaleniu oskrzeli rozważa się przy kaszlu trwającym:",o:["ponad 14 dni","ponad 3 dni","ponad 7 dni","tylko ponad 3 miesiące","nigdy"],e:"Zwłaszcza przy podejrzeniu zakażenia atypowego lub krztuśca (makrolid)."},
 {m:"I",t:"oskrzela",q:"Antybiotykiem stosowanym w zapaleniu ucha środkowego jest:",o:["amoksycylina","wankomycyna","kloksacylina","klindamycyna","gentamycyna"],e:"Amoksycylina lub amoksycylina z kwasem klawulanowym."},
-{m:"I",t:"oskrzela",q:"Szczepienie przeciw grypie u dzieci:",o:["można wykonać od 6. mż; do 8. rż podaje się 2 dawki","można wykonać od urodzenia","podaje się jednorazowo w każdym wieku","jest przeciwwskazane do 2. rż","wymaga 3 dawek do 18. rż"],e:"Od 6. mż, do 8. rż 2 dawki, potem jedna."},
+{m:"I",t:"oskrzela",q:"Szczepienie przeciw grypie u dzieci:",o:["można wykonać od 6. mż; dzieci do 8. rż szczepione pierwszy raz dostają 2 dawki","można wykonać od urodzenia","podaje się jednorazowo w każdym wieku","jest przeciwwskazane do 2. rż","wymaga 3 dawek do 18. rż"],e:"Od 6. mż. Dzieci do 8. rż szczepione pierwszy raz w życiu dostają 2 dawki w odstępie co najmniej 4 tygodni, w kolejnych sezonach 1 dawkę."},
 {m:"I",t:"oskrzela",q:"Nawracające zapalenie oskrzeli to co najmniej:",o:["4 epizody w roku","2 epizody w roku","6 epizodów w roku","3 epizody w ciągu 2 lat","10 epizodów w ciągu życia"],e:"Nie myl z kaszlem nawracającym (≥2 epizody >14 dni w roku)."},
 {m:"I",t:"oskrzela",q:"Pełna regeneracja nabłonka dróg oddechowych trwa:",o:["od 6 tygodni do 3 miesięcy","3–5 dni","2 tygodnie","rok","nabłonek nie regeneruje się"],e:"Dlatego częste zapalenia mogą trwale uszkodzić transport śluzowo-rzęskowy."},
 {m:"I",t:"oskrzela",q:"Nebulizacja 0,9% NaCl służy głównie do:",o:["nawilżenia dróg oddechowych przy wodnistym katarze","uzyskania efektu wykrztuśnego","rozkurczu oskrzeli","leczenia zapalenia płuc","przyspieszenia czynności serca"],e:"Efekt wykrztuśny dają roztwory hipertoniczne: 1,5%, 2,2%, 3%."},
@@ -1783,9 +1798,9 @@ const Q=[
 {m:"I",t:"oskrzeliki",q:"Test antygenowy „5 w 1” NIE wykrywa:",o:["krztuśca","RSV","grypy A i B","adenowirusa","Mycoplasmy"],e:"Test 5 w 1: COVID, RSV, adenowirus, Mycoplasma, grypa A i B. Krztusiec obejmuje panel PCR."},
 {m:"I",t:"oskrzeliki",q:"Dziecko z zapaleniem oskrzeli kaszle od 16 dni, podejrzewasz krztusiec. Zgodnie z rekomendacją 5 możesz podać:",o:["makrolid","amoksycylinę z klawulanianem przez 3 dni","ceftriakson domięśniowo","salbutamol","nic, antybiotyk nigdy nie jest wskazany"],e:"Kaszel >14 dni: makrolid, zwłaszcza przy podejrzeniu krztuśca."},
 {m:"I",t:"oskrzeliki",q:"Przewlekające się bakteryjne zapalenie oskrzeli rozpoznajemy u małego dziecka z kaszlem produktywnym trwającym ponad:",o:["4 tygodnie bez tendencji do ustępowania","3 dni","14 dni","3 miesiące w dwóch kolejnych latach","rok"],e:"Leczenie: amoksycylina z klawulanianem lub makrolid przez 10–14 dni."},
-{m:"I",t:"oskrzeliki",q:"Paliwizumab podaje się:",o:["domięśniowo co miesiąc w sezonie zakażeń","jednorazowo dożylnie","doustnie codziennie","w nebulizacji przy objawach","w trakcie choroby jako leczenie"],e:"To profilaktyka swoista dla grup ryzyka, nie leczenie."},
+{m:"I",t:"oskrzeliki",q:"Paliwizumab podaje się:",o:["domięśniowo co miesiąc w sezonie zakażeń","jednorazowo dożylnie","doustnie codziennie","w nebulizacji przy objawach","w trakcie choroby jako leczenie"],e:"To profilaktyka swoista dla grup ryzyka, nie leczenie. Dawka: 15 mg/kg, zwykle 3–5 dawek w sezonie."},
 {m:"I",t:"oskrzeliki",q:"Kryterium programu paliwizumabu spełnia dziecko:",o:["4-miesięczne, urodzone w 31. tc","3-miesięczne, urodzone w 34. tc z masą 2100 g","9-miesięczne, urodzone w 30. tc, bez BPD","14-miesięczne, urodzone w 26. tc, bez BPD i wady serca","8-miesięczne, urodzone w 36. tc"],e:"<6 mż i 29.–32. tc. Dziecko z 34. tc musiałoby ważyć ≤1500 g. Urodzone ≤28. tc kwalifikuje się do 1. rż, z BPD do 2. rż."},
-{m:"I",t:"oskrzeliki",q:"Abrysvo to:",o:["szczepionka przeciw RSV dla kobiet w ciąży","przeciwciało monoklonalne podawane niemowlętom co miesiąc","lek przeciwwirusowy w zapaleniu oskrzelików","szczepionka przeciw pneumokokom","szczepionka przeciw krztuścowi"],e:"Przeciwciała od matki chronią dziecko ok. 6 miesięcy; nie wyklucza to profilaktyki paliwizumabem."},
+{m:"I",t:"oskrzeliki",q:"Abrysvo to:",o:["szczepionka przeciw RSV dla kobiet w ciąży","przeciwciało monoklonalne podawane niemowlętom co miesiąc","lek przeciwwirusowy w zapaleniu oskrzelików","szczepionka przeciw pneumokokom","szczepionka przeciw krztuścowi"],e:"Przeciwciała od matki chronią dziecko ok. 6 miesięcy; nie wyklucza to profilaktyki paliwizumabem. Okno szczepienia: w notatkach 32.–36. tc (USA), w UE 24.–36. tc."},
 {m:"I",t:"oskrzeliki",q:"Czynnikiem ryzyka ciężkiego przebiegu zakażenia RSV jest:",o:["wiek poniżej 12 tygodni","karmienie piersią","wiek 3–5 lat","urodzenie w 39. tc","szczepienie matki w ciąży"],e:"Inne: wcześniactwo (<32 tc), istotna wada serca, przewlekła choroba płuc, niedobory odporności, choroby nerwowo-mięśniowe."},
 {m:"I",t:"pluca",q:"Rozpoznanie pozaszpitalnego zapalenia płuc u dziecka stawia się:",o:["na podstawie objawów klinicznych","wyłącznie na podstawie RTG","wyłącznie na podstawie CRP","na podstawie posiewu krwi","na podstawie USG płuc"],e:"Rekomendacja 1: RTG wskazane przy podejrzeniu powikłań."},
 {m:"I",t:"pluca",q:"Najczulszymi i najswoistszymi objawami zapalenia płuc u dzieci są:",o:["tachypnoe, gorączka >38°C i wciąganie międzyżebrzy","kaszel i katar","ból brzucha i wymioty","świsty wydechowe obustronnie","ból głowy i stan podgorączkowy"],e:"Osłuchowo: furczenia i trzeszczenia, zwłaszcza jednostronne."},
@@ -1807,32 +1822,33 @@ const Q=[
 {m:"I",t:"pluca",q:"Gronkowcowe zapalenie płuc wywołane szczepem metycylinoopornym leczy się:",o:["wankomycyną","kloksacyliną","amoksycyliną","cefuroksymem","makrolidem"],e:"Szczepy wrażliwe: kloksacylina, cefalosporyny I i II generacji."},
 {m:"I",t:"pluca",q:"Noworodek zachłysnął się. Postępowanie według notatek:",o:["hospitalizacja i badanie obrazowe płuc po 48 h","wypis do domu bez kontroli","natychmiastowa antybiotykoterapia ceftriaksonem","bronchoskopia w 1. dobie","spirometria po 48 h"],e:"Trzeba sprawdzić, czy treść nie dostała się do miąższu. Niezauważone zachłyśnięcie może dać przewlekły stan zapalny."},
 {m:"I",t:"pluca",q:"Chemioprofilaktykę zapalenia płuc stosuje się m.in. po kontakcie z:",o:["Haemophilus influenzae typu b","RSV","rhinowirusem","adenowirusem","Mycoplasma pneumoniae"],e:"Także przy zakażeniu matki S. agalactiae lub Chlamydia trachomatis."},
-{m:"I",t:"pluca",q:"Kolejność stadiów pneumokokowego zapalenia płuc to:",o:["nawał → zwątrobienie czerwone → zwątrobienie szare → zwątrobienie żółte i rozejście","zwątrobienie szare → nawał → zwątrobienie czerwone → rozejście","nawał → zwątrobienie szare → zwątrobienie czerwone → rozejście","zwątrobienie żółte → czerwone → szare → nawał","rozejście → nawał → zwątrobienie czerwone → szare"],e:"Niepowikłane zwykle ustępuje bez powikłań."}
+{m:"I",t:"pluca",q:"Kolejność stadiów pneumokokowego zapalenia płuc to:",o:["nawał → zwątrobienie czerwone → zwątrobienie szare → zwątrobienie żółte i rozejście","zwątrobienie szare → nawał → zwątrobienie czerwone → rozejście","nawał → zwątrobienie szare → zwątrobienie czerwone → rozejście","zwątrobienie żółte → czerwone → szare → nawał","rozejście → nawał → zwątrobienie czerwone → szare"],e:"Kolejność według notatek. Większość podręczników podaje: przekrwienie (nawał), zwątrobienie czerwone, zwątrobienie szare, rozejście."}
 ];
 
 /* Ściąga liczb: [moduł, wartość, opis] */
 const NUM=[
 ["F","do 7. tc","faza embrionalna"],["F","7.–16. tc","faza rzekomogruczołowa"],["F","17.–27. tc","faza kanalikowa"],["F","28.–36. tc","faza woreczków końcowych"],["F","37. tc – 2. rż","faza pęcherzykowa (alweolaryzacja)"],
-["F","4. / 5. / 6. tydz.","zawiązki oskrzeli głównych / płatowych / segmentarnych"],["F","16. tc","część przewodząca gotowa"],["F","22.–24. tc","surfaktant wykrywalny śladowo"],["F","28. tc","ciała lamelarne"],["F","3.–8. rż","budowa płuc jak u dorosłego"],
+["F","4. / 5. / 6. tydz.","zawiązki oskrzeli głównych / płatowych / segmentarnych"],["F","16. tc","część przewodząca gotowa"],["F","22.–24. tc","surfaktant wykrywalny śladowo"],["F","28. tc","ciała lamelarne (wg notatek; część podręczników: ok. 24. tc)"],["F","3.–8. rż","budowa płuc jak u dorosłego"],
 ["F","2–5 ml/kg/h","produkcja płynu płucnego u płodu"],["F","~30 ml/kg","płyn płucny u donoszonego noworodka"],["F","16. / 17. generacja","granica strefy przewodzącej i wymiany gazowej"],["F","17 generacji","strefa przewodząca (koniec fazy rzekomogruczołowej)"],["F","&lt;11. generacji","brak pierścieni chrzęstnych, tylko płytki"],
 ["F","~5000×","pole przekroju strefy oddechowej względem tchawicy"],["F","1 vs 15 /mm²","gruczoły śluzowe: dorosły vs noworodek"],["F","90%","powierzchni pęcherzyka pokrywają pneumocyty I"],["F","3 → 30 → 70 m²","powierzchnia wymiany: niemowlę, 8. rż, dorosły"],["F","25 → 300 mln","liczba pęcherzyków: po urodzeniu, 8. rż"],
-["F","do 5. rż","drogi przewodzące nieproporcjonalnie wąskie"],["F","6. rż / 8. rż","pory Kohna / kanały Lamberta"],["F","1–12 µm","średnica porów Kohna"],["F","od 6. rż","spirometria"],["F","≥2 pomiary","spirometria; wynik = największa wartość"],
-["F","&lt;75%","FEV1/FVC w obturacji (lub &lt;5. centyla)"],["F","&lt;80%","FVC i TLC w restrykcji (lub &lt;5. centyla)"],["F","&gt;70 / 60–69 / 50–59 / 35–49 / &lt;35%","FEV1: lekka / umiarkowana / umiarkowanie ciężka / ciężka / bardzo ciężka obturacja"],["F","≥12% i ≥0,2 l","dodatnia próba rozkurczowa"],["F","−20% FEV1","przerwanie testu prowokacji"],
+["F","do 5. rż","drogi przewodzące nieproporcjonalnie wąskie"],["F","6. rż / 8. rż","pory Kohna / kanały Lamberta (wg wykładu; inne źródła: ok. 3.–4. rż)"],["F","1–12 µm","średnica porów Kohna"],["F","od 6. rż","spirometria"],["F","≥2 pomiary","spirometria; wynik = największa wartość"],
+["F","&lt;75%","FEV1/FVC w obturacji (lub &lt;5. centyla)"],["F","&lt;80%","FVC i TLC w restrykcji (lub &lt;5. centyla)"],["F","&gt;70 / 60–69 / 50–59 / 35–49 / &lt;35%","FEV1: lekka / umiarkowana / umiarkowanie ciężka / ciężka / bardzo ciężka obturacja"],["F","≥12% i ≥0,2 l","dodatnia próba rozkurczowa (ERS/ATS 2005; nowsze: >10% wartości należnej)"],["F","−20% FEV1","przerwanie testu prowokacji"],
 ["F","10 s","zatrzymanie oddechu w badaniu TLCO"],["F","10% He / 100% O₂","rozcieńczanie helu / wypłukiwanie azotu"],
-["S","do 2–4 tyg.","kaszel ostry"],["S","&gt;4 tyg.","kaszel przewlekły"],["S","≥2×/rok, &gt;14 dni","kaszel nawracający (bez ostrej infekcji)"],["S","8–12 tyg.","kaszel poinfekcyjny (też nadreaktywność po krztuścu)"],
+["S","do 2–4 tyg.","kaszel ostry"],["S","&gt;4 tyg.","kaszel przewlekły"],["S","≥2×/rok, &gt;14 dni","kaszel nawracający (bez ostrej infekcji)"],["S","8–12 tyg.","kaszel poinfekcyjny wg notatek (inne źródła 3–8 tyg.; 8–12 tyg. po krztuścu)"],
 ["S","&gt;60/min","tachypnoe &lt;2 mż"],["S","&gt;50/min","tachypnoe 2–12 mż"],["S","&gt;40/min","tachypnoe 1–5 lat"],["S","&gt;30/min","tachypnoe &gt;5 lat"],["S","SpO₂ &lt;92%","stan patologiczny przy duszności"],
-["S","&gt;20 s","bezdech u wcześniaka"],["S","&lt;80/min · SpO₂ &lt;85%","bezdech &lt;20 s, ale z bradykardią, sinicą lub desaturacją"],["S","36. (maks. 43.) tydz.","ustępowanie bezdechów wcześniaczych (wiek skorygowany)"],["S","30 tc + 6 tyg. = 36","przykład wieku skorygowanego"],["S","Th1–Th12 · C3–C5","unerwienie ściany klatki · przepony"],
+["S","&gt;20 s","bezdech u wcześniaka"],["S","&lt;80/min · SpO₂ &lt;85%","bezdech &lt;20 s, ale z bradykardią, sinicą lub desaturacją"],["S","36. (maks. 43.) tydz.","ustępowanie bezdechów wcześniaczych (wiek postmenstruacyjny; w notatkach „skorygowany”)"],["S","30 tc + 6 tyg. = 36","przykład wieku skorygowanego"],["S","Th1–Th12 · C3–C5","unerwienie ściany klatki · przepony"],
 ["W","0,1–3,9%","udział wad oddechowych wśród wszystkich wad wrodzonych"],["W","2. miejsce","po wadach serca wśród wadowych przyczyn zgonów noworodków"],["W","42%","rozedma płatowa w płacie górnym lewym"],["W","5 typów","wrodzona torbielowatość gruczolakowata"],["W","&gt;2 cm","torbiele w typie 1"],["W","24 h","operacja przetoki przy niedrożnym przełyku"],["W","2×","większa śmiertelność przy hipoplazji prawego płuca"],
-["I","kilka dni – 3 tyg.","kaszel w ostrym zapaleniu oskrzeli"],["I","90%","wirusowa etiologia ostrego zapalenia oskrzeli"],["I","≤38°C","gorączka w zapaleniu oskrzeli"],["I","od urodzenia / &gt;3 mż","paracetamol / ibuprofen"],["I","0,9% vs 1,5 / 2,2 / 3%","NaCl: nawilżanie vs efekt wykrztuśny"],
-["I","&gt;14 dni","kaszel: rozważ antybiotyk (makrolid przy krztuścu)"],["I","&gt;4 tyg.","kaszel produktywny: przewlekające się bakteryjne zapalenie oskrzeli"],["I","10–14 dni","amoksycylina z klawulanianem lub makrolid w przewlekającym się zapaleniu"],["I","od 6. mż · 2 dawki do 8. rż","szczepienie przeciw grypie"],
+["I","kilka dni – 3 tyg.","kaszel w ostrym zapaleniu oskrzeli"],["I","90%","wirusowa etiologia ostrego zapalenia oskrzeli"],["I","≤38°C","gorączka w zapaleniu oskrzeli"],["I","od urodzenia / od 3. mż","paracetamol / ibuprofen (ibuprofen także od 5 kg)"],["I","0,9% vs 1,5 / 2,2 / 3%","NaCl: nawilżanie vs efekt wykrztuśny"],
+["I","&gt;14 dni","kaszel: rozważ antybiotyk (makrolid przy krztuścu)"],["I","&gt;4 tyg.","kaszel produktywny: przewlekające się bakteryjne zapalenie oskrzeli"],["I","10–14 dni","amoksycylina z klawulanianem lub makrolid w przewlekającym się zapaleniu"],["I","od 6. mż · 2 dawki do 8. rż","szczepienie przeciw grypie (2 dawki tylko przy pierwszym szczepieniu)"],
 ["I","≥4/rok","nawracające zapalenie oskrzeli"],["I","6 tyg. – 3 mies.","regeneracja nabłonka"],["I","&lt;2. rż","zapalenie oskrzelików"],["I","50–80%","udział RSV w zapaleniu oskrzelików"],["I","&gt;90%","młodszych dzieci przechodzi zakażenie RSV"],["I","2–8 dni (4–6)","wylęganie RSV"],
 ["I","4.–5. doba","pogorszenie w zapaleniu oskrzelików"],["I","~12 dni","czas trwania zapalenia oskrzelików"],["I","do 38,5°C","gorączka w prodromie zapalenia oskrzelików"],["I","&gt;70/min","pilna hospitalizacja (bronchiolitis)"],["I","&gt;60/min","rozważ hospitalizację (bronchiolitis)"],["I","50–75%","przyjmowanych płynów: rozważ hospitalizację"],
 ["I","≤90% / 90–92%","SpO₂: tlen zalecany / tlen może pomóc"],["I","1,5% / 3%","NaCl w nebulizacji w szpitalu: młodsze / starsze dzieci"],["I","&lt;2 s","prawidłowy powrót kapilarny"],["I","23 patogeny","panel PCR z nosogardła"],
 ["I","&lt;6 mż + 29–32 tc","paliwizumab"],["I","&lt;6 mż + ≤35 tc + ≤1500 g","paliwizumab"],["I","&lt;1 rż + ≤28 tc","paliwizumab"],["I","&lt;2 rż + BPD lub wada serca","paliwizumab (wada: + niewydolność, nadciśnienie płucne lub SaO₂ &lt;90%)"],
-["I","32.–36. tc · ~6 mies.","Abrysvo: szczepienie ciężarnej · czas ochrony dziecka"],["I","&lt;12 tyg. · &lt;32 tc","czynniki ryzyka ciężkiego RSV"],["I","≥6 mies.","karmienie piersią w profilaktyce"],
+["I","32.–36. tc (UE: 24.–36.) · ~6 mies.","Abrysvo: szczepienie ciężarnej (notatki/USA; ChPL w UE) · czas ochrony dziecka"],["I","&lt;12 tyg. · &lt;32 tc","czynniki ryzyka ciężkiego RSV"],["I","≥6 mies.","karmienie piersią w profilaktyce"],
 ["I","&gt;38°C","gorączka jako objaw zapalenia płuc (rek. 1)"],["I","&lt;6 mż · SpO₂ &lt;92%","hospitalizacja w zapaleniu płuc"],["I","48 h","obrazowanie po zachłyśnięciu noworodka"],["I","48–72 h","RTG w trakcie leczenia przy braku poprawy"],["I","4–12 tyg.","RTG kontrolne przy nawrotach lub niejasnych zmianach"],["I","&gt;24 h, &lt;5 lat","gorączka z leukocytozą: RTG przy rozpoznaniu"],["I","do 20. dnia","noworodki w tabeli etiologii (GBS, Enterobacteriaceae, CMV, Listeria)"],
 ["I","75–100 (100–150) mg/kg/d","cefuroksym co 8 h (3 tyg.–3 mies.)"],["I","100 mg/kg/d","amoksycylina z klawulanianem iv (3 tyg.–3 mies.); kloksacylina co 6 h"],["I","75–90 mg/kg/d, 3 dawki","amoksycylina p.o."],["I","5 dni / 7–10 dni","leczenie łagodnego / cięższego zapalenia płuc"],
-["I","100–200 mg/kg/d, 4 dawki","amoksycylina iv &lt;40 kg (maks. 4 g/d); &gt;40 kg 1–2 g co 6 h"],["I","50–100 mg/kg 1×/d","ceftriakson &lt;40 kg; &gt;40 kg 1–2 g (maks. 4 g/d)"],["I","50–180 mg/kg/d","cefotaksym &lt;40 kg co 6–8 h; &gt;40 kg 0,5–1 g co 8 h"]
+["I","100–200 mg/kg/d, 4 dawki","amoksycylina iv &lt;40 kg (maks. 4 g/d); &gt;40 kg 1–2 g co 6 h"],["I","50–100 mg/kg 1×/d","ceftriakson &lt;40 kg; &gt;40 kg 1–2 g (maks. 4 g/d)"],["I","50–180 mg/kg/d","cefotaksym &lt;40 kg co 6–8 h; &gt;40 kg 0,5–1 g co 8 h"],
+["I","15 mg/kg i.m.","paliwizumab co miesiąc w sezonie RSV (zwykle 3–5 dawek)"]
 ];
 
 
@@ -1851,7 +1867,7 @@ const TOPICS={
 "k-s-dusznosc":{q:"S:dusznosc",c:["60 · 50 · 40 · 30","oddechy > saturacja","SpO₂ <92% = patologia","wdech górne, wydech dolne"]},
 "k-s-swist":{q:"S:dusznosc",c:["stridor: wdech, bez stetoskopu","wheezing: wydech, stetoskop","oskrzeliki → RSV"]},
 "k-s-bezdech":{q:"S:bezdech",c:[">20 s lub HR <80","ustępuje do 36. tyg. skoryg.","OBS: migdałki → polisomnografia","kofeina"]},
-"k-s-bol":{q:"S:inne",c:["Th1–Th12 · C3–C5","zwykle układ krążenia"]},
+"k-s-bol":{q:"S:inne",c:["Th1–Th12 · C3–C5","objaw niecharakterystyczny"]},
 "k-s-krwioplucie":{q:"S:inne",c:["połóż na chorym boku","najpierw źródło krwawienia","krwawienie rzekome"]},
 "k-w-ogolne":{q:"W:wady",c:["0,1–3,9% wad","2. po wadach serca","hipoplazja w 3 fazach"]},
 "k-w-laryngo":{q:"W:wady",c:["najczęstsza wada","stridor wdechowy","zwykle bez leczenia"]},
@@ -2328,7 +2344,7 @@ W.fev1=el=>{
 /* 5. próba rozkurczowa */
 W.bd=el=>{
   el.innerHTML='<div class="wg" data-m="F">'+wgHead("F","Kalkulator","Próba rozkurczowa: czy jest odwracalność?")+'<div class="fields"><label>FEV1 przed lekiem (l)<input type="number" step="0.01" min="0.2" max="6" value="1.50" class="bd-a"></label><label>FEV1 po β2-mimetyku (l)<input type="number" step="0.01" min="0.2" max="6" value="1.74" class="bd-b"></label></div><div class="out bd-out"></div></div>';
-  const upd=()=>{const a=parseFloat($(".bd-a",el).value),b=parseFloat($(".bd-b",el).value),o=$(".bd-out",el);if(!(a>0&&b>0)){o.className="out no bd-out";o.textContent="Wpisz obie wartości.";return;}const d=b-a,p=d/a*100,ok=p>=12&&d>=.2;o.className="out "+(ok?"ok":"no")+" bd-out";o.innerHTML='<b class="h">'+(ok?"Próba dodatnia: znamienna odwracalność":"Próba ujemna")+'</b><span>Zmiana: '+(d>=0?"+":"")+fmtN(d,2)+' l, czyli '+(p>=0?"+":"")+fmtN(p,1)+'%. Próg: co najmniej 12% <b>i</b> 0,2 l.'+(!ok&&p>=12?" Procent wystarczy, ale brakuje 0,2 l.":"")+(!ok&&d>=.2&&p<12?" Litry wystarczą, ale brakuje 12%.":"")+'</span>';};
+  const upd=()=>{const a=parseFloat($(".bd-a",el).value),b=parseFloat($(".bd-b",el).value),o=$(".bd-out",el);if(!(a>0&&b>0)){o.className="out no bd-out";o.textContent="Wpisz obie wartości.";return;}const d=b-a,p=d/a*100,ok=p>=12&&d>=.2;o.className="out "+(ok?"ok":"no")+" bd-out";o.innerHTML='<b class="h">'+(ok?"Próba dodatnia: znamienna odwracalność":"Próba ujemna")+'</b><span>Zmiana: '+(d>=0?"+":"")+fmtN(d,2)+' l, czyli '+(p>=0?"+":"")+fmtN(p,1)+'%. Próg: co najmniej 12% <b>i</b> 0,2 l (ERS/ATS 2005).'+(!ok&&p>=12?" Procent wystarczy, ale brakuje 0,2 l.":"")+(!ok&&d>=.2&&p<12?" Litry wystarczą, ale brakuje 12%.":"")+'</span>';};
   $$("input",el).forEach(i=>i.addEventListener("input",upd));upd();
 };
 
@@ -2339,7 +2355,7 @@ W.cough=el=>{
     const w=+r.value,wet=$(".cg-wet",el).checked,post=$(".cg-post",el).checked;
     $(".cg-v",el).textContent=w===0?"kilka dni":fmtN(w,w%1?1:0)+" "+plural(Math.ceil(w),"tydzień","tygodnie","tygodni");$(".cg-mk",el).style.left="calc("+(w/16*100)+"% - 2px)";
     const cls=w<=2?"ostry":w<=4?"ostry (granica 2–4 tyg.)":"przewlekły";const tips=[];
-    if(w>=2)tips.push("trwa ≥14 dni: rozważ antybiotyk, przy podejrzeniu krztuśca makrolid");
+    if(w>2)tips.push("ponad 14 dni (np. w zapaleniu oskrzeli): rozważ antybiotyk, przy podejrzeniu krztuśca makrolid");
     if(wet&&w>4)tips.push("mokry >4 tyg. bez poprawy: przewlekające się bakteryjne zapalenie oskrzeli, amoksycylina z klawulanianem lub makrolid przez 10–14 dni");
     if(!wet&&post&&w>2&&w<=12)tips.push("suchy, po infekcji, słabnie: pasuje do kaszlu poinfekcyjnego (do 8–12 tyg.)");
     if(w>4)tips.push("szukaj przyczyny według wieku; długo trwający kaszel to wskazanie do RTG klatki");
@@ -2362,13 +2378,13 @@ W.tachy=el=>{
 
 /* 8. wiek skorygowany */
 W.corr=el=>{
-  el.innerHTML='<div class="wg" data-m="S">'+wgHead("S","Kalkulator","Wiek skorygowany wcześniaka i bezdechy")+'<div class="fields"><label>Urodzony w tygodniu ciąży<input type="number" min="22" max="42" value="30" class="co-a"></label><label>Ile tygodni żyje<input type="number" min="0" max="60" value="6" class="co-b"></label></div><div class="out co-out"></div></div>';
+  el.innerHTML='<div class="wg" data-m="S">'+wgHead("S","Kalkulator","Wiek postmenstruacyjny wcześniaka i bezdechy")+'<div class="fields"><label>Urodzony w tygodniu ciąży<input type="number" min="22" max="42" value="30" class="co-a"></label><label>Ile tygodni żyje<input type="number" min="0" max="60" value="6" class="co-b"></label></div><div class="out co-out"></div></div>';
   const upd=()=>{const a=+$(".co-a",el).value,b=+$(".co-b",el).value,o=$(".co-out",el);if(!a||isNaN(b)){o.className="out no co-out";o.textContent="Uzupełnij oba pola.";return;}const c=a+b;let msg,k;
     if(a>=37){k="ok";msg="Dziecko donoszone; bezdech z niedojrzałości dotyczy wcześniaków.";}
     else if(c<36){k="warn";msg="Bezdechy z niedojrzałości są jeszcze możliwe. Zwykle ustępują do 36. tygodnia wieku skorygowanego.";}
     else if(c<=43){k="ok";msg="Zwykle już ustąpiły (do 36. tyg.); skrajnie mogą trwać do 43. tygodnia.";}
     else{k="bad";msg="Poza granicą z notatek (43. tydzień). Szukaj innych przyczyn bezdechu: infekcja, krwawienie wewnątrzczaszkowe, refluks, drgawki, zaburzenia metaboliczne.";}
-    o.className="out "+k+" co-out";o.innerHTML='<b class="h">'+a+' tc + '+b+' tyg. = '+c+'. tydzień wieku skorygowanego</b><span>'+msg+'</span>';};
+    o.className="out "+k+" co-out";o.innerHTML='<b class="h">'+a+' tc + '+b+' tyg. = '+c+'. tydzień wieku postmenstruacyjnego</b><span class="small muted">W notatkach ten rachunek nazywa się wiekiem skorygowanym.</span><span>'+msg+'</span>';};
   $$("input",el).forEach(i=>i.addEventListener("input",upd));upd();
 };
 
@@ -2407,7 +2423,7 @@ W.abx=el=>{
   el.innerHTML='<div class="wg" data-m="I">'+wgHead("I","Kalkulator","Antybiotyk w pozaszpitalnym zapaleniu płuc")+'<div class="seg ab-g">'+G.map((g,i)=>'<button data-i="'+i+'" aria-pressed="'+(i===1)+'">'+g+'</button>').join("")+'</div><div class="fields"><label>Masa ciała (kg)<input type="number" min="2" max="120" step="0.5" value="15" class="ab-w"></label><label>Przebieg<select class="ab-s"><option value="0">łagodny, ambulatoryjnie</option><option value="1">ciężki</option></select></label><label class="ck" style="align-self:end"><input type="checkbox" class="ab-at"> obraz atypowy</label></div><div class="out ok ab-out"></div><p class="small muted">Dawki przepisane z notatek do nauki, nie do zlecania leków.</p></div>';
   let gi=1;
   const mg=x=>{x=Math.round(x/10)*10;if(x>=1000){let s=(x/1000).toFixed(2).replace(".",",");s=s.replace(/(,\d*?)0+$/,"$1").replace(/,$/,"");return s+" g";}return x+" mg";};
-  const rng=(kg,a,b,div,cap)=>{let lo=kg*a,hi=kg*b;let capd=false;if(cap&&hi>cap){hi=cap;capd=true;}if(cap&&lo>cap)lo=cap;return mg(lo)+(b!==a?"–"+mg(hi):"")+"/dobę"+(div?" → "+mg(lo/div)+(b!==a?"–"+mg(hi/div):"")+" na dawkę ("+div+"×/d)":"")+(capd?" (maks. "+mg(cap)+"/d)":"");};
+  const rng=(kg,a,b,div,cap)=>{let lo=kg*a,hi=kg*b;let capd=false;if(cap&&hi>cap){hi=cap;capd=true;}if(cap&&lo>cap)lo=cap;const two=mg(lo)!==mg(hi);return mg(lo)+(two?"–"+mg(hi):"")+"/dobę"+(div?" → "+mg(lo/div)+(two?"–"+mg(hi/div):"")+" na dawkę ("+div+"×/d)":"")+(capd?" (maks. "+mg(cap)+"/d)":"");};
   const upd=()=>{
     const kg=parseFloat($(".ab-w",el).value)||0,sev=$(".ab-s",el).value==="1",at=$(".ab-at",el).checked,L=[];
     if(gi===0){
@@ -2417,11 +2433,11 @@ W.abx=el=>{
       if(at)L.push("obraz atypowy: <b>makrolid</b> w I rzucie");
       L.push("<span class='muted'>Wiek &lt;6 mż to wskazanie do hospitalizacji.</span>");
     }else if(gi===1){
-      L.push("<b>Amoksycylina p.o.</b> 75–90 mg/kg/d w 3 dawkach co 8 h: "+rng(kg,75,90,3));
-      L.push(sev?"cięższy przebieg: leczenie 7–10 dni":"łagodny przebieg: można skrócić do 5 dni; bez wysokiej gorączki u dziecka zaszczepionego przeciw pneumokokom można rozważyć brak antybiotyku");
+      L.push("<b>Amoksycylina p.o.</b> 75–90 mg/kg/d w 3 dawkach co 8 h: "+rng(kg,75,90,3,4000));
+      L.push(sev?"cięższy przebieg: leczenie 7–10 dni; notatki nie podają osobnego schematu dożylnego dla tej grupy wieku":"łagodny przebieg: można skrócić do 5 dni; bez wysokiej gorączki u dziecka zaszczepionego przeciw pneumokokom można rozważyć brak antybiotyku");
       if(at)L.push("obraz atypowy: <b>makrolid</b>");
     }else{
-      if(!sev){L.push("<b>Amoksycylina p.o.</b> 75–90 mg/kg/d w 3 dawkach co 8 h: "+rng(kg,75,90,3));if(at)L.push("obraz atypowy (np. Mycoplasma): <b>makrolid</b>");}
+      if(!sev){L.push("<b>Amoksycylina p.o.</b> 75–90 mg/kg/d w 3 dawkach co 8 h: "+rng(kg,75,90,3,4000));if(at)L.push("obraz atypowy (np. Mycoplasma): <b>makrolid</b>");}
       else{
         L.push("<b>β-laktam + makrolid</b>, do wyboru β-laktam:");
         L.push("• <b>amoksycylina iv</b> "+(kg>40?"1–2 g co 6 h":"100–200 mg/kg/d w 4 dawkach: "+rng(kg,100,200,4,4000)));

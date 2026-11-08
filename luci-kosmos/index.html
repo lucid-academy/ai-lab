@@ -156,7 +156,8 @@
   #wStars svg{width:64px;height:64px;animation:pop .5s backwards}
   #sTravel{pointer-events:auto}
   #sSplash{padding:0;pointer-events:auto;background:#0b0620;cursor:pointer}
-  #sSplash img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%}
+  #sSplash .blur{position:absolute;inset:-30px;background:url(luci-spi.webp) center/cover;filter:blur(22px) brightness(.5)}
+  #sSplash img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
   #sSplash p{position:absolute;left:0;right:0;bottom:calc(14px + var(--sb));margin:0;text-align:center;font-weight:800;font-size:min(26px,6.5vh);
     color:#fff;text-shadow:0 0 12px #7B2FFF,0 2px 6px #000;animation:pulse 1.8s ease-in-out infinite}
   #sSet,#sPhoto{pointer-events:auto}
@@ -308,6 +309,7 @@
 </div>
 
 <div id="sSplash" class="scr">
+  <div class="blur"></div>
   <img src="luci-spi.webp" alt="">
   <p>Dotknij, żeby obudzić Luci</p>
 </div>
@@ -616,7 +618,7 @@ const SAY = {
   correct: ['Dobrze!', 'Brawo, dobrze!', 'Tak! Świetnie!', 'Zgadza się!', 'Super!'],
   wrong: ['Hmm, spróbuj jeszcze raz.', 'Prawie! Spróbuj jeszcze raz.', 'Jeszcze raz, dasz radę!'],
   small: ['Brawo!', 'Super!', 'Świetnie!', 'Ekstra!', 'Udało się!'],
-  named: [`Brawo, ${NICK}!`, `Super, ${NAME}!`, `Świetnie, ${NICK}!`, `Brawo, ${NAME}! Ale z ciebie mądrala!`, `Ekstra, ${NICK}!`],
+  named: [`Brawo, ${NICK}!`, `Super, ${NAME}!`, `Świetnie, ${NICK}!`, `Dobra robota, ${NAME}!`, `Ekstra, ${NICK}!`],
   pair: 'Dwa roboty, jeden za drugim! Przepłyń obok pierwszego, poczekaj między nimi i przepłyń obok drugiego.',
   patrol: 'Ten dinozaur spaceruje po korytarzu. Schowaj się w bocznej zatoczce, przepuść go i płyń dalej!',
   loops: 'Tu są dwie drogi. Jedna jest krótsza, ale pilnowana. Wybierz mądrze!',
@@ -669,6 +671,8 @@ const STYLES = {
     bass: { pat: 'long', wave: 'triangle', vol: 0.17 }, drums: 'hats', echo: 0.42, cutoff: 9000 },
   mush: { bpm: 138, swing: 0.22, lead: 0.125, leadVol: 0.12, slide: true, gap: 0.75, arp: null,
     bass: { pat: 'oompah', wave: 0.5, vol: 0.075 }, drums: 'wood', echo: 0.12, cutoff: 12000 },
+  castle: { bpm: 144, lead: 0.25, leadVol: 0.13, vib: 8, gap: 0.85, arp: { pat: [0, 1, 2, 3], oct: 4, wave: 0.125, vol: 0.03 },
+    bass: { pat: 'drive', wave: 0.5, vol: 0.085 }, drums: 'rock', echo: 0.14, cutoff: 14000 },
 };
 
 const TRACK_DEFS = {
@@ -712,6 +716,15 @@ const TRACK_DEFS = {
     G6-2 F6-2 D6-2 Bb5-2 F5-4 Bb5-4                   C6-2 D6-2 E6-4 G6-4 E6-4
     F6-4 C6-2 A5-2 F5-4 A5-4                          G5-2 A5-2 Bb5-2 B5-2 C6-8` },
 };
+TRACK_DEFS.castle = { style: 'castle', chords: ['Dm', 'Bb', 'F', 'C', 'Dm', 'Bb', 'Gm', 'A', 'Bb', 'C', 'Am', 'Dm', 'Bb', 'C', 'Dm', 'A'], mel: `
+    D5-2 F5-2 A5-4 D6-2 C6-2 A5-4      Bb5-4 A5-2 G5-2 F5-4 D5-4
+    C5-2 F5-2 A5-2 C6-2 F6-4 E6-2 C6-2  E6-4 D6-2 C6-2 G5-8
+    D6-2 D6-2 F6-2 D6-2 A5-4 D6-4      F6-4 D6-2 Bb5-2 F5-4 Bb5-4
+    G5-2 Bb5-2 D6-2 G6-2 F6-2 D6-2 Bb5-4  A5-4 C#6-4 E6-4 A6-4
+    F6-4 D6-2 Bb5-2 D6-4 F6-4          E6-4 C6-2 G5-2 C6-4 E6-4
+    E6-2 C6-2 A5-2 C6-2 E6-4 A6-4      F6-4 D6-4 A5-4 D6-4
+    D6-2 F6-2 Bb6-4 A6-2 F6-2 D6-4     C6-2 E6-2 G6-4 E6-4 C6-4
+    D6-4 A5-4 F5-4 A5-4                A5-2 C#6-2 E6-2 G6-2 A6-8` };
 const TRACKS = {};
 for (const k in TRACK_DEFS) TRACKS[k] = parseTrack(TRACK_DEFS[k]);
 
@@ -827,7 +840,8 @@ const Music = {
     }
     // perkusja
     const d = tr.drums;
-    if (d === 'soft') { if (pos === 0 || pos === 8) this.drum('softkick', t); if (pos % 4 === 2) this.drum('shaker', t); }
+    if (d === 'rock') { if (pos === 0 || pos === 8 || pos === 10) this.drum('kick', t); if (pos === 4 || pos === 12) this.drum('snare', t); if (pos % 2 === 0) this.drum('hat', t); }
+    else if (d === 'soft') { if (pos === 0 || pos === 8) this.drum('softkick', t); if (pos % 4 === 2) this.drum('shaker', t); }
     else if (d === 'tribal') {
       if (pos === 0 || pos === 6 || pos === 8) this.drum('kick', t);
       if (pos === 3 || pos === 11) this.drum('tomLo', t);
@@ -1942,15 +1956,32 @@ function drawPlanet(g, x, y, R, pi, t) {
     g.restore();
   };
   if (pi === 2) ring(false);
+  // ozdoby rysowane za kulą: ich podstawa chowa się za horyzontem, więc wyrastają z powierzchni
+  const onHorizon = (ang, depth, fn) => { g.save(); g.rotate(ang + Math.PI / 2); g.translate(0, -R * depth); fn(); g.restore(); };
+  if (pi === 1) onHorizon(-2.05, 0.9, () => drawVolcano(g, R, t));
+  if (pi === 3) for (const [a, h, c1, c2] of [[-2.0, 0.2, '#be185d', '#fda4af'], [-1.78, 0.3, '#b91c1c', '#fb7185'], [-1.55, 0.24, '#7e22ce', '#f0abfc'], [-1.36, 0.16, '#b91c1c', '#fb7185']])
+    onHorizon(a, 0.9, () => drawMushroom(g, R * h, c1, c2));
+  if (pi === 4) onHorizon(-Math.PI / 2, 0.86, () => drawCastleTop(g, R * 0.62));
   g.drawImage(planetSprite(pi, R), -R, -R, R * 2, R * 2);
   if (pi === 2) ring(true);
-  if (pi === 3) {
-    for (const [a, h, c1, c2] of [[-2.05, 0.3, '#b91c1c', '#fb7185'], [-1.6, 0.44, '#7e22ce', '#f0abfc'], [-1.15, 0.28, '#be185d', '#fda4af'], [0.75, 0.22, '#b91c1c', '#fb7185']]) {
-      g.save(); g.rotate(a + Math.PI / 2); g.translate(0, -R * 0.94); drawMushroom(g, R * h, c1, c2); g.restore();
-    }
-  }
-  if (pi === 4) { g.save(); g.translate(0, -R * 0.93); drawCastleTop(g, R * 0.75); g.restore(); }
   g.restore();
+}
+function drawVolcano(g, R, t) {
+  const gl = g.createRadialGradient(0, -R * 0.27, 0, 0, -R * 0.27, R * 0.22);
+  gl.addColorStop(0, 'rgba(255,140,40,0.55)'); gl.addColorStop(1, 'rgba(255,140,40,0)');
+  g.fillStyle = gl; g.beginPath(); g.arc(0, -R * 0.27, R * 0.22, 0, TAU); g.fill();
+  const vg = g.createLinearGradient(-R * 0.25, 0, R * 0.25, 0);
+  vg.addColorStop(0, '#6b4a2e'); vg.addColorStop(1, '#3d2a1a');
+  g.fillStyle = vg;
+  g.beginPath(); g.moveTo(-R * 0.27, 0); g.quadraticCurveTo(-R * 0.12, -R * 0.12, -R * 0.07, -R * 0.27); g.lineTo(R * 0.07, -R * 0.27); g.quadraticCurveTo(R * 0.12, -R * 0.12, R * 0.27, 0); g.closePath(); g.fill();
+  g.fillStyle = '#fb923c';
+  g.beginPath(); g.ellipse(0, -R * 0.27, R * 0.07, R * 0.022, 0, 0, TAU); g.fill();
+  g.beginPath(); g.moveTo(-R * 0.02, -R * 0.26); g.quadraticCurveTo(R * 0.03, -R * 0.18, -R * 0.02, -R * 0.08); g.lineTo(R * 0.01, -R * 0.08); g.quadraticCurveTo(R * 0.06, -R * 0.18, R * 0.02, -R * 0.26); g.fill();
+  for (let k = 0; k < 3; k++) {
+    const ph = (t * 0.35 + k / 3) % 1;
+    g.fillStyle = `rgba(215,215,225,${0.45 * (1 - ph)})`;
+    g.beginPath(); g.arc(Math.sin(ph * 5 + k) * R * 0.05, -R * 0.32 - ph * R * 0.35, R * (0.04 + ph * 0.07), 0, TAU); g.fill();
+  }
 }
 
 /* ---------- rakieta ---------- */
@@ -2602,19 +2633,22 @@ function closeItemInfo() {
 const COUNTABLE = [['🐟', 'rybek'], ['⭐', 'gwiazdek'], ['🍎', 'jabłek'], ['🐞', 'biedronek'], ['🍄', 'grzybków'], ['🦋', 'motyli'], ['🐢', 'żółwi'],
   ['🍓', 'truskawek'], ['🚀', 'rakiet'], ['🐝', 'pszczółek'], ['🌸', 'kwiatków'], ['🦕', 'dinozaurów'], ['🤖', 'robotów'], ['🐙', 'ośmiornic']];
 const PAT = ['🔴', '🔵', '🟡', '🟢', '⭐', '🌙', '🍎', '🍌', '🐟', '🦀', '🍄', '💎', '🌸', '🐢'];
+// w każdym zestawie trzy rzeczy są do siebie podobne pod każdym względem, a czwarta różni się jedną wyraźną cechą
 const ODD_EASY = [
-  { g: ['🐟', '🐠', '🐡', '🐙', '🦀'], x: ['🍎', '🚗', '🎈'], why: 'To nie mieszka w morzu.' },
-  { g: ['🍎', '🍐', '🍌', '🍓', '🍇'], x: ['🐶', '🚀', '⚽'], why: 'To nie jest owoc.' },
-  { g: ['🚗', '🚌', '🚂', '🚲', '🚜'], x: ['🐱', '🍄', '🌸'], why: 'To nie jest pojazd.' },
-  { g: ['🐶', '🐱', '🐰', '🐭', '🐻'], x: ['🍌', '✏️', '🚗'], why: 'To nie jest zwierzątko.' },
+  { g: ['🐟', '🐠', '🐡', '🐙'], x: ['🚗', '🎈', '🍌'], why: 'Reszta to zwierzęta, które mieszkają w morzu.' },
+  { g: ['🍎', '🍐', '🍓', '🍇'], x: ['⚽', '🧦', '🚀'], why: 'Reszta to owoce, które można zjeść.' },
+  { g: ['🚗', '🚕', '🚓', '🚙'], x: ['🍌', '🐱', '🌸'], why: 'Reszta to samochody.' },
+  { g: ['👕', '👖', '🧦', '🧢'], x: ['🍎', '🚗', '🐟'], why: 'Reszta to ubrania.' },
+  { g: ['🎸', '🥁', '🎺', '🎻'], x: ['🍌', '🧦', '🐢'], why: 'Reszta to instrumenty, na których się gra.' },
 ];
 const ODD_HARD = [
-  { g: ['🍎', '🍐', '🍌', '🍇', '🍓'], x: ['🥕', '🥦', '🌽'], why: 'To warzywo, a reszta to owoce.' },
-  { g: ['🐦', '🦋', '🐝', '✈️', '🦅'], x: ['🐢', '🐌', '🐘'], why: 'To nie umie latać, a reszta lata.' },
-  { g: ['⛄', '❄️', '🧊'], x: ['☀️', '🔥'], why: 'To jest gorące, a reszta jest zimna.' },
-  { g: ['🐶', '🐱', '🐴', '🐮', '🐷'], x: ['🐔', '🦆'], why: 'Ma dwie nogi, a reszta ma cztery.' },
-  { g: ['🐙', '🐟', '🦈', '🐳', '🦀'], x: ['🐘', '🦒', '🐄'], why: 'To mieszka na lądzie, a reszta w wodzie.' },
-  { g: ['🚗', '🚌', '🚕', '🚜'], x: ['⛵', '✈️'], why: 'To nie jeździ po drodze.' },
+  { g: ['🍎', '🍓', '🍒'], x: ['🍌', '🍋'], why: 'Reszta owoców jest czerwona.' },
+  { g: ['🐝', '🐞', '🦋', '🐜'], x: ['🐟', '🐌'], why: 'Reszta to owady.' },
+  { g: ['⛄', '❄️', '🧊'], x: ['🔥', '☀️'], why: 'Reszta jest zimna.' },
+  { g: ['🐟', '🐙', '🦈', '🐳'], x: ['🐘', '🦒'], why: 'Reszta mieszka w wodzie.' },
+  { g: ['🍎', '🍐', '🍇', '🍓'], x: ['🥕', '🥦'], why: 'Reszta to owoce, a to warzywo.' },
+  { g: ['🌙', '⭐', '🦉'], x: ['☀️'], why: 'Reszta kojarzy się z nocą, a słońce świeci w dzień.' },
+  { g: ['🧤', '🧣', '⛄'], x: ['🩳', '🏖️'], why: 'Reszta kojarzy się z zimą.' },
 ];
 const poly = n => '<path d="' + Array.from({ length: n }, (_, k) => { const a = -Math.PI / 2 + k * TAU / n; return `${k ? 'L' : 'M'}${(50 + Math.cos(a) * 45).toFixed(1)} ${(53 + Math.sin(a) * 45).toFixed(1)}`; }).join(' ') + 'z"/>';
 const starP = '<path d="' + STAR_PTS.map(([a, b], k) => `${k ? 'L' : 'M'}${(50 + a * 47).toFixed(1)} ${(53 + b * 47).toFixed(1)}`).join(' ') + 'z"/>';
@@ -2666,8 +2700,8 @@ const TASK_BADGE = { count: '🔢', add: '➕', sub: '➖', compareGroups: '⚖�
 const TASK_POOLS = [
   ['count', 'add', 'compareGroups', 'pattern', 'odd', 'shapes', 'colors', 'emotions', 'letters', 'numFind'],
   ['count', 'add', 'compareGroups', 'pattern', 'odd', 'shapes', 'shadow', 'emotions', 'letters', 'numFind', 'diff'],
-  ['count', 'add', 'sub', 'compareNums', 'pattern', 'odd', 'shapes', 'colorMix', 'shadow', 'letters', 'diff', 'syllables', 'memory'],
-  ['add', 'sub', 'diff', 'syllables', 'memory', 'compareNums', 'pattern', 'odd', 'shapes', 'colorMix', 'letters', 'count'],
+  ['count', 'add', 'sub', 'compareNums', 'pattern', 'odd', 'shapes', 'colorMix', 'shadow', 'letters', 'diff', 'emotions'],
+  ['add', 'sub', 'diff', 'compareNums', 'pattern', 'odd', 'shapes', 'colorMix', 'letters', 'count', 'numFind', 'shadow'],
 ];
 const recentTasks = [];
 function pickTaskType(p) {
@@ -2728,7 +2762,7 @@ const GEN = {
     const a = t === 3 ? randi(4, 10) : randi(1, lim - 2), b = randi(t === 3 ? 3 : 1, Math.max(t === 3 ? 3 : 1, lim - a));
     const [em] = pick(COUNTABLE);
     const fives = n => n > 5 ? Array.from({ length: Math.ceil(n / 5) }, (_, k) => `<span class="five">${many(em, Math.min(5, n - k * 5))}</span>`).join('') : many(em, n);
-    const col = n => `<div class="col"><div class="grp">${fives(n)}</div><span class="lbl">${n}</span></div>`;
+    const col = n => `<div class="col"><div class="grp" style="max-width:6.6em">${fives(n)}</div><span class="lbl">${n}</span></div>`;
     return { say: `Ile to jest ${a} dodać ${b}?`, text: `Ile to jest ${a} + ${b}? Wybierz wynik.`, fs: a + b > 12 ? 24 : a + b > 8 ? 30 : 38,
       vis: `${col(a)}<span class="op">+</span>${col(b)}<span class="op">=</span><span class="q">?</span>`, opts: numOpts(a + b, 1, 40) };
   },
@@ -2738,7 +2772,7 @@ const GEN = {
     const items = Array.from({ length: a }, (_, k) => `<span class="${k >= a - b ? 'gone' : ''}">🍎</span>`).join('');
     return { say: `Było ${a} ${pl(a, 'jabłko', 'jabłka', 'jabłek')}. Dinozaur zjadł ${b}. Ile zostało?`,
       text: `Było ${a} ${pl(a, 'jabłko', 'jabłka', 'jabłek')}. Dinozaur zjadł ${b}. Ile jabłek zostało?`, fs: a > 12 ? 28 : a > 9 ? 34 : 42,
-      vis: `<div class="grp" style="max-width:70%">${items}</div><span>🦖</span>`, opts: numOpts(a - b, 0, 40) };
+      vis: `<div class="grp" style="max-width:6.6em">${items}</div><span>🦖</span>`, opts: numOpts(a - b, 0, 40) };
   },
   compareGroups(t) {
     const [em] = pick(COUNTABLE);
@@ -2746,7 +2780,7 @@ const GEN = {
     do { a = randi(t ? 4 : 2, t ? 10 : 8); b = randi(t ? 4 : 2, t ? 10 : 8); }
     while (t ? (Math.abs(a - b) < 1 || Math.abs(a - b) > 2) : Math.abs(a - b) < 2);
     const more = Math.random() < 0.6, okA = more ? a > b : a < b;
-    const grp = n => `<div class="grp" style="max-width:none">${many(em, n)}</div>`;
+    const grp = n => `<div class="grp" style="max-width:6.6em">${many(em, n)}</div>`;
     return { say: more ? 'Gdzie jest więcej?' : 'Gdzie jest mniej?', text: more ? 'Gdzie jest więcej? Dotknij tej grupy.' : 'Gdzie jest mniej? Dotknij tej grupy.', fs: 34, optsIn: 'vis', optCls: 'big2',
       opts: [{ html: grp(a), ok: okA }, { html: grp(b), ok: !okA }] };
   },
@@ -2900,6 +2934,7 @@ function openTask() {
   scene = 'task';
   $('pad').classList.add('hide'); $('hud').classList.add('hide');
   showScreen('sTask');
+  if (hasVis) fitVis(vis);
   padDir = null; setPadVisual(null);
   Voice.say(t.say, 300);
   if (t.memorize) {
@@ -2911,6 +2946,14 @@ function openTask() {
       $('tQ').textContent = t.text2; t.say = t.say2; Voice.say(t.say2);
     }, t.memorize);
   } else ans.style.visibility = '';
+}
+// zmniejsza obrazki, aż wszystko zmieści się w karcie zagadki
+function fitVis(el) {
+  let fs = parseFloat(el.style.fontSize) || parseFloat(getComputedStyle(el).fontSize) || 44;
+  el.style.fontSize = fs + 'px';
+  for (let k = 0; k < 40 && fs > 12 && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1); k++) {
+    fs -= 2; el.style.fontSize = fs + 'px';
+  }
 }
 function answer(b, o) {
   if (!TK || TK.done || b.disabled) return;
@@ -2977,6 +3020,7 @@ function resize() {
   const k = ambKind; ambKind = null; if (k) setAmb(k);
   layoutPlay();
   updateHero();
+  if (scene === 'task') fitVis($('tVis'));
 }
 function layoutPlay() {
   if (!L) return;
@@ -3238,7 +3282,7 @@ function endTravel() {
 /* ---------- bohaterowie na ekranach ---------- */
 function orbitPlanets(cx, cy, s, under) {
   PLANETS.forEach((P, k) => {
-    const a = T * 0.35 + k * TAU / 4, z = Math.sin(a);
+    const a = T * 0.35 + k * TAU / PLANETS.length, z = Math.sin(a);
     if ((z < 0) === under) drawPlanet(ctx, cx + Math.cos(a) * s * 0.9, cy + z * s * 0.3, s * (0.1 + 0.03 * z), k, T);
   });
 }

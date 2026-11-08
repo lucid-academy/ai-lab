@@ -349,6 +349,7 @@ svg .stroke-ink{stroke:var(--ink-2);fill:none;stroke-width:1.5}
 </header>
 
 <main class="wrap">
+<p class="bang" id="nojs" style="margin-bottom:24px">Ten podgląd nie uruchamia skryptów, więc widać tylko kompendium. Otwórz plik w przeglądarce (Chrome, Safari, Firefox, Edge), żeby działały plan, fiszki, test i ściąga liczb.</p>
 
 <!-- ================= PLAN ================= -->
 <section class="view" id="view-plan" aria-label="Plan nauki">
@@ -380,7 +381,7 @@ svg .stroke-ink{stroke:var(--ink-2);fill:none;stroke-width:1.5}
 </section>
 
 <!-- ================= KOMPENDIUM ================= -->
-<section class="view" id="view-kompendium" aria-label="Kompendium" hidden>
+<section class="view" id="view-kompendium" aria-label="Kompendium">
   <div style="display:grid;gap:12px">
     <p class="eyebrow">Kompendium · skrót notatek</p>
     <h1>Wszystko z notatek, w kolejności nauki</h1>
@@ -2088,6 +2089,7 @@ $$("#pali input").forEach(i=>i.addEventListener("input",pali));
 $$("#pali input").forEach(i=>i.addEventListener("change",pali));
 pali();
 
+const nj=document.getElementById("nojs");if(nj)nj.remove();
 route();
 })();
 </script>

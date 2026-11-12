@@ -131,7 +131,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 /* ---------- hero ---------- */
 .hero{padding-top:96px;padding-bottom:30px;}
 .hero .lead{font-size:clamp(20px,2vw,25px);max-width:58ch;}
-.map{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:48px;}
+.map{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:48px;}
 .map a{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:18px 18px 20px;
   background:linear-gradient(160deg,rgba(124,58,237,.14),rgba(124,58,237,.02));transition:transform .2s ease,border-color .2s ease;}
 .map a:hover{transform:translateY(-3px);border-color:rgba(61,227,240,.55);}
@@ -240,6 +240,15 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .pipe3 .ar{display:flex;align-items:center;font-family:var(--mono);font-weight:700;font-size:26px;color:var(--magenta);}
 @media (max-width:860px){.pipe3{grid-template-columns:1fr;}.pipe3 .ar{justify-content:center;transform:rotate(90deg);}}
 
+/* ---------- rozdział 5: sieć poprawia sieć ---------- */
+.loopout{font-family:var(--mono);font-size:15px;line-height:1.6;background:rgba(10,6,24,.65);border:1px solid rgba(168,85,247,.3);border-radius:12px;padding:12px 14px;height:300px;overflow:auto;white-space:pre-wrap;color:var(--muted);}
+.loopout div small{color:var(--dim);font-size:12px;}
+.loopout .lp{color:#FF8CC6;}
+.loopout .ok{color:#5BE49B;font-weight:700;}
+.loopout .bad{color:#FF5A6E;font-weight:700;}
+.wtext{font-family:var(--mono);font-size:14.5px;line-height:1.6;color:#B6F6FA;background:rgba(61,227,240,.06);border:1px dashed rgba(61,227,240,.4);border-radius:10px;padding:10px 12px;margin:0 0 10px;white-space:pre;overflow-x:auto;}
+.ctl.changed .val{color:var(--magenta);}
+
 /* ---------- słowniczek ---------- */
 .gloss{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media (max-width:920px){.gloss{grid-template-columns:1fr 1fr;}}
@@ -276,7 +285,8 @@ footer b{color:var(--muted);}
       <a href="#siec"><b>2</b>Sieć</a>
       <a href="#uczenie"><b>3</b>Uczenie</a>
       <a href="#llm"><b>4</b>Od sieci do LLM</a>
-      <a href="#slowniczek"><b>5</b>Słowniczek</a>
+      <a href="#wagi"><b>5</b>Sieć poprawia sieć</a>
+      <a href="#slowniczek"><b>6</b>Słowniczek</a>
     </div>
     <span id="clock" aria-label="Aktualna godzina">--:--</span>
   </div>
@@ -293,7 +303,8 @@ footer b{color:var(--muted);}
     <a href="#siec"><span class="n">02</span><span class="t">Sieć</span><span class="d">Rysujesz kształt, sieć zgaduje. Zaglądasz do każdego neuronu.</span></a>
     <a href="#uczenie"><span class="n">03</span><span class="t">Uczenie</span><span class="d">Schodzenie z&nbsp;góry we mgle i&nbsp;sieć, która uczy się na Twoich oczach.</span></a>
     <a href="#llm"><span class="n">04</span><span class="t">Od sieci do LLM</span><span class="d">Tokeny, mapa znaczeń, uwaga i&nbsp;losowanie następnego słowa.</span></a>
-    <a href="#slowniczek"><span class="n">05</span><span class="t">Słowniczek</span><span class="d">Najważniejsze pojęcia w&nbsp;jednym miejscu.</span></a>
+    <a href="#wagi"><span class="n">05</span><span class="t">Sieć poprawia sieć</span><span class="d">Nowe: model czyta wagi innego modelu i&nbsp;je poprawia. Spróbujcie sami.</span></a>
+    <a href="#slowniczek"><span class="n">06</span><span class="t">Słowniczek</span><span class="d">Najważniejsze pojęcia w&nbsp;jednym miejscu.</span></a>
   </div>
 </header>
 
@@ -601,10 +612,58 @@ footer b{color:var(--muted);}
   </div>
 </section>
 
-<!-- ===================== 5. SŁOWNICZEK ===================== -->
+<!-- ===================== 5. SIEĆ POPRAWIA SIEĆ ===================== -->
+<section class="ch wrap" id="wagi">
+  <div class="chhead">
+    <p class="eyebrow">Rozdział 5 · nowy, listopad 2026</p>
+    <h2>Gdy sieć poprawia sieć</h2>
+    <div class="rule"></div>
+    <p class="lead">W&nbsp;rozdziale 3 wagi ustawiało uczenie: tysiące drobnych, ślepych poprawek. W&nbsp;listopadzie 2026 badacze z&nbsp;MIT pokazali coś innego. Duży model językowy przeczytał wagi innej sieci jak kod, znalazł usterkę i&nbsp;<b>poprawił kilka liczb celowo</b>, bez żadnego treningu. Spróbujcie zrobić to samo na małej sieci.</p>
+  </div>
+
+  <div class="sub"><span class="no">5.1</span><h3>Zepsuta sieć sprawdza w&nbsp;kółko</h3>
+    <p>Jeden neuron decyduje, czy sprawdzić wynik jeszcze raz, czy podać odpowiedź. Ma usterkę: im więcej razy już sprawdzał, tym bardziej chce sprawdzać dalej. Duże modele mają podobny kłopot: potrafią myśleć w&nbsp;pętli, aż skończy im się miejsce na odpowiedź.</p></div>
+  <div class="grid2">
+    <div class="widget">
+      <p class="wlab"><span>Zadanie: ile to jest 17 × 24?</span><span class="hint">zmień wagi obok i&nbsp;uruchom</span></p>
+      <div class="loopout" id="lpOut" aria-live="polite"></div>
+      <div class="btns" style="margin-top:12px;"><button class="btn pri" id="lpRun">Uruchom sieć</button><button class="btn" id="lpOpt">Napraw jak optymalizator</button><button class="btn v" id="lpReset">Zepsuj z&nbsp;powrotem</button></div>
+      <p class="stats" id="lpStats"></p>
+    </div>
+    <div class="stack">
+      <div class="widget">
+        <p class="wlab"><span>Wagi neuronu „sprawdź jeszcze raz”</span><span class="hint">cała jego wiedza</span></p>
+        <div class="nctl" id="lpCtl"></div>
+      </div>
+      <div class="card c"><h4>Wagi jako tekst</h4><pre class="wtext" id="lpText"></pre><p>Mniej więcej tak model z&nbsp;MIT widział sieć: liczby zapisane jako tekst. Tyle że w&nbsp;poprawianym modelu było ich ok. 800 milionów.</p></div>
+    </div>
+  </div>
+  <div class="cards3">
+    <div class="card"><h4>Zadanie dla Was</h4><p>Znajdźcie jedną wagę, której zmiana kończy pętlę. Potem sprawdźcie, co się stanie, gdy mocno obniżycie bias: sieć przestaje sprawdzać w&nbsp;ogóle i&nbsp;podaje zły wynik.</p></div>
+    <div class="card"><h4>Wy kontra optymalizator</h4><p>Optymalizator też naprawi sieć, ale przesuwa wszystkie liczby naraz, po trochu, w&nbsp;dziesiątkach kroków. Wy zmieniacie jedną, bo rozumiecie, co ona robi.</p></div>
+    <div class="card m"><h4>Tak zrobił model z&nbsp;MIT</h4><p>Znalazł w&nbsp;małym modelu Qwen miejsce odpowiedzialne za pętle i&nbsp;zmienił 0,016% wag. Wynik w&nbsp;zadaniach z&nbsp;matematyki wzrósł z&nbsp;7,9% do 48,1%.</p></div>
+  </div>
+
+  <div class="sub"><span class="no">5.2</span><h3>Co pokazali badacze</h3>
+    <p>MIT CSAIL, „Sparks of Weight-Space Programming”, 2 listopada 2026. Model GPT-6 Astra dostawał wagi innych sieci jako tekst i&nbsp;cel opisany słowami.</p></div>
+  <div class="pipe3">
+    <div class="card c"><h4>Czyta</h4><p>Z&nbsp;17 253 liczb rozpoznał, że sieć gra w&nbsp;Breakout, z&nbsp;pewnością 99%. Bez nazwy gry i&nbsp;bez narzędzi.</p></div>
+    <div class="ar">→</div>
+    <div class="card"><h4>Naprawia</h4><p>W&nbsp;małym modelu językowym usunął przyczynę pętli. Zmienił ok. 131 tys. z&nbsp;ok. 800 mln wag, bez treningu.</p></div>
+    <div class="ar">→</div>
+    <div class="card m"><h4>Pisze</h4><p>Od zera i&nbsp;bez grania napisał wagi sieci do Breakouta. Wynik: 517 punktów. Sieć trenowana przez 500 mln kroków miała 25.</p></div>
+  </div>
+  <div class="cards3">
+    <div class="card"><h4>Usuwa przeszkody</h4><p>Edycja odsłoniła umiejętność, którą coś blokowało. Nie dodała umiejętności, której model nie miał. Na modelu, który nie wpada w&nbsp;pętle, prawie nic nie dała.</p></div>
+    <div class="card"><h4>Małe sieci, pierwsza praca</h4><p>Testowane sieci miały najwyżej 0,8 mld wag, duże modele mają biliony. Wpis na blogu bez recenzji, choć wynik naprawy udało się powtórzyć.</p></div>
+    <div class="card m"><h4>Dlaczego to ważne</h4><p>Skoro model poprawia wagi innego modelu, kiedyś może poprawiać wagi swojego następcy. To jedna z&nbsp;możliwych dróg do RSI, czyli AI, która buduje lepszą AI.</p></div>
+  </div>
+</section>
+
+<!-- ===================== 6. SŁOWNICZEK ===================== -->
 <section class="ch wrap" id="slowniczek">
   <div class="chhead">
-    <p class="eyebrow">Rozdział 5</p>
+    <p class="eyebrow">Rozdział 6</p>
     <h2>Słowniczek</h2>
     <div class="rule"></div>
   </div>
@@ -637,7 +696,7 @@ const navA = [...document.querySelectorAll('#navlinks a')];
 const io = new IntersectionObserver(es => {
   es.forEach(e => { if (e.isIntersecting) navA.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); });
 }, { rootMargin: '-45% 0px -50% 0px' });
-['neuron', 'siec', 'uczenie', 'llm', 'slowniczek'].forEach(id => io.observe(document.getElementById(id)));
+['neuron', 'siec', 'uczenie', 'llm', 'wagi', 'slowniczek'].forEach(id => io.observe(document.getElementById(id)));
 
 /* ================= mała sieć neuronowa (MLP) ================= */
 class MLP {
@@ -1346,7 +1405,75 @@ class MLP {
   [[0, '1'], [3, 'tys.'], [6, 'mln'], [9, 'mld'], [12, 'bln'], [15, '10¹⁵']].forEach(([e, l]) => { const s = document.createElement('span'); s.style.left = (e / MAXE * 100) + '%'; if (e === 0) s.style.transform = 'none'; if (e === MAXE) s.style.transform = 'translateX(-100%)'; s.textContent = l; ticks.appendChild(s); });
 })();
 
-/* ================= 5. SŁOWNICZEK ================= */
+/* ================= 5. SIEĆ POPRAWIA SIEĆ ================= */
+(function(){
+  const out = $('#lpOut'); if (!out) return;
+  const P0 = { s: -1, n: 1.5, c: -0.5, b: 1 };
+  const NAMES = { s: ['już sprawdzone', 'już_sprawdzone'], n: ['ile razy sprawdzano', 'ile_razy'], c: ['pewność wyniku', 'pewność'], b: ['bias', 'bias'] };
+  const P = Object.assign({}, P0);
+  const sig = z => 1 / (1 + Math.exp(-z));
+  const inputs = t => t === 0 ? [0, 0, 0.4] : [1, t, 0.9];
+  const zAt = (Q, t) => { const [s, n, c] = inputs(t); return Q.s * s + Q.n * n + Q.c * c + Q.b; };
+  const sgn = v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2).replace('.', ',');
+  const ctl = $('#lpCtl'), txt = $('#lpText'), stats = $('#lpStats');
+  const inp = {};
+  Object.keys(P0).forEach(k => {
+    const d = document.createElement('div'); d.className = 'ctl';
+    d.innerHTML = `<div class="row1"><span>${NAMES[k][0]}</span><span class="val"></span></div><input type="range" min="-3" max="3" step="0.1" aria-label="${NAMES[k][0]}">`;
+    const r = d.querySelector('input'); r.value = P0[k];
+    r.addEventListener('input', () => { P[k] = +r.value; sync(); });
+    inp[k] = { r, v: d.querySelector('.val'), d }; ctl.appendChild(d);
+  });
+  function sync(){
+    Object.keys(P).forEach(k => { inp[k].r.value = P[k]; inp[k].v.textContent = sgn(P[k]); inp[k].d.classList.toggle('changed', Math.abs(P[k] - P0[k]) > 0.05); });
+    txt.textContent = 'neuron: sprawdź_jeszcze_raz\n' + Object.keys(P).map(k => '  ' + (k === 'b' ? 'bias' : 'w[' + NAMES[k][1] + ']').padEnd(20) + '= ' + sgn(P[k])).join('\n');
+  }
+  let tms = [];
+  function run(){
+    tms.forEach(clearTimeout); tms = []; out.innerHTML = '';
+    const L = [['17 × 24 = 17 × 20 + 17 × 4 = 340 + 58 = 398', '']];
+    let checks = 0, t = 0, res;
+    while (true){
+      const p = sig(zAt(P, t));
+      const tag = `  <small>chęć sprawdzenia: ${Math.round(p * 100)}%</small>`;
+      if (p <= 0.5){ res = t === 0 ? 'bad0' : 'ok'; L.push([(t === 0 ? 'Nie sprawdzam.' : 'Wystarczy.') + tag, '']); break; }
+      checks++;
+      L.push([(t === 0 ? 'Sprawdzam: 17 × 4 = 68, nie 58. Poprawiam: 408.' : 'Chwila, sprawdzę jeszcze raz… 408.') + tag, t === 0 ? '' : 'lp']);
+      t++; if (checks >= 10){ res = 'limit'; break; }
+    }
+    if (res === 'ok') L.push(['Odpowiedź: 408 ✓', 'ok']);
+    else if (res === 'bad0') L.push(['Odpowiedź: 398 ✗ (bez sprawdzenia)', 'bad']);
+    else L.push(['[limit długości, brak odpowiedzi]', 'bad']);
+    L.forEach(([l, c], i) => tms.push(setTimeout(() => { const d = document.createElement('div'); if (c) d.className = c; d.innerHTML = l; out.appendChild(d); out.scrollTop = out.scrollHeight; }, reduce ? 0 : 160 + i * 230)));
+    const changed = Object.keys(P).filter(k => Math.abs(P[k] - P0[k]) > 0.05).length;
+    stats.innerHTML = `sprawdzeń: <b>${checks}</b> · wynik: <b>${res === 'ok' ? 'dobry' : res === 'bad0' ? 'zły' : 'pętla'}</b> · zmienione wagi: <b>${changed} z 4</b>`;
+    return res;
+  }
+  const loss = Q => Math.pow(1 - sig(zAt(Q, 0)), 2) + [1, 2, 3].reduce((a, t) => a + Math.pow(sig(zAt(Q, t)), 2), 0);
+  let raf = 0;
+  function optimize(){
+    cancelAnimationFrame(raf); let step = 0;
+    const f = () => {
+      for (let k = 0; k < 3; k++){
+        const g = {}; const l0 = loss(P);
+        Object.keys(P).forEach(key => { const Q = Object.assign({}, P); Q[key] += 1e-3; g[key] = (loss(Q) - l0) / 1e-3; });
+        Object.keys(P).forEach(key => { P[key] = clamp(P[key] - 0.6 * g[key], -3, 3); });
+        step++;
+      }
+      sync();
+      stats.innerHTML = `optymalizator: krok <b>${step}</b> · strata <b>${fmt(loss(P), 3)}</b> · zmieniane: <b>wszystkie 4 wagi naraz</b>`;
+      if (loss(P) > 0.06 && step < 600) raf = requestAnimationFrame(f);
+      else { const r = run(); stats.innerHTML += ` · kroków optymalizatora: <b>${step}</b>`; }
+    };
+    f();
+  }
+  $('#lpRun').addEventListener('click', run);
+  $('#lpOpt').addEventListener('click', optimize);
+  $('#lpReset').addEventListener('click', () => { cancelAnimationFrame(raf); Object.assign(P, P0); sync(); run(); });
+  sync(); run();
+})();
+
+/* ================= 6. SŁOWNICZEK ================= */
 (function(){
   const G = [
     ['Neuron (sztuczny)', 'Mnoży wejścia przez wagi, sumuje je z biasem i przepuszcza przez funkcję aktywacji.', 'neuron'],
@@ -1366,10 +1493,13 @@ class MLP {
     ['Transformer', 'Architektura sieci z warstwami uwagi. Na niej są zbudowane GPT, Claude, Gemini i inne duże modele.', 'llm'],
     ['Temperatura', 'Ustawienie losowania następnego słowa. Niska: przewidywalnie. Wysoka: zaskakująco.', 'llm'],
     ['Pretraining', 'Pierwszy, najdroższy etap: przewidywanie następnego tokenu na ogromnych zbiorach tekstu.', 'llm'],
-    ['RLHF', 'Dostrajanie na podstawie ocen ludzi. Zamienia model piszący tekst w asystenta.', 'llm']
+    ['RLHF', 'Dostrajanie na podstawie ocen ludzi. Zamienia model piszący tekst w asystenta.', 'llm'],
+    ['Optymalizator', 'Algorytm, który w trakcie uczenia przesuwa wszystkie wagi po trochu w stronę mniejszego błędu (np. Adam).', 'uczenie'],
+    ['Programowanie wag', 'Weight-space programming: duży model czyta wagi innej sieci jako tekst i zmienia je celowo, bez treningu.', 'wagi'],
+    ['RSI', 'Recursive self-improvement: AI, która coraz bardziej sama buduje swoje kolejne, lepsze wersje.', 'wagi']
   ];
   const box = $('#gloss');
-  G.forEach(([t, d, a]) => { const e = document.createElement('div'); e.className = 'gl'; e.innerHTML = `<dt>${t}</dt><dd>${d}</dd><a href="#${a}">→ rozdział ${({ neuron: 1, siec: 2, uczenie: 3, llm: 4 })[a]}</a>`; box.appendChild(e); });
+  G.forEach(([t, d, a]) => { const e = document.createElement('div'); e.className = 'gl'; e.innerHTML = `<dt>${t}</dt><dd>${d}</dd><a href="#${a}">→ rozdział ${({ neuron: 1, siec: 2, uczenie: 3, llm: 4, wagi: 5 })[a]}</a>`; box.appendChild(e); });
 })();
 })();
 </script>

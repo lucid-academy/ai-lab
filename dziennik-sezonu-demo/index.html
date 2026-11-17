@@ -1,0 +1,1133 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Szczeciński Dziennik Sezonu · wersja demonstracyjna</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@400;500&family=Alegreya:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: kolumna „dziennika” 1120px z przyklejonym spisem sekcji; każda analiza na jasnej tablicy jak arkusz mapy morskiej; nocą ta sama mapa w granacie */
+:root {
+  --page: #ebdfc3; --plate: #f4ead3; --ink: #2a2216; --ink-2: #5a4c36; --muted: #6f6045;
+  --hair: #dccfae; --rule: #b8a57e; --shade: rgba(184, 69, 43, .07);
+  --sea: #1b64a6; --sea-wash: rgba(27, 100, 166, .12); --sea-soft: #a9c3de;
+  --verd: #23906a; --brass: #b27a0c; --rust: #b8452b; --sepia: #8c7a58; --sepia-soft: #d3c4a0;
+  --y23: #b09c76; --y24: #8a7652; --y25: #5e4e33;
+  --on-dark: #ffffff; --on-light: #1c160c;
+  --grain: .10;
+  --shadow: 0 1px 0 rgba(42, 34, 22, .05), 0 10px 28px -16px rgba(42, 34, 22, .35);
+  --f-display: "Alegreya SC", "Alegreya", Georgia, "Times New Roman", serif;
+  --f-italic: "Alegreya", Georgia, "Times New Roman", serif;
+  --f-body: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0e1920; --plate: #13202a; --ink: #ecdfc3; --ink-2: #c4b393; --muted: #9d8e76;
+    --hair: #22323d; --rule: #3a4b57; --shade: rgba(217, 103, 76, .10);
+    --sea: #4a8fdc; --sea-wash: rgba(74, 143, 220, .14); --sea-soft: #2b4d72;
+    --verd: #3aa37a; --brass: #b8862a; --rust: #d9674c; --sepia: #7d705c; --sepia-soft: #3c3a33;
+    --y23: #5e5646; --y24: #7a6e59; --y25: #a0917a;
+    --on-dark: #0b141a; --on-light: #0b141a; --grain: .05;
+    --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 30px -18px rgba(0, 0, 0, .8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0e1920; --plate: #13202a; --ink: #ecdfc3; --ink-2: #c4b393; --muted: #9d8e76;
+  --hair: #22323d; --rule: #3a4b57; --shade: rgba(217, 103, 76, .10);
+  --sea: #4a8fdc; --sea-wash: rgba(74, 143, 220, .14); --sea-soft: #2b4d72;
+  --verd: #3aa37a; --brass: #b8862a; --rust: #d9674c; --sepia: #7d705c; --sepia-soft: #3c3a33;
+  --y23: #5e5646; --y24: #7a6e59; --y25: #a0917a;
+  --on-dark: #0b141a; --on-light: #0b141a; --grain: .05;
+  --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 30px -18px rgba(0, 0, 0, .8);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body { background: var(--page); color: var(--ink); font: 400 15px/1.6 var(--f-body); padding-inline: clamp(16px, 4vw, 40px); padding-block: 0 48px; position: relative; overflow-x: hidden; }
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .25 0 0 0 0 .18 0 0 0 0 .08 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.rhumb { position: absolute; left: 0; top: 0; width: 100%; height: 760px; pointer-events: none; z-index: 0; color: var(--hair); overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent); mask-image: linear-gradient(180deg, #000 55%, transparent); }
+.wrap { max-width: 1120px; margin: 0 auto; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 72px; }
+
+.demo-strip { display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between; align-items: center; padding-block: 12px; border-bottom: 1px solid var(--rule);
+  font: 500 11px/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.demo-strip b { color: var(--rust); font-weight: 500; }
+
+h1, h2, h3 { margin: 0; font-weight: 400; text-wrap: balance; }
+h1 { font: 400 clamp(34px, 5.2vw, 58px)/1.06 var(--f-display); }
+h2 { font: 400 clamp(26px, 3.6vw, 36px)/1.12 var(--f-display); }
+h3 { font: 600 14px/1.3 var(--f-body); }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { display: flex; align-items: center; gap: 12px; font: 500 11px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--rule); max-width: 220px; }
+.lede { font-size: 17px; line-height: 1.6; }
+.fine { font-size: 12.5px; color: var(--muted); max-width: 90ch; }
+a { color: var(--sea); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--sea); outline-offset: 3px; border-radius: 2px; }
+
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: center; padding-top: 36px; }
+.hero-text { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.coords { font: 400 12px/1.5 var(--f-mono); color: var(--muted); letter-spacing: .04em; }
+.cartouche { position: relative; width: clamp(180px, 22vw, 250px); }
+.cartouche img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); box-shadow: var(--shadow); }
+.stamp { position: absolute; left: -34px; bottom: -18px; transform: rotate(-6deg); border: 2px solid var(--rust); color: var(--rust); background: color-mix(in srgb, var(--plate) 70%, transparent);
+  font: 500 13px/1 var(--f-mono); letter-spacing: .22em; text-transform: uppercase; padding: 9px 12px; white-space: nowrap; }
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: -28px; }
+.tile { background: var(--plate); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tile .lbl { font: 500 12px/1.3 var(--f-body); color: var(--ink-2); }
+.tile .val { font: 600 30px/1.1 var(--f-body); letter-spacing: -.01em; }
+.tile .delta { font: 500 12.5px/1.3 var(--f-body); color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+.tri { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid var(--sea); display: inline-block; }
+.tri.down { border-bottom: 0; border-top: 8px solid var(--rust); }
+
+.alert { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; border: 1px solid var(--rust); background: color-mix(in srgb, var(--plate) 85%, var(--rust) 6%); padding: 14px 18px; margin-top: -40px; }
+.alert .ic { font: 600 13px/1 var(--f-mono); color: var(--rust); border: 1.5px solid var(--rust); width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; margin-top: 2px; }
+.alert p { font-size: 14px; color: var(--ink); max-width: none; }
+.alert b { font-weight: 600; }
+
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; margin-top: -40px; background: color-mix(in srgb, var(--page) 94%, transparent); backdrop-filter: blur(6px); border-block: 1px solid var(--rule); }
+.nav ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.nav ol::-webkit-scrollbar { display: none; }
+.nav a { display: block; padding: 11px 12px; font: 500 12.5px/1 var(--f-body); color: var(--ink-2); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; }
+.nav a:hover { color: var(--ink); }
+.nav a[aria-current="true"] { color: var(--ink); border-bottom-color: var(--sea); }
+
+section.entry { display: flex; flex-direction: column; gap: 20px; }
+.head { display: flex; flex-direction: column; gap: 14px; }
+.plate { background: var(--plate); border: 1px solid var(--rule); box-shadow: var(--shadow); padding: 20px clamp(14px, 2.5vw, 26px) 18px; min-width: 0; }
+.plate-title { font: 600 13.5px/1.35 var(--f-body); color: var(--ink); margin-bottom: 2px; }
+.plate-sub { font: 400 12.5px/1.4 var(--f-body); color: var(--muted); margin-bottom: 12px; }
+.chart { width: 100%; min-width: 0; position: relative; }
+.chart svg { display: block; overflow: visible; }
+.note { font: italic 400 17.5px/1.5 var(--f-italic); color: var(--ink-2); max-width: 72ch; padding-left: 16px; border-left: 1px solid var(--rule); }
+.note b { font: 600 11px/1 var(--f-mono); font-style: normal; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); margin-right: 6px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.sub-title { font: 600 12.5px/1.3 var(--f-body); color: var(--ink-2); margin-bottom: 4px; }
+.detail-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 18px; margin: 22px 0 12px; padding-top: 16px; border-top: 1px solid var(--hair); }
+.detail-head h3 { font: 400 24px/1.1 var(--f-display); }
+.detail-head .stats { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.detail-head .stats strong { color: var(--ink); font-weight: 600; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-bottom: 14px; }
+.ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.ctl-label { font: 500 10.5px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--rule); background: var(--page); }
+.seg button { font: 500 12.5px/1 var(--f-body); color: var(--ink-2); background: transparent; border: 0; padding: 9px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button:hover { background: var(--sea-wash); }
+.seg button[aria-checked="true"] { background: var(--ink); color: var(--plate); }
+select { font: 500 13px/1.2 var(--f-body); color: var(--ink); background: var(--page); border: 1px solid var(--rule); padding: 8px 30px 8px 10px; border-radius: 0; max-width: 100%;
+  appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+input[type="range"] { width: 100%; accent-color: var(--sea); cursor: pointer; margin: 6px 0 0; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); margin-bottom: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+.lk { width: 16px; height: 0; border-top: 2px solid; display: inline-block; }
+.bg-sea { background: var(--sea); } .bg-verd { background: var(--verd); } .bg-brass { background: var(--brass); } .bg-rust { background: var(--rust); }
+.bg-sepia { background: var(--sepia); } .bg-sepia-soft { background: var(--sepia-soft); } .bg-sea-soft { background: var(--sea-soft); }
+.bc-sea { border-color: var(--sea); } .bc-sepia { border-color: var(--sepia); } .bc-brass { border-color: var(--brass); } .bc-rust { border-color: var(--rust); }
+.bc-y23 { border-color: var(--y23); } .bc-y24 { border-color: var(--y24); } .bc-y25 { border-color: var(--y25); }
+.bg-y23 { background: var(--y23); } .bg-y24 { background: var(--y24); } .bg-y25 { background: var(--y25); }
+
+table.sum { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; min-width: 520px; }
+table.sum th, table.sum td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+table.sum th { font: 600 11.5px/1.3 var(--f-body); color: var(--ink-2); border-bottom: 1px solid var(--rule); }
+table.sum th:first-child, table.sum td:first-child { text-align: left; }
+.tablewrap { overflow-x: auto; margin-top: 14px; }
+
+.sim { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px 32px; align-items: stretch; margin-bottom: 8px; }
+.sim-ctl { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sim-lbl { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 14px; font-size: 13.5px; color: var(--ink-2); }
+.sim-lbl strong { font: 600 20px/1 var(--f-body); color: var(--ink); font-variant-numeric: tabular-nums; }
+.scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+.out { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding-left: 28px; border-left: 1px solid var(--rule); min-width: 0; }
+.out .lbl { font: 500 12.5px/1.3 var(--f-body); color: var(--ink-2); }
+.out .big { font: 600 44px/1.05 var(--f-body); letter-spacing: -.01em; color: var(--ink); }
+.out .dl { font-size: 13.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.chip { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; margin-top: 8px; padding: 6px 11px; border: 1px solid var(--rule); background: var(--page); font: 500 12.5px/1 var(--f-body); color: var(--ink); }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.presets button { font: 500 12.5px/1 var(--f-body); color: var(--ink-2); background: var(--page); border: 1px solid var(--rule); padding: 9px 12px; cursor: pointer; }
+.presets button:hover { background: var(--sea-wash); }
+.presets button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--plate); }
+.sim-note { font: italic 400 17.5px/1.5 var(--f-italic); color: var(--ink-2); margin: 14px 0 6px; max-width: 72ch; }
+
+.calc { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px 32px; align-items: stretch; }
+.calc-ctl { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.calc-ctl label { font-size: 13.5px; color: var(--ink-2); }
+.kv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.kv div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kv .v { font: 600 26px/1.1 var(--f-body); color: var(--ink); }
+.kv .t { font-size: 12.5px; color: var(--ink-2); }
+
+.tagk { font: 500 9.5px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; }
+
+.notices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.notice { background: var(--plate); border: 1px solid var(--rule); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.notice .no { font: 500 10.5px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--rust); }
+.notice h3 { font-size: 14.5px; }
+.notice p { font-size: 13.5px; color: var(--ink-2); }
+.notice.key { grid-column: 1 / -1; border-color: var(--rust); }
+dl.gloss { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 10px 24px; margin: 0; font-size: 13.5px; }
+dl.gloss dt { font: 400 18px/1.25 var(--f-display); color: var(--ink); }
+dl.gloss dd { margin: 0; color: var(--ink-2); padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+
+.sources { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+footer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 24px; align-items: center; border-top: 1px solid var(--rule); padding-top: 28px; }
+footer img { width: 120px; height: auto; border: 1px solid var(--rule); display: block; }
+footer .ft { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); min-width: 0; }
+footer .ft strong { font: 400 22px/1.1 var(--f-display); color: var(--ink); }
+.mail { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); user-select: all; }
+
+#tip { position: fixed; z-index: 50; pointer-events: none; min-width: 150px; max-width: 280px; background: var(--plate); border: 1px solid var(--rule); box-shadow: var(--shadow);
+  padding: 10px 12px; font-size: 12.5px; color: var(--ink-2); display: flex; flex-direction: column; gap: 5px; }
+#tip .tt { font: 600 12px/1.2 var(--f-body); color: var(--ink); margin-bottom: 2px; }
+#tip .row { display: flex; align-items: center; gap: 8px; }
+#tip .row strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+#tip .row .rl { margin-left: auto; padding-left: 10px; }
+
+.ax { fill: var(--muted); font: 400 11px var(--f-body); font-variant-numeric: tabular-nums; }
+.ax-l { fill: var(--ink-2); font: 500 12px var(--f-body); }
+.ax-sel { fill: var(--ink); font: 600 12px var(--f-body); }
+.gl { stroke: var(--hair); stroke-width: 1; shape-rendering: crispEdges; }
+.bl { stroke: var(--rule); stroke-width: 1; shape-rendering: crispEdges; }
+.refl { stroke: var(--ink-2); stroke-width: 1; }
+.brk { stroke: var(--rust); stroke-width: 1; }
+.shade { fill: var(--shade); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.s-sea { stroke: var(--sea); } .s-sepia { stroke: var(--sepia); } .s-brass { stroke: var(--brass); } .s-rust { stroke: var(--rust); }
+.s-y23 { stroke: var(--y23); } .s-y24 { stroke: var(--y24); } .s-y25 { stroke: var(--y25); }
+.dot { stroke: var(--plate); stroke-width: 2; }
+.f-sea { fill: var(--sea); } .f-rust { fill: var(--rust); } .f-verd { fill: var(--verd); } .f-brass { fill: var(--brass); } .f-sepia { fill: var(--sepia); }
+.f-sea-soft { fill: var(--sea-soft); } .f-sepia-soft { fill: var(--sepia-soft); } .f-y23 { fill: var(--y23); } .f-y24 { fill: var(--y24); } .f-y25 { fill: var(--y25); }
+.aw { fill: var(--sea-wash); stroke: none; }
+.on-d { fill: var(--on-dark); font: 600 11.5px var(--f-body); } .on-l { fill: var(--on-light); font: 600 11.5px var(--f-body); }
+.vlab { fill: var(--ink); font: 600 12px var(--f-body); font-variant-numeric: tabular-nums; }
+.vlab-2 { fill: var(--ink-2); font: 500 11.5px var(--f-body); font-variant-numeric: tabular-nums; }
+.tag { fill: var(--muted); font: 500 9.5px var(--f-mono); letter-spacing: .08em; }
+.anno { fill: var(--ink-2); font: italic 400 14px var(--f-italic); }
+.anno-r { fill: var(--rust); font: italic 400 13.5px var(--f-italic); }
+.xh { stroke: var(--ink-2); stroke-width: 1; }
+.hit { fill: transparent; cursor: crosshair; }
+.bar { transition: opacity .12s; }
+.bar:hover { opacity: .8; }
+.rowhit { fill: transparent; cursor: pointer; }
+.rowsel { fill: var(--sea-wash); }
+.conn { stroke: var(--rule); stroke-width: 2; }
+
+@media (max-width: 860px) {
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two, .three { grid-template-columns: minmax(0, 1fr); }
+  .sim, .calc { grid-template-columns: minmax(0, 1fr); }
+  .out { padding-left: 0; padding-top: 16px; border-left: 0; border-top: 1px solid var(--rule); }
+}
+@media (max-width: 620px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-top: 24px; }
+  .cartouche { justify-self: center; width: min(220px, 64vw); }
+  .tiles { margin-top: -20px; }
+  .notices { grid-template-columns: minmax(0, 1fr); }
+  .tile .val { font-size: 24px; }
+  .out .big { font-size: 36px; }
+  .kv { grid-template-columns: minmax(0, 1fr); }
+  dl.gloss { grid-template-columns: minmax(0, 1fr); }
+  footer { grid-template-columns: minmax(0, 1fr); }
+  .wrap { gap: 56px; }
+  .alert, .nav { margin-top: -28px; }
+  .seg button { padding: 8px 9px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .bar { transition: none; } html { scroll-behavior: auto; } }
+</style>
+
+
+<style>
+.mz { filter: blur(max(4.5px, .24em)); display: inline-block; user-select: none; -webkit-user-select: none; }
+.mz-note { margin-top: 18px; }
+.mz-note + .tiles { margin-top: 18px; }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="mz-blur" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>
+</svg>
+<svg class="rhumb" id="rhumb" aria-hidden="true"></svg>
+<div class="wrap">
+
+  <div class="demo-strip">
+    <span><b>Wersja demonstracyjna</b> · dane zastąpione wartościami poglądowymi i zamazane</span>
+    <span>Lucid Academy · listopad 2026</span>
+  </div>
+
+  <header class="hero" id="hero">
+    <div class="hero-text">
+      <div class="eyebrow">Dziennik sezonu · lipiec 2023 – sierpień 2026</div>
+      <h1>Ruch turystyczny w&nbsp;Szczecinie 2023–2026</h1>
+      <p class="lede">Analiza obejmuje turystów i&nbsp;odwiedzających jednodniowych z&nbsp;Polski i&nbsp;z&nbsp;zagranicy, <span class="mz" aria-hidden="true">56</span> krajów pochodzenia oraz <span class="mz" aria-hidden="true">71</span> miejsc w&nbsp;mieście. W&nbsp;okresie styczeń–sierpień 2026 roku Szczecin odwiedziło <span class="mz" aria-hidden="true">8,66</span>&nbsp;mln osób, o&nbsp;<span class="mz" aria-hidden="true">71,7</span>% więcej niż przed rokiem.</p>
+      <div class="coords">53°25′N · 14°33′E · źródło danych: Selectivv, zestawienia przekazane przez Żeglugę Szczecińską</div>
+    </div>
+    <div class="cartouche" id="cartouche">
+      <img src="logo.jpg" alt="Logo Lucid Academy w stylu dawnej mapy morskiej, z napisem Powered by" width="640" height="640">
+      <div class="stamp">Demo</div>
+    </div>
+  </header>
+
+
+  <div class="alert mz-note" role="note">
+    <span class="ic" aria-hidden="true">i</span>
+    <p><b>Wersja demonstracyjna.</b> Analiza powstała dla Żeglugi Szczecińskiej na danych Selectivv. Ze względu na poufność danych klienta wszystkie liczby na tej stronie są zamazane, a wykresy i kalkulatory działają na wartościach poglądowych. Strona pokazuje zakres i funkcje analizy, a nie jej wyniki.</p>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="alert" role="note">
+    <span class="ic" aria-hidden="true">!</span>
+    <p><b>Możliwa zmiana metody pomiaru od maja 2026 roku.</b> W danych o miejscach liczba wizyt osób spoza Szczecina rośnie od maja o <span class="mz" aria-hidden="true">24–85</span>% r/r, wobec <span class="mz" aria-hidden="true">2–56</span>% w miesiącach wcześniejszych. W tym samym miesiącu przyspiesza także dynamika ruchu w całym mieście. Do czasu wyjaśnienia z Selectivv wzrost od maja 2026 roku należy interpretować ostrożnie. Szczegóły w sekcji <a href="#jakosc">Jakość danych</a>.</p>
+  </div>
+
+  <nav class="nav" aria-label="Sekcje analizy">
+    <ol>
+      <li><a href="#sezony">Sezony</a></li>
+      <li><a href="#symulator">Wynik roczny</a></li>
+      <li><a href="#kraje">Kraje</a></li>
+      <li><a href="#jednodniowi">Jednodniowi</a></li>
+      <li><a href="#miejsca">Miejsca</a></li>
+      <li><a href="#zagle">Efekt Żagli</a></li>
+      <li><a href="#jakosc">Jakość danych</a></li>
+    </ol>
+  </nav>
+
+  <section class="entry" id="sezony">
+    <div class="head">
+      <div class="eyebrow">Trzy sezony</div>
+      <h2>Ruch turystyczny miesiąc po miesiącu</h2>
+      <p>Wykres obejmuje okres od lipca 2023 do sierpnia 2026 roku. Widok sezonów nakłada kolejne lata na jedną oś, co ułatwia porównanie tych samych miesięcy. Czerwona linia oznacza maj 2026 roku, od którego dane mogą być nieporównywalne z wcześniejszymi.</p>
+    </div>
+    <div class="plate">
+      <div class="controls">
+        <div class="ctl"><span class="ctl-label">Grupa</span><div class="seg" id="c1-grp" aria-label="Grupa odwiedzających"></div></div>
+        <div class="ctl"><span class="ctl-label">Pochodzenie</span><div class="seg" id="c1-orig" aria-label="Pochodzenie"></div></div>
+        <div class="ctl"><span class="ctl-label">Widok</span><div class="seg" id="c1-view" aria-label="Widok wykresu"></div></div>
+      </div>
+      <div class="legend" id="c1-legend"></div>
+      <div class="chart" id="c1"></div>
+      <div class="tablewrap"><table class="sum" id="c1-table"></table></div>
+      <p class="fine" style="margin-top:10px">Wartości to suma miesięcznych liczb unikalnych odwiedzających, zgodnie z metodą stosowaną w komunikatach miasta. Dane za 2023 rok obejmują wyłącznie okres lipiec–grudzień.</p>
+    </div>
+    <p class="note"><b>Wniosek</b>Rok 2025 zamknął się wynikiem <span class="mz" aria-hidden="true">8&nbsp;344&nbsp;794</span> turystów, o&nbsp;<span class="mz" aria-hidden="true">57,9</span>% wyższym niż w&nbsp;2024 roku. Odwiedzający jednodniowi stanowią około <span class="mz" aria-hidden="true">35</span>% wszystkich odwiedzających; w&nbsp;2025 roku było ich <span class="mz" aria-hidden="true">6,78</span>&nbsp;mln wobec <span class="mz" aria-hidden="true">3,89</span>&nbsp;mln turystów.</p>
+  </section>
+
+  <section class="entry" id="symulator">
+    <div class="head">
+      <div class="eyebrow">Wynik roczny</div>
+      <h2>Symulacja wyniku za cały 2026 rok</h2>
+      <p>Symulator łączy rzeczywiste dane za styczeń–sierpień 2026 roku z&nbsp;założeniem o&nbsp;dynamice ruchu w&nbsp;okresie wrzesień–grudzień, odniesionym do wyników z&nbsp;tego samego okresu 2025 roku.</p>
+    </div>
+    <div class="plate">
+      <div class="controls">
+        <div class="ctl"><span class="ctl-label">Grupa</span><div class="seg" id="sim-grp" aria-label="Grupa w symulacji"></div></div>
+      </div>
+      <div class="sim">
+        <div class="sim-ctl">
+          <label for="sim-g" class="sim-lbl"><span>Dynamika ruchu w okresie IX–XII względem 2025 roku</span><strong id="sim-gv"></strong></label>
+          <input type="range" id="sim-g" min="-30" max="25" step="0.1" value="5">
+          <div class="scale"><span>−30%</span><span>+25%</span></div>
+          <div class="presets" id="sim-presets" role="group" aria-label="Scenariusze dynamiki"></div>
+        </div>
+        <div class="out" aria-live="polite">
+          <span class="lbl" id="sim-lbl">Szacowany wynik 2026 roku</span>
+          <span class="big" id="sim-total"></span>
+          <span class="dl" id="sim-delta"></span>
+          <span class="chip" id="sim-chip"></span>
+        </div>
+      </div>
+      <p class="sim-note" id="sim-note"></p>
+      <p class="fine" style="margin-bottom:14px">Jeżeli wzrost od maja 2026 roku wynika częściowo ze zmiany metody pomiaru, bardziej ostrożnym punktem odniesienia jest dynamika z&nbsp;okresu styczeń–kwiecień.</p>
+      <div class="legend">
+        <span><i class="sw bg-sea"></i>I–VIII 2026</span>
+        <span><i class="sw bg-sea-soft"></i>IX–XII 2026 według założenia</span>
+        <span><i class="sw bg-sepia"></i>I–VIII (2024, 2025)</span>
+        <span><i class="sw bg-sepia-soft"></i>IX–XII (2024, 2025)</span>
+      </div>
+      <div class="chart" id="sim-chart"></div>
+    </div>
+  </section>
+
+  <section class="entry" id="kraje">
+    <div class="head">
+      <div class="eyebrow">Pod obcą banderą</div>
+      <h2>Kraje pochodzenia gości zagranicznych</h2>
+      <p>Ranking obejmuje turystów i&nbsp;odwiedzających jednodniowych z&nbsp;zagranicy. Kliknięcie kraju wyświetla jego dane miesięczne od lipca 2023 roku.</p>
+    </div>
+    <div class="plate">
+      <div class="controls">
+        <div class="ctl"><span class="ctl-label">Grupa</span><div class="seg" id="c3-type" aria-label="Grupa gości zagranicznych"></div></div>
+        <div class="ctl"><span class="ctl-label">Okres</span><div class="seg" id="c3-per" aria-label="Okres"></div></div>
+      </div>
+      <div class="plate-sub" id="c3-sub"></div>
+      <div class="chart" id="c3"></div>
+      <div class="detail-head"><h3 id="c3-name"></h3><div class="stats" id="c3-stats"></div></div>
+      <div class="two">
+        <div><div class="sub-title">Turyści</div><div class="chart" id="c3-t"></div></div>
+        <div><div class="sub-title">Odwiedzający jednodniowi</div><div class="chart" id="c3-j"></div></div>
+      </div>
+      <p class="fine" style="margin-top:12px">Od października 2024 roku zestawienie wymienia z&nbsp;nazwy mniej krajów (<span class="mz" aria-hidden="true">19–97</span> zamiast około <span class="mz" aria-hidden="true">74</span>), a&nbsp;pozostałe włącza do kategorii „Pozostałe”. Porównania dla mniejszych krajów obejmujące ten okres nie są wiarygodne; przerwy w&nbsp;liniach oznaczają brak danych.</p>
+    </div>
+    <p class="note"><b>Wniosek</b>Niemcy odpowiadają za połowę turystów zagranicznych i&nbsp;<span class="mz" aria-hidden="true">58</span>% zagranicznych odwiedzających jednodniowych. Czesi przyjeżdżają niemal wyłącznie w&nbsp;sierpniu: w&nbsp;sierpniu 2026 roku było ich <span class="mz" aria-hidden="true">8,8</span>&nbsp;tys. wobec <span class="mz" aria-hidden="true">6,4</span>&nbsp;tys. w&nbsp;lipcu. Ta jedna grupa odpowiada za jedną trzecią wzrostu liczby turystów zagranicznych w&nbsp;2026 roku.</p>
+  </section>
+
+  <section class="entry" id="jednodniowi">
+    <div class="head">
+      <div class="eyebrow">Na jeden dzień</div>
+      <h2>Goście jednodniowi i&nbsp;nocujący</h2>
+      <p>Wykres pokazuje, ilu odwiedzających jednodniowych przypada na jednego turystę nocującego w&nbsp;Szczecinie w&nbsp;okresie styczeń–sierpień 2026 roku.</p>
+    </div>
+    <div class="plate">
+      <div class="plate-title">Odwiedzający jednodniowi na jednego turystę</div>
+      <div class="plate-sub">styczeń–sierpień 2026; kraje z&nbsp;co najmniej <span class="mz" aria-hidden="true">8</span>&nbsp;tys. turystów</div>
+      <div class="chart" id="c4"></div>
+    </div>
+    <div class="plate">
+      <div class="plate-title">Potencjał zatrzymania gości na noc</div>
+      <div class="plate-sub">Kalkulator szacuje, ilu dodatkowych turystów i&nbsp;noclegów przyniosłoby zatrzymanie na noc wybranego odsetka gości jednodniowych.</div>
+      <div class="calc">
+        <div class="calc-ctl">
+          <label for="conv-c">Pochodzenie gości jednodniowych</label>
+          <select id="conv-c"></select>
+          <label for="conv-p" class="sim-lbl"><span>Odsetek gości, którzy zostaną na noc</span><strong id="conv-pv"></strong></label>
+          <input type="range" id="conv-p" min="0" max="5" step="0.1" value="1">
+          <div class="scale"><span>0%</span><span>5%</span></div>
+        </div>
+        <div class="out">
+          <div class="kv">
+            <div><span class="v" id="conv-add"></span><span class="t">dodatkowych turystów</span></div>
+            <div><span class="v" id="conv-n"></span><span class="t">dodatkowych noclegów</span></div>
+            <div><span class="v" id="conv-g"></span><span class="t">wzrostu liczby turystów zagranicznych</span></div>
+          </div>
+          <span class="dl" id="conv-base" style="margin-top:10px"></span>
+        </div>
+      </div>
+      <p class="fine" style="margin-top:14px">Szacunek opiera się na sumie miesięcznych liczb odwiedzających w&nbsp;okresie styczeń–sierpień 2026 roku i&nbsp;na średniej liczbie noclegów na przyjazd turysty zagranicznego w&nbsp;tym okresie.</p>
+    </div>
+    <p class="note"><b>Wniosek</b>Szwedzi i&nbsp;Norwegowie odwiedzają Szczecin niemal wyłącznie na jeden dzień: na jednego nocującego przypada odpowiednio <span class="mz" aria-hidden="true">59</span> i&nbsp;<span class="mz" aria-hidden="true">18</span> gości jednodniowych. W&nbsp;przypadku Niemców proporcja wynosi <span class="mz" aria-hidden="true">9</span> do <span class="mz" aria-hidden="true">8</span>, przy czym w&nbsp;liczbach bezwzględnych to największa grupa: <span class="mz" aria-hidden="true">977</span>&nbsp;tys. wizyt jednodniowych w&nbsp;ośmiu miesiącach.</p>
+  </section>
+
+  <section class="entry" id="miejsca">
+    <div class="head">
+      <div class="eyebrow">Miejsca</div>
+      <h2>Najczęściej odwiedzane miejsca</h2>
+      <p>Ranking przedstawia wizyty w&nbsp;<span class="mz" aria-hidden="true">79</span> miejscach w&nbsp;2025 roku, ostatnim pełnym roku sprzed zmiany metody pomiaru. Kliknięcie miejsca wyświetla jego dane miesięczne w&nbsp;podziale na mieszkańców, gości z&nbsp;Polski i&nbsp;gości z&nbsp;zagranicy.</p>
+    </div>
+    <div class="plate">
+      <div class="controls">
+        <div class="ctl"><span class="ctl-label">Zakres</span><div class="seg" id="c5-mode" aria-label="Zakres rankingu"></div></div>
+      </div>
+      <div class="legend" id="c5-legend"></div>
+      <p class="fine" style="margin:-4px 0 10px">Oznaczenia: NABRZEŻE – miejsca nad Odrą; ŻEGLUGA – obiekty prowadzone przez Żeglugę Szczecińską.</p>
+      <div class="chart" id="c5"></div>
+      <div class="detail-head"><h3 id="c5-name"></h3><div class="stats" id="c5-stats"></div></div>
+      <div class="three">
+        <div><div class="sub-title">Mieszkańcy</div><div class="chart" id="c5-r"></div></div>
+        <div><div class="sub-title">Goście z Polski</div><div class="chart" id="c5-p"></div></div>
+        <div><div class="sub-title">Goście z zagranicy</div><div class="chart" id="c5-z"></div></div>
+      </div>
+      <p class="fine" style="margin-top:12px">Zacieniowany okres od maja 2026 roku obejmuje dane po prawdopodobnej zmianie metody pomiaru. Dane za październik i&nbsp;listopad 2024 roku są w&nbsp;większości identyczne. Goście z&nbsp;Polski obejmują turystów i&nbsp;odwiedzających jednodniowych krajowych i&nbsp;regionalnych.</p>
+    </div>
+    <p class="note"><b>Wniosek</b>Wały Chrobrego, bulwary i&nbsp;Łasztownia przyjęły w&nbsp;2025 roku łącznie około <span class="mz" aria-hidden="true">8,6</span>&nbsp;mln wizyt osób spoza Szczecina. Goście z&nbsp;zagranicy stanowili od <span class="mz" aria-hidden="true">93</span>% do <span class="mz" aria-hidden="true">66</span>% z&nbsp;nich, czyli więcej niż w&nbsp;większości pozostałych miejsc.</p>
+  </section>
+
+  <section class="entry" id="zagle">
+    <div class="head">
+      <div class="eyebrow">Efekt Żagli</div>
+      <h2>Sierpień na tle lipca w&nbsp;czterech kolejnych latach</h2>
+      <p>Wykres przedstawia stosunek liczby odwiedzających w&nbsp;sierpniu do liczby w&nbsp;lipcu. Wskaźnik porównuje dwa sąsiednie miesiące, dlatego jest mniej wrażliwy na zmiany poziomu danych między latami. Brak danych dziennych nie pozwala wyodrębnić samego wydarzenia ze szczytu wakacyjnego.</p>
+    </div>
+    <div class="plate">
+      <div class="plate-title">Sierpień względem lipca</div>
+      <div class="plate-sub">iloraz liczby odwiedzających w&nbsp;sierpniu i&nbsp;w&nbsp;lipcu danego roku</div>
+      <div class="legend">
+        <span><i class="sw bg-y23"></i>2023</span><span><i class="sw bg-y24"></i>2024</span><span><i class="sw bg-y25"></i>2025</span><span><i class="sw bg-sea"></i>2026</span>
+      </div>
+      <div class="chart" id="c6"></div>
+      <p class="fine" style="margin-top:10px">Dane dla Wałów Chrobrego, bulwarów i&nbsp;Łasztowni pominięto, ponieważ zmiany sposobu pomiaru w&nbsp;czerwcu 2025 i&nbsp;maju 2026 roku uniemożliwiają porównanie wskaźnika między latami. Turystów z&nbsp;Czech pominięto ze względu na skalę: w&nbsp;2026 roku wskaźnik wyniósł <span class="mz" aria-hidden="true">39</span>.</p>
+    </div>
+    <p class="note"><b>Wniosek</b>Sierpniowy wzrost ruchu zagranicznego wyraźnie się pogłębia. W&nbsp;2023 roku turystów zagranicznych było w&nbsp;sierpniu <span class="mz" aria-hidden="true">6,8</span> raza więcej niż w&nbsp;lipcu, w&nbsp;latach 2025 i&nbsp;2026 już <span class="mz" aria-hidden="true">4,8</span> raza. Wśród turystów z&nbsp;Niemiec wskaźnik wzrósł z&nbsp;<span class="mz" aria-hidden="true">5,4</span> w&nbsp;2023 roku do <span class="mz" aria-hidden="true">7,9</span> w&nbsp;2025 roku, a&nbsp;w&nbsp;2026 roku wyniósł <span class="mz" aria-hidden="true">2,3</span>. Liczba gości jednodniowych z&nbsp;Niemiec pozostaje w&nbsp;sierpniu na poziomie lipca, a&nbsp;w&nbsp;2026 roku była od niego niższa.</p>
+  </section>
+
+  <section class="entry" id="jakosc">
+    <div class="head">
+      <div class="eyebrow">Ostrzeżenia nawigacyjne</div>
+      <h2>Kwestie do wyjaśnienia z&nbsp;Selectivv</h2>
+      <p>Przed wykorzystaniem danych w&nbsp;komunikacji zewnętrznej rekomendujemy wyjaśnienie z&nbsp;dostawcą danych poniższych kwestii. Najważniejsza dotyczy możliwej zmiany metody pomiaru od maja 2026 roku.</p>
+    </div>
+    <div class="plate">
+      <div class="plate-title">Zmiana r/r w&nbsp;2026 roku: całe miasto i&nbsp;<span class="mz" aria-hidden="true">45</span> miejsc</div>
+      <div class="plate-sub">odwiedzający spoza Szczecina ogółem (turyści i&nbsp;jednodniowi) wobec wizyt osób spoza Szczecina w&nbsp;<span class="mz" aria-hidden="true">78</span> miejscach</div>
+      <div class="legend"><span><i class="lk bc-sea"></i>całe miasto</span><span><i class="lk bc-brass"></i><span class="mz" aria-hidden="true">28</span> miejsc</span></div>
+      <div class="chart" id="c7"></div>
+    </div>
+    <div class="notices">
+      <div class="notice key">
+        <span class="no">Komunikat 1</span>
+        <h3>Możliwa zmiana metody pomiaru od maja 2026 roku</h3>
+        <p>W danych o miejscach liczba wizyt osób spoza Szczecina wzrosła w&nbsp;maju 2026 roku o&nbsp;<span class="mz" aria-hidden="true">21</span>% r/r, a&nbsp;w&nbsp;lipcu i&nbsp;sierpniu o&nbsp;<span class="mz" aria-hidden="true">13–86</span>%, przy wzrostach rzędu <span class="mz" aria-hidden="true">1–85</span>% w&nbsp;miesiącach wcześniejszych. Na Zamku Książąt Pomorskich liczba takich wizyt wzrosła z&nbsp;<span class="mz" aria-hidden="true">5,9</span>&nbsp;tys. w&nbsp;kwietniu do <span class="mz" aria-hidden="true">83,2</span>&nbsp;tys. w&nbsp;maju. W&nbsp;tym samym miesiącu dynamika ruchu turystów krajowych w&nbsp;całym mieście zmienia się z&nbsp;około −<span class="mz" aria-hidden="true">49</span>% na +<span class="mz" aria-hidden="true">11–76</span>%.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 2</span>
+        <h3>Powielone dane za październik i&nbsp;listopad 2024</h3>
+        <p>W <span class="mz" aria-hidden="true">568</span> ze <span class="mz" aria-hidden="true">976</span> serii danych o&nbsp;miejscach wartości za listopad 2024 roku są identyczne z&nbsp;październikowymi. Dane dla całego miasta nie mają tego problemu.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 3</span>
+        <h3>Skokowy wzrost na Wałach Chrobrego w&nbsp;czerwcu 2025</h3>
+        <p>Liczba wizyt mieszkańców wzrosła z&nbsp;<span class="mz" aria-hidden="true">26,7</span>&nbsp;tys. w&nbsp;maju do <span class="mz" aria-hidden="true">979,7</span>&nbsp;tys. w&nbsp;czerwcu 2025 roku i&nbsp;pozostała na wyższym poziomie, co wskazuje na zmianę obszaru pomiaru.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 4</span>
+        <h3>Liczba noclegów niższa od liczby przyjazdów</h3>
+        <p>Dla turystów regionalnych w&nbsp;sierpniu 2023 oraz maju i&nbsp;czerwcu 2024 roku liczba noclegów jest niższa od liczby przyjazdów (<span class="mz" aria-hidden="true">1,67–9,43</span> nocy na przyjazd), co przy definicji turysty wymagającej noclegu nie powinno występować. W&nbsp;innych miesiącach wskaźnik sięga <span class="mz" aria-hidden="true">7,6</span>.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 5</span>
+        <h3>Luty 2025: przyjazdy równe liczbie odwiedzających</h3>
+        <p>We wszystkich sześciu grupach liczba przyjazdów jest identyczna z&nbsp;liczbą odwiedzających, co w&nbsp;pozostałych miesiącach nie występuje.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 6</span>
+        <h3>Zmiana listy krajów od października 2024</h3>
+        <p>Zestawienie wymienia od tego momentu <span class="mz" aria-hidden="true">76–24</span> krajów zamiast około <span class="mz" aria-hidden="true">57</span>. Dania, Hiszpania, Francja i&nbsp;Słowacja przestają występować osobno, co utrudnia porównania dla mniejszych rynków.</p>
+      </div>
+      <div class="notice">
+        <span class="no">Komunikat 7</span>
+        <h3>Ustalanie kraju zamieszkania</h3>
+        <p>Warto potwierdzić, na jakiej podstawie ustalana jest strefa zamieszkania użytkownika. Dotyczy to zwłaszcza gości z&nbsp;Ukrainy, którzy stanowią <span class="mz" aria-hidden="true">42</span>% turystów zagranicznych.</p>
+      </div>
+    </div>
+    <div class="plate">
+      <div class="plate-title" style="margin-bottom:14px">Definicje stosowane przez Selectivv</div>
+      <dl class="gloss">
+        <dt>Turysta</dt><dd>Osoba spoza Szczecina, która spędziła w&nbsp;mieście co najmniej dwa dni, w&nbsp;tym nocleg (co najmniej 4 godziny między 23:00 a&nbsp;7:00), a&nbsp;jej pobyt nie przekroczył 22 dni w&nbsp;badanym okresie.</dd>
+        <dt>Odwiedzający jednodniowy</dt><dd>Osoba spoza Szczecina, która spędziła w&nbsp;mieście co najmniej 3 godziny między 7:00 a&nbsp;23:00, bez noclegu. Osoby podróżujące w&nbsp;celach obowiązkowych (praca, nauka) są wykluczane limitem czterech podróży w&nbsp;miesiącu, a&nbsp;w&nbsp;ruchu regionalnym dwóch.</dd>
+        <dt>Krajowi</dt><dd>Osoby zamieszkałe w&nbsp;innym województwie niż zachodniopomorskie.</dd>
+        <dt>Regionalni</dt><dd>Osoby przemieszczające się między powiatami województwa zachodniopomorskiego.</dd>
+        <dt>Zagraniczni</dt><dd>Osoby, których strefą zamieszkania jest inny kraj niż Polska.</dd>
+        <dt>Unikalny użytkownik</dt><dd>Użytkownik, którego identyfikator nie powtarza się w&nbsp;bazie w&nbsp;danym okresie.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="entry" id="zrodla">
+    <div class="sources">
+      <span><b style="color:var(--ink)">Źródła.</b> Selectivv: ruch turystyczny w&nbsp;Szczecinie w&nbsp;podziale na grupy odwiedzających (VII 2023 – VIII 2026), pochodzenie gości zagranicznych (<span class="mz" aria-hidden="true">34</span> krajów) oraz wizyty w&nbsp;<span class="mz" aria-hidden="true">48</span> miejscach; zestawienia przekazane przez Żeglugę Szczecińską we wrześniu 2026 roku.</span>
+      <span>Wyniki zgodne z&nbsp;komunikatami miasta: <a href="https://visitszczecin.eu/en/news/1362-szczecin-leads-tourism-growth-poland" target="_blank" rel="noopener">Visit Szczecin, wynik 2025</a>, <a href="https://visitszczecin.eu/pl/aktualnosci/1350-szczecin-przyciaga-coraz-wiecej-turystow" target="_blank" rel="noopener">Visit Szczecin, grudzień 2025</a>.</span>
+    </div>
+  </section>
+
+  <footer>
+    <img src="logo.jpg" alt="" width="640" height="640">
+    <div class="ft">
+      <strong>Lucid Academy</strong>
+      <span>Toruń</span>
+      <span>Wersja demonstracyjna, listopad 2026. Kontakt: Piotr Jarczyk · <span class="mail">piotr.jarczyk.ai@gmail.com</span></span>
+    </div>
+  </footer>
+</div>
+
+<div id="tip" hidden></div>
+
+<script>
+(() => {
+  const D = {"months":["2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],"city":{"tk":{"u":[125398,155985,130257,60836,24953,32767,47680,45283,59827,64993,116608,127755,166247,174466,148214,108128,93025,121557,79994,94404,92346,77654,106074,135488,151921,222581,112375,106004,90273,101791,52771,66495,73021,75539,116462,122519,152203,199836],"p":[196036,173532,139981,68002,25733,44179,44284,55132,75195,68752,101911,128884,212129,160978,134618,92818,75503,108319,65290,96896,68311,68566,112083,108789,166523,238970,116864,103799,110726,135777,51932,66192,77824,74056,97711,144764,154321,243213],"n":[528940,524725,421504,217942,92289,141014,127764,142271,136947,198068,197763,278667,398331,447658,303641,217214,215638,275457,137818,183822,98909,108822,217864,204254,248379,396769,170165,204677,126155,227123,111083,206804,145869,183651,188885,229133,385390,442484]},"tr":{"u":[11941,15259,10143,8795,3644,2590,3630,2443,3939,6171,7157,9572,9568,12565,9183,5195,5132,4013,3055,8961,10448,9271,10487,8987,12833,20146,8388,8301,7314,5844,4272,10364,10927,10584,9602,10229,11897,30336],"p":[12417,13520,8350,8485,3577,1909,4080,2999,4371,7419,8333,8041,11764,12054,8194,5642,4129,3582,3211,7965,8194,7667,8255,8381,10447,21798,7822,7075,7120,5187,2724,8117,8191,9587,8191,8445,13927,20111],"n":[20901,17701,17757,19313,5993,5609,5638,7416,11547,19533,7537,10628,9635,28644,19097,12842,9906,12563,5555,12817,14646,23171,22572,16591,27826,39273,14912,8337,11332,12810,5184,26961,17280,17469,17250,14376,38545,41983]},"tz":{"u":[13714,23148,10064,7837,4231,5839,3794,7008,5638,8673,8692,13850,21913,55268,15944,10393,6116,7694,6651,6791,7603,9038,10085,15520,13705,61257,13290,8348,7289,9740,7058,10509,10301,9640,10225,14717,14911,61081],"p":[19570,28369,11172,7891,6029,5926,5067,6848,8056,7715,9065,19971,23155,42767,18660,10687,9085,7973,7405,7702,6780,8054,11604,11721,19712,62117,11499,10186,7382,7936,8982,10673,11824,11673,11803,17067,22270,57093],"n":[26697,78573,26049,21255,22355,25374,14260,22887,20099,16917,26279,33873,68387,85424,47106,14713,12381,21328,11200,19719,10781,16220,17869,29114,28554,74993,17680,17862,17809,13691,23462,17804,16069,16990,23021,30969,30832,92119]},"jk":{"u":[120921,166299,130705,106847,90635,118759,65221,98426,114634,122954,99607,161083,168796,183555,173452,124042,135959,158613,78514,101631,129239,163431,125183,155427,161690,240475,140668,148138,137791,156147,70688,90888,103566,152521,163398,161020,221566,307815],"p":[132201,120257,102116,79195,87830,82833,60328,63165,71700,109403,99578,109680,146316,220296,96897,121280,86584,148044,52920,93764,82785,134299,100804,94296,114515,209953,78279,90717,121025,142591,59573,88283,94553,113128,121033,138480,197319,223964]},"jr":{"u":[65709,70215,64597,72272,70686,95362,99826,73617,59318,99903,81888,56529,69639,95218,87937,87225,80619,107485,81508,130328,144100,175531,128093,75730,51691,160784,59750,92428,73531,162018,103970,128303,129022,139687,142120,78928,160881,208896],"p":[37940,44915,51909,40219,56494,59384,54724,38516,38086,60136,49341,47191,45755,74840,38374,42383,64523,58272,59486,59215,74996,77438,75729,41565,31898,121125,42811,43523,50213,68132,57976,65648,69846,87690,88784,37214,128461,121215]},"jz":{"u":[135373,119224,180078,174868,124671,184381,159618,155382,108202,147203,167977,149562,181581,186058,129142,170877,124227,178437,144786,150840,171012,155470,138462,157128,127678,125650,178040,159971,115754,135378,164612,126024,148687,174571,153471,193563,140572,191583],"p":[136534,183278,134992,178703,134715,157519,149091,174667,139780,189462,149536,195359,140740,215041,151931,203840,189187,173956,152814,231156,148240,146042,186204,206219,159104,150162,156388,130731,136139,231115,156786,187750,153131,205861,170257,161154,200829,186147]}},"countries":{"Niemcy":{"t":[9852,16420,8632,4372,3135,2839,2138,4147,4678,5979,5248,8190,10614,24132,14330,5841,4696,5603,3058,4375,4013,3610,5602,6581,10541,36327,9369,3878,3772,4699,5074,4287,4341,4484,5152,10379,11525,37330],"j":[54022,52030,67607,61790,65457,77381,57831,91482,82108,93918,65068,65616,68417,85834,78154,64672,70803,87814,76081,71643,85644,89436,91298,81744,49561,61268,94412,84415,52552,82307,103319,64396,95194,73341,91059,64102,69647,49543]},"Czechy":{"t":[629,591,311,145,144,139,136,176,206,194,251,1878,3882,8468,522,152,143,142,99,158,136,152,202,344,342,1594,333,239,198,222,115,240,177,164,269,331,312,10722],"j":[1215,750,727,971,1169,653,738,465,389,661,497,569,1689,6635,777,62,50,73,67,67,69,62,73,57,42,40,64,48,40,61,61,40,51,49,61,44,39,25853]},"Ukraina":{"t":[2283,4880,2418,2192,1434,3007,2693,1900,2205,1309,2439,2983,4677,4753,4171,2066,2475,2996,2019,2868,3173,4119,3710,3462,2970,3878,3376,3183,2593,4014,3451,3462,4544,4241,2342,3196,3540,7978],"j":[19122,20749,23202,14569,15593,12548,16529,10704,12611,21661,17669,20751,12025,15797,9937,11629,10728,8614,16945,18221,15307,16304,21924,21691,19370,18598,16381,11389,11409,12917,16649,11093,17042,23384,15595,18280,13353,8892]},"Wielka Brytania":{"t":[738,1195,697,327,261,324,311,425,518,519,394,669,1769,3631,892,687,441,768,485,567,526,617,686,1133,1494,4982,821,638,691,684,792,651,721,821,606,852,1000,5538],"j":[2362,4112,4169,4573,1860,2044,2079,2386,2185,2021,1660,2147,2695,6547,2346,2638,1960,2474,3405,3617,3705,5984,6208,5719,4018,3859,4356,4456,4343,4896,3920,4179,4587,3805,3848,4811,3897,21161]},"Szwecja":{"t":[217,218,91,58,38,79,68,91,71,94,110,151,353,1944,150,83,68,63,59,70,88,92,89,131,202,596,161,106,106,77,62,91,79,131,174,211,355,529],"j":[1686,1181,1616,1300,2576,2045,1986,2289,1880,2849,1655,2485,2365,3178,2791,3638,2636,3718,3543,3507,3317,3497,3275,3431,2928,3029,5050,3602,4461,5479,4312,4396,3166,3726,3709,4979,5725,2022]},"USA":{"t":[6,97,74,39,20,36,24,29,31,33,31,51,92,23,120,307,158,166,150,191,215,240,190,320,377,1755,286,109,138,188,176,213,275,230,269,439,707,3167],"j":[13,199,185,184,13,185,38,190,184,237,139,142,131,154,202,565,697,876,872,770,645,815,785,675,554,659,1054,926,1154,1000,719,627,788,972,1014,1739,889,4240]},"Białoruś":{"t":[5,4,3,1,1,1,15,24,51,56,57,141,314,505,3,210,170,202,189,269,153,206,222,426,482,1492,443,209,289,266,179,246,188,310,284,319,505,1647],"j":[11,4,3,3,17,11,566,660,413,688,544,931,822,928,827,1415,1853,1593,1502,1803,1654,1400,2086,1334,1314,1645,1914,1708,1444,2024,1886,1250,1627,1557,1673,2162,1618,3124]},"Holandia":{"t":[28,36,18,14,9,13,12,15,19,12,15,30,304,585,30,16,13,18,10,15,15,17,15,31,35,122,24,16,17,16,15,18,16,20,29,35,46,591],"j":[68,87,103,89,105,92,94,91,105,145,100,114,128,193,138,412,288,457,392,315,357,451,434,347,359,427,387,337,383,478,547,313,449,386,356,428,317,3663]},"Norwegia":{"t":[260,249,117,70,49,54,null,51,51,130,9,14,536,1030,163,55,45,52,33,64,46,67,73,163,195,636,165,78,78,110,64,87,80,113,102,191,248,371],"j":[1114,593,691,680,890,2547,664,1006,1372,694,632,630,3339,3174,1528,1933,2132,2150,2336,2052,2028,2377,2825,2270,2405,1743,2714,3315,2660,2784,3094,2171,1819,2305,2702,4462,3863,993]},"Izrael":{"t":[281,296,133,69,55,56,30,39,34,9,10,49,280,1242,144,163,86,136,98,126,95,97,106,158,173,891,137,73,99,104,120,80,128,107,157,187,286,982],"j":[734,297,305,459,789,591,812,860,645,581,652,748,604,752,830,1479,1613,1577,1770,1233,1037,1272,1404,1093,1069,1096,1432,1121,985,1099,2003,946,1674,1272,943,1053,889,1835]},"Włochy":{"t":[84,53,29,20,13,14,11,21,27,22,23,48,90,624,49,83,81,105,63,132,113,116,145,194,270,902,172,122,118,157,93,144,126,136,215,316,462,694],"j":[149,74,97,82,61,62,72,65,65,92,70,101,75,96,83,816,764,1114,983,963,1135,875,789,975,753,674,1037,855,775,1325,1158,942,655,1215,1483,1330,938,285]},"Pozostałe":{"t":[25,11,6,3,2,2,2,3,3,3,3,7,13,140,8,147,156,146,108,103,120,154,167,264,356,896,193,199,130,175,142,177,160,229,181,292,251,462],"j":[91,40,44,36,122,44,49,40,31,38,38,35,55,44,45,1183,1253,1426,1759,1402,1637,1179,1507,1033,774,964,939,806,793,1175,1673,1208,1148,1087,1044,1240,823,221]},"Dania":{"t":[79,641,264,157,121,167,99,130,180,178,146,292,500,1319,304,201,139,156,90,159,155,216,166,413,631,1781,366,164,184,205,149,259,251,291,298,344,443,762],"j":[362,1031,828,376,421,303,127,827,921,824,555,685,788,1223,927,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Słowacja":{"t":[23,46,25,19,10,17,16,24,22,22,19,40,772,1227,46,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[80,136,164,113,80,93,61,71,69,58,48,71,131,74,79,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Hiszpania":{"t":[120,71,30,16,11,13,8,12,12,11,10,17,40,421,49,11,10,14,10,11,12,12,13,30,25,140,24,13,9,8,14,20,14,16,21,34,33,54],"j":[521,98,106,97,75,62,100,77,90,114,108,93,132,161,105,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Litwa":{"t":[null,null,30,null,null,8,null,null,null,null,null,null,149,315,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Kanada":{"t":[13,48,26,14,11,12,11,17,19,19,18,29,51,384,39,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[24,101,85,69,42,138,116,80,119,125,81,80,120,133,124,299,251,188,240,256,357,378,365,381,312,234,422,271,237,410,379,348,364,307,345,499,234,91]},"Szwajcaria":{"t":[null,null,null,null,null,null,null,null,null,null,null,null,null,656,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Francja":{"t":[6,87,54,25,18,27,19,24,26,27,22,36,90,205,83,8,9,10,7,8,9,9,9,16,23,70,24,15,13,14,11,16,11,16,16,33,29,56],"j":[16,347,399,320,22,230,132,111,116,155,null,177,123,214,127,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Belgia":{"t":[8,null,3,null,null,null,null,null,null,null,6,11,46,26,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[37,19,14,18,21,19,15,16,15,17,14,22,14,21,18,271,199,227,292,252,259,202,284,301,261,248,276,278,319,336,401,381,348,216,287,310,237,68]},"Finlandia":{"t":[null,null,null,null,null,null,null,null,null,null,null,null,null,291,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Łotwa":{"t":[null,null,null,null,null,null,null,null,null,10,null,null,89,120,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Portugalia":{"t":[null,null,null,null,null,null,null,null,null,null,null,null,null,201,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Zjednoczone Emiraty Arabskie":{"t":[null,null,null,null,null,null,null,null,null,null,null,null,null,156,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Chiny":{"t":[null,null,null,null,null,null,null,null,null,null,null,null,null,125,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Węgry":{"t":[null,null,null,null,null,null,null,null,null,null,null,null,48,126,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Austria":{"t":[null,null,null,null,null,null,null,null,null,null,null,null,111,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"j":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}},"poi":{"Deptak Bogusława/ Plac Zgody":{"res":[222680,223966,122748,223384,174934,162477,92736,95666,99010,96183,120308,146763,177343,182406,181366,173140,207838,214455,226883,276113,226820,326919,383891,313537,453967,434037,428865,188307,193131,229730,267261,259396,236095,178492,240012,300601,608817,531320],"tk":[1809,1102,1152,1440,1470,1866,728,861,646,784,1116,1275,1982,1640,1200,1316,1696,1604,1748,1429,1220,2373,2639,2686,2262,3495,2659,1156,1106,1336,1452,1295,1333,1421,1515,2562,3559,4556],"tr":[189,136,128,186,242,171,98,105,120,118,135,162,164,167,220,129,187,292,225,274,259,483,493,485,723,566,831,208,241,374,292,261,301,307,295,346,700,766],"tz":[299,289,225,290,173,184,84,101,118,141,221,261,378,314,348,210,338,504,396,442,414,645,621,784,798,890,788,292,333,275,313,334,302,455,559,765,1326,1457],"jk":[3959,4352,3498,3757,5525,4698,2941,2066,2300,2599,3621,3966,4732,5389,4387,3497,4989,6461,5079,6584,4759,8287,6905,7581,8323,11496,11670,4486,5618,6975,6033,4464,4582,5859,5037,6083,12091,17967],"jr":[24072,24238,25044,19749,27695,29197,14042,15544,5375,16818,3124,30358,17309,24187,31166,16717,27222,29220,34606,39738,31950,32825,33509,39956,45542,46315,61808,5266,16317,19349,25533,34230,27760,30131,29969,43979,93620,110391],"jz":[6676,5535,3936,5319,4707,4996,2923,2881,1872,2579,3868,4786,6297,5484,4960,3845,6334,7611,6216,5410,7127,8801,6773,10825,10446,11379,13203,5207,5768,5448,4988,4887,5045,4450,5111,9070,15667,19704]},"Bulwar Piastowski/Gdyński":{"res":[79798,272312,44396,56510,47406,45219,49697,53602,32934,38704,54696,78121,84445,272390,57899,65117,50824,69355,77116,65935,82131,76777,65519,68836,96204,79711,86653,87538,100846,123887,89851,106985,105382,128427,202917,331177,307168,403516],"tk":[2447,9787,1813,1599,1240,905,1459,1734,1220,1584,1747,1612,2485,7894,1934,1731,1756,1891,1833,1737,2399,2496,2090,3061,2162,2927,3425,2992,2749,3565,3788,3738,2630,3166,6452,15066,13254,14577],"tr":[212,1133,205,186,139,105,110,141,101,160,154,247,247,1257,190,209,225,277,237,220,262,254,182,268,412,288,475,302,271,278,404,345,437,248,557,1103,1273,1458],"tz":[2510,9934,145,198,161,88,130,152,92,133,158,229,2597,8398,207,130,147,197,165,171,155,161,164,230,302,245,394,216,179,316,396,331,366,232,568,1161,1069,3515],"jk":[2874,11266,2121,1825,1796,1737,1571,2094,1520,2365,2453,2177,2438,16281,2396,1957,1931,2194,2313,3981,3903,3281,2832,3425,5341,5385,5263,3776,4783,6877,5286,5571,5778,5095,12925,14968,20593,40030],"jr":[4046,11237,6696,4144,2596,4004,1869,6410,10891,16401,6946,6742,4178,15103,6760,4046,4017,5179,7652,5841,9119,7582,5104,9129,8694,8699,7417,5546,3423,5033,11155,12528,12754,10184,15210,29060,28649,37149],"jz":[7238,33425,4134,5323,4317,2913,3538,3976,4094,4583,6342,4804,7776,37823,5861,4081,4243,5737,5947,7209,6942,5845,5266,6952,8109,5710,11091,7084,6241,7962,7822,10833,7494,10336,18569,33283,37720,51187]},"Dworzec Główny":{"res":[176568,188024,113378,91497,60708,68349,56524,76251,83747,93272,94145,124288,101574,128442,142923,73991,89072,83414,48320,26903,10458,30415,49162,74803,143054,95370,188003,8035,8729,13069,97780,12225,15345,5862,10975,45680,40446,26116],"tk":[29734,31445,25218,28711,20204,16131,25068,27156,19666,26018,30028,31075,29315,33987,35410,28751,24906,27439,20867,22046,16338,17499,24305,20872,23431,28349,26451,20687,15676,16259,32340,22242,18489,17947,17783,18566,21365,21329],"tr":[3035,3219,1576,2297,2115,1681,1705,2468,1968,2497,2617,2137,2746,2470,2187,2903,2231,2818,1623,2363,1908,1913,2299,2409,3340,3629,3404,2327,1999,2911,1579,2027,2077,1347,2373,1994,3510,3633],"tz":[18527,23323,5097,5741,4824,3479,4258,6466,4852,4765,6422,8177,21012,19460,8474,6587,7102,8109,6478,6400,5526,5422,6878,8037,9290,8274,9506,6071,6686,6937,5942,7354,4712,6243,8770,9558,9142,12455],"jk":[84350,91423,66198,61560,50753,51724,54310,70698,57759,78482,58856,65727,91355,78814,60490,67292,52690,68317,50601,58161,40549,62293,65073,54037,59188,61516,53959,53149,49659,64050,46554,57962,52885,54572,71600,56699,83435,80450],"jr":[389436,287969,187938,247827,254273,241976,263102,281583,348277,388776,368704,285380,413366,374962,360715,304404,337797,424130,194848,317869,297824,277168,327392,356217,296880,392065,334803,285750,266181,247091,278034,346736,292984,241141,249013,327785,435631,483784],"jz":[137538,107611,76437,98942,60241,49741,75350,97392,82724,102594,72082,102646,114692,103427,92796,79215,76042,89663,63559,48540,70849,47656,48647,83170,83160,102356,59420,70325,51556,63626,56100,45102,49157,43335,66782,74250,103009,99615]},"Łasztownia":{"res":[67303,228245,75283,43424,43422,43810,54142,53627,49154,68636,65192,104300,116313,275324,74898,64056,64691,68449,45537,45977,70619,61208,59495,114513,149368,121107,152800,49868,70762,45456,77656,54502,90304,66328,360956,537544,437480,706997],"tk":[1837,5111,1328,893,1080,959,1154,1077,796,859,1240,1445,1778,7627,1340,1042,1174,1202,632,776,1037,1181,1173,1688,2089,2261,2071,857,996,845,1452,1213,1141,1189,3742,8054,10539,19310],"tr":[208,411,141,106,73,65,98,81,108,89,146,132,216,494,159,80,102,145,69,64,89,91,90,160,207,224,227,68,67,87,106,78,80,91,392,801,899,1372],"tz":[2190,7668,255,184,101,179,207,192,180,212,231,294,2901,7198,296,170,222,314,147,176,219,211,190,406,510,553,469,246,278,227,213,153,256,235,843,1535,1827,3910],"jk":[1724,5093,1536,963,880,1245,1272,1540,1066,1065,1335,1465,1917,6906,1589,1064,1506,1959,1093,1186,1268,1213,1585,2325,2497,2258,2845,1133,1073,1172,1308,1253,1226,1232,6850,8021,11645,28250],"jr":[11406,54999,4963,3594,2843,2765,4030,3366,1769,1852,1382,5083,12247,54446,5671,3201,4524,5939,2443,4153,4173,4852,4622,9334,9784,11277,9926,7438,7661,18319,4863,4472,4022,5619,16315,23122,29145,50978],"jz":[6164,22609,5926,3273,3078,3151,4099,2590,3536,3773,4589,4283,6911,20122,4866,2990,4493,4623,3578,3403,3486,5087,4068,9266,8975,10267,10674,4734,4786,4417,5013,3653,3840,4565,24352,22331,25970,68632]},"Wały Chrobrego":{"res":[46100,183669,27989,34185,26735,25355,35133,30233,25330,37439,42159,43279,58565,183170,40615,31370,40655,34317,39003,27609,22866,44816,44785,160732,153036,241220,210900,144963,157468,100183,89538,108930,99929,115287,453880,349748,486861,577923],"tk":[1348,4107,1131,1120,583,412,894,780,645,774,761,1258,1450,3945,1087,810,865,758,971,769,795,813,766,4629,4955,7716,6013,4034,3877,2197,2708,2611,2475,2396,8286,10883,14487,25458],"tr":[99,329,79,80,58,59,89,79,66,89,106,122,150,314,118,89,103,91,84,58,59,80,62,331,325,676,464,329,340,177,226,236,207,170,593,775,945,1543],"tz":[1068,4886,137,188,91,132,141,113,134,165,193,218,1423,4300,181,146,191,149,189,128,126,187,165,718,1135,1735,1409,667,635,438,394,546,444,487,2264,2716,2477,7782],"jk":[3876,12159,2358,1865,1862,1279,1911,2049,1862,2875,2779,3291,4492,10890,2406,2883,2633,1927,2181,2249,2327,2498,3343,12373,14930,26502,19496,10683,9066,6164,7095,7162,6678,5797,29311,44088,36173,76390],"jr":[8737,35375,8137,10729,1781,3879,2037,3249,8452,6294,9235,9899,13344,35455,12269,9903,9916,8224,9102,6698,6711,8125,10649,36941,40974,57272,43555,34546,38535,22164,24323,18306,18838,26831,91163,119317,94087,180435],"jz":[5595,21845,5417,3985,3693,3963,4702,3677,5034,6066,4995,6529,8074,18919,5791,5691,5763,5145,5616,5533,4958,5458,4094,25424,26485,50979,28854,23584,24116,15735,14554,12431,16037,14831,68507,64378,77847,139105]},"Jasne Błonia":{"res":[24023,22415,15626,15769,12455,8304,14236,10621,10391,10825,17977,16872,22247,18827,29055,22434,22426,22572,23936,27738,25257,25009,28304,20940,71255,25253,76355,66697,53622,60693,65588,55654,50926,62165,160358,310625,334703,340731],"tk":[398,655,476,284,174,140,168,195,195,197,236,353,519,522,414,453,358,378,508,448,356,549,430,467,1736,531,1758,1190,1152,1577,1889,1475,1307,1166,3907,7579,7837,9523],"tr":[39,37,32,19,16,13,16,13,13,19,25,25,34,34,31,21,27,29,37,34,24,31,37,31,90,36,87,77,81,115,122,97,81,78,187,425,386,495],"tz":[391,554,81,68,32,24,33,33,36,36,47,54,533,543,99,80,97,118,89,135,88,111,105,126,382,121,349,307,298,374,275,314,266,313,778,1222,1315,1869],"jk":[855,980,729,511,356,288,385,375,498,436,635,591,729,713,1022,810,658,976,879,958,578,809,895,1058,3304,964,2554,2372,1793,3098,3212,2728,2038,2577,7199,15554,16585,15504],"jr":[4991,3677,4944,3265,256,1032,351,1382,1222,1989,2573,4027,4765,3929,4704,3153,3214,4094,5022,6013,5769,7276,6072,6518,20245,8031,18365,22074,22898,21794,12775,14557,12872,10834,50164,65681,100002,115744],"jz":[1956,1539,1440,1011,1031,598,857,846,980,887,1505,1316,1509,1397,1631,1353,1706,1705,1401,1934,1151,1729,1461,1682,6724,2536,6170,4149,3726,4664,7515,5361,3427,3436,8276,20638,21560,29012]},"Brama Portowa":{"res":[8327,11109,11081,8937,5475,4759,4272,3854,3340,4029,6457,9315,11658,10618,8632,6638,6814,8333,5118,5865,5461,6562,5255,4620,4534,6559,6396,4450,6553,5961,6558,8265,7291,6116,43670,127368,127764,99299],"tk":[580,723,521,556,322,341,245,235,223,255,335,653,771,900,586,412,443,720,444,504,361,364,478,472,364,494,601,493,519,649,653,480,650,492,2540,8701,8924,9024],"tr":[67,73,65,52,44,21,30,19,29,29,38,64,66,68,50,56,53,53,39,38,37,35,32,39,31,36,42,38,37,40,38,43,36,49,272,861,762,1124],"tz":[396,320,105,84,64,39,45,36,46,37,58,146,382,407,115,100,98,111,77,68,66,93,89,60,92,72,119,71,71,89,109,99,82,116,491,2014,1452,2100],"jk":[562,675,582,494,622,480,439,414,384,502,245,521,815,846,564,524,547,586,321,455,352,451,272,350,333,431,468,324,384,503,490,616,471,468,2436,6319,8515,6527],"jr":[1077,1670,520,522,546,54,474,51,113,50,332,716,1265,2499,528,557,577,565,363,427,394,455,489,625,520,621,648,718,414,988,599,574,622,676,2768,9238,8131,10213],"jz":[1649,1556,1520,1168,1121,550,814,576,625,765,1134,1627,1757,2062,1584,1089,1379,1218,851,926,874,725,611,574,452,556,687,826,634,786,1496,1068,851,831,5447,13759,14313,17177]},"Fabryka Wody":{"res":[2801,3126,2955,3594,2282,2399,2272,2208,2245,3237,5195,12574,16953,14118,15205,11551,8173,11835,10051,32109,30547,22531,22255,28900,45474,69658,59571,25079,25065,24137,28724,27930,26260,26458,20073,47344,70962,57524],"tk":[86,100,78,101,76,85,97,75,77,142,196,588,895,745,844,434,553,982,680,1786,1364,1363,1772,1645,3715,4657,4571,1237,1505,1160,1599,1610,1546,1698,1490,2324,2921,2990],"tr":[7,7,6,6,7,7,6,6,6,16,19,55,68,65,53,43,52,69,66,88,112,111,87,74,167,225,212,89,87,102,119,115,120,89,96,131,237,222],"tz":[17,18,17,13,12,12,16,15,16,26,37,121,244,168,161,104,126,155,126,315,321,306,287,337,616,528,629,222,228,283,286,343,285,255,226,382,803,883],"jk":[96,123,102,76,73,78,99,93,78,147,213,566,714,650,608,470,344,656,540,831,834,967,936,880,1451,1957,1903,751,839,733,1327,1127,924,844,930,1319,1774,2258],"jr":[1016,1161,1051,835,1064,789,946,928,671,1287,2329,7870,9759,10100,9674,6906,6046,10402,11654,16528,18091,16723,17198,21611,54283,53868,51840,24972,29867,22184,22361,20488,24941,23364,20061,31489,50360,60792],"jz":[434,332,343,399,241,356,346,250,251,431,667,1826,2730,2333,2228,1404,1816,2420,1905,4400,4411,4995,4913,5104,6851,10504,9294,4186,4075,4768,3977,6346,5954,5044,5046,7885,14038,11590]},"Katedra":{"res":[32299,27569,27194,27624,24774,22652,40714,38949,31614,32062,27872,36118,43924,34852,30632,23054,26794,30852,34793,41688,39543,43831,42403,48789,54875,66819,50295,30105,29074,38594,25548,32712,29267,30569,104482,39333,54805,50139],"tk":[57,62,60,46,26,29,64,66,64,49,56,77,75,67,75,51,62,72,46,60,57,78,76,92,63,111,62,40,58,49,55,43,42,49,212,74,136,91],"tr":[5,5,3,2,2,2,6,5,5,4,5,4,4,5,5,4,4,5,3,4,3,3,5,5,5,5,6,3,3,3,3,4,3,3,9,5,6,4],"tz":[12,9,8,5,5,4,11,10,7,8,8,9,11,12,10,7,8,8,9,9,9,9,10,9,9,11,11,8,10,8,9,8,7,6,22,13,17,17],"jk":[156,198,104,96,95,79,120,172,144,134,116,133,201,170,134,116,153,135,173,164,141,176,244,265,232,312,272,185,196,151,153,138,141,149,580,274,243,464],"jr":[7471,8020,4302,3652,758,150,1449,354,200,2759,3445,5230,8038,7096,5137,3077,3127,4344,4072,4597,4472,5061,5872,6111,5817,7154,6739,3895,5858,4847,4281,3228,2717,3618,10127,5380,6409,7770],"jz":[293,162,157,164,119,136,238,242,222,219,242,233,244,242,253,145,190,166,194,175,259,294,276,307,395,363,482,177,271,223,158,170,237,184,708,430,482,644]},"Teatr Letni/Park Kasprowicza":{"res":[22145,30048,4882,3550,4002,4061,5026,4040,3507,2850,4083,5673,28521,29517,5267,3415,4155,3416,2875,2855,3533,3048,2567,4073,2884,4842,4797,3267,2521,2351,3592,4021,4238,4516,50673,52803,33263,32211],"tk":[429,389,84,71,60,44,60,51,44,52,76,70,308,328,59,49,69,69,51,46,60,71,69,82,70,72,99,44,48,51,58,72,68,67,856,1011,590,898],"tr":[51,46,10,8,7,6,10,9,7,6,7,8,65,48,12,8,6,8,5,8,9,7,7,7,8,8,8,7,6,5,7,7,7,12,110,126,85,101],"tz":[375,563,12,12,13,9,13,7,10,8,11,18,439,403,17,12,12,10,7,7,11,9,11,9,8,10,10,9,8,8,11,11,9,12,125,121,78,112],"jk":[386,398,78,45,53,47,79,63,57,51,54,74,395,415,77,41,39,37,45,39,44,45,42,55,48,51,60,57,40,43,43,43,42,41,525,456,383,977],"jr":[8878,7455,1207,1199,18,533,17,517,163,86,773,1475,11174,7093,1422,1036,1083,859,933,845,1021,754,1058,1007,959,1120,1051,988,1090,1247,955,1732,1365,1312,13716,11273,9601,11079],"jz":[1519,1610,269,195,258,148,270,213,164,213,245,265,1968,1451,234,178,247,257,161,185,202,252,198,318,211,383,278,248,265,212,223,359,282,339,3586,2593,2462,3370]},"Zamek Książąt Pomorskich":{"res":[1464,1636,1203,654,922,1204,528,606,598,400,988,1535,1449,1329,1262,1209,978,758,590,565,449,466,503,560,326,572,455,376,437,580,1245,622,629,395,2038,3612,3514,2475],"tk":[467,732,429,433,503,445,245,277,252,275,441,609,806,643,472,543,559,452,303,375,336,372,377,434,354,483,473,346,374,425,570,450,485,524,5437,6632,6937,6787],"tr":[56,121,88,60,53,54,36,28,32,34,51,85,92,98,73,88,76,68,64,53,60,63,47,85,90,91,104,68,53,95,104,114,100,78,612,626,1092,1085],"tz":[361,611,160,110,77,83,49,66,44,52,112,139,365,509,170,169,136,134,96,127,141,99,129,113,136,145,173,114,156,154,191,177,184,168,1556,2152,1648,2148],"jk":[650,1266,794,904,741,736,514,525,518,291,640,832,1188,1023,714,755,887,659,707,705,958,626,946,884,739,1103,921,856,766,1093,886,814,881,922,10640,10617,9715,13480],"jr":[387,679,345,380,40,67,18,44,32,7,28,395,540,674,426,360,393,401,232,371,365,488,358,449,369,703,454,374,662,957,610,550,447,605,4880,5585,7633,10498],"jz":[2250,2806,2015,1729,1546,1257,932,839,799,1052,1974,1965,2628,3095,2168,2525,1961,2580,1584,1690,2016,2259,1683,3016,2254,3566,2084,2100,2784,2336,2746,3431,2269,4098,30071,32455,34543,55561]},"Stadion":{"res":[26943,17754,34123,29989,34689,14913,14448,27524,48266,25248,41570,11695,25056,27791,28867,22043,25996,22874,943,32495,27447,43736,65371,20623,1053,32324,29311,22908,16633,14717,5051,33266,34414,43277,30782,13517,17781,21901],"tk":[3062,2556,2353,1963,1127,1057,768,1324,19941,1506,2901,816,1838,1595,1658,1075,5398,1522,33,7436,7730,1054,2194,1989,30,3246,3567,4890,6162,5530,1033,6004,6142,10483,1010,643,1766,4558],"tr":[495,1013,0,15,0,0,0,0,1994,0,0,0,504,397,0,13,0,12,0,0,0,0,0,0,0,0,0,0,0,0,120,722,1146,1288,3596,0,248,841],"tz":[1706,2074,29,0,12,0,0,0,2286,0,19,0,1423,1878,0,22,1757,31,0,0,0,0,0,0,0,0,0,0,0,0,530,2669,3466,4412,630,0,949,2654],"jk":[2955,2203,2207,1726,1725,828,916,2221,10268,2359,2733,807,2273,2150,1870,1225,3163,1632,51,3729,5004,512,613,1809,7,2777,4786,3386,3784,2687,633,4389,4773,5154,6895,867,1278,6233],"jr":[6755,7677,4499,3459,1492,2711,613,4480,13636,5028,7754,4140,10310,3129,3574,2553,9584,2453,73,10577,13240,6313,11562,5819,267,10354,8135,10924,13768,10867,1547,9376,11846,13508,9943,2103,3485,8464],"jz":[530,436,0,0,0,0,0,0,6407,0,0,0,1077,919,0,571,0,662,0,0,0,0,0,0,0,0,0,0,0,0,153,883,1019,1604,148,0,428,630]},"Enea Arena":{"res":[3325,3588,17178,15051,12080,7750,7261,13321,12509,14981,19397,12593,3233,3607,12320,14506,14281,14838,1063,1100,12605,6407,10328,10749,20606,2642,5865,25872,22333,29803,24271,25794,21569,36375,39498,null,5258,13725],"tk":[48,34,137,205,139,135,77,132,103,159,148,159,42,40,192,182,167,191,13,13,129,61,102,131,277,23,78,233,199,284,241,239,311,475,690,null,76,150],"tr":[5,6,24,25,20,13,9,16,21,31,36,28,7,7,24,29,31,32,1,3,16,11,18,14,30,3,10,27,25,36,34,49,47,55,98,null,10,21],"tz":[31,29,83,101,44,41,17,42,51,55,99,78,31,34,101,104,77,108,5,7,73,52,54,76,119,16,43,133,93,143,118,164,190,260,359,null,45,120],"jk":[131,166,511,370,369,398,261,302,395,634,558,400,127,166,329,341,458,403,26,29,280,190,246,248,315,35,155,647,391,518,577,614,851,610,1144,null,113,246],"jr":[4771,3276,12892,11756,7517,7283,4991,9426,11437,9161,12554,15614,5151,4360,10372,15843,11403,13925,993,1001,7941,6165,6691,6280,15260,1677,7162,15830,11545,8771,16937,13480,30822,30943,42245,null,5391,13567],"jz":[207,162,539,913,634,439,346,425,730,697,866,810,257,243,492,582,659,748,40,43,592,261,549,581,1006,105,329,1124,682,1160,1097,1001,1639,1276,2592,null,313,606]},"Ratusz Staromiejski/Stare Miasto":{"res":[32834,61670,25907,30862,27746,23361,40474,28239,30720,23512,39950,39258,44326,57693,40031,29037,35438,42811,29395,21358,25543,22712,30715,21897,31605,38261,25823,23709,18679,25241,25629,28998,23795,27019,35875,40627,48933,57432],"tk":[479,994,414,347,423,408,638,456,404,343,405,650,713,757,493,343,483,570,328,320,297,242,298,285,408,490,416,257,345,235,212,247,327,354,398,553,509,820],"tr":[42,61,28,37,26,22,33,34,29,29,37,37,74,61,60,33,45,63,34,36,39,33,26,35,31,39,37,30,30,31,25,45,39,33,43,60,77,79],"tz":[135,171,76,56,45,50,68,65,48,41,89,131,184,191,112,67,90,96,76,58,50,57,82,54,60,93,70,50,65,56,55,69,72,75,71,112,96,129],"jk":[871,1382,603,398,364,414,545,369,412,540,558,972,1154,1212,885,639,491,617,458,538,536,447,568,651,593,728,608,577,491,550,532,402,414,649,623,940,1170,1201],"jr":[34535,41833,22994,17312,12330,15513,15290,13220,15909,17873,21971,32879,54277,50469,29370,24075,19308,31076,14085,21108,15587,18213,16842,15757,14591,19374,15263,19057,22358,19084,16545,18566,20578,18172,26506,25896,24721,37360],"jz":[1424,1496,839,610,656,688,1070,1332,845,761,1240,1266,1405,1933,1541,1235,896,1497,625,857,874,620,596,610,806,657,824,839,828,832,586,675,708,1022,957,883,1742,1992]},"Cmentarz Centralny":{"res":[12615,12685,13685,9978,8127,8786,11382,9641,9284,9406,11013,12386,17175,13222,10997,10670,10728,12702,7471,7227,8098,6752,10585,9194,12574,11491,15794,10107,12015,11014,9614,9523,12625,13249,8432,14936,10135,10091],"tk":[196,281,196,207,145,115,135,164,147,178,140,177,193,218,198,213,191,202,135,107,153,191,146,229,270,218,391,268,291,230,198,236,206,243,200,348,178,200],"tr":[10,9,11,11,6,6,7,6,7,8,7,12,12,13,9,12,9,13,7,7,6,6,7,10,12,11,12,14,15,17,12,11,13,12,7,16,11,11],"tz":[32,44,21,23,18,14,17,13,13,18,19,22,36,31,35,26,31,42,20,13,16,15,20,22,28,19,33,25,29,20,31,27,25,20,16,33,23,24],"jk":[517,475,369,396,228,243,232,271,286,259,393,406,432,568,364,342,318,359,257,222,256,245,210,352,434,364,709,353,437,462,283,485,325,305,330,434,375,312],"jr":[5261,6630,5056,3689,295,662,222,596,374,772,2004,3815,7051,6256,4712,5094,3876,5535,3185,2221,2120,3796,2807,3961,3733,3688,7103,5506,5053,4344,4628,5055,5694,3377,3827,4833,3251,3864],"jz":[955,746,959,748,504,390,544,562,620,702,460,914,808,668,954,735,717,747,555,416,404,540,587,648,652,763,994,864,766,667,630,817,592,840,528,1215,1013,855]},"MCN":{"res":[9960,9917,7385,10657,5388,5318,3282,5214,4995,6616,7163,9839,10985,12564,8659,7394,10527,12310,8927,8599,9590,8058,9666,10084,11893,9186,12096,9406,5809,9092,8107,9387,11007,8996,11387,13893,11832,13469],"tk":[1328,945,717,786,641,511,361,447,425,516,785,1010,864,851,1003,632,731,1044,644,678,739,783,1055,1270,929,1335,1417,931,834,912,581,1083,737,964,967,984,1030,1029],"tr":[104,60,53,69,54,29,25,30,30,52,74,56,84,81,88,72,54,70,56,52,50,61,65,63,91,75,92,45,39,58,59,58,56,65,59,90,63,62],"tz":[464,380,281,246,125,124,87,97,113,179,265,345,491,479,228,252,223,360,197,256,294,363,351,474,346,382,445,260,229,197,290,295,272,252,381,319,361,281],"jk":[2572,2407,2323,2237,1634,1419,1082,897,780,1049,1399,1866,2710,2763,1999,1847,1709,2551,1536,1601,1981,1873,2734,2313,3176,3206,4243,1760,1750,1766,1276,1988,1470,1824,2567,2582,2519,2743],"jr":[8004,4287,4354,5682,6750,4589,3393,3056,4753,4742,6331,7041,5844,4989,4591,5776,5542,6907,3420,5368,4834,6336,6140,10482,7448,8102,8629,3457,4571,5346,6120,5329,5881,5173,7251,6286,6335,8038],"jz":[5393,4392,4088,4778,3421,2331,1999,1840,2179,3481,3084,4839,4189,4397,3211,4804,3968,5043,3075,2793,3875,3475,5257,6403,6856,6649,6942,3220,3213,3652,2830,2890,4540,3773,5287,5346,6155,4813]},"Netto Arena":{"res":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,11074,null,null],"tk":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,162,null,null],"tr":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,35,null,null],"tz":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,169,null,null],"jk":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,390,null,null],"jr":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,8079,null,null],"jz":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1170,null,null]},"CIT":{"res":[22,75,126,176,0,50,38,26,29,34,33,54,58,63,85,89,73,123,438,15,267,107,325,486,204,488,191,232,221,208,512,269,190,256,2844,2810,1521,1544],"tk":[675,749,612,362,415,400,429,433,363,408,445,705,766,851,535,479,440,444,657,540,406,490,467,596,913,546,796,502,494,520,462,408,427,522,2682,2512,2854,2185],"tr":[89,90,65,30,43,34,49,39,35,33,57,86,98,70,64,46,39,65,86,73,67,95,102,104,171,120,160,82,71,87,66,87,77,99,475,848,561,778],"tz":[607,565,164,140,69,72,74,68,51,80,92,158,547,455,191,147,115,185,168,162,192,123,164,121,278,161,283,133,181,142,179,147,149,199,1105,1055,962,1556],"jk":[778,582,544,486,480,718,775,572,445,544,640,652,1064,839,624,497,369,378,726,730,559,470,461,479,646,612,881,549,612,621,490,603,570,734,4375,3468,3210,4139],"jr":[49,61,239,147,36,91,49,79,29,44,89,225,40,69,255,113,117,224,257,200,189,177,224,212,397,345,414,339,422,466,238,251,199,192,1471,1266,1231,1302],"jz":[2162,1762,2794,1309,1095,1238,1519,1521,883,1120,1301,2368,1960,1750,2523,1546,1277,1679,2065,2725,1671,2157,2436,1888,4578,2806,4393,2111,1475,1879,2148,1965,2069,1897,13589,18409,17697,21544]},"Filharmonia/CDP":{"res":[163,3193,3562,4113,4287,3309,6001,5112,6375,9154,4081,5682,215,4420,5105,4554,3846,4984,3509,3526,3148,2867,4717,4362,4233,4145,5710,2332,2296,2466,2271,3286,2882,2951,15403,7464,5646,6256],"tk":[2,80,53,77,74,54,138,89,92,132,75,79,4,71,94,75,58,91,46,69,44,68,108,113,122,144,128,58,69,53,42,45,65,72,283,247,126,118],"tr":[0,5,4,6,4,4,9,8,6,9,6,6,0,5,5,6,6,4,3,3,2,5,5,6,6,6,9,4,3,4,3,4,2,3,17,12,7,9],"tz":[0,9,8,8,7,5,10,7,7,13,8,8,1,11,10,9,6,10,6,6,4,6,6,7,8,9,10,5,6,4,5,5,5,4,23,12,10,8],"jk":[4,119,149,136,96,79,214,164,177,274,123,114,7,152,154,119,176,160,102,118,106,109,100,171,210,147,230,88,111,128,87,98,81,79,525,307,247,207],"jr":[7,162,330,507,203,61,337,151,22,891,631,502,7,215,385,485,364,343,304,220,257,302,319,319,489,477,485,591,363,103,280,231,231,165,922,619,308,394],"jz":[11,236,279,409,217,146,294,291,269,416,339,309,22,400,338,319,390,304,235,292,261,259,268,321,383,414,547,230,202,189,210,237,178,209,1083,772,429,348]},"Muzeum Techniki":{"res":[2861,3346,2402,2780,2162,1786,1547,2080,1925,2571,2910,3083,4592,4622,4340,4044,4024,2696,2689,2003,3001,2739,3652,3306,4218,2548,5177,2309,1978,2806,2734,3148,2488,2109,2371,3427,2468,3145],"tk":[82,105,66,71,77,57,49,64,61,64,77,86,88,148,95,112,101,126,89,57,78,64,51,84,80,76,93,56,51,74,72,63,64,46,45,65,43,44],"tr":[34,44,24,20,19,11,13,15,14,19,26,32,27,45,28,20,29,34,17,21,15,22,21,20,22,29,35,17,15,19,26,18,14,18,16,23,16,15],"tz":[95,87,56,34,20,29,17,19,21,30,45,62,80,88,60,47,59,53,46,43,36,44,53,52,67,54,76,46,37,35,33,37,44,41,29,41,37,40],"jk":[500,762,480,354,330,280,362,363,403,531,564,527,759,847,672,475,545,461,411,434,564,475,450,607,791,635,960,470,480,554,410,424,456,346,397,586,392,531],"jr":[5287,3940,2208,1694,1464,2134,1268,1987,1717,2640,3282,3347,3776,4889,3458,2943,2719,3993,2520,1673,2657,2274,2027,2976,2376,3172,2624,1893,2504,2347,1617,2102,1586,1451,1609,2359,1584,2073],"jz":[462,627,427,348,278,312,219,237,294,296,451,420,437,490,601,412,397,588,335,283,430,370,492,653,629,635,668,392,307,420,296,289,335,369,271,386,295,346]},"Willa Lentza":{"res":[101,11,97,253,57,87,80,79,69,60,82,101,127,115,180,272,233,164,166,315,328,402,381,368,589,572,554,343,363,464,238,355,530,578,585,406,1167,1266],"tk":[298,313,214,246,231,166,212,222,256,224,190,322,287,316,336,250,210,276,146,264,289,183,205,136,196,205,233,200,272,347,224,318,307,303,233,191,630,578],"tr":[24,29,19,23,18,12,23,19,24,32,21,23,32,33,24,22,16,19,13,19,13,20,18,19,16,30,20,21,18,22,23,19,19,18,22,22,49,80],"tz":[518,688,229,240,274,191,297,241,262,242,308,397,540,609,436,284,294,331,200,311,223,227,239,246,245,247,240,289,343,393,441,411,342,234,236,219,601,935],"jk":[177,138,162,185,201,151,261,327,263,293,291,233,180,137,259,209,153,174,153,158,117,178,101,137,131,134,123,135,143,148,257,256,187,194,132,162,291,370],"jr":[17,9,13,11,22,17,31,20,21,8,24,13,17,10,14,15,11,18,10,13,10,9,9,10,8,16,13,41,30,86,14,19,18,15,15,14,28,35],"jz":[668,701,417,457,424,274,525,514,513,688,409,680,562,766,490,525,579,568,261,296,463,351,274,296,306,374,370,392,377,412,653,402,464,492,434,424,974,1007]}}};
+  const M = D.months, N = M.length;
+  const MI = s => M.indexOf(s);
+  const T = ['tk', 'tr', 'tz'], J = ['jk', 'jr', 'jz'];
+  const ROM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+  const MONF = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'];
+  const ym = i => { const [y, m] = M[i].split('-'); return {y: +y, m: +m}; };
+  const mname = i => { const {y, m} = ym(i); return `${MONF[m - 1]} ${y}`; };
+  const rng = (y, a, b) => { const r = []; for (let m = a; m <= b; m++) { const i = MI(`${y}-${String(m).padStart(2, '0')}`); if (i >= 0) r.push(i); } return r; };
+  const sumIx = (arr, ix) => ix.reduce((s, i) => s + (arr[i] || 0), 0);
+  const cityAt = (cats, i, met = 'u') => cats.reduce((s, c) => s + D.city[c][met][i], 0);
+  const citySum = (cats, ix, met = 'u') => cats.reduce((s, c) => s + sumIx(D.city[c][met], ix), 0);
+  const BRK = MI('2026-05'), DUP = MI('2024-11'), LIST = MI('2024-10');
+
+  // formatowanie
+  const nf = new Intl.NumberFormat('pl-PL');
+  const nf1 = new Intl.NumberFormat('pl-PL', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const nf2 = new Intl.NumberFormat('pl-PL', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const MINUS = '−';
+  const signed = (x, f = nf1) => (x > 0 ? '+' : x < 0 ? MINUS : '') + f.format(Math.abs(x));
+  const pct = x => signed(x) + '%';
+  const big = v => Math.abs(v) >= 1e6 ? nf2.format(v / 1e6) + ' mln' : Math.abs(v) >= 1e4 ? nf1.format(v / 1e3) + ' tys.' : nf.format(Math.round(v));
+  const tick = v => v === 0 ? '0' : Math.abs(v) >= 1e6 ? nf1.format(v / 1e6).replace(/,0$/, '') + ' mln' : Math.abs(v) >= 1e3 ? nf.format(v / 1e3) + ' tys.' : nf.format(v);
+
+  // SVG
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const text = (parent, x, y, str, cls, anchor = 'start') => { const t = el('text', {x, y, class: cls, 'text-anchor': anchor}, parent); t.textContent = str; return t; };
+  const svgFor = (host, W, H, label) => { host.replaceChildren(); return el('svg', {width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: 'group', 'aria-label': label || ''}, host); };
+  const niceStep = (span, n = 4) => { const raw = span / n; const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 2.5, 5, 10].find(m => m * p >= raw) * p; };
+  const hbarPath = (x0, x1, y, h, r = 3) => { const w = x1 - x0; if (w < .5) return ''; r = Math.min(r, w, h / 2); return `M${x0},${y}H${x1 - r}Q${x1},${y} ${x1},${y + r}V${y + h - r}Q${x1},${y + h} ${x1 - r},${y + h}H${x0}Z`; };
+  const rectPath = (x0, x1, y, h) => (x1 - x0 < .5) ? '' : `M${x0},${y}H${x1}V${y + h}H${x0}Z`;
+
+  // dymek
+  const tip = document.getElementById('tip');
+  function showTip(pos, title, rows) {
+    tip.replaceChildren();
+    const t = document.createElement('div'); t.className = 'tt'; t.textContent = title; tip.appendChild(t);
+    rows.forEach(r => {
+      const row = document.createElement('div'); row.className = 'row';
+      if (r.key) { const k = document.createElement('i'); k.className = (r.shape === 'sw' ? 'sw ' : 'lk ') + r.key; if (r.shape === 'sw') { k.style.width = '10px'; k.style.height = '10px'; } row.appendChild(k); }
+      const s = document.createElement('strong'); s.textContent = r.value; row.appendChild(s);
+      if (r.label) { const l = document.createElement('span'); l.className = 'rl'; l.textContent = r.label; row.appendChild(l); }
+      tip.appendChild(row);
+    });
+    tip.hidden = false;
+    const bw = tip.offsetWidth, bh = tip.offsetHeight;
+    let x = pos.x + 16, y = pos.y + 16;
+    if (x + bw > window.innerWidth - 8) x = pos.x - bw - 16;
+    if (y + bh > window.innerHeight - 8) y = pos.y - bh - 16;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const hideTip = () => { tip.hidden = true; };
+  const centerOf = n => { const b = n.getBoundingClientRect(); return {x: b.left + b.width / 2, y: b.top + b.height / 2}; };
+  function bindTip(node, get, focusable = true) {
+    if (focusable) node.setAttribute('tabindex', '0');
+    node.addEventListener('pointermove', e => { const [t, r] = get(); showTip({x: e.clientX, y: e.clientY}, t, r); });
+    node.addEventListener('pointerleave', hideTip);
+    node.addEventListener('focus', () => { const [t, r] = get(); showTip(centerOf(node), t, r); });
+    node.addEventListener('blur', hideTip);
+  }
+
+  // animacje przy przewijaniu
+  const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const EASE = 'cubic-bezier(.25,.7,.25,1)';
+  function animateIn(root) {
+    if (REDUCED || !root.animate) return;
+    root.querySelectorAll('path.ln').forEach((p, i) => {
+      const L = p.getTotalLength(); if (!L) return;
+      p.style.strokeDasharray = L;
+      const a = p.animate([{strokeDashoffset: L}, {strokeDashoffset: 0}], {duration: 1300, delay: (i % 6) * 120, easing: EASE, fill: 'backwards'});
+      a.onfinish = () => { p.style.strokeDasharray = ''; };
+    });
+    root.querySelectorAll('path.aw').forEach(p => p.animate([{opacity: 0}, {opacity: 1}], {duration: 900, delay: 500, easing: 'ease-out', fill: 'backwards'}));
+    root.querySelectorAll('[data-grow]').forEach((n, i) => {
+      const dir = n.dataset.grow, ord = n.dataset.order !== undefined ? +n.dataset.order : i;
+      n.style.transformBox = 'fill-box';
+      n.style.transformOrigin = {up: 'center bottom', down: 'center top', right: 'left center', left: 'right center'}[dir];
+      const from = (dir === 'up' || dir === 'down') ? 'scaleY(0)' : 'scaleX(0)';
+      n.animate([{transform: from}, {transform: 'none'}], {duration: 800, delay: 60 + ord * 45, easing: EASE, fill: 'backwards'});
+    });
+    root.querySelectorAll('circle.dot').forEach((c, i) => {
+      c.style.transformBox = 'fill-box'; c.style.transformOrigin = 'center';
+      c.animate([{opacity: 0, transform: 'scale(.3)'}, {opacity: 1, transform: 'none'}], {duration: 420, delay: 300 + (i % 16) * 40, easing: EASE, fill: 'backwards'});
+    });
+    root.querySelectorAll('text.vlab, text.vlab-2, text.anno, text.anno-r, text.on-d, text.on-l').forEach(t => t.animate([{opacity: 0}, {opacity: 1}], {duration: 500, delay: 900, easing: 'ease-out', fill: 'backwards'}));
+  }
+  const io = ('IntersectionObserver' in window) ? new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); animateIn(e.target); } });
+  }, {threshold: .25}) : null;
+  function watch(ids) { if (!io || REDUCED) return; ids.forEach(id => { const n = document.getElementById(id); if (n && n.getBoundingClientRect().top > window.innerHeight) io.observe(n); }); }
+
+  // przełączniki
+  function seg(id, opts, val, onChange) {
+    const host = document.getElementById(id); host.replaceChildren(); host.setAttribute('role', 'radiogroup');
+    const btns = opts.map(([v, label]) => { const b = document.createElement('button'); b.type = 'button'; b.id = `${id}-${v}`; b.setAttribute('role', 'radio'); b.dataset.v = v; b.textContent = label; b.setAttribute('aria-checked', v === val ? 'true' : 'false'); host.appendChild(b); return b; });
+    const pick = b => { btns.forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); onChange(b.dataset.v); };
+    btns.forEach((b, i) => {
+      b.addEventListener('click', () => pick(b));
+      b.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const n = btns[(i + (e.key === 'ArrowRight' ? 1 : btns.length - 1)) % btns.length]; n.focus(); pick(n); } });
+    });
+  }
+
+  // uniwersalny wykres liniowy
+  function lineChart(host, o) {
+    const W = host.clientWidth, H = o.height || (W < 520 ? 240 : 300);
+    const m = {l: o.ml || (W < 520 ? 48 : 58), r: o.mr ?? 20, t: o.mt ?? 26, b: 30};
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const vals = o.series.flatMap(s => s.vals.filter(v => v != null));
+    const vmax = Math.max(1, ...vals), vmin = o.neg ? Math.min(0, ...vals) : 0;
+    const step = o.step || niceStep((vmax - vmin) * 1.05 || 1, o.ticks || 4);
+    const hi = Math.ceil(vmax * 1.04 / step) * step, lo = Math.floor(vmin / step) * step;
+    const x = i => m.l + (o.n === 1 ? iw / 2 : i * iw / (o.n - 1));
+    const y = v => m.t + ih - (v - lo) / (hi - lo) * ih;
+    const svg = svgFor(host, W, H, o.label);
+    if (o.shadeFrom != null) {
+      const sx = x(o.shadeFrom) - iw / (o.n - 1) / 2;
+      el('rect', {x: sx, y: m.t - 4, width: m.l + iw - sx + 4, height: ih + 4, class: 'shade'}, svg);
+    }
+    for (let v = lo; v <= hi + 1e-9; v += step) { el('line', {x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), class: Math.abs(v) < 1e-9 ? 'bl' : 'gl'}, svg); text(svg, m.l - 8, y(v) + 4, o.yFmt ? o.yFmt(v) : tick(v), 'ax', 'end'); }
+    for (let i = 0; i < o.n; i++) {
+      const lb = o.xLabel(i); if (lb) text(svg, x(i), H - 8, lb, 'ax', i === 0 && o.n > 12 ? 'start' : 'middle');
+      if (o.xGrid && o.xGrid(i)) el('line', {x1: x(i), x2: x(i), y1: m.t, y2: m.t + ih, class: 'gl'}, svg);
+    }
+    (o.marks || []).forEach(mk => {
+      el('line', {x1: x(mk.i), x2: x(mk.i), y1: m.t - 8, y2: m.t + ih, class: mk.cls || 'brk'}, svg);
+      if (mk.text && W > 420) text(svg, x(mk.i) + (mk.side === 'left' ? -6 : 6), m.t - 12 + (mk.dy || 0), mk.text, mk.tcls || 'anno-r', mk.side === 'left' ? 'end' : 'start');
+    });
+    o.series.forEach(s => {
+      let d = '', pen = false;
+      s.vals.forEach((v, i) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${x(i)},${y(v)}`; pen = true; });
+      if (s.area) {
+        const idx = s.vals.map((v, i) => v == null ? null : i).filter(i => i != null);
+        if (idx.length) el('path', {d: d + `L${x(idx[idx.length - 1])},${y(Math.max(lo, 0))}L${x(idx[0])},${y(Math.max(lo, 0))}Z`, class: 'aw'}, svg);
+      }
+      el('path', {d, class: 'ln ' + s.cls}, svg);
+      if (s.dots) s.vals.forEach((v, i) => { if (v != null) el('circle', {cx: x(i), cy: y(v), r: s.r || 3.5, class: 'dot ' + s.dots}, svg); });
+      if (s.end) {
+        let li = s.vals.length - 1; while (li >= 0 && s.vals[li] == null) li--;
+        if (li >= 0) { el('circle', {cx: x(li), cy: y(s.vals[li]), r: 4, class: 'dot ' + s.end}, svg); if (s.endText) text(svg, x(li) + 8, y(s.vals[li]) + 4 + (s.endDy || 0), s.endText, 'vlab'); }
+      }
+    });
+    if (o.tip) {
+      const xh = el('line', {y1: m.t - 4, y2: m.t + ih, class: 'xh', visibility: 'hidden'}, svg);
+      const hit = el('rect', {x: m.l - 6, y: m.t - 10, width: iw + 12, height: ih + 10, class: 'hit'}, svg);
+      let cur = o.n - 1;
+      const show = (i, pos) => { cur = i; xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('visibility', 'visible'); const [t, r] = o.tip(i); showTip(pos, t, r); };
+      const hide = () => { xh.setAttribute('visibility', 'hidden'); hideTip(); };
+      hit.addEventListener('pointermove', e => { const b = svg.getBoundingClientRect(); const i = Math.max(0, Math.min(o.n - 1, Math.round((e.clientX - b.left - m.l) / (iw / (o.n - 1))))); show(i, {x: e.clientX, y: e.clientY}); });
+      hit.addEventListener('pointerleave', hide);
+      svg.setAttribute('tabindex', '0');
+      const posOf = i => { const b = svg.getBoundingClientRect(); return {x: b.left + x(i), y: b.top + m.t + ih / 3}; };
+      svg.addEventListener('focus', () => show(cur, posOf(cur)));
+      svg.addEventListener('blur', hide);
+      svg.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const i = Math.max(0, Math.min(o.n - 1, cur + (e.key === 'ArrowRight' ? 1 : -1))); show(i, posOf(i)); } });
+    }
+    return {x, y, svg};
+  }
+  const timeLabel = W => i => { const {y, m} = ym(i); if (i === 0) return `VII ${y}`; if (m === 1) return String(y); if (W >= 700 && m === 7) return 'VII'; return null; };
+
+  // uniwersalny ranking poziomy
+  function ranking(host, o) {
+    const W = host.clientWidth, narrow = W < 560;
+    const lw = narrow ? 0 : (o.labelW || 200), rw = narrow ? Math.min(o.valW || 130, 132) : (o.valW || 130);
+    const bh = o.bh || 16, rowH = narrow ? bh + 26 : (o.rowH || 26);
+    const H = o.rows.length * rowH + 6;
+    const iw = W - lw - rw, x = v => v / o.xMax * iw;
+    const svg = svgFor(host, W, H, o.label);
+    o.rows.forEach((r, ri) => {
+      const y0 = ri * rowH + (narrow ? 18 : (rowH - bh) / 2), yl = narrow ? ri * rowH + 12 : y0 + bh / 2 + 4;
+      const g = el('g', {}, svg);
+      if (r.selected) el('rect', {x: -6, y: ri * rowH, width: W + 6, height: rowH, class: 'rowsel'}, g);
+      const lt = text(g, 0, yl, r.label, r.selected ? 'ax-sel' : 'ax-l');
+      if (r.tag) { const tw = lt.getComputedTextLength(); text(g, tw + 8, yl, r.tag, 'tag'); }
+      let x0 = lw;
+      r.segs.forEach((s, si) => {
+        const w = x(s.v); const last = si === r.segs.length - 1;
+        const d = last ? hbarPath(x0, x0 + w, y0, bh) : rectPath(x0, x0 + w - (w > 3 ? 2 : 0), y0, bh);
+        if (d) el('path', {d, class: 'bar ' + s.cls, 'data-grow': 'right', 'data-order': ri}, g);
+        x0 += w;
+      });
+      const vt = text(g, x0 + 8, y0 + bh / 2 + 4, r.valText, 'vlab');
+      if (r.subText) text(g, x0 + 8 + vt.getComputedTextLength() + 8, y0 + bh / 2 + 4, r.subText, 'vlab-2');
+      const hit = el('rect', {x: -6, y: ri * rowH, width: W + 6, height: rowH, class: o.onPick ? 'rowhit' : 'hit'}, g);
+      if (o.tip) bindTip(hit, () => o.tip(r), !o.onPick);
+      if (o.onPick) {
+        hit.setAttribute('tabindex', '0'); hit.setAttribute('role', 'button'); hit.setAttribute('aria-label', r.label);
+        hit.addEventListener('click', () => o.onPick(r.key));
+        hit.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); o.onPick(r.key); } });
+      }
+    });
+  }
+
+  // ---------- kafelki ----------
+  function renderTiles() {
+    const ix26 = rng(2026, 1, 8), ix25 = rng(2025, 1, 8);
+    const items = [['Odwiedzający ogółem', T.concat(J)], ['Turyści', T], ['Odwiedzający jednodniowi', J], ['Turyści zagraniczni', ['tz']]];
+    const host = document.getElementById('tiles'); host.replaceChildren();
+    items.forEach(([lbl, cats]) => {
+      const a = citySum(cats, ix26), b = citySum(cats, ix25);
+      const d = document.createElement('div'); d.className = 'tile';
+      const l = document.createElement('span'); l.className = 'lbl'; l.textContent = lbl + ', I–VIII 2026';
+      const v = document.createElement('span'); v.className = 'val'; v.textContent = big(a);
+      const dl = document.createElement('span'); dl.className = 'delta';
+      const tri = document.createElement('i'); tri.className = 'tri' + (a < b ? ' down' : '');
+      const dt = document.createElement('span'); dt.textContent = pct((a / b - 1) * 100) + ' r/r';
+      dl.append(tri, dt); d.append(l, v, dl); host.appendChild(d);
+    });
+  }
+
+  // ---------- 1. sezony ----------
+  const c1 = {grp: 'all', orig: 'all', view: 'season'};
+  const catsFor = (grp, orig) => {
+    let cats = grp === 'tur' ? T : grp === 'day' ? J : T.concat(J);
+    if (orig !== 'all') cats = cats.filter(c => c[1] === orig);
+    return cats;
+  };
+  const YEARS = [[2023, 's-y23', 'bc-y23', 'd-y23'], [2024, 's-y24', 'bc-y24', 'f-y24'], [2025, 's-y25', 'bc-y25', 'f-y25'], [2026, 's-sea', 'bc-sea', 'f-sea']];
+  function renderC1() {
+    const cats = catsFor(c1.grp, c1.orig), host = document.getElementById('c1');
+    const series = M.map((_, i) => cityAt(cats, i));
+    const leg = document.getElementById('c1-legend'); leg.replaceChildren();
+    const W = host.clientWidth;
+    if (c1.view === 'time') {
+      const s = document.createElement('span'); const k = document.createElement('i'); k.className = 'lk bc-sea'; s.append(k, 'wartości miesięczne'); leg.appendChild(s);
+      lineChart(host, {n: N, label: 'Wartości miesięczne od lipca 2023', series: [{vals: series, cls: 's-sea', area: true, end: 'f-sea'}],
+        xLabel: timeLabel(W), xGrid: i => ym(i).m === 1, marks: [{i: BRK, text: 'V 2026: możliwa zmiana metody', side: 'left'}],
+        tip: i => { const prev = i >= 12 ? series[i - 12] : null; return [mname(i), [{key: 'bc-sea', value: nf.format(series[i]), label: 'odwiedzających'}].concat(prev ? [{value: pct((series[i] / prev - 1) * 100), label: 'zmiana r/r'}] : [])]; }});
+    } else {
+      YEARS.forEach(([yr, , bc]) => { const s = document.createElement('span'); const k = document.createElement('i'); k.className = 'lk ' + bc; s.append(k, String(yr)); leg.appendChild(s); });
+      const byYear = YEARS.map(([yr, cls]) => ({yr, cls, vals: ROM.map((_, m) => { const i = MI(`${yr}-${String(m + 1).padStart(2, '0')}`); return i >= 0 ? series[i] : null; })}));
+      lineChart(host, {n: 12, label: 'Nakładka sezonów 2023–2026', xLabel: i => ROM[i],
+        series: byYear.map(b => ({vals: b.vals, cls: b.cls, dots: b.yr === 2026 ? 'f-sea' : null, r: 3.5, end: b.yr === 2026 ? 'f-sea' : null, endText: b.yr === 2026 ? '2026' : null})),
+        marks: [{i: 4, text: 'maj 2026', side: 'left', cls: 'brk'}],
+        tip: i => [ROM[i] + ' · ' + MONF[i], byYear.slice().reverse().filter(b => b.vals[i] != null).map(b => ({key: YEARS.find(y => y[0] === b.yr)[2], value: nf.format(b.vals[i]), label: String(b.yr)}))]});
+    }
+    // tabela
+    const t = document.getElementById('c1-table'); t.replaceChildren();
+    const head = ['Rok', 'Styczeń–sierpień', 'Zmiana r/r', 'Cały rok', 'Zmiana r/r'];
+    const thead = document.createElement('thead'), tr = document.createElement('tr');
+    head.forEach(h => { const th = document.createElement('th'); th.scope = 'col'; th.textContent = h; tr.appendChild(th); }); thead.appendChild(tr); t.appendChild(thead);
+    const tb = document.createElement('tbody');
+    [2024, 2025, 2026].forEach(yr => {
+      const a = citySum(cats, rng(yr, 1, 8)), ap = yr > 2024 ? citySum(cats, rng(yr - 1, 1, 8)) : null;
+      const full = yr < 2026 ? citySum(cats, rng(yr, 1, 12)) : null, fp = yr === 2025 ? citySum(cats, rng(2024, 1, 12)) : null;
+      const cells = [String(yr), nf.format(a), ap ? pct((a / ap - 1) * 100) : '—', full ? nf.format(full) : '—', fp ? pct((full / fp - 1) * 100) : '—'];
+      const row = document.createElement('tr'); cells.forEach(c => { const td = document.createElement('td'); td.textContent = c; row.appendChild(td); }); tb.appendChild(row);
+    });
+    t.appendChild(tb);
+  }
+
+  // ---------- 2. symulator ----------
+  const sim = {grp: 'tur', g: 0, raf: 0};
+  const simCats = () => sim.grp === 'tur' ? T : T.concat(J);
+  const growthOf = (a, b) => (citySum(simCats(), rng(2026, a, b)) / citySum(simCats(), rng(2025, a, b)) - 1) * 100;
+  function simVals() {
+    const c = simCats();
+    const y24 = citySum(c, rng(2024, 1, 12)), a24 = citySum(c, rng(2024, 1, 8));
+    const a25 = citySum(c, rng(2025, 1, 8)), r25 = citySum(c, rng(2025, 9, 12)), y25 = a25 + r25;
+    const a26 = citySum(c, rng(2026, 1, 8)), r26 = r25 * (1 + sim.g / 100);
+    return {y24, a24, a25, r25, y25, a26, r26, total: a26 + r26, be: ((y25 - a26) / r25 - 1) * 100};
+  }
+  function buildPresets() {
+    const host = document.getElementById('sim-presets'); host.replaceChildren();
+    [['Dynamika I–IV', growthOf(1, 4)], ['Poziom 2025', 0], ['Dynamika I–VIII', growthOf(1, 8)], ['Dynamika V–VIII', growthOf(5, 8)]].forEach(([label, g], i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.id = 'sim-pre-' + i;
+      const r = Math.round(g * 10) / 10; b.dataset.g = r; b.textContent = `${label} (${r === 0 ? '0%' : pct(r)})`;
+      b.addEventListener('click', () => tweenSim(r)); host.appendChild(b);
+    });
+  }
+  function updateSim() {
+    const v = simVals(), diff = v.total - v.y25;
+    document.getElementById('sim-gv').textContent = pct(sim.g);
+    document.getElementById('sim-lbl').textContent = sim.grp === 'tur' ? 'Szacowana liczba turystów w 2026 roku' : 'Szacowana liczba odwiedzających w 2026 roku';
+    document.getElementById('sim-total').textContent = big(v.total);
+    document.getElementById('sim-delta').textContent = `${signed(Math.round(diff / 1000), nf)} tys. (${pct(diff / v.y25 * 100)}) względem 2025 roku`;
+    const chip = document.getElementById('sim-chip'), up = diff >= 0; chip.replaceChildren();
+    const tri = document.createElement('i'); tri.className = 'tri' + (up ? '' : ' down');
+    chip.append(tri, document.createTextNode(up ? 'powyżej wyniku 2025 roku' : 'poniżej wyniku 2025 roku'));
+    document.getElementById('sim-note').textContent = `Wynik 2025 roku (${nf.format(v.y25)}) zostanie przekroczony, jeżeli ruch w okresie wrzesień–grudzień nie spadnie o więcej niż ${nf1.format(Math.abs(v.be))}% względem analogicznego okresu 2025 roku.`;
+    document.querySelectorAll('#sim-presets button').forEach(b => b.setAttribute('aria-pressed', Math.abs(+b.dataset.g - sim.g) < .05 ? 'true' : 'false'));
+    renderSimChart();
+  }
+  function tweenSim(target) {
+    const input = document.getElementById('sim-g'); cancelAnimationFrame(sim.raf);
+    if (REDUCED) { sim.g = target; input.value = target; updateSim(); return; }
+    const from = sim.g, t0 = performance.now(), dur = 600;
+    const frame = now => { const k0 = Math.min(1, (now - t0) / dur), k = 1 - Math.pow(1 - k0, 3); sim.g = Math.round((from + (target - from) * k) * 10) / 10; input.value = sim.g; updateSim(); if (k0 < 1) sim.raf = requestAnimationFrame(frame); };
+    sim.raf = requestAnimationFrame(frame);
+  }
+  function renderSimChart() {
+    const host = document.getElementById('sim-chart'), v = simVals();
+    const W = host.clientWidth, narrow = W < 560, rp = narrow ? 8 : 110, bh = 26, rowH = 62, top = 22;
+    const H = top + rowH * 3 + 14;
+    const xMax = sim.grp === 'tur' ? 1600000 : 7000000, iw = W - rp, x = val => val / xMax * iw;
+    const svg = svgFor(host, W, H, 'Wyniki roczne 2024–2026');
+    const step = sim.grp === 'tur' ? 400000 : 2000000;
+    for (let t = 0; t <= xMax; t += step) { el('line', {x1: x(t), x2: x(t), y1: 8, y2: H - 20, class: t ? 'gl' : 'bl'}, svg); text(svg, x(t), H - 4, tick(t), 'ax', t === 0 ? 'start' : t + step > xMax ? 'end' : 'middle'); }
+    const rows = [
+      {lab: `2024 · ${big(v.y24)}`, segs: [[v.a24, 'f-sepia', 'I–VIII 2024'], [v.y24 - v.a24, 'f-sepia-soft', 'IX–XII 2024']]},
+      {lab: `2025 · ${big(v.y25)}`, segs: [[v.a25, 'f-sepia', 'I–VIII 2025'], [v.r25, 'f-sepia-soft', 'IX–XII 2025']]},
+      {lab: `2026 · szacunek ${big(v.total)}`, segs: [[v.a26, 'f-sea', 'I–VIII 2026'], [v.r26, 'f-sea-soft', `IX–XII 2026 przy dynamice ${pct(sim.g)}`]]}
+    ];
+    rows.forEach((r, ri) => {
+      const y0 = top + ri * rowH + 18;
+      text(svg, 0, y0 - 8, r.lab, ri === 2 ? 'ax-sel' : 'ax-l');
+      let x0 = 0;
+      r.segs.forEach(([val, cls, name], si) => {
+        const w = x(val);
+        const p = el('path', {d: rectPath(x0 + (si ? 1 : 0), x0 + w - (si ? 0 : 1), y0, bh), class: 'bar ' + cls, 'data-grow': 'right', 'data-order': ri * 2 + si}, svg);
+        bindTip(p, () => [name, [{value: nf.format(Math.round(val)), label: sim.grp === 'tur' ? 'turystów' : 'odwiedzających'}]]);
+        x0 += w;
+      });
+    });
+    el('line', {x1: x(v.y25), x2: x(v.y25), y1: top + rowH + 6, y2: top + rowH * 3 + 2, class: 'refl'}, svg);
+    if (!narrow) text(svg, x(Math.max(v.y25, v.total)) + 8, top + rowH * 2 + 18 + bh / 2 + 4, 'wynik 2025', 'vlab-2');
+    text(svg, x(v.a26) - 8, top + rowH * 2 + 18 + bh / 2 + 4, nf.format(Math.round(v.a26 / v.y25 * 100)) + '% wyniku 2025', 'on-d', 'end');
+  }
+  function initSim() {
+    const input = document.getElementById('sim-g');
+    const reset = () => { buildPresets(); sim.g = Math.round(growthOf(1, 8) * 10) / 10; input.value = sim.g; updateSim(); };
+    seg('sim-grp', [['tur', 'Turyści'], ['all', 'Wszyscy odwiedzający']], sim.grp, v => { sim.grp = v; reset(); });
+    input.addEventListener('input', () => { cancelAnimationFrame(sim.raf); sim.g = +input.value; updateSim(); });
+    reset();
+  }
+
+  // ---------- 3. kraje ----------
+  const c3 = {type: 't', per: 'y26', sel: 'Niemcy'};
+  const PER = {y26: {ix: rng(2026, 1, 8), cmp: rng(2025, 1, 8), label: 'styczeń–sierpień 2026; zmiana względem stycznia–sierpnia 2025'},
+               y25: {ix: rng(2025, 1, 12), cmp: rng(2024, 1, 12), label: 'cały 2025 rok; zmiana względem 2024 roku'},
+               y24: {ix: rng(2024, 1, 12), cmp: null, label: 'cały 2024 rok'}};
+  const hasAll = (arr, ix) => ix.every(i => arr[i] != null);
+  function renderC3() {
+    const p = PER[c3.per];
+    document.getElementById('c3-sub').textContent = (c3.type === 't' ? 'Turyści zagraniczni, ' : 'Odwiedzający jednodniowi z zagranicy, ') + p.label;
+    const rows = Object.entries(D.countries).map(([k, v]) => {
+      const arr = v[c3.type], val = sumIx(arr, p.ix);
+      const prev = p.cmp && hasAll(arr, p.cmp) && hasAll(arr, p.ix) ? sumIx(arr, p.cmp) : null;
+      return {key: k, label: k, val, prev};
+    }).filter(r => r.val > 0).sort((a, b) => (a.key === 'Pozostałe') - (b.key === 'Pozostałe') || b.val - a.val);
+    const total = rows.reduce((s, r) => s + r.val, 0), mx = Math.max(...rows.map(r => r.val));
+    ranking(document.getElementById('c3'), {label: 'Ranking krajów', xMax: mx * 1.02, labelW: 150, valW: 150, rowH: 24, bh: 14,
+      rows: rows.map(r => ({key: r.key, label: r.label, selected: r.key === c3.sel, segs: [{v: r.val, cls: r.key === c3.sel ? 'f-sea' : 'f-sepia'}],
+        valText: big(r.val), subText: r.prev ? pct((r.val / r.prev - 1) * 100) : ''})),
+      tip: r => [r.label, [{value: nf.format(rows.find(x => x.key === r.key).val), label: c3.type === 't' ? 'turystów' : 'odwiedzających'}, {value: nf1.format(rows.find(x => x.key === r.key).val / total * 100) + '%', label: 'udział'}]],
+      onPick: k => { c3.sel = k; renderC3(); }});
+    renderC3Detail();
+  }
+  function renderC3Detail() {
+    const v = D.countries[c3.sel], W = document.getElementById('c3-t').clientWidth;
+    document.getElementById('c3-name').textContent = c3.sel;
+    const t26 = sumIx(v.t, rng(2026, 1, 8)), t25 = sumIx(v.t, rng(2025, 1, 8)), j26 = sumIx(v.j, rng(2026, 1, 8));
+    const tAll = citySum(['tz'], rng(2026, 1, 8));
+    const st = document.getElementById('c3-stats'); st.replaceChildren();
+    const add = (strong, rest) => { const s = document.createElement('span'); const b = document.createElement('strong'); b.textContent = strong; s.append(b, ' ' + rest); st.appendChild(s); };
+    add(nf.format(t26), `turystów w I–VIII 2026${t25 && hasAll(v.t, rng(2025, 1, 8)) ? ' (' + pct((t26 / t25 - 1) * 100) + ' r/r)' : ''}`);
+    if (t26) add(nf1.format(t26 / tAll * 100) + '%', 'turystów zagranicznych');
+    if (j26 && t26) add(nf1.format(j26 / t26), 'wizyty jednodniowej na turystę');
+    const mk = [{i: LIST, text: 'X 2024: zmiana listy krajów', cls: 'refl', tcls: 'anno', side: 'left'}];
+    [['c3-t', v.t, 's-sea', 'f-sea'], ['c3-j', v.j, 's-brass', 'f-brass']].forEach(([id, arr, cls, dot]) => {
+      lineChart(document.getElementById(id), {n: N, height: 200, label: `${c3.sel}: dane miesięczne`, series: [{vals: arr, cls, end: dot}],
+        xLabel: timeLabel(W), xGrid: i => ym(i).m === 1, marks: W > 480 ? mk : [],
+        tip: i => [mname(i), [{value: arr[i] == null ? 'brak danych' : nf.format(arr[i]), label: id === 'c3-t' ? 'turystów' : 'odwiedzających'}]]});
+    });
+  }
+
+  // ---------- 4. jednodniowi ----------
+  function renderC4() {
+    const ix = rng(2026, 1, 8);
+    const groups = [['Goście krajowi', 'jk', 'tk'], ['Goście regionalni', 'jr', 'tr'], ['Goście zagraniczni', 'jz', 'tz']].map(([l, j, t]) => ({key: l, label: l, v: citySum([j], ix) / citySum([t], ix), j: citySum([j], ix), t: citySum([t], ix), grp: true}));
+    const ctr = Object.entries(D.countries).filter(([k]) => k !== 'Pozostałe').map(([k, v]) => ({key: k, label: k, t: sumIx(v.t, ix), j: sumIx(v.j, ix)}))
+      .filter(r => r.t >= 1000 && r.j > 0 && hasAll(D.countries[r.key].j, ix)).map(r => ({...r, v: r.j / r.t})).sort((a, b) => b.v - a.v);
+    const rows = groups.concat(ctr);
+    ranking(document.getElementById('c4'), {label: 'Odwiedzający jednodniowi na turystę', xMax: 20, labelW: 170, valW: 70, rowH: 24, bh: 14,
+      rows: rows.map(r => ({key: r.key, label: r.label, tag: r.grp ? 'OGÓŁEM' : '', segs: [{v: r.v, cls: r.grp ? 'f-sea' : 'f-sepia'}], valText: nf1.format(r.v)})),
+      tip: r => { const x = rows.find(q => q.key === r.key); return [x.label, [{value: nf.format(x.j), label: 'wizyt jednodniowych'}, {value: nf.format(x.t), label: 'turystów'}, {value: nf1.format(x.v), label: 'na jednego turystę'}]]; }});
+  }
+  const conv = {c: 'all', p: 1};
+  function initConv() {
+    const ix = rng(2026, 1, 8), sel = document.getElementById('conv-c');
+    const opts = [['all', 'Wszyscy goście zagraniczni']].concat(Object.entries(D.countries).filter(([k, v]) => k !== 'Pozostałe' && hasAll(v.j, ix) && sumIx(v.j, ix) > 10000).sort((a, b) => sumIx(b[1].j, ix) - sumIx(a[1].j, ix)).map(([k]) => [k, k]));
+    opts.forEach(([v, l]) => { const o = document.createElement('option'); o.value = v; o.textContent = l; sel.appendChild(o); });
+    sel.addEventListener('change', () => { conv.c = sel.value; updateConv(); });
+    const inp = document.getElementById('conv-p'); inp.addEventListener('input', () => { conv.p = +inp.value; updateConv(); });
+    updateConv();
+  }
+  function updateConv() {
+    const ix = rng(2026, 1, 8);
+    const j = conv.c === 'all' ? citySum(['jz'], ix) : sumIx(D.countries[conv.c].j, ix);
+    const tz = citySum(['tz'], ix), npa = citySum(['tz'], ix, 'n') / citySum(['tz'], ix, 'p');
+    const add = j * conv.p / 100;
+    document.getElementById('conv-pv').textContent = nf1.format(conv.p) + '%';
+    document.getElementById('conv-add').textContent = '+' + nf.format(Math.round(add));
+    document.getElementById('conv-n').textContent = '+' + nf.format(Math.round(add * npa));
+    document.getElementById('conv-g').textContent = pct(add / tz * 100);
+    document.getElementById('conv-base').textContent = `Podstawa: ${nf.format(j)} wizyt jednodniowych w I–VIII 2026; średnio ${nf2.format(npa)} nocy na przyjazd turysty zagranicznego.`;
+  }
+
+  // ---------- 5. miejsca ----------
+  const WATER = ['Wały Chrobrego', 'Bulwar Piastowski/Gdyński', 'Łasztownia'], ZSTW = ['CIT', 'Enea Arena'];
+  const PNAME = k => ({'Deptak Bogusława/ Plac Zgody': 'Deptak Bogusława / Plac Zgody', 'Bulwar Piastowski/Gdyński': 'Bulwary Piastowski i Gdyński', 'Ratusz Staromiejski/Stare Miasto': 'Ratusz Staromiejski / Stare Miasto', 'Teatr Letni/Park Kasprowicza': 'Teatr Letni / Park Kasprowicza', 'Filharmonia/CDP': 'Filharmonia / CDP', 'CIT': 'Informacja turystyczna (CIT)', 'MCN': 'MCN (Przełomy)'}[k] || k);
+  const c5 = {mode: 'non', sel: 'Wały Chrobrego'};
+  const PL = ['tk', 'tr', 'jk', 'jr'], ZG = ['tz', 'jz'];
+  const poiSum = (p, cats, ix) => cats.reduce((s, c) => s + sumIx(D.poi[p][c], ix), 0);
+  const poiAt = (p, cats, i) => { let s = 0, any = false; cats.forEach(c => { const v = D.poi[p][c][i]; if (v != null) { s += v; any = true; } }); return any ? s : null; };
+  function renderC5() {
+    const ix = rng(2025, 1, 12);
+    const leg = document.getElementById('c5-legend'); leg.replaceChildren();
+    const L = c5.mode === 'all' ? [['bg-sepia', 'mieszkańcy'], ['bg-sea', 'goście z Polski'], ['bg-brass', 'goście z zagranicy']] : [['bg-sea', 'goście z Polski'], ['bg-brass', 'goście z zagranicy']];
+    L.forEach(([c, t]) => { const s = document.createElement('span'); const k = document.createElement('i'); k.className = 'sw ' + c; s.append(k, t); leg.appendChild(s); });
+    const rows = Object.keys(D.poi).filter(p => p !== 'Netto Arena').map(p => {
+      const res = poiSum(p, ['res'], ix), pl = poiSum(p, PL, ix), zg = poiSum(p, ZG, ix);
+      return {key: p, res, pl, zg, tot: (c5.mode === 'all' ? res : 0) + pl + zg};
+    }).sort((a, b) => b.tot - a.tot);
+    const mx = Math.max(...rows.map(r => r.tot));
+    ranking(document.getElementById('c5'), {label: 'Ranking miejsc 2025', xMax: mx * 1.02, labelW: 270, valW: 150, rowH: 26, bh: 15,
+      rows: rows.map(r => ({key: r.key, label: PNAME(r.key), selected: r.key === c5.sel, tag: WATER.includes(r.key) ? 'NABRZEŻE' : ZSTW.includes(r.key) ? 'ŻEGLUGA' : '',
+        segs: (c5.mode === 'all' ? [{v: r.res, cls: 'f-sepia'}] : []).concat([{v: r.pl, cls: 'f-sea'}, {v: r.zg, cls: 'f-brass'}]),
+        valText: big(r.tot), subText: r.zg > 0 ? `zagr. ${Math.round(r.zg / (r.pl + r.zg) * 100)}%` : 'zagr. brak danych'})),
+      tip: r => { const x = rows.find(q => q.key === r.key); return [PNAME(x.key) + ' · 2025', [{key: 'bg-sepia', shape: 'sw', value: nf.format(x.res), label: 'mieszkańcy'}, {key: 'bg-sea', shape: 'sw', value: nf.format(x.pl), label: 'goście z Polski'}, {key: 'bg-brass', shape: 'sw', value: nf.format(x.zg), label: 'goście z zagranicy'}]]; },
+      onPick: k => { c5.sel = k; renderC5(); }});
+    renderC5Detail();
+  }
+  function renderC5Detail() {
+    const p = c5.sel, W = document.getElementById('c5-r').clientWidth;
+    document.getElementById('c5-name').textContent = PNAME(p);
+    const ix = rng(2025, 1, 12);
+    const st = document.getElementById('c5-stats'); st.replaceChildren();
+    const add = (strong, rest) => { const s = document.createElement('span'); const b = document.createElement('strong'); b.textContent = strong; s.append(b, ' ' + rest); st.appendChild(s); };
+    const res = poiSum(p, ['res'], ix), pl = poiSum(p, PL, ix), zg = poiSum(p, ZG, ix);
+    add(nf.format(res + pl + zg), 'wizyt w 2025 roku');
+    add(Math.round((pl + zg) / (res + pl + zg) * 100) + '%', 'spoza Szczecina');
+    if (zg > 0) add(Math.round(zg / (pl + zg) * 100) + '%', 'gości z zagranicy wśród przyjezdnych');
+    const lab = W < 330 ? (i => { const {y, m} = ym(i); return m === 1 ? String(y).slice(2) : null; }) : (i => { const {y, m} = ym(i); return m === 1 ? String(y) : null; });
+    [['c5-r', ['res'], 's-sepia', 'f-sepia', 'mieszkańców'], ['c5-p', PL, 's-sea', 'f-sea', 'gości z Polski'], ['c5-z', ZG, 's-brass', 'f-brass', 'gości z zagranicy']].forEach(([id, cats, cls, dot, name]) => {
+      const vals = M.map((_, i) => poiAt(p, cats, i));
+      lineChart(document.getElementById(id), {n: N, height: 190, ml: 46, label: `${PNAME(p)}: ${name}`, series: [{vals, cls, end: dot}], shadeFrom: BRK,
+        xLabel: lab, xGrid: i => ym(i).m === 1, marks: [{i: DUP, cls: 'refl'}],
+        tip: i => [mname(i), [{value: vals[i] == null ? 'brak danych' : nf.format(vals[i]), label: 'wizyt ' + name}].concat(i >= BRK ? [{value: 'po zmianie metody', label: ''}] : i === DUP ? [{value: 'kopia października', label: ''}] : [])]});
+    });
+  }
+
+  // ---------- 6. Żagle ----------
+  function renderC6() {
+    const host = document.getElementById('c6'), W = host.clientWidth, narrow = W < 560;
+    const ratio = (arr, y) => { const a = arr[MI(`${y}-08`)], j = arr[MI(`${y}-07`)]; return a != null && j ? a / j : null; };
+    const cityArr = cats => M.map((_, i) => cityAt(cats, i));
+    const rows = [['Turyści krajowi', cityArr(['tk'])], ['Turyści zagraniczni', cityArr(['tz'])], ['Turyści z Niemiec', D.countries['Niemcy'].t], ['Jednodniowi krajowi', cityArr(['jk'])], ['Jednodniowi zagraniczni', cityArr(['jz'])], ['Jednodniowi z Niemiec', D.countries['Niemcy'].j]];
+    const yrs = [[2023, 'f-y23', 'bg-y23'], [2024, 'f-y24', 'bg-y24'], [2025, 'f-y25', 'bg-y25'], [2026, 'f-sea', 'bg-sea']];
+    const lw = narrow ? 0 : 170, rp = 52, bh = 9, gap = 2, grpH = yrs.length * (bh + gap), rowH = grpH + (narrow ? 34 : 18);
+    const H = rows.length * rowH + 30, xMax = 4, iw = W - lw - rp, x = v => lw + v / xMax * iw;
+    const svg = svgFor(host, W, H, 'Sierpień względem lipca');
+    [0, 1, 2, 3, 4].forEach(v => { el('line', {x1: x(v), x2: x(v), y1: 0, y2: H - 22, class: v ? 'gl' : 'bl'}, svg); text(svg, x(v), H - 6, '×' + v, 'ax', 'middle'); });
+    el('line', {x1: x(1), x2: x(1), y1: 0, y2: H - 22, class: 'refl'}, svg);
+    rows.forEach(([name, arr], ri) => {
+      const y0 = ri * rowH + (narrow ? 22 : 8);
+      text(svg, 0, narrow ? y0 - 8 : y0 + grpH / 2 + 4, name, 'ax-l');
+      yrs.forEach(([yr, cls, key], yi) => {
+        const r = ratio(arr, yr); if (r == null) return;
+        const yy = y0 + yi * (bh + gap);
+        const p = el('path', {d: hbarPath(x(0), x(Math.min(r, xMax)), yy, bh, 2), class: 'bar ' + cls, 'data-grow': 'right', 'data-order': ri}, svg);
+        bindTip(p, () => [`${name} · ${yr}`, [{key, shape: 'sw', value: '×' + nf2.format(r), label: 'sierpień / lipiec'}, {value: nf.format(arr[MI(`${yr}-08`)]), label: 'sierpień'}, {value: nf.format(arr[MI(`${yr}-07`)]), label: 'lipiec'}]], false);
+        if (yr === 2026 || yr === 2023) text(svg, x(Math.min(r, xMax)) + 5, yy + bh - 1, '×' + nf1.format(r), yr === 2026 ? 'vlab' : 'vlab-2');
+      });
+    });
+  }
+
+  // ---------- 7. jakość danych ----------
+  function renderC7() {
+    const host = document.getElementById('c7'), W = host.clientWidth;
+    const P = Object.keys(D.poi).filter(p => p !== 'Netto Arena');
+    const cityYoY = [], poiYoY = [];
+    for (let m = 1; m <= 8; m++) {
+      const i26 = MI(`2026-${String(m).padStart(2, '0')}`), i25 = MI(`2025-${String(m).padStart(2, '0')}`);
+      cityYoY.push((cityAt(T.concat(J), i26) / cityAt(T.concat(J), i25) - 1) * 100);
+      const pt = i => P.reduce((s, p) => s + (poiAt(p, T.concat(J), i) || 0), 0);
+      poiYoY.push((pt(i26) / pt(i25) - 1) * 100);
+    }
+    lineChart(host, {n: 8, height: 260, label: 'Zmiana r/r 2026: miasto i miejsca', neg: true, step: 20, yFmt: v => (v > 0 ? '+' : v < 0 ? MINUS : '') + Math.abs(v) + '%',
+      series: [{vals: cityYoY, cls: 's-sea', dots: 'f-sea'}, {vals: poiYoY, cls: 's-brass', dots: 'f-brass'}], xLabel: i => ROM[i],
+      marks: [{i: 4, text: 'maj 2026', side: 'left'}], mr: 30,
+      tip: i => [MONF[i] + ' 2026', [{key: 'bc-sea', value: pct(cityYoY[i]), label: 'całe miasto'}, {key: 'bc-brass', value: pct(poiYoY[i]), label: '20 miejsc'}]]});
+  }
+
+  // ---------- loksodromy ----------
+  function renderRhumb() {
+    const svg = document.getElementById('rhumb'), hero = document.getElementById('hero'), cart = document.getElementById('cartouche');
+    const bodyTop = document.body.getBoundingClientRect().top;
+    svg.style.height = Math.round(hero.getBoundingClientRect().bottom - bodyTop + 40) + 'px';
+    const hb = svg.getBoundingClientRect(), cb = cart.getBoundingClientRect();
+    svg.replaceChildren();
+    const cx = cb.left + cb.width / 2 - hb.left, cy = cb.top + cb.height / 2 - hb.top;
+    svg.setAttribute('viewBox', `0 0 ${hb.width} ${hb.height}`);
+    for (let i = 0; i < 32; i++) { const a = i / 32 * Math.PI * 2; el('line', {x1: cx, y1: cy, x2: cx + Math.cos(a) * 3000, y2: cy + Math.sin(a) * 3000, stroke: 'currentColor', 'stroke-width': i % 4 === 0 ? 1.2 : .7}, svg); }
+    el('circle', {cx, cy, r: Math.max(cb.width, cb.height) * .78, fill: 'none', stroke: 'currentColor', 'stroke-width': 1}, svg);
+  }
+
+  // ---------- nawigacja ----------
+  function initNav() {
+    const links = [...document.querySelectorAll('.nav a')];
+    const secs = links.map(a => document.querySelector(a.getAttribute('href')));
+    const onScroll = () => {
+      let cur = -1; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < 140) cur = i; });
+      links.forEach((a, i) => a.setAttribute('aria-current', i === cur ? 'true' : 'false'));
+    };
+    window.addEventListener('scroll', onScroll, {passive: true}); onScroll();
+  }
+
+  // ---------- start ----------
+  function renderAll() { renderC1(); renderSimChart(); renderC3(); renderC4(); renderC5(); renderC6(); renderC7(); renderRhumb(); }
+  renderTiles();
+  seg('c1-grp', [['all', 'Wszyscy odwiedzający'], ['tur', 'Turyści'], ['day', 'Jednodniowi']], c1.grp, v => { c1.grp = v; renderC1(); });
+  seg('c1-orig', [['all', 'Wszyscy'], ['k', 'Krajowi'], ['r', 'Regionalni'], ['z', 'Zagraniczni']], c1.orig, v => { c1.orig = v; renderC1(); });
+  seg('c1-view', [['season', 'Sezony'], ['time', 'Oś czasu']], c1.view, v => { c1.view = v; renderC1(); });
+  seg('c3-type', [['t', 'Turyści'], ['j', 'Jednodniowi']], c3.type, v => { c3.type = v; renderC3(); });
+  seg('c3-per', [['y26', 'I–VIII 2026'], ['y25', '2025'], ['y24', '2024']], c3.per, v => { c3.per = v; renderC3(); });
+  seg('c5-mode', [['non', 'Goście spoza Szczecina'], ['all', 'Łącznie z mieszkańcami']], c5.mode, v => { c5.mode = v; renderC5(); });
+  initSim(); initConv(); initNav();
+  renderAll();
+  let lastW = document.documentElement.clientWidth, raf = 0;
+  window.addEventListener('resize', () => { const w = document.documentElement.clientWidth; if (w === lastW) return; lastW = w; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { hideTip(); renderAll(); }); });
+  const startWatch = () => watch(['c1', 'sim-chart', 'c3', 'c4', 'c5', 'c6', 'c7']);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { renderAll(); startWatch(); }); else startWatch();
+  window.addEventListener('scroll', hideTip, {passive: true});
+})();
+</script>
+
+
+<script>
+(() => {
+  const YEAR = /^202[3-7]$/;
+  const NUM = /\d+(?:[   ]\d{3})*(?:[.,]\d+)?/g;
+  const KEEP = '#sim-gv, #conv-pv, .scale, dl.gloss, footer, .coords, nav, script, style, .mz, .demo-strip, .notice .no, .eyebrow, h1, h2, h3, select, option';
+  const isData = tok => !YEAR.test(tok);
+  const hasData = txt => { const m = txt.match(NUM); return !!m && m.some(isData); };
+
+  const maskText = node => {
+    const p = node.parentElement;
+    if (!p || p.closest(KEEP)) return;
+    if (p.closest('svg')) { const t = p.closest('text'); if (t && hasData(t.textContent)) t.setAttribute('filter', 'url(#mz-blur)'); return; }
+    const txt = node.nodeValue;
+    if (!txt || !hasData(txt)) return;
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    txt.replace(NUM, (m, off) => {
+      if (!isData(m)) return m;
+      if (off > last) frag.appendChild(document.createTextNode(txt.slice(last, off)));
+      const sp = document.createElement('span');
+      sp.className = 'mz'; sp.setAttribute('aria-hidden', 'true'); sp.textContent = m;
+      frag.appendChild(sp);
+      last = off + m.length;
+      return m;
+    });
+    if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
+    node.replaceWith(frag);
+  };
+
+  const maskAttr = el => {
+    for (const a of ['title', 'aria-label']) {
+      const v = el.getAttribute && el.getAttribute(a);
+      if (v && hasData(v)) el.setAttribute(a, v.replace(NUM, m => isData(m) ? m.replace(/\d/g, '•') : m));
+    }
+  };
+
+  const scan = root => {
+    if (root.nodeType === 3) { maskText(root); return; }
+    if (root.nodeType !== 1) return;
+    maskAttr(root);
+    root.querySelectorAll('[title],[aria-label]').forEach(maskAttr);
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+    nodes.forEach(maskText);
+  };
+
+  let busy = false;
+  const obs = new MutationObserver(list => {
+    if (busy) return; busy = true;
+    for (const m of list) {
+      if (m.type === 'characterData') maskText(m.target);
+      else if (m.type === 'attributes') maskAttr(m.target);
+      else m.addedNodes.forEach(scan);
+    }
+    obs.takeRecords(); busy = false;
+  });
+  scan(document.body);
+  obs.observe(document.body, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['title', 'aria-label']});
+})();
+</script>
+</body></html>
